@@ -1,5 +1,6 @@
-package com.mobilabsolutions.payment.data.repository
+package com.mobilabsolutions.payment.data.common
 
+import com.mobilabsolutions.payment.data.common.CriteriaJpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.repository.NoRepositoryBean
 import java.io.Serializable

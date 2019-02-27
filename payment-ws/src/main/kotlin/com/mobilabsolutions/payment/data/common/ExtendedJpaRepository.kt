@@ -1,5 +1,7 @@
-package com.mobilabsolutions.payment.data.repository
+package com.mobilabsolutions.payment.data.common
 
+import com.mobilabsolutions.payment.data.common.Select
+import com.mobilabsolutions.payment.data.common.Update
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.jpa.repository.query.QueryUtils

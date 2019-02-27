@@ -1,6 +1,6 @@
 package com.mobilabsolutions.payment.data.configuration
 
-import com.mobilabsolutions.payment.data.repository.ExtendedRepositoryFactoryBean
+import com.mobilabsolutions.payment.data.common.ExtendedRepositoryFactoryBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.dao.support.PersistenceExceptionTranslator
