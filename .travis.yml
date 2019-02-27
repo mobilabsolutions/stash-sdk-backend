@@ -17,7 +17,7 @@ env:
 
 branches:
   only:
-    - NO-TICKET_adding_travis_and_k8s_res
+    - master
     - /^(\d+\.)?(\d+\.)?\d+(-\w+)?$/
 
 install: true
@@ -36,4 +36,4 @@ deploy:
     # deploy to kube dev namespace
     script: ${TRAVIS_BUILD_DIR}/k8s/gcp-dev-deploy.sh
     on:
-      branch: NO-TICKET_adding_travis_and_k8s_res
+      branch: master
