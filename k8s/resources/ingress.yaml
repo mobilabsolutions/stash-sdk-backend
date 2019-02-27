@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: payment-sdk-backend
+  namespace: ${KUBE_NAMESPACE}
+  labels:
+    app: payment-sdk-backend
+  annotations:
+    # setting static ingress ip which is previously created. see: https://github.com/kelseyhightower/ingress-with-static-ip
+    kubernetes.io/ingress.global-static-ip-name: "${KUBE_INGRESS_STATIC_IP_NAME}"
+spec:
+  backend:
+    serviceName: payment-sdk-backend
+    servicePort: 80
