@@ -1,7 +1,5 @@
 package com.mobilabsolutions.payment.data.common
 
-import com.mobilabsolutions.payment.data.common.Select
-import com.mobilabsolutions.payment.data.common.Update
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.jpa.repository.query.QueryUtils
@@ -38,7 +36,6 @@ class ExtendedJpaRepository<T, ID : Serializable>(domainClass: Class<T>, var em:
             if (predicate != null) {
                 criteriaQuery.where(predicate)
             }
-
         }
 
         if (sort != null) {
@@ -54,7 +51,6 @@ class ExtendedJpaRepository<T, ID : Serializable>(domainClass: Class<T>, var em:
         } catch (e: NoResultException) {
             return null
         }
-
     }
 
     override fun <R> findAll(cls: Class<R>, criteria: Select<T, R>): List<R> {
@@ -83,7 +79,6 @@ class ExtendedJpaRepository<T, ID : Serializable>(domainClass: Class<T>, var em:
             if (predicate != null) {
                 criteriaUpdate.where(predicate)
             }
-
         }
 
         return this.em.createQuery(criteriaUpdate).executeUpdate()
@@ -100,7 +95,6 @@ class ExtendedJpaRepository<T, ID : Serializable>(domainClass: Class<T>, var em:
             if (predicate != null) {
                 criteriaDelete.where(predicate)
             }
-
         }
 
         return this.em.createQuery(criteriaDelete).executeUpdate()

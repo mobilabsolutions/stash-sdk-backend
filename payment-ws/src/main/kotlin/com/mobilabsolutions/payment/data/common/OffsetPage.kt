@@ -3,7 +3,6 @@ package com.mobilabsolutions.payment.data.common
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 
-
 /**
  * Pageable implementation which allows mid-page offsets. If the pageable starts at a min-page offset, the page number
  * is considered the previous page number.

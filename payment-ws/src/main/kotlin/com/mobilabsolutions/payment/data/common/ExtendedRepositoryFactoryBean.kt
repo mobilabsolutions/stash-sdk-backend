@@ -23,8 +23,7 @@ class ExtendedRepositoryFactoryBean<R : JpaRepository<T, I>, T, I : Serializable
     private class ExtendedRepositoryFactory<T, I : Serializable>
         internal constructor(private val entityManager: EntityManager) : JpaRepositoryFactory(entityManager) {
 
-        override fun getTargetRepository(information: RepositoryInformation, entityManager: EntityManager)
-                : ExtendedJpaRepository<T, I> {
+        override fun getTargetRepository(information: RepositoryInformation, entityManager: EntityManager): ExtendedJpaRepository<T, I> {
             return ExtendedJpaRepository(information.domainType as Class<T>, this.entityManager)
         }
 

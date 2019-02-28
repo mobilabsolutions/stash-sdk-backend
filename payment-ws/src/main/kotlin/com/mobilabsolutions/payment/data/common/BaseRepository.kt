@@ -1,6 +1,5 @@
 package com.mobilabsolutions.payment.data.common
 
-import com.mobilabsolutions.payment.data.common.CriteriaJpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.repository.NoRepositoryBean
 import java.io.Serializable
@@ -13,5 +12,4 @@ import java.io.Serializable
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
 @NoRepositoryBean
-interface BaseRepository<T, ID : Serializable> : CriteriaJpaRepository<T, ID>, JpaSpecificationExecutor<T> {
-}
+interface BaseRepository<T, ID : Serializable> : CriteriaJpaRepository<T, ID>, JpaSpecificationExecutor<T>

@@ -1,7 +1,5 @@
 package com.mobilabsolutions.payment.data.common
 
-import com.mobilabsolutions.payment.data.common.Select
-import com.mobilabsolutions.payment.data.common.Update
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.jpa.repository.JpaRepository
@@ -79,5 +77,4 @@ interface CriteriaJpaRepository<T, ID : Serializable> : JpaRepository<T, ID> {
      * @return the updated entity
      */
     fun refresh(entity: T): T
-
 }

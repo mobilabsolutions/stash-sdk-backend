@@ -22,5 +22,4 @@ interface Update<T> {
      * @return the query predicate
      */
     fun toPredicate(cb: CriteriaBuilder, root: Root<T>, update: CriteriaUpdate<T>): Predicate
-
 }

@@ -10,5 +10,5 @@ import org.springframework.context.annotation.Import
 class PaymentSdkBackendApplication
 
 fun main(args: Array<String>) {
-	runApplication<PaymentSdkBackendApplication>(*args)
+    runApplication<PaymentSdkBackendApplication>(*args)
 }

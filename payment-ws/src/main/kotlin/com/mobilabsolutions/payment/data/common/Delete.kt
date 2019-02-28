@@ -22,5 +22,4 @@ interface Delete<T> {
      * @return the query predicate
      */
     fun toPredicate(cb: CriteriaBuilder, root: Root<T>, delete: CriteriaDelete<*>): Predicate
-
 }

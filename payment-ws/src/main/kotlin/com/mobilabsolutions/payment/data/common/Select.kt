@@ -23,5 +23,4 @@ interface Select<T, R> {
      * @return the query predicate
      */
     fun toPredicate(cb: CriteriaBuilder, root: Root<T>, select: CriteriaQuery<R>): Predicate
-
 }
