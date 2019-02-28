@@ -1,7 +1,7 @@
 package com.mobilabsolutions.payment.data.configuration
 
-import com.mobilabsolutions.payment.data.common.ExtendedRepositoryFactoryBean
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.dao.support.PersistenceExceptionTranslator
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
@@ -18,8 +18,8 @@ import javax.persistence.EntityManagerFactory
 @Validated
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = [(DataConfiguration.BASE_SCAN_PACKAGE)],
-        repositoryFactoryBeanClass = ExtendedRepositoryFactoryBean::class)
+@ComponentScan(DataConfiguration.BASE_SCAN_PACKAGE)
+@EnableJpaRepositories(basePackages = [(DataConfiguration.BASE_SCAN_PACKAGE)])
 class DataConfiguration {
 
     companion object {
@@ -33,7 +33,7 @@ class DataConfiguration {
      * @return the transaction manager
      */
     @Bean
-    fun transactionManager(emf: EntityManagerFactory): PlatformTransactionManager {
+    open fun transactionManager(emf: EntityManagerFactory): PlatformTransactionManager {
         val transactionManager = JpaTransactionManager()
         transactionManager.entityManagerFactory = emf
         return transactionManager
@@ -45,7 +45,7 @@ class DataConfiguration {
      * @return the exception translator bean
      */
     @Bean
-    fun hibernateExceptionTranslator(): PersistenceExceptionTranslator {
+    open fun hibernateExceptionTranslator(): PersistenceExceptionTranslator {
         return HibernateExceptionTranslator()
     }
 }

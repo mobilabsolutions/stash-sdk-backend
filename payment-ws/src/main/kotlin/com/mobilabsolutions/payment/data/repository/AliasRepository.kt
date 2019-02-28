@@ -1,6 +1,5 @@
 package com.mobilabsolutions.payment.data.repository
 
-import com.mobilabsolutions.payment.data.common.BaseRepository
 import com.mobilabsolutions.payment.data.domain.Alias
 import org.springframework.stereotype.Repository
 
