@@ -2,8 +2,18 @@ package com.mobilabsolutions.payment.data.domain
 
 import com.mobilabsolutions.payment.data.enum.KeyType
 import org.springframework.data.util.ProxyUtils
-import java.util.*
-import javax.persistence.*
+import java.util.Objects
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
+import javax.persistence.ForeignKey
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.persistence.Table
 
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
