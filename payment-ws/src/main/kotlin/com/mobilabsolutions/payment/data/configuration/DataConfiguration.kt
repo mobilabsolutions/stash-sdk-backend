@@ -33,7 +33,7 @@ class DataConfiguration {
      * @return the transaction manager
      */
     @Bean
-    open fun transactionManager(emf: EntityManagerFactory): PlatformTransactionManager {
+    fun transactionManager(emf: EntityManagerFactory): PlatformTransactionManager {
         val transactionManager = JpaTransactionManager()
         transactionManager.entityManagerFactory = emf
         return transactionManager
@@ -45,7 +45,7 @@ class DataConfiguration {
      * @return the exception translator bean
      */
     @Bean
-    open fun hibernateExceptionTranslator(): PersistenceExceptionTranslator {
+    fun hibernateExceptionTranslator(): PersistenceExceptionTranslator {
         return HibernateExceptionTranslator()
     }
 }
