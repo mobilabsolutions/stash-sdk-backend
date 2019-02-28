@@ -1,8 +1,10 @@
-package com.mobilabsolutions.payment.data.common
+package com.mobilabsolutions.payment.data.repository
 
+import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.repository.NoRepositoryBean
 import java.io.Serializable
+import javax.transaction.Transactional
 
 /**
  * Extends the base JPA repository with functionality provided by the JPA specification executor.
@@ -12,4 +14,5 @@ import java.io.Serializable
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
 @NoRepositoryBean
-interface BaseRepository<T, ID : Serializable> : CriteriaJpaRepository<T, ID>, JpaSpecificationExecutor<T>
+@Transactional
+interface BaseRepository<T, ID : Serializable> : JpaRepository<T, ID>, JpaSpecificationExecutor<T>

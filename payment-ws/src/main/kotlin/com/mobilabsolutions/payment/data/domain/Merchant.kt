@@ -2,8 +2,12 @@ package com.mobilabsolutions.payment.data.domain
 
 import org.hibernate.annotations.Type
 import org.springframework.data.util.ProxyUtils
-import java.util.*
-import javax.persistence.*
+import java.util.Objects
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.Id
+import javax.persistence.Lob
+import javax.persistence.Table
 
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
