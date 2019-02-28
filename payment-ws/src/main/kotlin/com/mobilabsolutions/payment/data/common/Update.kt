@@ -1,4 +1,4 @@
-package com.mobilabsolutions.payment.data.repository
+package com.mobilabsolutions.payment.data.common
 
 import javax.persistence.criteria.CriteriaBuilder
 import javax.persistence.criteria.CriteriaUpdate
@@ -22,5 +22,4 @@ interface Update<T> {
      * @return the query predicate
      */
     fun toPredicate(cb: CriteriaBuilder, root: Root<T>, update: CriteriaUpdate<T>): Predicate
-
 }

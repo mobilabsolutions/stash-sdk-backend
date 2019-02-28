@@ -1,4 +1,4 @@
-package com.mobilabsolutions.payment.data.repository
+package com.mobilabsolutions.payment.data.common
 
 import javax.persistence.criteria.CriteriaBuilder
 import javax.persistence.criteria.CriteriaQuery
@@ -23,5 +23,4 @@ interface Select<T, R> {
      * @return the query predicate
      */
     fun toPredicate(cb: CriteriaBuilder, root: Root<T>, select: CriteriaQuery<R>): Predicate
-
 }
