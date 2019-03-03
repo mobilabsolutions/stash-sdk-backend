@@ -17,6 +17,10 @@
 		<module>payment-ws</module>
 	</modules>
 
+    <properties>
+        <kotlin.version>1.3.21</kotlin.version>
+    </properties>
+
 	<distributionManagement>
 		<repository>
 			<id>mobilab-nexus</id>
@@ -33,6 +37,10 @@
 			<id>central</id>
 			<url>http://repo.maven.apache.org/maven2</url>
 		</repository>
+		<repository>
+			<id>spring</id>
+			<url>http://repo.spring.io/plugins-release/</url>
+		</repository>
 	</repositories>
 
 	<pluginRepositories>
@@ -45,6 +53,35 @@
 	<build>
 		<pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                    <artifactId>kotlin-maven-noarg</artifactId>
+                    <version>${kotlin.version}</version>
+                    <configuration>
+                        <compilerPlugins>
+                            <plugin>jpa</plugin>
+                        </compilerPlugins>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                    <artifactId>kotlin-maven-plugin</artifactId>
+                    <configuration>
+                        <args>
+                            <arg>-Xjsr305=strict</arg>
+                        </args>
+                        <compilerPlugins>
+                            <plugin>spring</plugin>
+                        </compilerPlugins>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.jetbrains.kotlin</groupId>
+                            <artifactId>kotlin-maven-allopen</artifactId>
+                            <version>${kotlin.version}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-antrun-plugin</artifactId>
