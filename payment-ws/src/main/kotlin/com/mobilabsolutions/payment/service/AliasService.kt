@@ -12,6 +12,7 @@ import com.mobilabsolutions.payment.model.AliasResponseModel
 import com.mobilabsolutions.payment.service.psp.PspRegistry
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -47,9 +48,10 @@ class AliasService(
     }
 
     fun exchangeAlias(publicKey: String, aliasId: String, aliasRequestModel: AliasRequestModel): AliasResponseModel {
+        aliasRepository.findByIdOrNull(aliasId) ?: throw IllegalArgumentException("Alias ID cannot be found")
         merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, publicKey) ?: throw IllegalArgumentException("Public Key cannot be found")
         val extra = if (aliasRequestModel.extra != null) jacksonObjectMapper().writeValueAsString(aliasRequestModel.extra) else null
-        aliasRepository.updateAlias(aliasRequestModel.pspAlias!!, extra!!, aliasId)
+        aliasRepository.updateAlias(aliasRequestModel.pspAlias!!, extra, aliasId)
         return AliasResponseModel(aliasId, aliasRequestModel.extra, null)
     }
 

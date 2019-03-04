@@ -8,13 +8,14 @@ import javax.persistence.EnumType
 import javax.persistence.Enumerated
 import javax.validation.Valid
 import javax.validation.constraints.Email
+import javax.validation.constraints.NotNull
 
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class AliasRequestModel(val pspAlias: String?, @field:Valid val extra: AliasExtraModel?)
+data class AliasRequestModel(@field:NotNull val pspAlias: String?, @field:Valid val extra: AliasExtraModel?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
