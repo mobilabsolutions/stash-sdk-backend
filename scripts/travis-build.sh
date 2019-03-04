@@ -38,7 +38,7 @@ build
 if echo ${TRAVIS_PULL_REQUEST} | egrep '[[:digit:]]+'; then
   tag pr-${TRAVIS_PULL_REQUEST} build-${TRAVIS_BUILD_NUMBER} commit-${TRAVIS_COMMIT}
 else
-  if [[ ${TRAVIS_BRANCH:-X} == 'master' ]]; then
+  if [[ ${TRAVIS_BRANCH:-X} == '11-alias-endpoint' ]]; then
     tag latest build-${TRAVIS_BUILD_NUMBER} commit-${TRAVIS_COMMIT}
   fi
 fi

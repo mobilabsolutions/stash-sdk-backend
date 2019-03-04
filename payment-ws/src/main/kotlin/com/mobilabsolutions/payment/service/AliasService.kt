@@ -6,9 +6,10 @@ import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
+import com.mobilabsolutions.payment.message.PspConfigMessage
 import com.mobilabsolutions.payment.model.AliasRequestModel
 import com.mobilabsolutions.payment.model.AliasResponseModel
-import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.service.psp.PspRegistry
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.stereotype.Service
@@ -21,7 +22,8 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class AliasService(
     private val aliasRepository: AliasRepository,
-    private val merchantApiKeyRepository: MerchantApiKeyRepository
+    private val merchantApiKeyRepository: MerchantApiKeyRepository,
+    private val pspRegistry: PspRegistry
 ) {
 
     fun createAlias(publicKey: String, pspType: String): AliasResponseModel {
@@ -30,14 +32,18 @@ class AliasService(
 
         val result = jacksonObjectMapper().readValue(merchantApiKey.merchant.pspConfig, Provider::class.java)
         val pspConfig = result.providers?.firstOrNull { it.type == pspType }
+        val pspConfigType = PaymentServiceProvider.valueOf(pspConfig?.type ?: throw IllegalArgumentException("PSP configuration for '$pspType' cannot be found from Merchant"))
+        val psp = pspRegistry.find(pspConfigType) ?: throw IllegalArgumentException("PSP implementation '$pspType' cannot be found")
 
         val alias = Alias(
             id = generatedAliasId,
             merchant = merchantApiKey.merchant,
-            psp = PaymentServiceProvider.valueOf(pspConfig?.type!!)
+            psp = pspConfigType
         )
         aliasRepository.save(alias)
-        return AliasResponseModel(generatedAliasId, null, pspConfig)
+        val calculatedConfig = psp.calculatePspConfig(pspConfig)
+
+        return AliasResponseModel(generatedAliasId, null, calculatedConfig)
     }
 
     fun exchangeAlias(publicKey: String, aliasId: String, aliasRequestModel: AliasRequestModel): AliasResponseModel {
@@ -47,7 +53,7 @@ class AliasService(
         return AliasResponseModel(aliasId, aliasRequestModel.extra, null)
     }
 
-    private data class Provider(val providers: List<PspConfigModel>?)
+    private data class Provider(val providers: List<PspConfigMessage>?)
 
     companion object : KLogging() {
         const val STRING_LENGTH = 20

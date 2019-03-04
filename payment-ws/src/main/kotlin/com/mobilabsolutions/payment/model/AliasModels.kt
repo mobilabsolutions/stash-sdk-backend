@@ -3,6 +3,7 @@ package com.mobilabsolutions.payment.model
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
+import com.mobilabsolutions.payment.message.PspConfigMessage
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
 import javax.validation.Valid
@@ -17,12 +18,8 @@ data class AliasRequestModel(val pspAlias: String?, @field:Valid val extra: Alia
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class AliasResponseModel(val aliasId: String?, val extra: AliasExtraModel?, val psp: PspConfigModel?)
+data class AliasResponseModel(val aliasId: String?, val extra: AliasExtraModel?, val psp: PspConfigMessage?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class AliasExtraModel(@field:Email val email: String?, val ccMask: String?, val ccExpiry: String?, val ccType: String?, val ibanMask: String?, @field:Enumerated(EnumType.STRING) val paymentMethod: PaymentMethod?)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-data class PspConfigModel(val type: String?, val merchantId: String?, val portalId: String?, val apiVersion: String?, val request: String?, val responseType: String?, val encoding: String?, val hash: String?)
