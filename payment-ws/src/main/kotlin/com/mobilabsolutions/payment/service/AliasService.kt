@@ -47,12 +47,11 @@ class AliasService(
         return AliasResponseModel(generatedAliasId, null, calculatedConfig)
     }
 
-    fun exchangeAlias(publicKey: String, aliasId: String, aliasRequestModel: AliasRequestModel): AliasResponseModel {
+    fun exchangeAlias(publicKey: String, aliasId: String, aliasRequestModel: AliasRequestModel) {
         aliasRepository.findByIdOrNull(aliasId) ?: throw IllegalArgumentException("Alias ID cannot be found")
         merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, publicKey) ?: throw IllegalArgumentException("Public Key cannot be found")
         val extra = if (aliasRequestModel.extra != null) jacksonObjectMapper().writeValueAsString(aliasRequestModel.extra) else null
         aliasRepository.updateAlias(aliasRequestModel.pspAlias!!, extra, aliasId)
-        return AliasResponseModel(aliasId, aliasRequestModel.extra, null)
     }
 
     private data class Provider(val providers: List<PspConfigMessage>?)

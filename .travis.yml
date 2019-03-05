@@ -17,7 +17,7 @@ env:
 
 branches:
   only:
-    - master
+    - 11-alias-endpoint
     - /^(\d+\.)?(\d+\.)?\d+(-\w+)?$/
 
 install: true
@@ -36,4 +36,4 @@ deploy:
     # deploy to kube dev namespace
     script: ${TRAVIS_BUILD_DIR}/k8s/gcp-dev-deploy.sh
     on:
-      branch: master
+      branch: 11-alias-endpoint

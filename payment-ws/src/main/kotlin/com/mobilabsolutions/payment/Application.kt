@@ -19,6 +19,7 @@ class Application {
 
     @Bean
     fun api(): Docket = Docket(DocumentationType.SWAGGER_2)
+        .useDefaultResponseMessages(false)
         .select()
         .apis(RequestHandlerSelectors.any())
         .paths(Predicates.not(PathSelectors.regex("/error.*")))
