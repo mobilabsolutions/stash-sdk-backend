@@ -14,6 +14,25 @@ services:
       - "DB_NAME=payment"
       - "DB_USERNAME=payment"
       - "DB_PASSWORD=payment"
+  keycloak:
+    build: keycloak
+    environment:
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      DB_VENDOR: postgres
+      POSTGRES_ADDR: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+      POSTGRES_DATABASE: keycloak
+    depends_on:
+      - db
+    links:
+      - db
+    ports:
+      - "9990:9990"
+      - "9090:8080"
   db:
     build:
       context: .

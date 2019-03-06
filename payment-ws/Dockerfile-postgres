@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y software-properties-common postgresql-9
 USER postgres
 RUN    /etc/init.d/postgresql start &&\
     psql --command "CREATE USER payment WITH SUPERUSER PASSWORD 'payment';" &&\
+    psql --command "CREATE USER keycloak WITH SUPERUSER PASSWORD 'keycloak';" &&\
+    psql --command "CREATE DATABASE keycloak WITH OWNER keycloak;" &&\
     createdb -O payment payment
 RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/9.3/main/pg_hba.conf
 RUN echo "listen_addresses='*'" >> /etc/postgresql/9.3/main/postgresql.conf
