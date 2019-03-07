@@ -33,8 +33,6 @@ spec:
             name: payment-sdk-backend
         - secretRef:
             name: payment-sdk-backend
-        - secretRef:
-            name: cloudsql-db-credentials
         ports:
         - containerPort: 8080
           name: api

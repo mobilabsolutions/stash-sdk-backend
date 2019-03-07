@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.dao.support.PersistenceExceptionTranslator
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.orm.hibernate5.HibernateExceptionTranslator
 import org.springframework.orm.jpa.JpaTransactionManager
@@ -18,6 +19,7 @@ import javax.persistence.EntityManagerFactory
 @Validated
 @Configuration
 @EnableTransactionManagement
+@EnableJpaAuditing
 @ComponentScan(DataConfiguration.BASE_SCAN_PACKAGE)
 @EnableJpaRepositories(basePackages = [(DataConfiguration.BASE_SCAN_PACKAGE)])
 class DataConfiguration {
