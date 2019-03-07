@@ -1,5 +1,6 @@
 package com.mobilabsolutions.payment.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.domain.Alias
 import com.mobilabsolutions.payment.data.domain.Merchant
 import com.mobilabsolutions.payment.data.domain.MerchantApiKey
@@ -11,6 +12,7 @@ import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.AliasRequestModel
 import com.mobilabsolutions.payment.service.psp.Psp
 import com.mobilabsolutions.payment.service.psp.PspRegistry
+import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -22,6 +24,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
@@ -44,6 +47,9 @@ class AliasServiceTest {
 
     @Mock
     private lateinit var pspRegistry: PspRegistry
+
+    @Spy
+    private val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
 
     private val publicKey = "some public key"
     private val aliasId = "some alias id"

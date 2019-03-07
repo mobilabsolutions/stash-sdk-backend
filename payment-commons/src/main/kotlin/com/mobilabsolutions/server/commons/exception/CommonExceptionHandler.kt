@@ -81,7 +81,6 @@ class CommonExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleHttpMessageNotReadableException(e: HttpMessageNotReadableException): ApiError {
         logger.error("Non readable message", e)
-        val errorMessage = e.message
         return ApiError.builder()
             .withMessage("argument.validation.error")
             .withProperty("errors", "Non readable message")
