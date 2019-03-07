@@ -11,6 +11,7 @@ import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.AliasRequestModel
 import com.mobilabsolutions.payment.service.psp.Psp
 import com.mobilabsolutions.payment.service.psp.PspRegistry
+import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -59,7 +60,7 @@ class AliasServiceTest {
             null
         )
         // When
-        Assertions.assertThrows(IllegalArgumentException::class.java) {
+        Assertions.assertThrows(ApiException::class.java) {
             aliasService.createAlias(publicKey, pspType)
         }
         // Then
@@ -73,7 +74,7 @@ class AliasServiceTest {
             MerchantApiKey(merchant = Merchant(pspConfig = pspConfig))
         )
         // When
-        Assertions.assertThrows(IllegalArgumentException::class.java) {
+        Assertions.assertThrows(ApiException::class.java) {
             aliasService.createAlias(publicKey, pspType)
         }
         // Then
@@ -96,9 +97,12 @@ class AliasServiceTest {
     @Test
     fun `exchange alias with wrong alias id`() {
         // Given
+        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, publicKey)).thenReturn(
+            MerchantApiKey(merchant = Merchant(pspConfig = pspConfig))
+        )
         `when`(aliasRepository.getFirstById(aliasId)).thenReturn(null)
         // When
-        Assertions.assertThrows(IllegalArgumentException::class.java) {
+        Assertions.assertThrows(ApiException::class.java) {
             aliasService.exchangeAlias(publicKey, aliasId, Mockito.mock(AliasRequestModel::class.java))
         }
         // Then
@@ -108,10 +112,10 @@ class AliasServiceTest {
     @Test
     fun `exchange alias successfully`() {
         // Given
-        `when`(aliasRepository.getFirstById(aliasId)).thenReturn(Alias())
         `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, publicKey)).thenReturn(
             MerchantApiKey(merchant = Merchant(pspConfig = pspConfig))
         )
+        `when`(aliasRepository.getFirstById(aliasId)).thenReturn(Alias())
         // When
         aliasService.exchangeAlias(publicKey, aliasId, AliasRequestModel(pspAlias, Mockito.mock(AliasExtraModel::class.java)))
         // Then

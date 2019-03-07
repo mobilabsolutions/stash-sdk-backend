@@ -13,5 +13,6 @@ data class PspConfigMessage(
     val request: String?,
     val responseType: String?,
     val encoding: String?,
-    val hash: String?
+    val hash: String?,
+    val accountId: String?
 )

@@ -14,7 +14,6 @@
     <properties>
         <postgresql-jdbc.version>42.2.5</postgresql-jdbc.version>
         <testcontainers.version>1.10.5</testcontainers.version>
-        <swagger.version>2.9.2</swagger.version>
     </properties>
 
     <dependencies>
@@ -63,26 +62,6 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${postgresql-jdbc.version}</version>
-        </dependency>
-
-        <!--Util-->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.microutils</groupId>
-            <artifactId>kotlin-logging</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>${swagger.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <version>${swagger.version}</version>
         </dependency>
 
         <!--Test-->

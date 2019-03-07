@@ -1,6 +1,6 @@
 package com.mobilabsolutions.payment.service
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.domain.Alias
 import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
@@ -10,6 +10,7 @@ import com.mobilabsolutions.payment.message.PspConfigMessage
 import com.mobilabsolutions.payment.model.AliasRequestModel
 import com.mobilabsolutions.payment.model.AliasResponseModel
 import com.mobilabsolutions.payment.service.psp.PspRegistry
+import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.stereotype.Service
@@ -23,7 +24,8 @@ import org.springframework.transaction.annotation.Transactional
 class AliasService(
     private val aliasRepository: AliasRepository,
     private val merchantApiKeyRepository: MerchantApiKeyRepository,
-    private val pspRegistry: PspRegistry
+    private val pspRegistry: PspRegistry,
+    private val objectMapper: ObjectMapper
 ) {
 
     /**
@@ -35,12 +37,12 @@ class AliasService(
      */
     fun createAlias(publicKey: String, pspType: String): AliasResponseModel {
         val generatedAliasId = RandomStringUtils.randomAlphanumeric(STRING_LENGTH)
-        val merchantApiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, publicKey) ?: throw IllegalArgumentException("Public Key cannot be found")
+        var merchantApiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, publicKey) ?: throw ApiError.ofMessage("Public Key cannot be found").asBadRequest()
 
-        val result = jacksonObjectMapper().readValue(merchantApiKey.merchant.pspConfig, Provider::class.java)
+        val result = objectMapper.readValue(merchantApiKey.merchant.pspConfig, Provider::class.java)
         val pspConfig = result.providers?.firstOrNull { it.type == pspType }
-        val pspConfigType = PaymentServiceProvider.valueOf(pspConfig?.type ?: throw IllegalArgumentException("PSP configuration for '$pspType' cannot be found from Merchant"))
-        val psp = pspRegistry.find(pspConfigType) ?: throw IllegalArgumentException("PSP implementation '$pspType' cannot be found")
+        val pspConfigType = PaymentServiceProvider.valueOf(pspConfig?.type ?: throw ApiError.ofMessage("PSP configuration for '$pspType' cannot be found from used merchant").asBadRequest())
+        val psp = pspRegistry.find(pspConfigType) ?: throw ApiError.ofMessage("PSP implementation '$pspType' cannot be found").asBadRequest()
 
         val alias = Alias(
             id = generatedAliasId,
@@ -61,9 +63,9 @@ class AliasService(
      * @param aliasRequestModel Alias Request Model
      */
     fun exchangeAlias(publicKey: String, aliasId: String, aliasRequestModel: AliasRequestModel) {
-        aliasRepository.getFirstById(aliasId) ?: throw IllegalArgumentException("Alias ID cannot be found")
-        merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, publicKey) ?: throw IllegalArgumentException("Public Key cannot be found")
-        val extra = if (aliasRequestModel.extra != null) jacksonObjectMapper().writeValueAsString(aliasRequestModel.extra) else null
+        merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, publicKey) ?: throw ApiError.ofMessage("Public Key cannot be found").asBadRequest()
+        aliasRepository.getFirstById(aliasId) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+        val extra = if (aliasRequestModel.extra != null) objectMapper.writeValueAsString(aliasRequestModel.extra) else null
         aliasRepository.updateAlias(aliasRequestModel.pspAlias!!, extra, aliasId)
     }
 
