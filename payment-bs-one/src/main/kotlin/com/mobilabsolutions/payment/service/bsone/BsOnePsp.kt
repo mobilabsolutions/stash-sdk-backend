@@ -26,7 +26,8 @@ class BsOnePsp : Psp {
             responseType = "JSON",
             hash = "35996f45100c40d51cffedcddc471f8189fc3568c287871568dc6c8bae1c4d732ded416b502f6191fb6085a2d767ef6f",
             accountId = "42949",
-            encoding = "UTF-8"
+            encoding = "UTF-8",
+            mode = "test"
         ) // MOCK DATA
     }
 
