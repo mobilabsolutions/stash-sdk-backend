@@ -6,7 +6,7 @@ import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
-import com.mobilabsolutions.payment.message.PspConfigMessage
+import com.mobilabsolutions.payment.message.PspConfigModel
 import com.mobilabsolutions.payment.model.AliasRequestModel
 import com.mobilabsolutions.payment.model.AliasResponseModel
 import com.mobilabsolutions.payment.service.psp.PspRegistry
@@ -52,7 +52,7 @@ class AliasService(
         aliasRepository.save(alias)
         val calculatedConfig = psp.calculatePspConfig(pspConfig)
 
-        return AliasResponseModel(generatedAliasId, null, calculatedConfig)
+        return AliasResponseModel(generatedAliasId, calculatedConfig)
     }
 
     /**
@@ -66,10 +66,10 @@ class AliasService(
         merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, publicKey) ?: throw ApiError.ofMessage("Public Key cannot be found").asBadRequest()
         aliasRepository.getFirstById(aliasId) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         val extra = if (aliasRequestModel.extra != null) objectMapper.writeValueAsString(aliasRequestModel.extra) else null
-        aliasRepository.updateAlias(aliasRequestModel.pspAlias!!, extra, aliasId)
+        aliasRepository.updateAlias(aliasRequestModel.pspAlias, extra, aliasId)
     }
 
-    private data class Provider(val providers: List<PspConfigMessage>?)
+    private data class Provider(val providers: List<PspConfigModel>?)
 
     companion object : KLogging() {
         const val STRING_LENGTH = 20

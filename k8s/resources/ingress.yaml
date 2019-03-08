@@ -6,9 +6,18 @@ metadata:
   labels:
     app: payment-sdk-backend
   annotations:
-    # setting static ingress ip which is previously created. see: https://github.com/kelseyhightower/ingress-with-static-ip
     kubernetes.io/ingress.global-static-ip-name: "${KUBE_INGRESS_STATIC_IP_NAME}"
+    ingress.gcp.kubernetes.io/pre-shared-cert: "payment-dev"
+    kubernetes.io/ingress.allow-http: "false"
 spec:
   backend:
-    serviceName: payment-sdk-backend
+    serviceName: payment-dashboard
     servicePort: 80
+  rules:
+    - host: payment-dev.mblb.net
+      http:
+        paths:
+          - path: /api/*
+            backend:
+              serviceName: payment-sdk-backend
+              servicePort: 80

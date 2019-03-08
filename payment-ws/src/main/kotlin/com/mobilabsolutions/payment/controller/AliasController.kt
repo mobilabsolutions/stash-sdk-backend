@@ -43,12 +43,12 @@ class AliasController(private val aliasService: AliasService) {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun exchangeAlias(
         @RequestHeader(value = "Public-Key") publicKey: String,
-        @PathVariable("aliasId") aliasId: String,
+        @PathVariable("Alias-Id") aliasId: String,
         @Valid @RequestBody alias: AliasRequestModel
     ) = aliasService.exchangeAlias(publicKey, aliasId, alias)
 
     companion object {
-        const val BASE_URL = "/api/v1/alias"
-        const val EXCHANGE_ALIAS_URL = "/{aliasId}"
+        const val BASE_URL = "alias"
+        const val EXCHANGE_ALIAS_URL = "/{Alias-Id}"
     }
 }

@@ -1,7 +1,7 @@
 package com.mobilabsolutions.payment.service.bsone
 
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
-import com.mobilabsolutions.payment.message.PspConfigMessage
+import com.mobilabsolutions.payment.message.PspConfigModel
 import com.mobilabsolutions.payment.service.psp.Psp
 import mu.KLogging
 import org.springframework.stereotype.Component
@@ -15,9 +15,9 @@ class BsOnePsp : Psp {
         return PaymentServiceProvider.BS_PAYONE
     }
 
-    override fun calculatePspConfig(pspConfigMessage: PspConfigMessage): PspConfigMessage {
+    override fun calculatePspConfig(pspConfigModel: PspConfigModel): PspConfigModel {
         logger.info { "Random config calculation has been called..." }
-        return PspConfigMessage(
+        return PspConfigModel(
             type = PaymentServiceProvider.BS_PAYONE.name,
             merchantId = "42865",
             portalId = "2030968",
