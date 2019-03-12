@@ -3,6 +3,7 @@ package com.mobilabsolutions.auth.config.server
 import com.mobilabsolutions.payment.auth.configuration.Encoders
 import com.mobilabsolutions.payment.service.UserDetailsServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
@@ -21,6 +22,7 @@ class ServerSecurityConfig : WebSecurityConfigurerAdapter() {
     @Autowired
     private lateinit var userDetailsService: UserDetailsServiceImpl
 
+    @Qualifier("userPasswordEncoder")
     @Autowired
     private lateinit var userPasswordEncoder: PasswordEncoder
 

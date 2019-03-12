@@ -35,6 +35,7 @@ class AuthServerOAuth2Config : AuthorizationServerConfigurerAdapter() {
     @Autowired
     private lateinit var userDetailsService: UserDetailsServiceImpl
 
+    @Qualifier("clientPasswordEncoder")
     @Autowired
     private lateinit var oauthClientPasswordEncoder: PasswordEncoder
 

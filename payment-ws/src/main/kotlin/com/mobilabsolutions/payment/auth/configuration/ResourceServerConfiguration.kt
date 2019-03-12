@@ -1,7 +1,6 @@
 package com.mobilabsolutions.payment.auth.configuration
 
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter
@@ -16,16 +15,14 @@ class ResourceServerConfiguration : ResourceServerConfigurerAdapter() {
     }
 
     override fun configure(http: HttpSecurity) {
-        http.requestMatchers().anyRequest()
-            .antMatchers(SECURED_PATTERN).and().authorizeRequests()
-            .antMatchers(HttpMethod.POST, SECURED_PATTERN).access(SECURED_WRITE_SCOPE)
-            .anyRequest().permitAll()
+        http.requestMatchers().anyRequest().and().authorizeRequests()
+            .antMatchers(*PERMITTED_PATTERNS).permitAll()
+            .anyRequest().access(USER_SCOPE)
     }
 
     companion object {
-        private const val RESOURCE_ID = "resource-server-rest-api"
-        private const val SECURED_READ_SCOPE = "#oauth2.hasScope('read')"
-        private const val SECURED_WRITE_SCOPE = "#oauth2.hasScope('write')"
-        private const val SECURED_PATTERN = "/secured/**"
+        private const val RESOURCE_ID = "payment-sdk-rest-api"
+        private const val USER_SCOPE = "#oauth2.hasScope('user')"
+        private val PERMITTED_PATTERNS = arrayOf("/swagger-ui.html", "/alias/**")
     }
 }
