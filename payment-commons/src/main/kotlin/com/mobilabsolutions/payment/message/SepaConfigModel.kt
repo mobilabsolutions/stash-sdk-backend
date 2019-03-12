@@ -19,7 +19,7 @@ data class SepaConfigModel(
     @ApiModelProperty(value = "Full name of account holder", example = "Max Mustermann")
     val name: String?,
 
-    @ApiModelProperty(value = "Address information of account holder", example = "")
+    @ApiModelProperty(value = "Address information of account holder", example = "Holzmarkt 59-65")
     val street: String?,
 
     @ApiModelProperty(value = "ZIP code information of account holder", example = "50676")
