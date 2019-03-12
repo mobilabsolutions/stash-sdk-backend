@@ -2,6 +2,7 @@ package com.mobilabsolutions.payment.message
 
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
+import javax.validation.constraints.Email
 
 @ApiModel(value = "SEPA Configuration")
 data class SepaConfigModel(
@@ -11,11 +12,12 @@ data class SepaConfigModel(
     @ApiModelProperty(value = "Bank Identifier Code", example = "TESTTEST")
     val bic: String?,
 
-    @ApiModelProperty(value = "Firstname of account holder", example = "Max")
-    val firstname: String?,
+    @ApiModelProperty(value = "Email address", example = "test@test.com")
+    @field:Email
+    val email: String?,
 
-    @ApiModelProperty(value = "Lastname of account holder", example = "Mustermann")
-    val lastname: String?,
+    @ApiModelProperty(value = "Full name of account holder", example = "Max Mustermann")
+    val name: String?,
 
     @ApiModelProperty(value = "Address information of account holder", example = "")
     val street: String?,
