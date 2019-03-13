@@ -24,7 +24,7 @@ class MerchantApiKey(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private val id: Long? = null,
+    val id: Long? = null,
 
     @Column(name = "name")
     var name: String? = null,
