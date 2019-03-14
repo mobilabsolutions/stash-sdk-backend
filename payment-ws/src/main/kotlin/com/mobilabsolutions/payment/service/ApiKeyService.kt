@@ -4,6 +4,7 @@ import com.mobilabsolutions.payment.data.domain.MerchantApiKey
 import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
+import com.mobilabsolutions.payment.model.ApiKeyRequestModel
 import com.mobilabsolutions.payment.model.CreateApiKeyResponseModel
 import com.mobilabsolutions.payment.model.GetApiKeyByIdResponseModel
 import com.mobilabsolutions.payment.model.GetApiKeyResponseModel
@@ -43,31 +44,29 @@ class ApiKeyService(
      * Create merchant api key
      *
      * @param merchantId Merchant Id
-     * @param apiKeyType Key type
-     * @param apiKeyName key name
+     * @param apiKeyInfo Api key info request model
      * @return merchant api key method response
      */
-    fun createMerchantApiKey(merchantId: String, apiKeyType: KeyType?, apiKeyName: String): Any {
+    fun createMerchantApiKey(merchantId: String, apiKeyInfo: ApiKeyRequestModel): Any {
         val merchant = merchantRepository.getMerchantById(merchantId)
                 ?: throw ApiError.ofMessage("Merchant cannot be found").asBadRequest()
         val generatedKey = merchantId + "-" + RandomStringUtils.randomAlphanumeric(ApiKeyService.STRING_LENGTH)
 
         val merchantApiKey = MerchantApiKey(
-                name = apiKeyName,
+                name = apiKeyInfo.apiKeyName,
                 key = generatedKey,
                 active = true,
-                keyType = apiKeyType,
+                keyType = apiKeyInfo.apiKeyType,
                 merchant = merchant
         )
         merchantApiKeyRepository.save(merchantApiKey)
 
-        return CreateApiKeyResponseModel(generatedKey, apiKeyType)
+        return CreateApiKeyResponseModel(generatedKey, apiKeyInfo.apiKeyType)
     }
 
     /**
      * Get merchant api key
      *
-     * @param merchantId Merchant Id
      * @param apiKeyId Api Key Id
      * @return merchant api key by id method response
      */
@@ -82,13 +81,13 @@ class ApiKeyService(
      * Edit merchant api key name
      *
      * @param apiKeyId
-     * @param apiKeyName
+     * @param apiKeyInfo Api key info request model
      * @return none
      */
-    fun editMerchantApiKeyInfoById(apiKeyId: Long, apiKeyName: String) {
+    fun editMerchantApiKeyInfoById(apiKeyId: Long, apiKeyInfo: ApiKeyRequestModel) {
         merchantApiKeyRepository.getFirstById(apiKeyId)
                 ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
-        merchantApiKeyRepository.editApiKey(apiKeyName, apiKeyId)
+        merchantApiKeyRepository.editApiKey(apiKeyInfo.apiKeyName, apiKeyId)
     }
 
     /**
