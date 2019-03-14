@@ -11,6 +11,9 @@ import javax.persistence.Id
 import javax.persistence.Table
 import javax.persistence.UniqueConstraint
 
+/**
+ * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
+ */
 @Entity
 @Table(name = "authority", uniqueConstraints = [UniqueConstraint(columnNames = ["name"])])
 class Authority(

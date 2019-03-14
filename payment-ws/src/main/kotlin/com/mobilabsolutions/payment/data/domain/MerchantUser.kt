@@ -2,36 +2,43 @@ package com.mobilabsolutions.payment.data.domain
 
 import org.springframework.data.util.ProxyUtils
 import java.util.Objects
+import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.JoinTable
 import javax.persistence.ManyToMany
 import javax.persistence.Table
-import javax.persistence.UniqueConstraint
 
+/**
+ * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
+ */
 @Entity
-@Table(name = "merchant_user", uniqueConstraints = [UniqueConstraint(columnNames = ["username"])])
+@Table(name = "merchant_user")
 class MerchantUser(
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    var id: Long? = null,
+    var email: String,
 
-    @Column(name = "username")
-    var username: String,
+    @Column(name = "first_name")
+    var firstName: String? = null,
 
-    @Column(name = "password")
+    @Column(name = "last_name")
+    var lastName: String? = null,
+
+    @Column(name = "locale")
+    var locale: String? = null,
+
+    @Column(name = "password", nullable = false)
     var password: String,
 
-    @Column(name = "enabled")
+    @Column(name = "enabled", nullable = false)
     var enabled: Boolean = true,
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     @JoinTable(
         name = "merchant_user_authorities",
         joinColumns = [JoinColumn(name = "merchant_user_id", referencedColumnName = "id")],
@@ -43,7 +50,7 @@ class MerchantUser(
 
     override fun hashCode(): Int {
         var hash = 7
-        hash = 97 * hash + Objects.hashCode(this.id)
+        hash = 97 * hash + Objects.hashCode(this.email)
         return hash
     }
 
@@ -56,6 +63,6 @@ class MerchantUser(
 
         other as MerchantUser
 
-        return this.id == other.id
+        return this.email == other.email
     }
 }

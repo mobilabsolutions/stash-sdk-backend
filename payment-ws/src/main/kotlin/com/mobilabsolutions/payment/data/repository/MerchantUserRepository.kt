@@ -9,8 +9,8 @@ import org.springframework.stereotype.Repository
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
 @Repository
-interface MerchantUserRepository : BaseRepository<MerchantUser, Long> {
+interface MerchantUserRepository : BaseRepository<MerchantUser, String> {
 
-    @Query("select distinct user from MerchantUser user inner join fetch user.authorities as authorities where user.username = :username")
-    fun findByUsername(@Param("username") username: String?): MerchantUser?
+    @Query("select distinct user from MerchantUser user inner join fetch user.authorities as authorities where user.email = :email")
+    fun findByEmail(@Param("email") email: String?): MerchantUser?
 }
