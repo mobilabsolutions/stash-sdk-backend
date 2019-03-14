@@ -6,9 +6,9 @@ import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
-import com.mobilabsolutions.payment.message.PspConfigModel
 import com.mobilabsolutions.payment.model.AliasRequestModel
 import com.mobilabsolutions.payment.model.AliasResponseModel
+import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.payment.service.psp.PspRegistry
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
@@ -27,6 +27,9 @@ class AliasService(
     private val pspRegistry: PspRegistry,
     private val objectMapper: ObjectMapper
 ) {
+    companion object : KLogging() {
+        const val STRING_LENGTH = 20
+    }
 
     /**
      * Creates an alias for given pspType and publicKey
@@ -37,10 +40,10 @@ class AliasService(
      */
     fun createAlias(publicKey: String, pspType: String): AliasResponseModel {
         val generatedAliasId = RandomStringUtils.randomAlphanumeric(STRING_LENGTH)
-        var merchantApiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, publicKey) ?: throw ApiError.ofMessage("Public Key cannot be found").asBadRequest()
+        val merchantApiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, publicKey) ?: throw ApiError.ofMessage("Public Key cannot be found").asBadRequest()
 
-        val result = objectMapper.readValue(merchantApiKey.merchant.pspConfig, Provider::class.java)
-        val pspConfig = result.providers?.firstOrNull { it.type == pspType }
+        val result = objectMapper.readValue(merchantApiKey.merchant.pspConfig, PspConfigListModel::class.java)
+        val pspConfig = result.psp.firstOrNull { it.type == pspType }
         val pspConfigType = PaymentServiceProvider.valueOf(pspConfig?.type ?: throw ApiError.ofMessage("PSP configuration for '$pspType' cannot be found from used merchant").asBadRequest())
         val psp = pspRegistry.find(pspConfigType) ?: throw ApiError.ofMessage("PSP implementation '$pspType' cannot be found").asBadRequest()
 
@@ -67,11 +70,5 @@ class AliasService(
         aliasRepository.getFirstById(aliasId) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         val extra = if (aliasRequestModel.extra != null) objectMapper.writeValueAsString(aliasRequestModel.extra) else null
         aliasRepository.updateAlias(aliasRequestModel.pspAlias, extra, aliasId)
-    }
-
-    private data class Provider(val providers: List<PspConfigModel>?)
-
-    companion object : KLogging() {
-        const val STRING_LENGTH = 20
     }
 }

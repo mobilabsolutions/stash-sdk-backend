@@ -1,4 +1,4 @@
-package com.mobilabsolutions.payment.message
+package com.mobilabsolutions.payment.model
 
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
@@ -6,11 +6,8 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "PSP Configuration")
-class PspConfigModel(
-    @ApiModelProperty(value = "Payment service provider type", example = "BSPAYONE")
-    val type: String?,
-
+@ApiModel(value = "PSP Upsert Configuration Request")
+data class PspUpsertConfigRequestModel(
     @ApiModelProperty(value = "Merchant ID", example = "42865")
     val merchantId: String?,
 

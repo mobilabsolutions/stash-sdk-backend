@@ -23,6 +23,7 @@ class BsPayoneHashingService {
         const val RESPONSE_TYPE = "JSON"
         const val STORE_CARD_DATA_PARAM_VALUE = "yes"
         const val HASH_ALGORITHM = "HmacSHA384"
+        const val MODE = "test" // hardcoding until we implement the mode parameter
     }
 
     /**
@@ -33,7 +34,7 @@ class BsPayoneHashingService {
      */
     fun makeCreditCardCheckHash(pspConfigModel: PspConfigModel): String {
         return calculateHash(pspConfigModel.key, pspConfigModel.accountId + API_VERSION + pspConfigModel.merchantId +
-            pspConfigModel.mode + pspConfigModel.portalId + BsPayoneRequestType.CREDIT_CARD_CHECK.type + RESPONSE_TYPE +
+            MODE + pspConfigModel.portalId + BsPayoneRequestType.CREDIT_CARD_CHECK.type + RESPONSE_TYPE +
             STORE_CARD_DATA_PARAM_VALUE)
     }
 

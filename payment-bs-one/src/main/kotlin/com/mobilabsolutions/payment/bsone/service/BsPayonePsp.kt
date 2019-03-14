@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
 @Component
-class BsPayonePsp(var bsPayoneHashingService: BsPayoneHashingService) : Psp {
+class BsPayonePsp(private val bsPayoneHashingService: BsPayoneHashingService) : Psp {
     companion object : KLogging() {
         const val ENCODING = "UTF-8"
     }
@@ -31,7 +31,7 @@ class BsPayonePsp(var bsPayoneHashingService: BsPayoneHashingService) : Psp {
             hash = bsPayoneHashingService.makeCreditCardCheckHash(pspConfigModel),
             accountId = pspConfigModel.accountId,
             encoding = ENCODING,
-            mode = pspConfigModel.mode,
+            mode = BsPayoneHashingService.MODE,
             publicKey = null,
             privateKey = null
         ) else null
