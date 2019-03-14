@@ -80,10 +80,10 @@ class CommonExceptionHandler {
     @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleHttpMessageNotReadableException(e: HttpMessageNotReadableException): ApiError {
-        logger.error("Non readable message", e)
+        logger.error("Non readable model", e)
         return ApiError.builder()
             .withMessage("argument.validation.error")
-            .withProperty("errors", "Non readable message")
+            .withProperty("errors", "Non readable model")
             .build()
     }
 

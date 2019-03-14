@@ -2,7 +2,7 @@ package com.mobilabsolutions.payment.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
-import com.mobilabsolutions.payment.message.PspConfigModel
+import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.payment.model.PspConfigRequestModel
 import com.mobilabsolutions.payment.model.PspConfigResponseModel

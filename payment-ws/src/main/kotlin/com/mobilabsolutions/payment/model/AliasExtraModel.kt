@@ -1,8 +1,6 @@
 package com.mobilabsolutions.payment.model
 
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
-import com.mobilabsolutions.payment.message.CreditCardConfigModel
-import com.mobilabsolutions.payment.message.SepaConfigModel
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import javax.persistence.EnumType

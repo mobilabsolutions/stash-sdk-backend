@@ -1,8 +1,8 @@
 package com.mobilabsolutions.payment.bsone.service
 
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
-import com.mobilabsolutions.payment.message.PspAliasConfigModel
-import com.mobilabsolutions.payment.message.PspConfigModel
+import com.mobilabsolutions.payment.model.PspAliasConfigModel
+import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.service.psp.Psp
 import mu.KLogging
 import org.springframework.stereotype.Component

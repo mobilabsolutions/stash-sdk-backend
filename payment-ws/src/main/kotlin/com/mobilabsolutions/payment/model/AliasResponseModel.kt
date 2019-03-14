@@ -1,6 +1,5 @@
 package com.mobilabsolutions.payment.model
 
-import com.mobilabsolutions.payment.message.PspAliasConfigModel
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 

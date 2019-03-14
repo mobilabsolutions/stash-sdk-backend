@@ -3,7 +3,7 @@ package com.mobilabsolutions.payment.bsone.service
 import com.google.common.base.Charsets
 import com.google.common.hash.Hashing
 import com.mobilabsolutions.payment.bsone.enum.BsPayoneRequestType
-import com.mobilabsolutions.payment.message.PspConfigModel
+import com.mobilabsolutions.payment.model.PspConfigModel
 import mu.KLogging
 import org.apache.tomcat.util.buf.HexUtils
 import org.springframework.stereotype.Service
