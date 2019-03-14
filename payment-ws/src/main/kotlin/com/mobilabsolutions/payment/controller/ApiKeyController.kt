@@ -3,16 +3,11 @@ package com.mobilabsolutions.payment.controller
 import com.mobilabsolutions.payment.model.ApiKeyRequestModel
 import com.mobilabsolutions.payment.service.ApiKeyService
 import io.swagger.annotations.ApiOperation
-import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
+import io.swagger.annotations.ApiResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
@@ -21,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(ApiKeyController.BASE_URL)
 class ApiKeyController(private val apiKeyService: ApiKeyService) {
 
-    @ApiOperation(value = "Get api key for specific merchant")
+    @ApiOperation(value = "Get all api keys for specific merchant")
     @ApiResponses(
         ApiResponse(code = 200, message = "Successfully fetched api key"),
         ApiResponse(code = 400, message = "Merchant does not exist"),

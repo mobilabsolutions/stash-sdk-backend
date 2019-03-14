@@ -47,7 +47,7 @@ class ApiKeyService(
      * @param apiKeyInfo Api key info request model
      * @return merchant api key method response
      */
-    fun createMerchantApiKey(merchantId: String, apiKeyInfo: ApiKeyRequestModel): Any {
+    fun createMerchantApiKey(merchantId: String, apiKeyInfo: ApiKeyRequestModel): CreateApiKeyResponseModel {
         val merchant = merchantRepository.getMerchantById(merchantId)
                 ?: throw ApiError.ofMessage("Merchant cannot be found").asBadRequest()
         val generatedKey = merchantId + "-" + RandomStringUtils.randomAlphanumeric(ApiKeyService.STRING_LENGTH)
