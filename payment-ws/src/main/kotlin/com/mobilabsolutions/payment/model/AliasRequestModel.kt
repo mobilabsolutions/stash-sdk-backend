@@ -13,5 +13,6 @@ data class AliasRequestModel(
     val pspAlias: String?,
 
     @ApiModelProperty(value = "Alias Extra")
-    @field:Valid val extra: AliasExtraModel?
+    @field:Valid
+    val extra: AliasExtraModel?
 )
