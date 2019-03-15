@@ -22,132 +22,102 @@ class ApiKeyServiceTest : AbstractServiceTest() {
 
     @Test
     fun `get all api key info with wrong merchant id`() {
-        // Given
         `when`(merchantApiKeyRepository.getAllByMerchantId(merchantId)).thenReturn(
                 merchantApiKeys
         )
-        // When
         Assertions.assertThrows(ApiException::class.java) {
             apiKeyService.getMerchantApiKeyInfo(merchantId)
         }
-        // Then
         verify(merchantApiKeyRepository, times(1)).getAllByMerchantId(ArgumentMatchers.anyString())
     }
 
     @Test
     fun `get api keys successfully`() {
-        // Given
         `when`(merchantApiKeyRepository.getAllByMerchantId(merchantId)).thenReturn(
                 merchantApiKeys
         )
-        // When
         merchantApiKeys.add(MerchantApiKey(merchant = Merchant()))
         apiKeyService.getMerchantApiKeyInfo(merchantId)
-        // Then
         verify(merchantApiKeyRepository, times(1)).getAllByMerchantId(ArgumentMatchers.anyString())
     }
 
     @Test
     fun `create merchant api key with wrong merchant id`() {
-        // Given
         `when`(merchantRepository.getMerchantById(merchantId)).thenReturn(
                 null
         )
-        // When
         Assertions.assertThrows(ApiException::class.java) {
             apiKeyService.createMerchantApiKey(merchantId, Mockito.mock(ApiKeyRequestModel::class.java))
         }
-        // Then
         verify(merchantApiKeyRepository, times(0)).save(ArgumentMatchers.any(MerchantApiKey::class.java))
     }
 
     @Test
     fun `create merchant api key successfully`() {
-        // Given
         `when`(merchantRepository.getMerchantById(merchantId)).thenReturn(
                 Merchant()
         )
-        // When
         apiKeyService.createMerchantApiKey(merchantId, Mockito.mock(ApiKeyRequestModel::class.java))
-        // Then
         verify(merchantApiKeyRepository, times(1)).save(ArgumentMatchers.any(MerchantApiKey::class.java))
     }
 
     @Test
     fun `get merchant api key info with wrong api key id`() {
-        // Given
         `when`(merchantApiKeyRepository.getFirstById(apiKeyId)).thenReturn(
                 null
         )
-        // When
         Assertions.assertThrows(ApiException::class.java) {
             apiKeyService.getMerchantApiKeyInfoById(apiKeyId)
         }
-        // Then
         verify(merchantApiKeyRepository, times(1)).getFirstById(ArgumentMatchers.anyLong())
     }
 
     @Test
     fun `get merchant api key info with api key id successfully`() {
-        // Given
         `when`(merchantApiKeyRepository.getFirstById(apiKeyId)).thenReturn(
                 MerchantApiKey(merchant = Merchant())
         )
-        // When
         apiKeyService.getMerchantApiKeyInfoById(apiKeyId)
-        // Then
         verify(merchantApiKeyRepository, times(1)).getFirstById(ArgumentMatchers.anyLong())
     }
 
     @Test
     fun `edit merchant api key info with wrong api key id`() {
-        // Given
         `when`(merchantApiKeyRepository.editApiKey(null, apiKeyId)).thenReturn(
                 0
         )
-        // When
         Assertions.assertThrows(ApiException::class.java) {
             apiKeyService.editMerchantApiKeyInfoById(apiKeyId, Mockito.mock(ApiKeyRequestModel::class.java))
         }
-        // Then
         verify(merchantApiKeyRepository, times(0)).editApiKey(ArgumentMatchers.anyString(), ArgumentMatchers.anyLong())
     }
 
     @Test
     fun `edit merchant api key info with api key id successfully`() {
-        // Given
         `when`(merchantApiKeyRepository.editApiKey(null, apiKeyId)).thenReturn(
                 1
         )
-        // When
         apiKeyService.editMerchantApiKeyInfoById(apiKeyId, Mockito.mock(ApiKeyRequestModel::class.java))
-        // Then
         verify(merchantApiKeyRepository, times(1)).editApiKey(ArgumentMatchers.isNull(), ArgumentMatchers.anyLong())
     }
 
     @Test
     fun `delete merchant api key info with wrong api key id`() {
-        // Given
         `when`(merchantApiKeyRepository.deleteMerchantApiKeyById(apiKeyId)).thenReturn(
                 0
         )
-        // When
         Assertions.assertThrows(ApiException::class.java) {
             apiKeyService.deleteMerchantApiKeyById(apiKeyId)
         }
-        // Then
         verify(merchantApiKeyRepository, times(1)).deleteMerchantApiKeyById(ArgumentMatchers.anyLong())
     }
 
     @Test
     fun `delete merchant api key info with api key id successfully`() {
-        // Given
         `when`(merchantApiKeyRepository.deleteMerchantApiKeyById(apiKeyId)).thenReturn(
                 1
         )
-        // When
         apiKeyService.deleteMerchantApiKeyById(apiKeyId)
-        // Then
         verify(merchantApiKeyRepository, times(1)).deleteMerchantApiKeyById(ArgumentMatchers.anyLong())
     }
 }
