@@ -25,6 +25,7 @@
         <kotlin.logging.version>1.6.25</kotlin.logging.version>
         <swagger.version>2.9.2</swagger.version>
         <after.burner.version>2.9.8</after.burner.version>
+        <oauth2.version>2.2.1.RELEASE</oauth2.version>
     </properties>
 
 	<distributionManagement>
@@ -83,22 +84,17 @@
                 <artifactId>jackson-module-afterburner</artifactId>
                 <version>${after.burner.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.security.oauth</groupId>
+                <artifactId>spring-security-oauth2</artifactId>
+                <version>${oauth2.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
 	<build>
 		<pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.jetbrains.kotlin</groupId>
-                    <artifactId>kotlin-maven-noarg</artifactId>
-                    <version>${kotlin.version}</version>
-                    <configuration>
-                        <compilerPlugins>
-                            <plugin>jpa</plugin>
-                        </compilerPlugins>
-                    </configuration>
-                </plugin>
                 <plugin>
                     <groupId>org.jetbrains.kotlin</groupId>
                     <artifactId>kotlin-maven-plugin</artifactId>
@@ -108,12 +104,18 @@
                         </args>
                         <compilerPlugins>
                             <plugin>spring</plugin>
+                            <plugin>jpa</plugin>
                         </compilerPlugins>
                     </configuration>
                     <dependencies>
                         <dependency>
                             <groupId>org.jetbrains.kotlin</groupId>
                             <artifactId>kotlin-maven-allopen</artifactId>
+                            <version>${kotlin.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.jetbrains.kotlin</groupId>
+                            <artifactId>kotlin-maven-noarg</artifactId>
                             <version>${kotlin.version}</version>
                         </dependency>
                     </dependencies>
