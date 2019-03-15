@@ -1,6 +1,5 @@
 package com.mobilabsolutions.payment.model
 
-import com.mobilabsolutions.payment.service.ApiKeyService
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
@@ -10,5 +9,5 @@ import io.swagger.annotations.ApiModelProperty
 @ApiModel(value = "Get All Api Keys Response")
 data class GetApiKeyResponseModel(
     @ApiModelProperty(value = "List of api keys")
-    val data: MutableList<ApiKeyService.ApiKeyReturnInfo>
+    val data: List<ApiKeyReturnInfoModel>
 )

@@ -20,7 +20,8 @@ interface MerchantApiKeyRepository : BaseRepository<MerchantApiKey, Long> {
 
     @Modifying
     @Query("UPDATE MerchantApiKey m SET m.name = :name WHERE m.id = :id")
-    fun editApiKey(@Param("name") name: String?, @Param("id") id: Long)
+    fun editApiKey(@Param("name") name: String?, @Param("id") id: Long): Int
 
-    fun deleteMerchantApiKeyById(apiKeyId: Long): Any?
+    @Modifying
+    fun deleteMerchantApiKeyById(apiKeyId: Long): Int
 }

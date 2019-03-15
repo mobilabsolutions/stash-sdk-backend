@@ -1,9 +1,9 @@
 package com.mobilabsolutions.payment.service
 
 import com.mobilabsolutions.payment.data.domain.MerchantApiKey
-import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
+import com.mobilabsolutions.payment.model.ApiKeyReturnInfoModel
 import com.mobilabsolutions.payment.model.ApiKeyRequestModel
 import com.mobilabsolutions.payment.model.CreateApiKeyResponseModel
 import com.mobilabsolutions.payment.model.GetApiKeyByIdResponseModel
@@ -12,13 +12,11 @@ import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
 @Service
-@Transactional
 class ApiKeyService(
     private val merchantApiKeyRepository: MerchantApiKeyRepository,
     private val merchantRepository: MerchantRepository
@@ -30,12 +28,9 @@ class ApiKeyService(
      * @return api key method response
      */
     fun getMerchantApiKeyInfo(merchantId: String): GetApiKeyResponseModel {
-        val merchantApiKey = merchantApiKeyRepository.getAllByMerchantId(merchantId)
-        if (merchantApiKey.isEmpty()) throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
-        val list: MutableList<ApiKeyReturnInfo> = mutableListOf()
-        for (apiKey in merchantApiKey) {
-            list.add(ApiKeyReturnInfo(merchantId, apiKey.name, apiKey.keyType))
-        }
+        val merchantApiKeyList = merchantApiKeyRepository.getAllByMerchantId(merchantId)
+        if (merchantApiKeyList.isEmpty()) throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
+        val list = merchantApiKeyList.map { ApiKeyReturnInfoModel(merchantId, it.name, it.keyType) }
 
         return GetApiKeyResponseModel(list)
     }
@@ -85,9 +80,8 @@ class ApiKeyService(
      * @return none
      */
     fun editMerchantApiKeyInfoById(apiKeyId: Long, apiKeyInfo: ApiKeyRequestModel) {
-        merchantApiKeyRepository.getFirstById(apiKeyId)
-                ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
-        merchantApiKeyRepository.editApiKey(apiKeyInfo.apiKeyName, apiKeyId)
+        if (merchantApiKeyRepository.editApiKey(apiKeyInfo.apiKeyName, apiKeyId) == 0)
+            throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
     }
 
     /**
@@ -97,12 +91,9 @@ class ApiKeyService(
      * @return none
      */
     fun deleteMerchantApiKeyById(apiKeyId: Long) {
-        merchantApiKeyRepository.getFirstById(apiKeyId)
-                ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
-        merchantApiKeyRepository.deleteMerchantApiKeyById(apiKeyId)
+        if (merchantApiKeyRepository.deleteMerchantApiKeyById(apiKeyId) == 0)
+            throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
     }
-
-    data class ApiKeyReturnInfo(val merchantId: String, val apiKeyName: String?, val apiKeyType: KeyType?)
 
     companion object : KLogging() {
         const val STRING_LENGTH = 20
