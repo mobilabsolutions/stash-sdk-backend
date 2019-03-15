@@ -14,11 +14,13 @@ import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
 @Service
+@Transactional
 class AliasService(
     private val aliasRepository: AliasRepository,
     private val merchantApiKeyRepository: MerchantApiKeyRepository,

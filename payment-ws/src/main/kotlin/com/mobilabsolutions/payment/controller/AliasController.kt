@@ -7,7 +7,6 @@ import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
@@ -21,7 +20,6 @@ import javax.validation.Valid
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
 @RestController
-@Transactional
 @RequestMapping(AliasController.BASE_URL)
 class AliasController(private val aliasService: AliasService) {
 
