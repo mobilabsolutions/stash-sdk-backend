@@ -17,7 +17,7 @@ interface MerchantUserRepository : BaseRepository<MerchantUser, String> {
 
     @Modifying
     @Query("UPDATE MerchantUser mu SET mu.firstName = :firstname, mu.lastName = :lastname, mu.locale = :locale, mu.lastModifiedDate = CURRENT_TIMESTAMP WHERE mu.email = :userId")
-    fun updateMerchantUser(@Param("userId") userId: String, @Param("firstname") firstname: String?, @Param("lastname") extra: String?, @Param("locale") locale: String?)
+    fun updateMerchantUser(@Param("userId") userId: String, @Param("firstname") firstname: String?, @Param("lastname") lastname: String?, @Param("locale") locale: String?)
 
     @Modifying
     @Query("UPDATE MerchantUser mu SET mu.password = :password, mu.lastModifiedDate = CURRENT_TIMESTAMP WHERE mu.email = :userId")
