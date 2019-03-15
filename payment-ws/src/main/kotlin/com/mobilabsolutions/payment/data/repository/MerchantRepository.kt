@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository
  */
 @Repository
 interface MerchantRepository : BaseRepository<Merchant, String> {
-    fun getFirstById(id: String): Merchant?
+    fun getMerchantById(id: String): Merchant?
 
     @Modifying
     @Query("UPDATE Merchant m SET m.pspConfig = :pspConfig WHERE m.id = :merchantId")
