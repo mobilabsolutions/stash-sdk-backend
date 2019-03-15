@@ -19,7 +19,7 @@ class ApiError private constructor(details: Map<String, Any>) {
 
     companion object {
 
-        private const val MESSAGE_PROPERTY = "model"
+        private const val MESSAGE_PROPERTY = "message"
         private const val DETAILS_PROPERTY = "details"
 
         @JvmStatic
