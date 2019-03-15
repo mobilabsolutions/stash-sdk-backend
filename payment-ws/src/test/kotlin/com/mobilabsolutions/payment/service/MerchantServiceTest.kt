@@ -17,7 +17,7 @@ class MerchantServiceTest : AbstractServiceTest() {
 
     @Test
     fun `add psp config successfully`() {
-        Mockito.`when`(merchantRepository.getFirstById(merchantId)).thenReturn(merchant)
+        Mockito.`when`(merchantRepository.getMerchantById(merchantId)).thenReturn(merchant)
 
         merchantService.addPspConfigForMerchant(merchantId, PspConfigRequestModel(pspId, Mockito.mock(PspUpsertConfigRequestModel::class.java)))
 
@@ -27,7 +27,7 @@ class MerchantServiceTest : AbstractServiceTest() {
 
     @Test
     fun `add psp config with wrong merchant id`() {
-        Mockito.`when`(merchantRepository.getFirstById(merchantId)).thenReturn(null)
+        Mockito.`when`(merchantRepository.getMerchantById(merchantId)).thenReturn(null)
 
         Assertions.assertThrows(ApiException::class.java) {
             merchantService.addPspConfigForMerchant(merchantId, PspConfigRequestModel(pspId, Mockito.mock(PspUpsertConfigRequestModel::class.java)))
@@ -38,7 +38,7 @@ class MerchantServiceTest : AbstractServiceTest() {
 
     @Test
     fun `get merchant config successfully`() {
-        Mockito.`when`(merchantRepository.getFirstById(merchantId)).thenReturn(merchant)
+        Mockito.`when`(merchantRepository.getMerchantById(merchantId)).thenReturn(merchant)
 
         val response = merchantService.getMerchantConfiguration(merchantId)
         val config = objectMapper.readValue(merchant.pspConfig, PspConfigListModel::class.java)
@@ -47,7 +47,7 @@ class MerchantServiceTest : AbstractServiceTest() {
 
     @Test
     fun `get merchant psp config successfully`() {
-        Mockito.`when`(merchantRepository.getFirstById(merchantId)).thenReturn(merchant)
+        Mockito.`when`(merchantRepository.getMerchantById(merchantId)).thenReturn(merchant)
 
         val response = merchantService.getMerchantPspConfiguration(merchantId, knownPspType)
         val config = objectMapper.readValue(merchant.pspConfig, PspConfigListModel::class.java).psp.firstOrNull { it.type == knownPspType }
@@ -57,7 +57,7 @@ class MerchantServiceTest : AbstractServiceTest() {
 
     @Test
     fun `update merchant psp config successfully`() {
-        Mockito.`when`(merchantRepository.getFirstById(merchantId)).thenReturn(merchant)
+        Mockito.`when`(merchantRepository.getMerchantById(merchantId)).thenReturn(merchant)
 
         merchantService.updatePspConfig(merchantId, knownPspType, Mockito.mock(PspUpsertConfigRequestModel::class.java))
 
