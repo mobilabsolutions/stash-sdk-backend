@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiResponses
 import io.swagger.annotations.ApiResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -31,6 +32,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService) {
     )
     @RequestMapping(method = [RequestMethod.GET])
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun getApiKey(
         @PathVariable("Merchant-Id") merchantId: String
     ) = apiKeyService.getMerchantApiKeyInfo(merchantId)
@@ -46,6 +48,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService) {
             consumes = [MediaType.APPLICATION_JSON_VALUE],
             produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun createApiKey(
         @PathVariable("Merchant-Id") merchantId: String,
         @RequestBody apiKeyInfo: ApiKeyRequestModel
@@ -61,6 +64,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService) {
     )
     @RequestMapping(API_KEY_ID_URL, method = [RequestMethod.GET])
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun getApiKeyById(
         @PathVariable("API-Key-Id") apiKeyId: Long
     ) = apiKeyService.getMerchantApiKeyInfoById(apiKeyId)
@@ -77,6 +81,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService) {
             consumes = [MediaType.APPLICATION_JSON_VALUE],
             produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun editApiKeyById(
         @PathVariable("Merchant-Id") merchantId: String,
         @PathVariable("API-Key-Id") apiKeyId: Long,
@@ -93,6 +98,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService) {
     )
     @RequestMapping(API_KEY_ID_URL, method = [RequestMethod.DELETE])
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun deleteApiKeyById(
         @PathVariable("Merchant-Id") merchantId: String,
         @PathVariable("API-Key-Id") apiKeyId: Long
