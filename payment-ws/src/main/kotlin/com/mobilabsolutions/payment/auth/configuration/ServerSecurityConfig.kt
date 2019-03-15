@@ -1,6 +1,5 @@
-package com.mobilabsolutions.auth.config.server
+package com.mobilabsolutions.payment.auth.configuration
 
-import com.mobilabsolutions.payment.auth.configuration.Encoders
 import com.mobilabsolutions.payment.service.UserDetailsServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier

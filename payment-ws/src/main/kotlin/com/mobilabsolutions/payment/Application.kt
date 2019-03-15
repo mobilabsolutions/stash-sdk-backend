@@ -1,6 +1,6 @@
 package com.mobilabsolutions.payment
 
-import com.mobilabsolutions.auth.config.server.AuthServerOAuth2Config
+import com.mobilabsolutions.payment.auth.configuration.AuthServerOAuth2Config
 import com.mobilabsolutions.payment.auth.configuration.ResourceServerConfiguration
 import com.mobilabsolutions.payment.data.configuration.DataConfiguration
 import com.mobilabsolutions.server.commons.CommonConfiguration
