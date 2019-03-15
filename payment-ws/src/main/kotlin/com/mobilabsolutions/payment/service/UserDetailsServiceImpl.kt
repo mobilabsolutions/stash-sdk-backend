@@ -2,19 +2,85 @@ package com.mobilabsolutions.payment.service
 
 import com.mobilabsolutions.payment.data.domain.MerchantUser
 import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
+import com.mobilabsolutions.payment.model.MerchantUserChangePasswordModel
+import com.mobilabsolutions.payment.model.MerchantUserUpdateModel
 import com.mobilabsolutions.server.commons.exception.ApiError
+import mu.KLogging
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
+/**
+ * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
+ */
 @Service
-class UserDetailsServiceImpl(private val merchantUserRepository: MerchantUserRepository) : UserDetailsService {
+class UserDetailsServiceImpl(
+    private val merchantUserRepository: MerchantUserRepository,
+    @Qualifier("userPasswordEncoder") private val userPasswordEncoder: PasswordEncoder
+) : UserDetailsService {
+
+    @Value("\${initial.data.loader.adminUsername}")
+    lateinit var adminUsername: String
+
+    /**
+     * Find merchant user by id and wrap the merchant user with extra information for authentication
+     *
+     * @param email Merchant user email
+     * @return Enchanced merchant user
+     */
     @Transactional(readOnly = true)
     override fun loadUserByUsername(email: String): UserDetails {
-        return merchantUserRepository.findByEmail(email)?.toUserDetails() ?: throw ApiError.builder().withMessage("Bad credentials").build().asUnauthorized()
+        return merchantUserRepository.findByEmail(email)?.toUserDetails()
+            ?: throw ApiError.builder().withMessage("Bad credentials").build().asUnauthorized()
+    }
+
+    /**
+     * Update the merchant user by given userId
+     *
+     * @param userId Merchant userId
+     * @param principal Currently authenticated user
+     * @param merchantUserModel Merchant user model
+     */
+    @Transactional
+    fun updateMerchantUser(userId: String, principal: String, merchantUserModel: MerchantUserUpdateModel) {
+        if (principal != adminUsername && principal != userId) throw ApiError.ofMessage("Authenticated user doesn't have the required rights for this operation").asForbidden()
+        merchantUserRepository.updateMerchantUser(
+            userId,
+            merchantUserModel.firstname,
+            merchantUserModel.lastname,
+            merchantUserModel.locale
+        )
+    }
+
+    /**
+     * Change the password of the merchant user by given userId
+     *
+     * @param userId Merchant userId
+     * @param principal Currently authenticated user
+     * @param merchantUserChangePasswordModel Merchant user change password model
+     */
+    @Transactional
+    fun changePasswordMerchantUser(
+        userId: String,
+        principal: String,
+        merchantUserChangePasswordModel: MerchantUserChangePasswordModel
+    ) {
+        if (principal != adminUsername && principal != userId) throw ApiError.ofMessage("Authenticated user doesn't have the required rights for this operation").asForbidden()
+
+        val merchantUser = merchantUserRepository.findByEmail(userId)
+        val isPasswordMatching = userPasswordEncoder.matches(merchantUserChangePasswordModel.oldPassword, merchantUser?.password)
+        if (isPasswordMatching) merchantUserRepository.updatePasswordMerchantUser(
+            userId,
+            userPasswordEncoder.encode(merchantUserChangePasswordModel.newPassword)
+        ) else throw ApiError.ofMessage("Old password for user '$userId' is incorrect").asBadRequest()
     }
 
     private fun MerchantUser.toUserDetails() = User(email, password, enabled, true, true, true, authorities)
+
+    companion object : KLogging()
 }
