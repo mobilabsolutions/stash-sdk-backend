@@ -23,7 +23,7 @@ class BsPayonePsp(private val bsPayoneHashingService: BsPayoneHashingService) : 
     override fun calculatePspConfig(pspConfigModel: PspConfigModel?): PspAliasConfigModel? {
         logger.info { "Random config calculation has been called..." }
         return if (pspConfigModel != null) PspAliasConfigModel(
-            type = PaymentServiceProvider.BS_PAYONE.value,
+            type = PaymentServiceProvider.BS_PAYONE.toString(),
             merchantId = pspConfigModel.merchantId,
             portalId = pspConfigModel.portalId,
             apiVersion = BsPayoneHashingService.API_VERSION,

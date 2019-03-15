@@ -44,6 +44,7 @@ class AliasService(
 
         val result = objectMapper.readValue(merchantApiKey.merchant.pspConfig, PspConfigListModel::class.java)
         val pspConfig = result.psp.firstOrNull { it.type == pspType }
+        println(pspConfig)
         val pspConfigType = PaymentServiceProvider.valueOf(pspConfig?.type ?: throw ApiError.ofMessage("PSP configuration for '$pspType' cannot be found from used merchant").asBadRequest())
         val psp = pspRegistry.find(pspConfigType) ?: throw ApiError.ofMessage("PSP implementation '$pspType' cannot be found").asBadRequest()
 
