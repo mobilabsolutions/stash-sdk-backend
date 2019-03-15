@@ -30,6 +30,9 @@ abstract class AbstractServiceTest {
     val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
 
     @InjectMocks
+    protected lateinit var apiKeyService: ApiKeyService
+
+    @InjectMocks
     protected lateinit var aliasService: AliasService
 
     @InjectMocks

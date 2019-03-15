@@ -2,41 +2,21 @@ package com.mobilabsolutions.payment.service
 
 import com.mobilabsolutions.payment.data.domain.Merchant
 import com.mobilabsolutions.payment.data.domain.MerchantApiKey
-import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
-import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.model.ApiKeyRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers
-import org.mockito.InjectMocks
-import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.junit.jupiter.MockitoSettings
-import org.mockito.quality.Strictness
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ExtendWith(MockitoExtension::class)
-@MockitoSettings(strictness = Strictness.STRICT_STUBS)
-class ApiKeyServiceTest {
+class ApiKeyServiceTest : AbstractServiceTest() {
 
-    @InjectMocks
-    private lateinit var apiKeyService: ApiKeyService
-
-    @Mock
-    private lateinit var merchantApiKeyRepository: MerchantApiKeyRepository
-
-    @Mock
-    private lateinit var merchantRepository: MerchantRepository
-
-    private val merchantId = "some merchant id"
     private val merchantApiKeys = ArrayList<MerchantApiKey>()
     private val apiKeyId: Long = 1
 
