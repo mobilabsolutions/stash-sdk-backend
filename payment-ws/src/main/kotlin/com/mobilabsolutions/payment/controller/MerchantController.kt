@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -37,6 +38,7 @@ class MerchantController(private val merchantService: MerchantService) {
     @RequestMapping(method = [RequestMethod.POST],
         produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun createPspConfigToMerchant(
         @PathVariable("Merchant-Id") merchantId: String,
         @Valid @RequestBody pspConfigRequestModel: PspConfigRequestModel
@@ -52,6 +54,7 @@ class MerchantController(private val merchantService: MerchantService) {
     @RequestMapping(method = [RequestMethod.GET],
         produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun getMerchantConfiguration(
         @PathVariable("Merchant-Id") merchantId: String
     ) = merchantService.getMerchantConfiguration(merchantId)
@@ -67,6 +70,7 @@ class MerchantController(private val merchantService: MerchantService) {
     @RequestMapping(PSP_ID_PARAM, method = [RequestMethod.GET],
         produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun getMerchantConfiguration(
         @PathVariable("Merchant-Id") merchantId: String,
         @PathVariable("Psp-Id") pspId: String
@@ -84,6 +88,7 @@ class MerchantController(private val merchantService: MerchantService) {
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun updateMerchantPspConfiguration(
         @PathVariable("Merchant-Id") merchantId: String,
         @PathVariable("Psp-Id") pspId: String,
