@@ -12,11 +12,13 @@ import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
 @Service
+@Transactional
 class ApiKeyService(
     private val merchantApiKeyRepository: MerchantApiKeyRepository,
     private val merchantRepository: MerchantRepository
