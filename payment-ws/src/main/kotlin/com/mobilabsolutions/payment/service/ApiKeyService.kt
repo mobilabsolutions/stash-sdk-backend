@@ -33,7 +33,7 @@ class ApiKeyService(
     fun getMerchantApiKeyInfo(merchantId: String): GetApiKeyResponseModel {
         val merchantApiKeyList = merchantApiKeyRepository.getAllByMerchantId(merchantId)
         if (merchantApiKeyList.isEmpty()) throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
-        val list = merchantApiKeyList.map { ApiKeyReturnInfoModel(merchantId, it.name, it.keyType) }
+        val list = merchantApiKeyList.map { ApiKeyReturnInfoModel(it.id, it.name, it.keyType) }
 
         return GetApiKeyResponseModel(list)
     }
