@@ -5,6 +5,7 @@ import com.mobilabsolutions.payment.data.domain.MerchantApiKey
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.model.ApiKeyRequestModel
+import com.mobilabsolutions.payment.model.EditApiKeyRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -127,7 +128,7 @@ class ApiKeyServiceTest {
         )
         // When
         Assertions.assertThrows(ApiException::class.java) {
-            apiKeyService.editMerchantApiKeyInfoById(apiKeyId, Mockito.mock(ApiKeyRequestModel::class.java))
+            apiKeyService.editMerchantApiKeyInfoById(apiKeyId, Mockito.mock(EditApiKeyRequestModel::class.java))
         }
         // Then
         verify(merchantApiKeyRepository, times(0)).editApiKey(ArgumentMatchers.anyString(), ArgumentMatchers.anyLong())
@@ -140,7 +141,7 @@ class ApiKeyServiceTest {
                 1
         )
         // When
-        apiKeyService.editMerchantApiKeyInfoById(apiKeyId, Mockito.mock(ApiKeyRequestModel::class.java))
+        apiKeyService.editMerchantApiKeyInfoById(apiKeyId, Mockito.mock(EditApiKeyRequestModel::class.java))
         // Then
         verify(merchantApiKeyRepository, times(1)).editApiKey(ArgumentMatchers.isNull(), ArgumentMatchers.anyLong())
     }

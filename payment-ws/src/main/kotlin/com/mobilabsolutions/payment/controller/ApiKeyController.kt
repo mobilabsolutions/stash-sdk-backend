@@ -1,6 +1,7 @@
 package com.mobilabsolutions.payment.controller
 
 import com.mobilabsolutions.payment.model.ApiKeyRequestModel
+import com.mobilabsolutions.payment.model.EditApiKeyRequestModel
 import com.mobilabsolutions.payment.service.ApiKeyService
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponses
@@ -85,8 +86,8 @@ class ApiKeyController(private val apiKeyService: ApiKeyService) {
     fun editApiKeyById(
         @PathVariable("Merchant-Id") merchantId: String,
         @PathVariable("API-Key-Id") apiKeyId: Long,
-        @RequestBody apiKeyInfo: ApiKeyRequestModel
-    ) = apiKeyService.editMerchantApiKeyInfoById(apiKeyId, apiKeyInfo)
+        @RequestBody apiKeyType: EditApiKeyRequestModel
+    ) = apiKeyService.editMerchantApiKeyInfoById(apiKeyId, apiKeyType)
 
     @ApiOperation(value = "Delete merchant api key")
     @ApiResponses(
