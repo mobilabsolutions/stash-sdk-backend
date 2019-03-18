@@ -9,7 +9,7 @@ import javax.persistence.Enumerated
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel(value = "Alias Request")
+@ApiModel(value = "Api Key Request")
 data class ApiKeyRequestModel(
     @ApiModelProperty(value = "Api key type", example = "PUBLIC")
     @field:Enumerated(EnumType.STRING)
