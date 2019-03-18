@@ -1,10 +1,8 @@
 package com.mobilabsolutions.payment.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.domain.Merchant
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.model.MerchantRequestModel
-import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
