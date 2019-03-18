@@ -1,81 +1,111 @@
 package com.mobilabsolutions.payment.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.domain.Alias
+import com.mobilabsolutions.payment.data.domain.Merchant
 import com.mobilabsolutions.payment.data.domain.MerchantApiKey
 import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
+import com.mobilabsolutions.payment.data.repository.AliasRepository
+import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.AliasRequestModel
 import com.mobilabsolutions.payment.service.psp.Psp
+import com.mobilabsolutions.payment.service.psp.PspRegistry
+import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.InjectMocks
+import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
+import org.mockito.MockitoAnnotations
+import org.mockito.Spy
+import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.junit.jupiter.MockitoSettings
+import org.mockito.quality.Strictness
 
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
-class AliasServiceTest : AbstractServiceTest() {
-    private val publicKey = "some public key"
-    private val aliasId = "some alias id"
+@ExtendWith(MockitoExtension::class)
+@MockitoSettings(strictness = Strictness.STRICT_STUBS)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class AliasServiceTest {
+    private val knownPublicKey = "some public key"
+    private val unknownPublicKey = "other public key"
+    private val knownAliasId = "some alias id"
+    private val unknownAliasId = "other alias id"
     private val pspType = "some psp type"
     private val pspAlias = "some psp alias"
+    private val knownPspType = "BS_PAYONE"
+
+    @InjectMocks
+    private lateinit var aliasService: AliasService
+
+    @Mock
+    private lateinit var aliasRepository: AliasRepository
+
+    @Mock
+    private lateinit var merchantApiKeyRepository: MerchantApiKeyRepository
+
+    @Mock
+    private lateinit var pspRegistry: PspRegistry
+
+    @Spy
+    val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
+
+    @BeforeAll
+    fun beforeAll() {
+        MockitoAnnotations.initMocks(this)
+
+        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, unknownPublicKey))
+            .thenReturn(null)
+
+        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, knownPublicKey))
+            .thenReturn(MerchantApiKey(merchant = Merchant(id = "mobilab",
+                pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
+                " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")))
+
+        `when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(Mockito.mock(Psp::class.java))
+
+        `when`(aliasRepository.getFirstById(unknownAliasId)).thenReturn(null)
+
+        `when`(aliasRepository.getFirstById(knownAliasId)).thenReturn(Mockito.mock(Alias::class.java))
+    }
 
     @Test
     fun `create alias with wrong header parameters`() {
-        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, publicKey)).thenReturn(
-            null
-        )
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(publicKey, pspType)
+            aliasService.createAlias(unknownPublicKey, pspType)
         }
-        verify(aliasRepository, times(0)).save(ArgumentMatchers.any(Alias::class.java))
     }
 
     @Test
     fun `create alias with unknown pspType`() {
-        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, publicKey)).thenReturn(
-            MerchantApiKey(merchant = merchant)
-        )
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(publicKey, pspType)
+            aliasService.createAlias(knownPublicKey, pspType)
         }
-        verify(aliasRepository, times(0)).save(ArgumentMatchers.any(Alias::class.java))
     }
 
     @Test
     fun `create alias successfully`() {
-        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, publicKey)).thenReturn(
-            MerchantApiKey(merchant = merchant)
-        )
-        `when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(Mockito.mock(Psp::class.java))
-        aliasService.createAlias(publicKey, knownPspType)
-        verify(aliasRepository, times(1)).save(ArgumentMatchers.any(Alias::class.java))
+        aliasService.createAlias(knownPublicKey, knownPspType)
     }
 
     @Test
     fun `exchange alias with wrong alias id`() {
-        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, publicKey)).thenReturn(
-            MerchantApiKey(merchant = merchant)
-        )
-        `when`(aliasRepository.getFirstById(aliasId)).thenReturn(null)
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.exchangeAlias(publicKey, aliasId, Mockito.mock(AliasRequestModel::class.java))
+            aliasService.exchangeAlias(knownPublicKey, unknownAliasId, Mockito.mock(AliasRequestModel::class.java))
         }
-        verify(aliasRepository, times(0)).updateAlias(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())
     }
 
     @Test
     fun `exchange alias successfully`() {
-        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, publicKey)).thenReturn(
-            MerchantApiKey(merchant = merchant)
-        )
-        `when`(aliasRepository.getFirstById(aliasId)).thenReturn(Alias())
-        aliasService.exchangeAlias(publicKey, aliasId, AliasRequestModel(pspAlias, Mockito.mock(AliasExtraModel::class.java)))
-        verify(aliasRepository, times(1)).updateAlias(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())
+        aliasService.exchangeAlias(knownPublicKey, knownAliasId, AliasRequestModel(pspAlias, Mockito.mock(AliasExtraModel::class.java)))
     }
 }
