@@ -15,7 +15,7 @@ data class GetApiKeyByIdResponseModel(
     val apiKeyId: Long?,
 
     @ApiModelProperty(value = "Api key name", example = "Test key")
-    val name: String?,
+    val apiKeyName: String?,
 
     @ApiModelProperty(value = "Api key type", example = "PUBLIC")
     @field:Enumerated(EnumType.STRING)
