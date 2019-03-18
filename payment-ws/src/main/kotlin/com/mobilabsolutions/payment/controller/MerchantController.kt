@@ -7,11 +7,12 @@ import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.bind.annotation.RequestBody
+import javax.validation.Valid
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
@@ -31,7 +32,7 @@ class MerchantController(private val merchantService: MerchantService) {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('admin')")
     fun createMerchant(
-        @RequestBody merchantInfo: MerchantRequestModel
+        @Valid @RequestBody merchantInfo: MerchantRequestModel
     ) = merchantService.createMerchant(merchantInfo)
 
     companion object {

@@ -1,6 +1,8 @@
 package com.mobilabsolutions.payment.service
 
+import com.mobilabsolutions.payment.data.domain.Authority
 import com.mobilabsolutions.payment.data.domain.Merchant
+import com.mobilabsolutions.payment.data.repository.AuthorityRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.model.MerchantRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
@@ -13,24 +15,32 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional
 class MerchantService(
-    private val merchantRepository: MerchantRepository
+    private val merchantRepository: MerchantRepository,
+    private val authorityRepository: AuthorityRepository
 ) {
 
     /**
      * Create merchant
      *
      * @param merchantInfo Merchant specific details
-     * @return null
+     *
      */
     fun createMerchant(merchantInfo: MerchantRequestModel) {
-        val merchant = Merchant(
-            id = merchantInfo.merchantId,
-            name = merchantInfo.merchantName,
-            email = merchantInfo.merchantEmail,
-            defaultCurrency = merchantInfo.merchantCurrency
+        if (!checkMerchantAndAuthority(merchantInfo.merchantId)) throw ApiError.ofMessage("Merchant with id '${merchantInfo.merchantId}' already exists").asBadRequest()
+
+        merchantRepository.save(
+            Merchant(
+                id = merchantInfo.merchantId,
+                name = merchantInfo.merchantName,
+                email = merchantInfo.merchantEmail,
+                defaultCurrency = merchantInfo.merchantCurrency
+            )
         )
 
-        if (merchantRepository.getMerchantById(merchantInfo.merchantId) == null) merchantRepository.save(merchant)
-        else throw ApiError.ofMessage("Merchant with that id already exists").asBadRequest()
+        authorityRepository.save(Authority(name = merchantInfo.merchantId))
+    }
+
+    private fun checkMerchantAndAuthority(merchantId: String): Boolean {
+        return authorityRepository.getAuthorityByName(merchantId) == null || merchantRepository.getMerchantById(merchantId) == null
     }
 }
