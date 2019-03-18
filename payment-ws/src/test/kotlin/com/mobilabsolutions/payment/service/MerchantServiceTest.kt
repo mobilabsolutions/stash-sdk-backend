@@ -9,13 +9,13 @@ import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito
+import org.mockito.Spy
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.times
-import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
@@ -33,26 +33,29 @@ class MerchantServiceTest {
     @Mock
     private lateinit var merchantRepository: MerchantRepository
 
+    private val merchantRequestModel =
+            MerchantRequestModel("test", "test", "test@mobilabsolutions.com", "EUR")
+
     @Spy
     private val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
 
     @Test
     fun `create merchant with existing merchant id`() {
-        `when`(merchantRepository.getMerchantById(null)).thenReturn(
+        `when`(merchantRepository.getMerchantById("test")).thenReturn(
                 Merchant()
         )
         Assertions.assertThrows(ApiException::class.java) {
-            merchantService.createMerchant(Mockito.mock(MerchantRequestModel::class.java))
+            merchantService.createMerchant(merchantRequestModel)
         }
         verify(merchantRepository, times(0)).save(Merchant())
     }
 
     @Test
     fun `create merchant successfully`() {
-        `when`(merchantRepository.getMerchantById(null)).thenReturn(
+        `when`(merchantRepository.getMerchantById("test")).thenReturn(
                 null
         )
-        merchantService.createMerchant(Mockito.mock(MerchantRequestModel::class.java))
-        verify(merchantRepository, times(1)).save(Merchant())
+        merchantService.createMerchant(merchantRequestModel)
+        verify(merchantRepository, times(1)).save(ArgumentMatchers.any(Merchant::class.java))
     }
 }

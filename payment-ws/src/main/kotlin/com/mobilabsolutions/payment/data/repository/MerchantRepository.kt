@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository
  */
 @Repository
 interface MerchantRepository : BaseRepository<Merchant, String> {
-    fun getMerchantById(id: String?): Merchant?
+    fun getMerchantById(id: String): Merchant?
 }

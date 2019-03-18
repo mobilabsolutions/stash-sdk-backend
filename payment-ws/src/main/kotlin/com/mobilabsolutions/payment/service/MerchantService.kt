@@ -29,7 +29,6 @@ class MerchantService(
             id = merchantInfo.merchantId,
             name = merchantInfo.merchantName,
             email = merchantInfo.merchantEmail,
-            pspConfig = objectMapper.writeValueAsString(merchantInfo.merchantPspConfig),
             defaultCurrency = merchantInfo.merchantCurrency
         )
 

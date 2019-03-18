@@ -1,6 +1,5 @@
 package com.mobilabsolutions.payment.model
 
-import com.mobilabsolutions.payment.message.PspConfigModel
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
@@ -10,16 +9,13 @@ import io.swagger.annotations.ApiModelProperty
 @ApiModel(value = "Merchant Creation Request")
 data class MerchantRequestModel(
     @ApiModelProperty(value = "Merchant id", example = "Mobilab")
-    val merchantId: String?,
+    val merchantId: String,
 
     @ApiModelProperty(value = "Merchant name", example = "Mobilab's Best Merchant")
-    val merchantName: String?,
+    val merchantName: String,
 
     @ApiModelProperty(value = "Merchant email", example = "merchant@mobilabsolutions.com")
-    val merchantEmail: String?,
-
-    @ApiModelProperty(value = "Merchant psp config")
-    val merchantPspConfig: PspConfigModel,
+    val merchantEmail: String,
 
     @ApiModelProperty(value = "Merchant default currency", example = "EUR")
     val merchantCurrency: String?
