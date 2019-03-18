@@ -1,8 +1,11 @@
 package com.mobilabsolutions.payment.service
 
+import com.mobilabsolutions.payment.data.domain.Authority
 import com.mobilabsolutions.payment.data.domain.MerchantUser
+import com.mobilabsolutions.payment.data.repository.AuthorityRepository
 import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
 import com.mobilabsolutions.payment.model.MerchantUserChangePasswordModel
+import com.mobilabsolutions.payment.model.MerchantUserCreateModel
 import com.mobilabsolutions.payment.model.MerchantUserUpdateModel
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
@@ -38,8 +41,13 @@ class UserDetailsServiceTest {
     private lateinit var merchantUserRepository: MerchantUserRepository
 
     @Mock
+    private lateinit var authorityRepository: AuthorityRepository
+
+    @Mock
     private lateinit var userPasswordEncoder: PasswordEncoder
 
+    private val knownMerchant = "known merchant"
+    private val unKnownMerchant = "unknown merchant"
     private val knownEmail = "known email"
     private val unknownEmail = "unknown email"
     private val userPassword = "some password"
@@ -50,7 +58,13 @@ class UserDetailsServiceTest {
         MockitoAnnotations.initMocks(this)
         ReflectionTestUtils.setField(userDetailsService, "adminUsername", "admin")
 
-        `when`(merchantUserRepository.findByEmail(knownEmail)).thenReturn(MerchantUser(email = knownEmail, password = userPassword, authorities = setOf()))
+        `when`(merchantUserRepository.findByEmail(knownEmail)).thenReturn(
+            MerchantUser(
+                email = knownEmail,
+                password = userPassword,
+                authorities = setOf()
+            )
+        )
         `when`(merchantUserRepository.findByEmail(unknownEmail)).thenReturn(null)
         doNothing().`when`(merchantUserRepository).updateMerchantUser(
             ArgumentMatchers.anyString(),
@@ -59,6 +73,9 @@ class UserDetailsServiceTest {
             ArgumentMatchers.anyString()
         )
         `when`(userPasswordEncoder.matches(userPassword, userPassword)).thenReturn(true)
+        `when`(userPasswordEncoder.encode(userPassword)).thenReturn(anotherUserPassword)
+        `when`(authorityRepository.getAuthorityByName(knownMerchant)).thenReturn(Mockito.mock(Authority::class.java))
+        `when`(authorityRepository.getAuthorityByName(unKnownMerchant)).thenReturn(null)
     }
 
     @Test
@@ -73,7 +90,11 @@ class UserDetailsServiceTest {
 
     @Test
     fun `update successfully with no admin merchant user`() {
-        userDetailsService.updateMerchantUser("some email", "some email", Mockito.mock(MerchantUserUpdateModel::class.java))
+        userDetailsService.updateMerchantUser(
+            "some email",
+            "some email",
+            Mockito.mock(MerchantUserUpdateModel::class.java)
+        )
     }
 
     @Test
@@ -83,21 +104,59 @@ class UserDetailsServiceTest {
 
     @Test
     fun `update merchant user without related rights`() {
-        Assertions.assertThrows(ApiException::class.java) { userDetailsService.updateMerchantUser("some email", "other email", Mockito.mock(MerchantUserUpdateModel::class.java)) }
+        Assertions.assertThrows(ApiException::class.java) {
+            userDetailsService.updateMerchantUser(
+                "some email",
+                "other email",
+                Mockito.mock(MerchantUserUpdateModel::class.java)
+            )
+        }
     }
 
     @Test
     fun `change merchant user password successfully`() {
-        userDetailsService.changePasswordMerchantUser(knownEmail, knownEmail, MerchantUserChangePasswordModel(userPassword, "new password"))
+        userDetailsService.changePasswordMerchantUser(
+            knownEmail,
+            knownEmail,
+            MerchantUserChangePasswordModel(userPassword, "new password")
+        )
     }
 
     @Test
     fun `change merchant user password unsuccessfully`() {
-        Assertions.assertThrows(ApiException::class.java) { userDetailsService.changePasswordMerchantUser(knownEmail, knownEmail, MerchantUserChangePasswordModel(anotherUserPassword, "new password")) }
+        Assertions.assertThrows(ApiException::class.java) {
+            userDetailsService.changePasswordMerchantUser(
+                knownEmail,
+                knownEmail,
+                MerchantUserChangePasswordModel(anotherUserPassword, "new password")
+            )
+        }
     }
 
     @Test
     fun `change merchant user password with admin rights`() {
-        userDetailsService.changePasswordMerchantUser(knownEmail, "admin", MerchantUserChangePasswordModel(userPassword, "new password"))
+        userDetailsService.changePasswordMerchantUser(
+            knownEmail,
+            "admin",
+            MerchantUserChangePasswordModel(userPassword, "new password")
+        )
+    }
+
+    @Test
+    fun `create merchant user successfully`() {
+        userDetailsService.createMerchantUser(
+            knownMerchant,
+            MerchantUserCreateModel(knownEmail, userPassword, "test name", "test lastname", "test locale")
+        )
+    }
+
+    @Test
+    fun `create merchant user unsuccessfully`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            userDetailsService.createMerchantUser(
+                unKnownMerchant,
+                Mockito.mock(MerchantUserCreateModel::class.java)
+            )
+        }
     }
 }

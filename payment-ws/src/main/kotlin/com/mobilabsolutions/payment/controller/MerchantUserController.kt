@@ -1,6 +1,7 @@
 package com.mobilabsolutions.payment.controller
 
 import com.mobilabsolutions.payment.model.MerchantUserChangePasswordModel
+import com.mobilabsolutions.payment.model.MerchantUserCreateModel
 import com.mobilabsolutions.payment.model.MerchantUserUpdateModel
 import com.mobilabsolutions.payment.service.UserDetailsServiceImpl
 import io.swagger.annotations.ApiOperation
@@ -24,6 +25,23 @@ import javax.validation.Valid
 @RestController
 @RequestMapping(MerchantUserController.BASE_URL)
 class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServiceImpl) {
+
+    @ApiOperation(value = "Create the merchant user by given data")
+    @ApiResponses(
+        ApiResponse(code = 204, message = "Successfully create the merchant user"),
+        ApiResponse(code = 400, message = "Request model validation is failed"),
+        ApiResponse(code = 401, message = "Authentication is failed"),
+        ApiResponse(code = 403, message = "User doesn't have the required rights for this operation")
+    )
+    @RequestMapping(
+        method = [RequestMethod.POST],
+        consumes = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority('admin')")
+    fun createUser(@PathVariable("Merchant-Id") merchantId: String, @Valid @RequestBody merchantUserCreateModel: MerchantUserCreateModel) {
+        userDetailsServiceImpl.createMerchantUser(merchantId, merchantUserCreateModel)
+    }
 
     @ApiOperation(value = "Update the given merchant user by user id")
     @ApiResponses(
