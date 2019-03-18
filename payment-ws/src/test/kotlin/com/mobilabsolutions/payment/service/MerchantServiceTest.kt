@@ -12,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Spy
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.times
@@ -35,9 +34,6 @@ class MerchantServiceTest {
 
     private val merchantRequestModel =
             MerchantRequestModel("test", "test", "test@mobilabsolutions.com", "EUR")
-
-    @Spy
-    private val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
 
     @Test
     fun `create merchant with existing merchant id`() {

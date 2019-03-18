@@ -1,6 +1,5 @@
 package com.mobilabsolutions.payment.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.domain.Merchant
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.model.MerchantRequestModel
@@ -14,8 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional
 class MerchantService(
-    private val merchantRepository: MerchantRepository,
-    private val objectMapper: ObjectMapper
+    private val merchantRepository: MerchantRepository
 ) {
 
     /**

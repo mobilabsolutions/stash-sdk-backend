@@ -29,7 +29,7 @@ class MerchantController(private val merchantService: MerchantService) {
     )
     @RequestMapping(method = [RequestMethod.POST])
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
+    @PreAuthorize("hasAuthority('admin')")
     fun createMerchant(
         @RequestBody merchantInfo: MerchantRequestModel
     ) = merchantService.createMerchant(merchantInfo)
