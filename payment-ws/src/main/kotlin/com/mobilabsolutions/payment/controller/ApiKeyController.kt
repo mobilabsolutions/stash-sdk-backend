@@ -66,6 +66,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService) {
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun getApiKeyById(
+        @PathVariable("Merchant-Id") merchantId: String,
         @PathVariable("API-Key-Id") apiKeyId: Long
     ) = apiKeyService.getMerchantApiKeyInfoById(apiKeyId)
 
