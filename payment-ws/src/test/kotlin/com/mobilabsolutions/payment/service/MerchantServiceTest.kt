@@ -13,9 +13,11 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.doNothing
 import org.mockito.MockitoAnnotations
 import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
@@ -55,6 +57,11 @@ class MerchantServiceTest {
         Mockito.`when`(merchantRepository.getMerchantById(knownMerchantId)).thenReturn(merchant)
 
         Mockito.`when`(merchantRepository.getMerchantById(unknownMerchantId)).thenReturn(null)
+
+        doNothing().`when`(merchantRepository).updateMerchant(
+            ArgumentMatchers.anyString(),
+            ArgumentMatchers.anyString()
+        )
     }
 
     @Test

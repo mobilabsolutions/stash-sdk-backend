@@ -19,10 +19,12 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.doNothing
 import org.mockito.MockitoAnnotations
 import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
@@ -70,6 +72,12 @@ class AliasServiceTest {
             .thenReturn(MerchantApiKey(merchant = Merchant(id = "mobilab",
                 pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
                 " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")))
+
+        doNothing().`when`(aliasRepository).updateAlias(
+            ArgumentMatchers.anyString(),
+            ArgumentMatchers.anyString(),
+            ArgumentMatchers.anyString()
+        )
 
         `when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(Mockito.mock(Psp::class.java))
 
