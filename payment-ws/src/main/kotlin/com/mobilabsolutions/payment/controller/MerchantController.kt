@@ -1,8 +1,8 @@
 package com.mobilabsolutions.payment.controller
 
+import com.mobilabsolutions.payment.model.MerchantRequestModel
 import com.mobilabsolutions.payment.model.PspConfigRequestModel
 import com.mobilabsolutions.payment.model.PspUpsertConfigRequestModel
-import com.mobilabsolutions.payment.model.MerchantRequestModel
 import com.mobilabsolutions.payment.service.MerchantService
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController
 import javax.validation.Valid
 
 /**
-<<<<<<< HEAD
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
 @RestController
@@ -28,7 +27,7 @@ class MerchantController(private val merchantService: MerchantService) {
     companion object {
         const val BASE_MERCHANT_URL = "merchant"
         const val MERCHANT_CONFIG_URL = "/{Merchant-Id}/psp"
-        const val PSP_CONFIG_URL = "/{Merchant-Id}/psp/{Psp-Id}"
+        const val MERCHANT_PSP_CONFIG_URL = "/{Merchant-Id}/psp/{Psp-Id}"
     }
 
     @ApiOperation(value = "Create merchant")
@@ -84,7 +83,7 @@ class MerchantController(private val merchantService: MerchantService) {
         ApiResponse(code = 403, message = "Forbidden access"),
         ApiResponse(code = 404, message = "Resource not found")
     )
-    @RequestMapping(PSP_CONFIG_URL, method = [RequestMethod.GET],
+    @RequestMapping(MERCHANT_PSP_CONFIG_URL, method = [RequestMethod.GET],
         produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
@@ -101,7 +100,7 @@ class MerchantController(private val merchantService: MerchantService) {
         ApiResponse(code = 403, message = "Forbidden access"),
         ApiResponse(code = 404, message = "Resource not found")
     )
-    @RequestMapping(PSP_CONFIG_URL, method = [RequestMethod.PUT],
+    @RequestMapping(MERCHANT_PSP_CONFIG_URL, method = [RequestMethod.PUT],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseStatus(HttpStatus.NO_CONTENT)

@@ -88,7 +88,7 @@ class MerchantServiceTest {
             merchantService.addPspConfigForMerchant(unknownMerchantId, PspConfigRequestModel(pspId, Mockito.mock(PspUpsertConfigRequestModel::class.java)))
         }
     }
-    
+
     @Test
     fun `create merchant with existing merchant id`() {
         Assertions.assertThrows(ApiException::class.java) {

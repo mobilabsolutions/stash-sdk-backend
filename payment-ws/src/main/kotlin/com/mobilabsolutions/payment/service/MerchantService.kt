@@ -1,7 +1,11 @@
 package com.mobilabsolutions.payment.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.mobilabsolutions.payment.data.domain.Authority
+import com.mobilabsolutions.payment.data.domain.Merchant
+import com.mobilabsolutions.payment.data.repository.AuthorityRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
+import com.mobilabsolutions.payment.model.MerchantRequestModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.PspConfigRequestModel
@@ -9,10 +13,6 @@ import com.mobilabsolutions.payment.model.PspConfigResponseModel
 import com.mobilabsolutions.payment.model.PspUpsertConfigRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import org.springframework.stereotype.Service
-import com.mobilabsolutions.payment.data.domain.Authority
-import com.mobilabsolutions.payment.data.domain.Merchant
-import com.mobilabsolutions.payment.data.repository.AuthorityRepository
-import com.mobilabsolutions.payment.model.MerchantRequestModel
 import org.springframework.transaction.annotation.Transactional
 
 /**
