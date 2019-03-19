@@ -8,8 +8,8 @@ import io.swagger.annotations.ApiModelProperty
  */
 @ApiModel(value = "PSP Configuration")
 class PspConfigModel(
-    @ApiModelProperty(value = "Payment service provider type", example = "BSPAYONE")
-    val type: String?,
+    @ApiModelProperty(value = "Payment service provider type", example = "BS_PAYONE")
+    val type: String,
 
     @ApiModelProperty(value = "Merchant ID", example = "42865")
     val merchantId: String?,

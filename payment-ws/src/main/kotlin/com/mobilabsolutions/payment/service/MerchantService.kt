@@ -3,6 +3,7 @@ package com.mobilabsolutions.payment.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.domain.Authority
 import com.mobilabsolutions.payment.data.domain.Merchant
+import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.repository.AuthorityRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.model.MerchantRequestModel
@@ -36,8 +37,9 @@ class MerchantService(
     fun addPspConfigForMerchant(merchantId: String, pspConfigRequestModel: PspConfigRequestModel): PspConfigResponseModel {
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofMessage("Merchant ID cannot be found").asBadRequest()
         val configList = if (merchant.pspConfig != null) objectMapper.readValue(merchant.pspConfig, PspConfigListModel::class.java) else PspConfigListModel()
+
         configList.psp.add(PspConfigModel(
-            type = pspConfigRequestModel.pspId,
+            type = pspConfigRequestModel.pspId.toString(),
             merchantId = pspConfigRequestModel.pspConfig.merchantId,
             portalId = pspConfigRequestModel.pspConfig.portalId,
             key = pspConfigRequestModel.pspConfig.key,
@@ -47,7 +49,7 @@ class MerchantService(
         ))
         val pspConfig = objectMapper.writeValueAsString(configList)
         merchantRepository.updateMerchant(pspConfig, merchantId)
-        return PspConfigResponseModel(pspConfigRequestModel.pspId)
+        return PspConfigResponseModel(pspConfigRequestModel.pspId.toString())
     }
 
     /**
@@ -71,7 +73,9 @@ class MerchantService(
     fun getMerchantPspConfiguration(merchantId: String, pspId: String): PspConfigModel? {
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofMessage("Merchant ID cannot be found").asBadRequest()
         val configList = if (merchant.pspConfig != null) objectMapper.readValue(merchant.pspConfig, PspConfigListModel::class.java) else PspConfigListModel()
-        return configList.psp.firstOrNull { it.type == pspId }
+        val pspConfig = configList.psp.firstOrNull { it.type == pspId }
+        PaymentServiceProvider.valueOf(pspConfig?.type ?: throw ApiError.ofMessage("PSP configuration for '$pspId' cannot be found from used merchant").asNotFound())
+        return pspConfig
     }
 
     /**
@@ -90,18 +94,18 @@ class MerchantService(
 
     private fun updateConfig(pspId: String, configList: PspConfigListModel, pspUpsertConfigRequestModel: PspUpsertConfigRequestModel): PspConfigListModel {
         val pspConfig = configList.psp.firstOrNull { it.type == pspId }
-        if (pspConfig != null) {
-            configList.psp.remove(pspConfig)
-            configList.psp.add(PspConfigModel(
-                type = pspId,
-                merchantId = pspUpsertConfigRequestModel.merchantId,
-                portalId = pspUpsertConfigRequestModel.portalId,
-                key = pspUpsertConfigRequestModel.key,
-                accountId = pspUpsertConfigRequestModel.accountId,
-                publicKey = pspUpsertConfigRequestModel.publicKey,
-                privateKey = pspUpsertConfigRequestModel.privateKey
-            ))
-        }
+        PaymentServiceProvider.valueOf(pspConfig?.type ?: throw ApiError.ofMessage("PSP configuration for '$pspId' cannot be found from used merchant").asBadRequest())
+
+        configList.psp.remove(pspConfig)
+        configList.psp.add(PspConfigModel(
+            type = pspId,
+            merchantId = pspUpsertConfigRequestModel.merchantId,
+            portalId = pspUpsertConfigRequestModel.portalId,
+            key = pspUpsertConfigRequestModel.key,
+            accountId = pspUpsertConfigRequestModel.accountId,
+            publicKey = pspUpsertConfigRequestModel.publicKey,
+            privateKey = pspUpsertConfigRequestModel.privateKey
+        ))
         return configList
     }
 

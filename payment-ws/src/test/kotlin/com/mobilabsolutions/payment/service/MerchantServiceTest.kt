@@ -3,6 +3,7 @@ package com.mobilabsolutions.payment.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.domain.Authority
 import com.mobilabsolutions.payment.data.domain.Merchant
+import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.repository.AuthorityRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.model.MerchantRequestModel
@@ -35,8 +36,9 @@ import org.mockito.quality.Strictness
 @MockitoSettings(strictness = Strictness.STRICT_STUBS)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MerchantServiceTest {
-    private val pspId = "BRAINTREE"
+    private val pspId = PaymentServiceProvider.BRAINTREE
     private val knownPspType = "BS_PAYONE"
+    private val unknownPspType = "BS"
     private val knownMerchantId = "mobilab"
     private val unknownMerchantId = "test"
     private var merchant = Merchant()
@@ -101,6 +103,13 @@ class MerchantServiceTest {
         val response = merchantService.getMerchantConfiguration(knownMerchantId)
         val config = objectMapper.readValue(merchant.pspConfig, PspConfigListModel::class.java)
         Assertions.assertEquals(response.psp.size, config.psp.size)
+    }
+
+    @Test
+    fun `get merchant psp config with wrong psp id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            merchantService.getMerchantPspConfiguration(unknownMerchantId, unknownPspType)
+        }
     }
 
     @Test

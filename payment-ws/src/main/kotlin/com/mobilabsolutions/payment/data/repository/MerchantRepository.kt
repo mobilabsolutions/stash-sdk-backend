@@ -14,6 +14,6 @@ interface MerchantRepository : BaseRepository<Merchant, String> {
     fun getMerchantById(id: String): Merchant?
 
     @Modifying
-    @Query("UPDATE Merchant m SET m.pspConfig = :pspConfig WHERE m.id = :merchantId")
+    @Query("UPDATE Merchant m SET m.pspConfig = :pspConfig, m.lastModifiedDate = CURRENT_TIMESTAMP WHERE m.id = :merchantId")
     fun updateMerchant(@Param("pspConfig") pspConfig: String?, @Param("merchantId") merchantId: String)
 }
