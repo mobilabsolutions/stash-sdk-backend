@@ -3,12 +3,12 @@ package com.mobilabsolutions.payment.service
 import com.mobilabsolutions.payment.data.domain.MerchantApiKey
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
-import com.mobilabsolutions.payment.model.ApiKeyReturnInfoModel
 import com.mobilabsolutions.payment.model.ApiKeyRequestModel
+import com.mobilabsolutions.payment.model.ApiKeyReturnInfoModel
 import com.mobilabsolutions.payment.model.CreateApiKeyResponseModel
+import com.mobilabsolutions.payment.model.EditApiKeyRequestModel
 import com.mobilabsolutions.payment.model.GetApiKeyByIdResponseModel
 import com.mobilabsolutions.payment.model.GetApiKeyResponseModel
-import com.mobilabsolutions.payment.model.EditApiKeyRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
@@ -51,15 +51,15 @@ class ApiKeyService(
         val generatedKey = merchantId + "-" + RandomStringUtils.randomAlphanumeric(ApiKeyService.STRING_LENGTH)
 
         val merchantApiKey = MerchantApiKey(
-                name = apiKeyInfo.apiKeyName,
+                name = apiKeyInfo.name,
                 key = generatedKey,
                 active = true,
-                keyType = apiKeyInfo.apiKeyType,
+                keyType = apiKeyInfo.type,
                 merchant = merchant
         )
         merchantApiKeyRepository.save(merchantApiKey)
 
-        return CreateApiKeyResponseModel(generatedKey, apiKeyInfo.apiKeyType)
+        return CreateApiKeyResponseModel(generatedKey, apiKeyInfo.type)
     }
 
     /**
@@ -83,7 +83,7 @@ class ApiKeyService(
      * @return none
      */
     fun editMerchantApiKeyInfoById(apiKeyId: Long, apiKeyInfo: EditApiKeyRequestModel) {
-        if (merchantApiKeyRepository.editApiKey(apiKeyInfo.apiKeyName, apiKeyId) == 0)
+        if (merchantApiKeyRepository.editApiKey(apiKeyInfo.name, apiKeyId) == 0)
             throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
     }
 

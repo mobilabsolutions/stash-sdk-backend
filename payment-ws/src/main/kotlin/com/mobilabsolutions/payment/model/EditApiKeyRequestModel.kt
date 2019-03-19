@@ -9,5 +9,5 @@ import io.swagger.annotations.ApiModelProperty
 @ApiModel("Edit api key request model")
 data class EditApiKeyRequestModel(
     @ApiModelProperty(value = "Api key name", example = "Test key")
-    val apiKeyName: String?
+    val name: String?
 )

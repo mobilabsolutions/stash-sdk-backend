@@ -12,9 +12,9 @@ import javax.persistence.Enumerated
 @ApiModel(value = "Creat Api Key Response")
 data class CreateApiKeyResponseModel(
     @ApiModelProperty(value = "Api key name", example = "Test key")
-    val apiKeyName: String?,
+    val name: String?,
 
     @ApiModelProperty(value = "Key type", example = "PUBLIC")
     @field:Enumerated(EnumType.STRING)
-    val apiKeyType: KeyType?
+    val type: KeyType?
 )
