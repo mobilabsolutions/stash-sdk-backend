@@ -59,7 +59,7 @@ class ApiKeyService(
         )
         merchantApiKeyRepository.save(merchantApiKey)
 
-        return CreateApiKeyResponseModel(generatedKey, apiKeyInfo.type)
+        return CreateApiKeyResponseModel(merchantApiKey.id, generatedKey)
     }
 
     /**
@@ -72,7 +72,7 @@ class ApiKeyService(
         val merchantApiKey = merchantApiKeyRepository.getFirstById(apiKeyId)
                 ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
 
-        return GetApiKeyByIdResponseModel(merchantApiKey.id, merchantApiKey.name, merchantApiKey.keyType)
+        return GetApiKeyByIdResponseModel(merchantApiKey.id, merchantApiKey.name, merchantApiKey.key, merchantApiKey.keyType)
     }
 
     /**
