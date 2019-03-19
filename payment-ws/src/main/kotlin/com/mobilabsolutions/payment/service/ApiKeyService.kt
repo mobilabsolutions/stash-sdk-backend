@@ -1,13 +1,13 @@
 package com.mobilabsolutions.payment.service
 
 import com.mobilabsolutions.payment.data.domain.MerchantApiKey
+import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.model.ApiKeyRequestModel
 import com.mobilabsolutions.payment.model.ApiKeyReturnInfoModel
 import com.mobilabsolutions.payment.model.CreateApiKeyResponseModel
 import com.mobilabsolutions.payment.model.EditApiKeyRequestModel
-import com.mobilabsolutions.payment.model.GetApiKeyByIdResponseModel
 import com.mobilabsolutions.payment.model.GetApiKeyResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
@@ -32,10 +32,14 @@ class ApiKeyService(
      */
     fun getMerchantApiKeyInfo(merchantId: String): GetApiKeyResponseModel {
         val merchantApiKeyList = merchantApiKeyRepository.getAllByMerchantId(merchantId)
-        if (merchantApiKeyList.isEmpty()) throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
-        val list = merchantApiKeyList.map { ApiKeyReturnInfoModel(it.id, it.name, it.keyType) }
-
-        return GetApiKeyResponseModel(list)
+        if (merchantApiKeyList.isEmpty()) throw ApiError.ofMessage("Merchant api keys cannot be found").asBadRequest()
+        val apiKeyList = merchantApiKeyList.map {
+            when (it.keyType) {
+                KeyType.PUBLIC -> ApiKeyReturnInfoModel(it.id, it.name, it.keyType, it.key)
+                else -> ApiKeyReturnInfoModel(it.id, it.name, it.keyType)
+            }
+        }
+        return GetApiKeyResponseModel(apiKeyList)
     }
 
     /**
@@ -51,15 +55,15 @@ class ApiKeyService(
         val generatedKey = merchantId + "-" + RandomStringUtils.randomAlphanumeric(ApiKeyService.STRING_LENGTH)
 
         val merchantApiKey = MerchantApiKey(
-                name = apiKeyInfo.apiKeyName,
+                name = apiKeyInfo.name,
                 key = generatedKey,
                 active = true,
-                keyType = apiKeyInfo.apiKeyType,
+                keyType = apiKeyInfo.type,
                 merchant = merchant
         )
         merchantApiKeyRepository.save(merchantApiKey)
 
-        return CreateApiKeyResponseModel(generatedKey, apiKeyInfo.apiKeyType)
+        return CreateApiKeyResponseModel(merchantApiKey.id, generatedKey)
     }
 
     /**
@@ -68,11 +72,14 @@ class ApiKeyService(
      * @param apiKeyId Api Key Id
      * @return merchant api key by id method response
      */
-    fun getMerchantApiKeyInfoById(apiKeyId: Long): GetApiKeyByIdResponseModel {
+    fun getMerchantApiKeyInfoById(apiKeyId: Long): ApiKeyReturnInfoModel {
         val merchantApiKey = merchantApiKeyRepository.getFirstById(apiKeyId)
                 ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
 
-        return GetApiKeyByIdResponseModel(merchantApiKey.id, merchantApiKey.name, merchantApiKey.keyType)
+        return when (merchantApiKey.keyType) {
+            KeyType.PUBLIC -> ApiKeyReturnInfoModel(merchantApiKey.id, merchantApiKey.name, merchantApiKey.keyType, merchantApiKey.key)
+            else -> ApiKeyReturnInfoModel(merchantApiKey.id, merchantApiKey.name, merchantApiKey.keyType)
+        }
     }
 
     /**
@@ -83,7 +90,7 @@ class ApiKeyService(
      * @return none
      */
     fun editMerchantApiKeyInfoById(apiKeyId: Long, apiKeyInfo: EditApiKeyRequestModel) {
-        if (merchantApiKeyRepository.editApiKey(apiKeyInfo.apiKeyName, apiKeyId) == 0)
+        if (merchantApiKeyRepository.editApiKey(apiKeyInfo.name, apiKeyId) == 0)
             throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
     }
 
