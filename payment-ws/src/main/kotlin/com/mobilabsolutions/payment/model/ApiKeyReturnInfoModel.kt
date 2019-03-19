@@ -2,6 +2,8 @@ package com.mobilabsolutions.payment.model
 
 import com.mobilabsolutions.payment.data.enum.KeyType
 import io.swagger.annotations.ApiModelProperty
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
@@ -14,5 +16,9 @@ data class ApiKeyReturnInfoModel(
     val name: String?,
 
     @ApiModelProperty(value = "Api key type", example = "PUBLIC")
-    val type: KeyType?
+    @field:Enumerated(EnumType.STRING)
+    val type: KeyType?,
+
+    @ApiModelProperty(value = "Api key", example = "Mobilab-dkoeheDaXaqnQp")
+    val key: String? = null
 )
