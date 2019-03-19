@@ -3,6 +3,7 @@ package com.mobilabsolutions.payment.model
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import javax.validation.constraints.NotNull
+import javax.validation.constraints.Pattern
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
@@ -11,16 +12,17 @@ import javax.validation.constraints.NotNull
 data class MerchantRequestModel(
     @ApiModelProperty(value = "Merchant id", example = "Mobilab")
     @field:NotNull
-    val merchantId: String,
+    @field:Pattern(regexp = "^\\S+\$")
+    val id: String,
 
     @ApiModelProperty(value = "Merchant name", example = "Mobilab's Best Merchant")
     @field:NotNull
-    val merchantName: String,
+    val name: String,
 
     @ApiModelProperty(value = "Merchant email", example = "merchant@mobilabsolutions.com")
     @field:NotNull
-    val merchantEmail: String,
+    val email: String,
 
     @ApiModelProperty(value = "Merchant default currency", example = "EUR")
-    val merchantCurrency: String?
+    val currency: String?
 )

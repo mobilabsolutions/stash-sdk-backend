@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "a642f5f1-1b24-47f4-ae89-8b6cca1e99d2",
+		"_postman_id": "088da42e-5f6d-4d3d-a71e-99897e056977",
 		"name": "Payment-SDK-Open",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -128,6 +128,112 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Create Merchant",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currency\": \"EUR\",\n  \"email\": \"merchant@mobilabsolutions.com\",\n  \"id\": \"mobilab\",\n  \"name\": \"Mobilab's Best Merchant\"\n}"
+						},
+						"url": {
+							"raw": "{{wsEndpoint}}/api/v1/merchant",
+							"host": [
+								"{{wsEndpoint}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"merchant"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Merchant User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@mobilabsolutions.com\",\n  \"locale\": \"de-DE\",\n  \"password\": \"test1234\"\n}"
+						},
+						"url": {
+							"raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/user",
+							"host": [
+								"{{wsEndpoint}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"merchant",
+								"{Merchant-Id}",
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Merchant User Password",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newPassword\": \"test1234\",\n  \"oldPassword\": \"123\"\n}"
+						},
+						"url": {
+							"raw": "{{wsEndpoint}}/api/v1/merchant/mobilabasd/user/test@mblb.net/change-password",
+							"host": [
+								"{{wsEndpoint}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"merchant",
+								"mobilabasd",
+								"user",
+								"test@mblb.net",
+								"change-password"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -193,11 +299,17 @@
 								"key": "Name",
 								"value": "test",
 								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": ""
+							"raw": "{\n  \"name\": \"Test key34\",\n  \"type\": \"PRIVATE\"\n}"
 						},
 						"url": {
 							"raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/api-key",
@@ -275,7 +387,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"apiKeyName\": \"Anotherkeyname\"\n}"
+							"raw": "{\n  \"name\": \"Test key\"\n}"
 						},
 						"url": {
 							"raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/api-key/{Api-Key-Id}",

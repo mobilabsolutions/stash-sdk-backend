@@ -112,18 +112,18 @@ class MerchantService(
      *
      */
     fun createMerchant(merchantInfo: MerchantRequestModel) {
-        if (!checkMerchantAndAuthority(merchantInfo.merchantId)) throw ApiError.ofMessage("Merchant with id '${merchantInfo.merchantId}' already exists").asBadRequest()
+        if (!checkMerchantAndAuthority(merchantInfo.id)) throw ApiError.ofMessage("Merchant with id '${merchantInfo.id}' already exists").asBadRequest()
 
         merchantRepository.save(
             Merchant(
-                id = merchantInfo.merchantId,
-                name = merchantInfo.merchantName,
-                email = merchantInfo.merchantEmail,
-                defaultCurrency = merchantInfo.merchantCurrency
+                id = merchantInfo.id,
+                name = merchantInfo.name,
+                email = merchantInfo.email,
+                defaultCurrency = merchantInfo.currency
             )
         )
 
-        authorityRepository.save(Authority(name = merchantInfo.merchantId))
+        authorityRepository.save(Authority(name = merchantInfo.id))
     }
 
     private fun checkMerchantAndAuthority(merchantId: String): Boolean {
