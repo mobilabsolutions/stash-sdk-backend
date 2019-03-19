@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModelProperty
 
 @ApiModel(value = "PSP Alias Configuration")
 data class PspAliasConfigModel(
-    @ApiModelProperty(value = "Payment service provider type", example = "BSPAYONE")
+    @ApiModelProperty(value = "Payment service provider type", example = "BS_PAYONE")
     val type: String?,
 
     @ApiModelProperty(value = "Merchant ID", example = "42865")

@@ -8,6 +8,6 @@ import io.swagger.annotations.ApiModelProperty
  */
 @ApiModel(value = "PSP Config Response")
 data class PspConfigResponseModel(
-    @ApiModelProperty(value = "Payment service provider type", example = "BSPAYONE")
+    @ApiModelProperty(value = "Payment service provider type", example = "BS_PAYONE")
     val pspId: String
 )
