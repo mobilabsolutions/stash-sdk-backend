@@ -1,6 +1,7 @@
 package com.mobilabsolutions.payment.controller
 
 import com.mobilabsolutions.payment.model.ApiKeyRequestModel
+import com.mobilabsolutions.payment.model.EditApiKeyRequestModel
 import com.mobilabsolutions.payment.service.ApiKeyService
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponses
@@ -66,6 +67,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService) {
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun getApiKeyById(
+        @PathVariable("Merchant-Id") merchantId: String,
         @PathVariable("API-Key-Id") apiKeyId: Long
     ) = apiKeyService.getMerchantApiKeyInfoById(apiKeyId)
 
@@ -85,7 +87,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService) {
     fun editApiKeyById(
         @PathVariable("Merchant-Id") merchantId: String,
         @PathVariable("API-Key-Id") apiKeyId: Long,
-        @RequestBody apiKeyInfo: ApiKeyRequestModel
+        @RequestBody apiKeyInfo: EditApiKeyRequestModel
     ) = apiKeyService.editMerchantApiKeyInfoById(apiKeyId, apiKeyInfo)
 
     @ApiOperation(value = "Delete merchant api key")

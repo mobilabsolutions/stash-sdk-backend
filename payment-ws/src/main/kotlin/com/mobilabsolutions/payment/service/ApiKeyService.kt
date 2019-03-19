@@ -8,6 +8,7 @@ import com.mobilabsolutions.payment.model.ApiKeyRequestModel
 import com.mobilabsolutions.payment.model.CreateApiKeyResponseModel
 import com.mobilabsolutions.payment.model.GetApiKeyByIdResponseModel
 import com.mobilabsolutions.payment.model.GetApiKeyResponseModel
+import com.mobilabsolutions.payment.model.EditApiKeyRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
@@ -32,7 +33,7 @@ class ApiKeyService(
     fun getMerchantApiKeyInfo(merchantId: String): GetApiKeyResponseModel {
         val merchantApiKeyList = merchantApiKeyRepository.getAllByMerchantId(merchantId)
         if (merchantApiKeyList.isEmpty()) throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
-        val list = merchantApiKeyList.map { ApiKeyReturnInfoModel(merchantId, it.name, it.keyType) }
+        val list = merchantApiKeyList.map { ApiKeyReturnInfoModel(it.id, it.name, it.keyType) }
 
         return GetApiKeyResponseModel(list)
     }
@@ -81,7 +82,7 @@ class ApiKeyService(
      * @param apiKeyInfo Api key info request model
      * @return none
      */
-    fun editMerchantApiKeyInfoById(apiKeyId: Long, apiKeyInfo: ApiKeyRequestModel) {
+    fun editMerchantApiKeyInfoById(apiKeyId: Long, apiKeyInfo: EditApiKeyRequestModel) {
         if (merchantApiKeyRepository.editApiKey(apiKeyInfo.apiKeyName, apiKeyId) == 0)
             throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
     }

@@ -1,8 +1,11 @@
 package com.mobilabsolutions.payment.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.mobilabsolutions.payment.data.domain.Authority
 import com.mobilabsolutions.payment.data.domain.Merchant
+import com.mobilabsolutions.payment.data.repository.AuthorityRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
+import com.mobilabsolutions.payment.model.MerchantRequestModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.payment.model.PspConfigRequestModel
 import com.mobilabsolutions.payment.model.PspUpsertConfigRequestModel
@@ -17,6 +20,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import org.mockito.Mockito.doNothing
 import org.mockito.MockitoAnnotations
 import org.mockito.Spy
@@ -46,6 +50,9 @@ class MerchantServiceTest {
     @Mock
     private lateinit var merchantRepository: MerchantRepository
 
+    @Mock
+    private lateinit var authorityRepository: AuthorityRepository
+
     @BeforeAll
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
@@ -54,14 +61,20 @@ class MerchantServiceTest {
             pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
                 " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")
 
-        Mockito.`when`(merchantRepository.getMerchantById(knownMerchantId)).thenReturn(merchant)
+        `when`(merchantRepository.getMerchantById(knownMerchantId)).thenReturn(merchant)
 
-        Mockito.`when`(merchantRepository.getMerchantById(unknownMerchantId)).thenReturn(null)
+        `when`(merchantRepository.getMerchantById(unknownMerchantId)).thenReturn(null)
 
         doNothing().`when`(merchantRepository).updateMerchant(
             ArgumentMatchers.anyString(),
             ArgumentMatchers.anyString()
         )
+
+        `when`(authorityRepository.getAuthorityByName(knownMerchantId)).thenReturn(
+            Mockito.mock(Authority::class.java)
+        )
+
+        `when`(authorityRepository.getAuthorityByName(unknownMerchantId)).thenReturn(null)
     }
 
     @Test
@@ -73,6 +86,13 @@ class MerchantServiceTest {
     fun `add psp config with wrong merchant id`() {
         Assertions.assertThrows(ApiException::class.java) {
             merchantService.addPspConfigForMerchant(unknownMerchantId, PspConfigRequestModel(pspId, Mockito.mock(PspUpsertConfigRequestModel::class.java)))
+        }
+    }
+    
+    @Test
+    fun `create merchant with existing merchant id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            merchantService.createMerchant(MerchantRequestModel(knownMerchantId, "test", "test@mobilabsolutions.com", "EUR"))
         }
     }
 
@@ -94,5 +114,10 @@ class MerchantServiceTest {
     @Test
     fun `update merchant psp config successfully`() {
         merchantService.updatePspConfig(knownMerchantId, knownPspType, Mockito.mock(PspUpsertConfigRequestModel::class.java))
+    }
+
+    @Test
+    fun `create merchant successfully`() {
+        merchantService.createMerchant(MerchantRequestModel(unknownMerchantId, "test", "test@mobilabsolutions.com", "EUR"))
     }
 }

@@ -5,6 +5,7 @@ import com.mobilabsolutions.payment.data.domain.MerchantApiKey
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.model.ApiKeyRequestModel
+import com.mobilabsolutions.payment.model.EditApiKeyRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -105,13 +106,13 @@ class ApiKeyServiceTest {
     @Test
     fun `edit merchant api key info with wrong api key id`() {
         Assertions.assertThrows(ApiException::class.java) {
-            apiKeyService.editMerchantApiKeyInfoById(unknownApiKeyId, Mockito.mock(ApiKeyRequestModel::class.java))
+            apiKeyService.editMerchantApiKeyInfoById(unknownApiKeyId, Mockito.mock(EditApiKeyRequestModel::class.java))
         }
     }
 
     @Test
     fun `edit merchant api key info with api key id successfully`() {
-        apiKeyService.editMerchantApiKeyInfoById(knownApiKeyId, Mockito.mock(ApiKeyRequestModel::class.java))
+        apiKeyService.editMerchantApiKeyInfoById(knownApiKeyId, Mockito.mock(EditApiKeyRequestModel::class.java))
     }
 
     @Test
