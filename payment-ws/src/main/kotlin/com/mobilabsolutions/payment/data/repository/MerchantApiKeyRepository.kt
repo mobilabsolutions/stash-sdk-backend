@@ -19,7 +19,7 @@ interface MerchantApiKeyRepository : BaseRepository<MerchantApiKey, Long> {
     fun getFirstById(apiKeyId: Long): MerchantApiKey?
 
     @Modifying
-    @Query("UPDATE MerchantApiKey m SET m.name = :name WHERE m.id = :id")
+    @Query("UPDATE MerchantApiKey m SET m.name = :name, m.lastModifiedDate = CURRENT_TIMESTAMP WHERE m.id = :id")
     fun editApiKey(@Param("name") name: String?, @Param("id") id: Long): Int
 
     @Modifying

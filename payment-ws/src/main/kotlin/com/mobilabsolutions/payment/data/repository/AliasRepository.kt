@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository
  */
 @Repository
 interface AliasRepository : BaseRepository<Alias, String> {
-
     fun getFirstById(id: String): Alias?
 
     @Modifying

@@ -1,15 +1,18 @@
-package com.mobilabsolutions.payment.message
+package com.mobilabsolutions.payment.model
 
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
-@ApiModel(value = "PSP Configuration")
-data class PspConfigModel(
-    @ApiModelProperty(value = "Payment service provider type", example = "BSPAYONE")
+@ApiModel(value = "PSP Alias Configuration")
+data class PspAliasConfigModel(
+    @ApiModelProperty(value = "Payment service provider type", example = "BS_PAYONE")
     val type: String?,
 
     @ApiModelProperty(value = "Merchant ID", example = "42865")
     val merchantId: String?,
+
+    @ApiModelProperty(value = "Payment service provider mode", example = "test")
+    val mode: String?,
 
     @ApiModelProperty(value = "Portal ID", example = "2030968")
     val portalId: String?,
@@ -17,10 +20,7 @@ data class PspConfigModel(
     @ApiModelProperty(value = "API version", example = "3.11")
     val apiVersion: String?,
 
-    @ApiModelProperty(value = "Request type", example = "creditcardcheck")
-    val request: String?,
-
-    @ApiModelProperty(value = "Response data type", example = "JSON")
+    @ApiModelProperty(value = "Response enum type", example = "JSON")
     val responseType: String?,
 
     @ApiModelProperty(value = "Encoding type", example = "UTF-8")
@@ -32,6 +32,9 @@ data class PspConfigModel(
     @ApiModelProperty(value = "Account ID", example = "42949")
     val accountId: String?,
 
-    @ApiModelProperty(value = "Payment service provider mode", example = "test")
-    val mode: String?
+    @ApiModelProperty(value = "Public key", example = "bbdjshcjdhdsgf")
+    val publicKey: String?,
+
+    @ApiModelProperty(value = "Private key", example = "ncbcjdheufhdhfjh")
+    val privateKey: String?
 )

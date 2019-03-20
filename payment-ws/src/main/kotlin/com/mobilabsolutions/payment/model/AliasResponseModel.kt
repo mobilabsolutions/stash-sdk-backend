@@ -1,6 +1,5 @@
 package com.mobilabsolutions.payment.model
 
-import com.mobilabsolutions.payment.message.PspConfigModel
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
@@ -13,5 +12,5 @@ data class AliasResponseModel(
     val aliasId: String?,
 
     @ApiModelProperty(value = "PSP Configuration")
-    val psp: PspConfigModel?
+    val psp: PspAliasConfigModel?
 )

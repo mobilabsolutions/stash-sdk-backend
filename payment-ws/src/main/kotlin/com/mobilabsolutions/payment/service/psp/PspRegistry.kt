@@ -10,8 +10,7 @@ import javax.annotation.PostConstruct
  */
 @Component
 class PspRegistry(private val psp: List<Psp>) {
-
-    private var pspMap: Map<PaymentServiceProvider, Psp> = HashMap<PaymentServiceProvider, Psp>()
+    private var pspMap: Map<PaymentServiceProvider, Psp> = HashMap()
 
     fun find(provider: PaymentServiceProvider): Psp? {
         return pspMap[provider]
