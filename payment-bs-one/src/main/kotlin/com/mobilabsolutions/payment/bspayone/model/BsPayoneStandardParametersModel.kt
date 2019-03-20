@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "BS Payone Standard Parameter Model")
+@ApiModel(value = "BS Payone Standard Parameters")
 data class BsPayoneStandardParametersModel(
     @ApiModelProperty(value = "Merchant ID", example = "42865")
     @JsonProperty(value = "mid")
