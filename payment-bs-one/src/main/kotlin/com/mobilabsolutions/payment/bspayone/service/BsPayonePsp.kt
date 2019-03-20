@@ -1,10 +1,11 @@
-package com.mobilabsolutions.payment.bsone.service
+package com.mobilabsolutions.payment.bspayone.service
 
-import com.mobilabsolutions.payment.bsone.enum.BsPayoneRequestType
+import com.mobilabsolutions.payment.bspayone.data.BsPayoneConstants
+import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneRequestType
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
-import com.mobilabsolutions.payment.service.psp.Psp
+import com.mobilabsolutions.payment.service.Psp
 import mu.KLogging
 import org.springframework.stereotype.Component
 
@@ -13,9 +14,7 @@ import org.springframework.stereotype.Component
  */
 @Component
 class BsPayonePsp(private val bsPayoneHashingService: BsPayoneHashingService) : Psp {
-    companion object : KLogging() {
-        const val ENCODING = "UTF-8"
-    }
+    companion object : KLogging()
 
     override fun getProvider(): PaymentServiceProvider {
         return PaymentServiceProvider.BS_PAYONE
@@ -28,12 +27,12 @@ class BsPayonePsp(private val bsPayoneHashingService: BsPayoneHashingService) : 
             merchantId = pspConfigModel.merchantId,
             portalId = pspConfigModel.portalId,
             request = BsPayoneRequestType.CREDIT_CARD_CHECK.type,
-            apiVersion = BsPayoneHashingService.API_VERSION,
+            apiVersion = BsPayoneConstants.API_VERSION,
             responseType = BsPayoneHashingService.RESPONSE_TYPE,
             hash = bsPayoneHashingService.makeCreditCardCheckHash(pspConfigModel),
             accountId = pspConfigModel.accountId,
-            encoding = ENCODING,
-            mode = BsPayoneHashingService.MODE,
+            encoding = BsPayoneConstants.ENCODING,
+            mode = BsPayoneConstants.MODE,
             publicKey = null,
             privateKey = null
         ) else null
