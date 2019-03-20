@@ -1,5 +1,6 @@
 package com.mobilabsolutions.payment.bsone.service
 
+import com.mobilabsolutions.payment.bsone.enum.BsPayoneRequestType
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
@@ -26,6 +27,7 @@ class BsPayonePsp(private val bsPayoneHashingService: BsPayoneHashingService) : 
             type = PaymentServiceProvider.BS_PAYONE.toString(),
             merchantId = pspConfigModel.merchantId,
             portalId = pspConfigModel.portalId,
+            request = BsPayoneRequestType.CREDIT_CARD_CHECK.type,
             apiVersion = BsPayoneHashingService.API_VERSION,
             responseType = BsPayoneHashingService.RESPONSE_TYPE,
             hash = bsPayoneHashingService.makeCreditCardCheckHash(pspConfigModel),

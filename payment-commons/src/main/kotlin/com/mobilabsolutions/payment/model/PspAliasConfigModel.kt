@@ -17,6 +17,9 @@ data class PspAliasConfigModel(
     @ApiModelProperty(value = "Portal ID", example = "2030968")
     val portalId: String?,
 
+    @ApiModelProperty(value = "Request name", example = "creditcardcheck")
+    val request: String?,
+
     @ApiModelProperty(value = "API version", example = "3.11")
     val apiVersion: String?,
 
