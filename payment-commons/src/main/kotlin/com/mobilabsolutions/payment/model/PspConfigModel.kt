@@ -27,5 +27,8 @@ class PspConfigModel(
     val publicKey: String?,
 
     @ApiModelProperty(value = "Private key")
-    val privateKey: String?
+    val privateKey: String?,
+
+    @ApiModelProperty(value = "Default flag", example = "true")
+    val default: Boolean = true
 )
