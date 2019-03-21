@@ -2,7 +2,7 @@ package com.mobilabsolutions.payment.bspayone.service
 
 import com.google.common.base.Charsets
 import com.google.common.hash.Hashing
-import com.mobilabsolutions.payment.bspayone.data.BsPayoneConstants
+import com.mobilabsolutions.payment.bspayone.configuration.BsPayoneProperties
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneRequestType
 import com.mobilabsolutions.payment.model.PspConfigModel
 import mu.KLogging
@@ -18,7 +18,7 @@ import javax.crypto.spec.SecretKeySpec
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
 @Service
-class BsPayoneHashingService {
+class BsPayoneHashingService(private val bsPayoneProperties: BsPayoneProperties) {
     companion object : KLogging() {
         const val RESPONSE_TYPE = "JSON"
         const val STORE_CARD_DATA_PARAM_VALUE = "yes"
@@ -32,8 +32,8 @@ class BsPayoneHashingService {
      * @return hash
      */
     fun makeCreditCardCheckHash(pspConfigModel: PspConfigModel): String {
-        return calculateHash(pspConfigModel.key, pspConfigModel.accountId + BsPayoneConstants.API_VERSION + pspConfigModel.merchantId +
-            BsPayoneConstants.MODE + pspConfigModel.portalId + BsPayoneRequestType.CREDIT_CARD_CHECK.type + RESPONSE_TYPE +
+        return calculateHash(pspConfigModel.key, pspConfigModel.accountId + bsPayoneProperties.apiVersion + pspConfigModel.merchantId +
+            bsPayoneProperties.mode + pspConfigModel.portalId + BsPayoneRequestType.CREDIT_CARD_CHECK.type + RESPONSE_TYPE +
             STORE_CARD_DATA_PARAM_VALUE)
     }
 
