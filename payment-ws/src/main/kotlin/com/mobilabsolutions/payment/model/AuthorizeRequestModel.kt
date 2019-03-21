@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull
 @ApiModel("Authorize Request Model")
 data class AuthorizeRequestModel(
     @ApiModelProperty("Alias ID")
-    val aliasId: String?,
+    val aliasId: String,
 
     @ApiModelProperty("Payment data")
     @field:NotNull
@@ -20,5 +20,5 @@ data class AuthorizeRequestModel(
     val purchaseId: String?,
 
     @ApiModelProperty("Customer ID")
-    val customerId: String
+    val customerId: String?
 )
