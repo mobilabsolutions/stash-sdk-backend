@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
 @Repository
-interface TransactionRepository : BaseRepository<Transaction, Long>
+interface TransactionRepository : BaseRepository<Transaction, Long> {
+    fun getTransactionByIdempotentKey(idempotentKey: String): Transaction?
+}
