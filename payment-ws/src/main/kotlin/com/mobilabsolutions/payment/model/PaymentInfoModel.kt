@@ -1,6 +1,5 @@
 package com.mobilabsolutions.payment.model
 
-import com.mobilabsolutions.payment.message.PspConfigModel
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
@@ -13,6 +12,6 @@ data class PaymentInfoModel(
     val extra: AliasExtraModel?,
 
     @ApiModelProperty("Psp configuration")
-    val pspConfig: PspConfigModel?
+    val pspConfig: PspConfigListModel?
 
 )

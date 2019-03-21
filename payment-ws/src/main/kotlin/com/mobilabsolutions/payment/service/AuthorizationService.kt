@@ -7,11 +7,11 @@ import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
-import com.mobilabsolutions.payment.message.PspConfigModel
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.AuthorizeRequestModel
 import com.mobilabsolutions.payment.model.AuthorizeResponseModel
 import com.mobilabsolutions.payment.model.PaymentInfoModel
+import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
@@ -46,7 +46,7 @@ class AuthorizationService(
                 ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
 
         val paymentInfoModel = PaymentInfoModel(objectMapper.readValue(alias.extra, AliasExtraModel::class.java),
-                objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigModel::class.java))
+                objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java))
 
         val transactionId = RandomStringUtils.randomAlphanumeric(AuthorizationService.STRING_LENGTH)
         val transaction = transactionRepository.getTransactionByIdempotentKey(idempotentKey)

@@ -34,6 +34,17 @@ import org.mockito.quality.Strictness
 @MockitoSettings(strictness = Strictness.STRICT_STUBS)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AuthorizationServiceTest {
+    private val correctIdempotentKey = "correct key"
+    private val wrongIdempotentKey = "wrong key"
+    private val correctSecretKey = "correct key"
+    private val wrongSecretKey = "wrong key"
+    private val correctAliasId = "correct alias id"
+    private val wrongAliasId = "wrong alias id"
+    private val paymentData = PaymentDataModel(1, "EUR", "reason")
+    private val pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
+            " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}"
+    private val extra =
+            "{\"email\": \"test@test.com\",\"paymentMethod\": \"SEPA\"}"
 
     @InjectMocks
     private lateinit var authorizationService: AuthorizationService
@@ -49,18 +60,6 @@ class AuthorizationServiceTest {
 
     @Spy
     val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
-
-    private val correctIdempotentKey = "correct key"
-    private val wrongIdempotentKey = "wrong key"
-    private val correctSecretKey = "correct key"
-    private val wrongSecretKey = "wrong key"
-    private val correctAliasId = "correct alias id"
-    private val wrongAliasId = "wrong alias id"
-    private val paymentData = PaymentDataModel(1, "EUR", "reason")
-    private val pspConfig =
-            "{\"providers\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}, {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}"
-    private val extra =
-            "{\"email\": \"test@test.com\",\"paymentMethod\": \"SEPA\"}"
 
     @BeforeAll
     fun beforeAll() {
