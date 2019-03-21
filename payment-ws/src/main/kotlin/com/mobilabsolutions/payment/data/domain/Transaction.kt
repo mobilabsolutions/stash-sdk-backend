@@ -70,7 +70,7 @@ class Transaction(
 
     @ManyToOne
     @JoinColumn(name = "merchant_id", nullable = false, foreignKey = ForeignKey(name = "fk_merchant_transactionrecord"))
-    var merchant: Merchant? = null,
+    var merchant: Merchant = Merchant(),
 
     @ManyToOne
     @JoinColumn(name = "alias_id", foreignKey = ForeignKey(name = "fk_alias_transactionrecord"))
