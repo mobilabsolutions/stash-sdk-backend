@@ -61,7 +61,7 @@ class MerchantServiceTest {
 
         merchant = Merchant(id = knownMerchantId,
             pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
-                " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")
+                " {\"type\" : \"other\", \"merchantId\" : \"test merchant\", \"default\" : \"true\"}]}")
 
         `when`(merchantRepository.getMerchantById(knownMerchantId)).thenReturn(merchant)
 
