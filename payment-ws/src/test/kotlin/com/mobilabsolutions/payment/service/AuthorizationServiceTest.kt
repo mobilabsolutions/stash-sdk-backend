@@ -37,8 +37,8 @@ import org.mockito.quality.Strictness
 class AuthorizationServiceTest {
     private val correctIdempotentKey = "correct key"
     private val wrongIdempotentKey = "wrong key"
-    private val correctSecretKey = "correct key"
-    private val wrongSecretKey = "wrong key"
+    private val correctPrivateKey = "correct key"
+    private val wrongPrivateKey = "wrong key"
     private val correctAliasId = "correct alias id"
     private val wrongAliasId = "wrong alias id"
     private val paymentData = PaymentDataModel(1, "EUR", "reason")
@@ -65,7 +65,7 @@ class AuthorizationServiceTest {
     @BeforeAll
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
-        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PRIVATE, correctSecretKey)).thenReturn(
+        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PRIVATE, correctPrivateKey)).thenReturn(
                 MerchantApiKey(active = true, merchant = Merchant("1", pspConfig = pspConfig))
         )
         `when`(aliasIdRepository.getFirstById(correctAliasId)).thenReturn(
@@ -77,26 +77,26 @@ class AuthorizationServiceTest {
     }
 
     @Test
-    fun `authorize transaction with wrong secret key`() {
+    fun `authorize transaction with wrong private key`() {
         Assertions.assertThrows(ApiException::class.java) {
-            authorizationService.authorize(wrongSecretKey, wrongIdempotentKey, Mockito.mock(AuthorizeRequestModel::class.java))
+            authorizationService.authorize(wrongPrivateKey, wrongIdempotentKey, Mockito.mock(AuthorizeRequestModel::class.java))
         }
     }
 
     @Test
-    fun `authorize transaction with correct secret key`() {
-        authorizationService.authorize(correctSecretKey, correctIdempotentKey, AuthorizeRequestModel(correctAliasId, paymentData, "1", "1"))
+    fun `authorize transaction with correct private key`() {
+        authorizationService.authorize(correctPrivateKey, correctIdempotentKey, AuthorizeRequestModel(correctAliasId, paymentData, "1", "1"))
     }
 
     @Test
     fun `authorize transaction with wrong alias id`() {
         Assertions.assertThrows(ApiException::class.java) {
-            authorizationService.authorize(correctSecretKey, correctIdempotentKey, AuthorizeRequestModel(wrongAliasId, paymentData, "1", "1"))
+            authorizationService.authorize(correctPrivateKey, correctIdempotentKey, AuthorizeRequestModel(wrongAliasId, paymentData, "1", "1"))
         }
     }
 
     @Test
     fun `authorize transaction with correct alias id`() {
-        authorizationService.authorize(correctSecretKey, correctIdempotentKey, AuthorizeRequestModel(correctAliasId, paymentData, "1", "1"))
+        authorizationService.authorize(correctPrivateKey, correctIdempotentKey, AuthorizeRequestModel(correctAliasId, paymentData, "1", "1"))
     }
 }

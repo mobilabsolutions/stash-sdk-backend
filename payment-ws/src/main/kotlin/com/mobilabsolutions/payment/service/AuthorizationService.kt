@@ -33,15 +33,15 @@ class AuthorizationService(
     /**
      * Authorize transaction
      *
-     * @param secretKey Secret key
+     * @param privateKey Private key
      * @param idempotentKey Idempotent key
      * @param authorizeInfo Authorization information
      */
-    fun authorize(secretKey: String, idempotentKey: String, authorizeInfo: AuthorizeRequestModel): AuthorizeResponseModel {
+    fun authorize(privateKey: String, idempotentKey: String, authorizeInfo: AuthorizeRequestModel): AuthorizeResponseModel {
         /**
          * TO-DO: Implement authorization with PSP
          */
-        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PRIVATE, secretKey)
+        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PRIVATE, privateKey)
                 ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
         val alias = aliasRepository.getFirstById(authorizeInfo.aliasId)
                 ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
