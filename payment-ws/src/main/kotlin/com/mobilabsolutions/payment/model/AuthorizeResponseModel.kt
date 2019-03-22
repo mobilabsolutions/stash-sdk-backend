@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull
  */
 @ApiModel("Authorize Response Model")
 data class AuthorizeResponseModel(
-    @ApiModelProperty("Id")
+    @ApiModelProperty("Transaction ID")
     val id: String?,
 
     @ApiModelProperty("Amount")

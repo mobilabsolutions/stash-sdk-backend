@@ -2,6 +2,7 @@ package com.mobilabsolutions.payment.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.domain.Transaction
+import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.AliasRepository
@@ -40,7 +41,7 @@ class AuthorizationService(
         /**
          * TO-DO: Implement authorization with PSP
          */
-        val apiKey = merchantApiKeyRepository.getFirstByKey(secretKey)
+        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PRIVATE, secretKey)
                 ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
         val alias = aliasRepository.getFirstById(authorizeInfo.aliasId)
                 ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
@@ -59,6 +60,8 @@ class AuthorizationService(
                         status = TransactionStatus.SUCCESS,
                         paymentMethod = objectMapper.readValue(alias.extra, AliasExtraModel::class.java).paymentMethod,
                         paymentInfo = objectMapper.writeValueAsString(paymentInfoModel),
+                        merchantTransactionId = authorizeInfo.purchaseId,
+                        merchantCustomerId = authorizeInfo.customerId,
                         merchant = apiKey.merchant,
                         alias = alias
                 )
@@ -67,7 +70,7 @@ class AuthorizationService(
         transactionRepository.save(transaction)
 
         return AuthorizeResponseModel(transactionId, authorizeInfo.paymentData.amount,
-                authorizeInfo.paymentData.currency, TransactionStatus.SUCCESS, TransactionAction.AUTH)
+                authorizeInfo.paymentData.currency, transaction.status, transaction.action)
     }
 
     companion object : KLogging() {

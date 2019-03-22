@@ -5,6 +5,7 @@ import com.mobilabsolutions.payment.data.domain.Alias
 import com.mobilabsolutions.payment.data.domain.Merchant
 import com.mobilabsolutions.payment.data.domain.MerchantApiKey
 import com.mobilabsolutions.payment.data.domain.Transaction
+import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
@@ -64,7 +65,7 @@ class AuthorizationServiceTest {
     @BeforeAll
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
-        `when`(merchantApiKeyRepository.getFirstByKey(correctSecretKey)).thenReturn(
+        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PRIVATE, correctSecretKey)).thenReturn(
                 MerchantApiKey(active = true, merchant = Merchant("1", pspConfig = pspConfig))
         )
         `when`(aliasIdRepository.getFirstById(correctAliasId)).thenReturn(

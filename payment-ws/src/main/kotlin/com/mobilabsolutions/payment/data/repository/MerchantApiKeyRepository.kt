@@ -24,6 +24,4 @@ interface MerchantApiKeyRepository : BaseRepository<MerchantApiKey, Long> {
 
     @Modifying
     fun deleteMerchantApiKeyById(apiKeyId: Long): Int
-
-    fun getFirstByKey(key: String): MerchantApiKey?
 }
