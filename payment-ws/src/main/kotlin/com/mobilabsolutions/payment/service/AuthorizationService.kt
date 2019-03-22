@@ -33,16 +33,16 @@ class AuthorizationService(
     /**
      * Authorize transaction
      *
-     * @param privateKey Private key
+     * @param secretKey Secret key
      * @param idempotentKey Idempotent key
      * @param authorizeInfo Authorization information
      * @return Authorization response model
      */
-    fun authorize(privateKey: String, idempotentKey: String, authorizeInfo: AuthorizeRequestModel): AuthorizeResponseModel {
+    fun authorize(secretKey: String, idempotentKey: String, authorizeInfo: AuthorizeRequestModel): AuthorizeResponseModel {
         /**
          * TO-DO: Implement authorization with PSP
          */
-        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PRIVATE, privateKey)
+        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
                 ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
         val alias = aliasRepository.getFirstById(authorizeInfo.aliasId)
                 ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
@@ -70,8 +70,8 @@ class AuthorizationService(
         transaction.action = TransactionAction.AUTH
         transactionRepository.save(transaction)
 
-        return AuthorizeResponseModel(transactionId, authorizeInfo.paymentData.amount,
-                authorizeInfo.paymentData.currency, transaction.status, transaction.action)
+        return AuthorizeResponseModel(transactionId, transaction.amount,
+                transaction.currencyId, transaction.status, transaction.action)
     }
 
     companion object : KLogging() {

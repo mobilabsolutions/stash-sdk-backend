@@ -15,7 +15,7 @@ data class ApiKeyReturnInfoModel(
     @ApiModelProperty(value = "Api key name", example = "Test key")
     val name: String?,
 
-    @ApiModelProperty(value = "Api key type", example = "PUBLIC")
+    @ApiModelProperty(value = "Api key type", example = "PUBLISHABLE")
     @field:Enumerated(EnumType.STRING)
     val type: KeyType?,
 

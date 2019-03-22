@@ -31,10 +31,10 @@ class AuthorizationController(private val authorizationService: AuthorizationSer
     @RequestMapping(method = [RequestMethod.PUT])
     @ResponseStatus(HttpStatus.CREATED)
     fun authorizeTransaction(
-        @RequestHeader(value = "Private-Key") privateKey: String,
+        @RequestHeader(value = "Secret-Key") secretKey: String,
         @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
         @Valid @RequestBody authorizeInfo: AuthorizeRequestModel
-    ) = authorizationService.authorize(privateKey, idempotentKey, authorizeInfo)
+    ) = authorizationService.authorize(secretKey, idempotentKey, authorizeInfo)
 
     companion object {
         const val BASE_URL = "authorization"

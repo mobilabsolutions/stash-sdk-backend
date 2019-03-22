@@ -11,7 +11,7 @@ import javax.persistence.Enumerated
  */
 @ApiModel(value = "Api Key Request")
 data class ApiKeyRequestModel(
-    @ApiModelProperty(value = "Api key type", example = "PUBLIC")
+    @ApiModelProperty(value = "Api key type", example = "Publishable")
     @field:Enumerated(EnumType.STRING)
     val type: KeyType?,
 

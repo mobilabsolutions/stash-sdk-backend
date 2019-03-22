@@ -48,8 +48,8 @@ class MerchantService(
                         portalId = pspConfigRequestModel.pspConfig.portalId,
                         key = pspConfigRequestModel.pspConfig.key,
                         accountId = pspConfigRequestModel.pspConfig.accountId,
-                        publicKey = pspConfigRequestModel.pspConfig.publicKey,
-                        privateKey = pspConfigRequestModel.pspConfig.privateKey
+                        publishableKey = pspConfigRequestModel.pspConfig.publishableKey,
+                        secretKey = pspConfigRequestModel.pspConfig.secretKey
                     )
                 )
             )
@@ -106,8 +106,8 @@ class MerchantService(
                         portalId = pspUpsertConfigRequestModel.portalId,
                         key = pspUpsertConfigRequestModel.key,
                         accountId = pspUpsertConfigRequestModel.accountId,
-                        publicKey = pspUpsertConfigRequestModel.publicKey,
-                        privateKey = pspUpsertConfigRequestModel.privateKey
+                        publishableKey = pspUpsertConfigRequestModel.publishableKey,
+                        secretKey = pspUpsertConfigRequestModel.secretKey
                     )
                 )
             )
@@ -158,5 +158,5 @@ class MerchantService(
         return configMap.values.toMutableList()
     }
 
-    private fun PspConfigModel.setDefault(default: Boolean) = PspConfigModel(type, merchantId, portalId, key, accountId, publicKey, privateKey, default = default)
+    private fun PspConfigModel.setDefault(default: Boolean) = PspConfigModel(type, merchantId, portalId, key, accountId, publishableKey, secretKey, default = default)
 }

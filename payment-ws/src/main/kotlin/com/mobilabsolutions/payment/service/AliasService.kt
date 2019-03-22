@@ -32,15 +32,15 @@ class AliasService(
     }
 
     /**
-     * Creates an alias for given pspType and publicKey
+     * Creates an alias for given pspType and publishableKey
      *
-     * @param publicKey Public Key
+     * @param publishableKey Publishable Key
      * @param pspType PSP Type
      * @return alias method response
      */
-    fun createAlias(publicKey: String, pspType: String): AliasResponseModel {
+    fun createAlias(publishableKey: String, pspType: String): AliasResponseModel {
         val generatedAliasId = RandomStringUtils.randomAlphanumeric(STRING_LENGTH)
-        val merchantApiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, publicKey) ?: throw ApiError.ofMessage("Public Key cannot be found").asBadRequest()
+        val merchantApiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofMessage("Publishable Key cannot be found").asBadRequest()
 
         val result = objectMapper.readValue(merchantApiKey.merchant.pspConfig, PspConfigListModel::class.java)
         val pspConfig = result.psp.firstOrNull { it.type == pspType }
@@ -61,12 +61,12 @@ class AliasService(
     /**
      * Update an alias for alias id and alias model
      *
-     * @param publicKey Public Key
+     * @param publishableKey Publishable Key
      * @param aliasId Alias ID
      * @param aliasRequestModel Alias Request Model
      */
-    fun exchangeAlias(publicKey: String, aliasId: String, aliasRequestModel: AliasRequestModel) {
-        merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, publicKey) ?: throw ApiError.ofMessage("Public Key cannot be found").asBadRequest()
+    fun exchangeAlias(publishableKey: String, aliasId: String, aliasRequestModel: AliasRequestModel) {
+        merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofMessage("Publishable Key cannot be found").asBadRequest()
         aliasRepository.getFirstById(aliasId) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         val extra = if (aliasRequestModel.extra != null) objectMapper.writeValueAsString(aliasRequestModel.extra) else null
         aliasRepository.updateAlias(aliasRequestModel.pspAlias, extra, aliasId)
