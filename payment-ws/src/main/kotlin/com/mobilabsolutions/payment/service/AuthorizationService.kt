@@ -70,7 +70,7 @@ class AuthorizationService(
         transaction.action = TransactionAction.AUTH
         transactionRepository.save(transaction)
 
-        return AuthorizeResponseModel(transactionId, transaction.amount,
+        return AuthorizeResponseModel(transaction.transactionId, transaction.amount,
                 transaction.currencyId, transaction.status, transaction.action)
     }
 

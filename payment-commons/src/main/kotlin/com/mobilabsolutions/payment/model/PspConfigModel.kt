@@ -23,11 +23,11 @@ class PspConfigModel(
     @ApiModelProperty(value = "Account ID", example = "42949")
     val accountId: String?,
 
-    @ApiModelProperty(value = "Publishable key")
-    val publishableKey: String?,
+    @ApiModelProperty(value = "Public key")
+    val publicKey: String?,
 
-    @ApiModelProperty(value = "Secret key")
-    val secretKey: String?,
+    @ApiModelProperty(value = "Private key")
+    val privateKey: String?,
 
     @ApiModelProperty(value = "Default flag", example = "true")
     val default: Boolean = true

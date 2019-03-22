@@ -34,8 +34,8 @@ class BsPayonePsp(private val bsPayoneHashingService: BsPayoneHashingService) : 
             accountId = pspConfigModel.accountId,
             encoding = ENCODING,
             mode = BsPayoneHashingService.MODE,
-            publishableKey = null,
-            secretKey = null
+            publicKey = null,
+            privateKey = null
         ) else null
     }
 }
