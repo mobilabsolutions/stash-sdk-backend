@@ -9,13 +9,13 @@ import javax.validation.constraints.NotNull
  */
 @ApiModel("Payment Data Model")
 data class PaymentDataModel(
-    @ApiModelProperty("Amount")
+    @ApiModelProperty("Amount", example = "300")
     @field:NotNull
     val amount: Int,
 
-    @ApiModelProperty("Currency")
+    @ApiModelProperty("Currency", example = "EUR")
     val currency: String?,
 
-    @ApiModelProperty("Reason")
+    @ApiModelProperty("Reason", example = "Payment for dinner")
     val reason: String?
 )

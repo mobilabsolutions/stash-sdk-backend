@@ -36,6 +36,7 @@ class AuthorizationService(
      * @param privateKey Private key
      * @param idempotentKey Idempotent key
      * @param authorizeInfo Authorization information
+     * @return Authorization response model
      */
     fun authorize(privateKey: String, idempotentKey: String, authorizeInfo: AuthorizeRequestModel): AuthorizeResponseModel {
         /**
