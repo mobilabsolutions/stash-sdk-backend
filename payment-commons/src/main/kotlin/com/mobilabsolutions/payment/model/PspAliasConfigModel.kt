@@ -35,9 +35,9 @@ data class PspAliasConfigModel(
     @ApiModelProperty(value = "Account ID", example = "42949")
     val accountId: String?,
 
-    @ApiModelProperty(value = "Public key", example = "bbdjshcjdhdsgf")
-    val publicKey: String?,
+    @ApiModelProperty(value = "Publishable key", example = "bbdjshcjdhdsgf")
+    val publishableKey: String?,
 
-    @ApiModelProperty(value = "Private key", example = "ncbcjdheufhdhfjh")
-    val privateKey: String?
+    @ApiModelProperty(value = "Secret key", example = "ncbcjdheufhdhfjh")
+    val secretKey: String?
 )

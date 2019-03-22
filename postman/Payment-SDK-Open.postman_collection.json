@@ -19,7 +19,7 @@
 								"type": "text"
 							},
 							{
-								"key": "Public-Key",
+								"key": "Publishable-Key",
 								"value": "",
 								"type": "text"
 							},
@@ -59,7 +59,7 @@
 								"type": "text"
 							},
 							{
-								"key": "Public-Key",
+								"key": "Publishable-Key",
 								"value": "",
 								"type": "text"
 							}
@@ -292,7 +292,7 @@
 						"header": [
 							{
 								"key": "Type",
-								"value": "PUBLIC",
+								"value": "PUBLISHABLE",
 								"type": "text"
 							},
 							{
@@ -309,7 +309,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Test key34\",\n  \"type\": \"PRIVATE\"\n}"
+							"raw": "{\n  \"name\": \"Test key34\",\n  \"type\": \"SECRET\"\n}"
 						},
 						"url": {
 							"raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/api-key",
