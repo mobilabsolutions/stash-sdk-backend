@@ -45,7 +45,7 @@ class AuthorizationServiceTest {
     private val pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
             " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}"
     private val extra =
-            "{\"email\": \"test@test.com\",\"paymentMethod\": \"SEPA\"}"
+            "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\"}"
 
     @InjectMocks
     private lateinit var authorizationService: AuthorizationService

@@ -3,6 +3,7 @@ package com.mobilabsolutions.payment.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.domain.Transaction
 import com.mobilabsolutions.payment.data.enum.KeyType
+import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.AliasRepository
@@ -46,8 +47,12 @@ class AuthorizationService(
                 ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
         val alias = aliasRepository.getFirstById(authorizeInfo.aliasId)
                 ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+        val extra = objectMapper.readValue(alias.extra, AliasExtraModel::class.java)
 
-        val paymentInfoModel = PaymentInfoModel(objectMapper.readValue(alias.extra, AliasExtraModel::class.java),
+        if (extra.paymentMethod != PaymentMethod.CC)
+            throw ApiError.ofMessage("Payment method is not of type CC").asBadRequest()
+
+        val paymentInfoModel = PaymentInfoModel(extra,
                 objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java))
 
         val transactionId = RandomStringUtils.randomAlphanumeric(AuthorizationService.STRING_LENGTH)
@@ -59,7 +64,7 @@ class AuthorizationService(
                         amount = authorizeInfo.paymentData.amount,
                         reason = authorizeInfo.paymentData.reason,
                         status = TransactionStatus.SUCCESS,
-                        paymentMethod = objectMapper.readValue(alias.extra, AliasExtraModel::class.java).paymentMethod,
+                        paymentMethod = extra.paymentMethod,
                         paymentInfo = objectMapper.writeValueAsString(paymentInfoModel),
                         merchantTransactionId = authorizeInfo.purchaseId,
                         merchantCustomerId = authorizeInfo.customerId,
