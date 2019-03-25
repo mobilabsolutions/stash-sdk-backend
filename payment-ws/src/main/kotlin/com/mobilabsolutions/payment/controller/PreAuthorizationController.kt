@@ -1,8 +1,8 @@
 package com.mobilabsolutions.payment.controller
 
-import com.mobilabsolutions.payment.model.AuthorizeRequestModel
-import com.mobilabsolutions.payment.model.AuthorizeResponseModel
-import com.mobilabsolutions.payment.service.AuthorizationService
+import com.mobilabsolutions.payment.model.PreauthorizeRequestModel
+import com.mobilabsolutions.payment.model.PreauthorizeResponseModel
+import com.mobilabsolutions.payment.service.PreauthorizationService
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
@@ -18,8 +18,8 @@ import javax.validation.Valid
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
 @RestController
-@RequestMapping(AuthorizationController.BASE_URL)
-class AuthorizationController(private val authorizationService: AuthorizationService) {
+@RequestMapping(PreAuthorizationController.BASE_URL)
+class PreAuthorizationController(private val preauthorizationService: PreauthorizationService) {
 
     @ApiOperation(value = "Authorize transaction")
     @ApiResponses(
@@ -30,13 +30,14 @@ class AuthorizationController(private val authorizationService: AuthorizationSer
         ApiResponse(code = 404, message = "Not found")
     )
     @RequestMapping(method = [RequestMethod.PUT])
-    fun authorizeTransaction(
+    fun preauthorizeTransaction(
         @RequestHeader(value = "Secret-Key") secretKey: String,
         @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
-        @Valid @RequestBody authorizeInfo: AuthorizeRequestModel
-    ): ResponseEntity<AuthorizeResponseModel> = authorizationService.authorize(secretKey, idempotentKey, authorizeInfo)
+        @Valid @RequestBody preauthorizeInfo: PreauthorizeRequestModel
+    ): ResponseEntity<PreauthorizeResponseModel> =
+        preauthorizationService.preauthorize(secretKey, idempotentKey, preauthorizeInfo)
 
     companion object {
-        const val BASE_URL = "authorization"
+        const val BASE_URL = "preauthorization"
     }
 }
