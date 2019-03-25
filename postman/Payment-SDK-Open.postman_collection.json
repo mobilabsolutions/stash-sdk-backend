@@ -734,6 +734,47 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Transaction",
+			"item": [
+				{
+					"name": "Authorize",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": ""
+							}
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Secret-Key",
+								"value": "Tika-5OqpftqPh8vrvyL3UooS",
+								"type": "text"
+							},
+							{
+								"key": "Idempotent-Key",
+								"value": "1",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"aliasId\": \"JipfjLKL3BKvIREaRGyM\",\n\t\"paymentData\": {\n\t\t\"amount\": \"20\",\n\t\t\"currency\": \"CAD\",\n\t\t\"reason\": \"reason\"\n\t},\n\t\"purchaseId\": \"1\",\n\t\"customerId\": \"1\"\n}"
+						},
+						"url": "{{wsEndpoint}}/api/v1/authorization"
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }
