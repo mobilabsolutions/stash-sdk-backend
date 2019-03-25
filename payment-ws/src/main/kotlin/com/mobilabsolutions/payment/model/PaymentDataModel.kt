@@ -3,6 +3,7 @@ package com.mobilabsolutions.payment.model
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import javax.validation.constraints.NotNull
+import javax.validation.constraints.Size
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
@@ -14,8 +15,11 @@ data class PaymentDataModel(
     val amount: Int,
 
     @ApiModelProperty("Currency", example = "EUR")
-    val currency: String?,
+    @field:Size(min = 3, max = 3)
+    @field:NotNull
+    val currency: String,
 
     @ApiModelProperty("Reason", example = "Payment for dinner")
-    val reason: String?
+    @field:NotNull
+    val reason: String
 )
