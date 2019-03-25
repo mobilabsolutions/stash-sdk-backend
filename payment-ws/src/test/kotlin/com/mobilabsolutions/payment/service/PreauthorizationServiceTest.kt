@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.domain.Alias
 import com.mobilabsolutions.payment.data.domain.Merchant
 import com.mobilabsolutions.payment.data.domain.MerchantApiKey
+import com.mobilabsolutions.payment.data.domain.Transaction
 import com.mobilabsolutions.payment.data.enum.KeyType
+import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
@@ -42,6 +44,8 @@ class PreauthorizationServiceTest {
     private val wrongSecretKey = "wrong key"
     private val correctAliasId = "correct alias id"
     private val wrongAliasId = "wrong alias id"
+    private val correctTransactionId = "correct transaction id"
+    private val wrongTransactionId = "wrong transaction id"
     private val correctPaymentData = PaymentDataModel(1, "EUR", "reason")
     private val wrongPaymentData = PaymentDataModel(2, "EUR", "reason")
     private val pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
@@ -68,15 +72,18 @@ class PreauthorizationServiceTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
         `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, correctSecretKey)).thenReturn(
-                MerchantApiKey(active = true, merchant = Merchant("1", pspConfig = pspConfig))
+            MerchantApiKey(active = true, merchant = Merchant("1", pspConfig = pspConfig))
         )
         `when`(aliasIdRepository.getFirstById(correctAliasId)).thenReturn(
-                Alias(active = true, extra = extra)
+            Alias(active = true, extra = extra)
         )
         `when`(transactionRepository.getIdByIdempotentKey(newIdempotentKey)).thenReturn(null)
         `when`(transactionRepository.getIdByIdempotentKey(usedIdempotentKey)).thenReturn(1)
         `when`(transactionRepository.getIdByIdempotentKeyAndGivenBody(newIdempotentKey, PreauthorizeRequestModel(correctAliasId, correctPaymentData, ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))).thenReturn(1)
         `when`(transactionRepository.getIdByIdempotentKeyAndGivenBody(newIdempotentKey, PreauthorizeRequestModel(correctAliasId, wrongPaymentData, ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))).thenReturn(null)
+        `when`(transactionRepository.getByTransactionIdAndAction(correctTransactionId, TransactionAction.AUTH)).thenReturn(
+            Transaction(amount = 1, merchant = Merchant("1", pspConfig = pspConfig), alias = Alias(active = true, extra = extra))
+        )
     }
 
     @Test
@@ -120,5 +127,17 @@ class PreauthorizationServiceTest {
     fun `preauthorize transaction with used idempotent key`() {
         val responseEntity = preauthorizationService.preauthorize(correctSecretKey, usedIdempotentKey, PreauthorizeRequestModel(correctAliasId, correctPaymentData, "1", "1"))
         Assertions.assertEquals(responseEntity.statusCode, HttpStatus.OK)
+    }
+
+    @Test
+    fun `capture transaction with wrong transaction id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            preauthorizationService.capture(correctSecretKey, wrongTransactionId)
+        }
+    }
+
+    @Test
+    fun `capture transaction with correct transaction id`() {
+        preauthorizationService.capture(correctSecretKey, correctTransactionId)
     }
 }
