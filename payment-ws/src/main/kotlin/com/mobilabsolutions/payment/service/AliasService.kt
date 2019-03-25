@@ -42,7 +42,7 @@ class AliasService(
         val generatedAliasId = RandomStringUtils.randomAlphanumeric(STRING_LENGTH)
         val merchantApiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofMessage("Publishable Key cannot be found").asBadRequest()
 
-        val result = objectMapper.readValue(merchantApiKey.merchant.pspConfig, PspConfigListModel::class.java)
+        val result = objectMapper.readValue(merchantApiKey.merchant.pspConfig ?: throw ApiError.ofMessage("There are no PSP configurations defined for used merchant").asInternalServerError(), PspConfigListModel::class.java)
         val pspConfig = result.psp.firstOrNull { it.type == pspType }
         val pspConfigType = PaymentServiceProvider.valueOf(pspConfig?.type ?: throw ApiError.ofMessage("PSP configuration for '$pspType' cannot be found from used merchant").asBadRequest())
         val psp = pspRegistry.find(pspConfigType) ?: throw ApiError.ofMessage("PSP implementation '$pspType' cannot be found").asBadRequest()

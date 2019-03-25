@@ -17,6 +17,8 @@ import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -39,7 +41,7 @@ class AuthorizationService(
      * @param authorizeInfo Authorization information
      * @return Authorization response model
      */
-    fun authorize(secretKey: String, idempotentKey: String, authorizeInfo: AuthorizeRequestModel): AuthorizeResponseModel {
+    fun authorize(secretKey: String, idempotentKey: String, authorizeInfo: AuthorizeRequestModel): ResponseEntity<AuthorizeResponseModel> {
         /**
          * TO-DO: Implement authorization with PSP
          */
@@ -55,28 +57,31 @@ class AuthorizationService(
         val paymentInfoModel = PaymentInfoModel(extra,
                 objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java))
 
-        val transactionId = RandomStringUtils.randomAlphanumeric(AuthorizationService.STRING_LENGTH)
-        val transaction = transactionRepository.getTransactionByIdempotentKey(idempotentKey)
-                ?: Transaction(
-                        transactionId = transactionId,
-                        idempotentKey = idempotentKey,
-                        currencyId = authorizeInfo.paymentData.currency,
-                        amount = authorizeInfo.paymentData.amount,
-                        reason = authorizeInfo.paymentData.reason,
-                        status = TransactionStatus.SUCCESS,
-                        paymentMethod = extra.paymentMethod,
-                        paymentInfo = objectMapper.writeValueAsString(paymentInfoModel),
-                        merchantTransactionId = authorizeInfo.purchaseId,
-                        merchantCustomerId = authorizeInfo.customerId,
-                        merchant = apiKey.merchant,
-                        alias = alias
+        when {
+            transactionRepository.getIdByIdempotentKey(idempotentKey) == null -> {
+                val transaction = Transaction(
+                    transactionId = RandomStringUtils.randomAlphanumeric(AuthorizationService.STRING_LENGTH),
+                    idempotentKey = idempotentKey,
+                    currencyId = authorizeInfo.paymentData.currency,
+                    amount = authorizeInfo.paymentData.amount,
+                    reason = authorizeInfo.paymentData.reason,
+                    status = TransactionStatus.SUCCESS,
+                    action = TransactionAction.AUTH,
+                    paymentMethod = extra.paymentMethod,
+                    paymentInfo = objectMapper.writeValueAsString(paymentInfoModel),
+                    merchantTransactionId = authorizeInfo.purchaseId,
+                    merchantCustomerId = authorizeInfo.customerId,
+                    merchant = apiKey.merchant,
+                    alias = alias
                 )
+                transactionRepository.save(transaction)
 
-        transaction.action = TransactionAction.AUTH
-        transactionRepository.save(transaction)
-
-        return AuthorizeResponseModel(transaction.transactionId, transaction.amount,
-                transaction.currencyId, transaction.status, transaction.action)
+                return ResponseEntity.status(HttpStatus.CREATED).body(AuthorizeResponseModel(transaction.transactionId, transaction.amount,
+                    transaction.currencyId, transaction.status, transaction.action))
+            }
+            transactionRepository.getIdByIdempotentKeyAndGivenBody(idempotentKey, authorizeInfo) != null -> return ResponseEntity.status(HttpStatus.OK).body(null)
+            else -> throw ApiError.ofMessage("There is already a transaction with given idempotent key").asBadRequest()
+        }
     }
 
     companion object : KLogging() {

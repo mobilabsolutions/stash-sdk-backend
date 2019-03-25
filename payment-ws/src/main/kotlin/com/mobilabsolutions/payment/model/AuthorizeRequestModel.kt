@@ -2,6 +2,7 @@ package com.mobilabsolutions.payment.model
 
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
+import javax.validation.Valid
 import javax.validation.constraints.NotNull
 
 /**
@@ -14,6 +15,7 @@ data class AuthorizeRequestModel(
     val aliasId: String,
 
     @ApiModelProperty("Payment data")
+    @field:Valid
     @field:NotNull
     val paymentData: PaymentDataModel,
 
