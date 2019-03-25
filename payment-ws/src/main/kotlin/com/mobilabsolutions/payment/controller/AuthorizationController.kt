@@ -25,7 +25,7 @@ class AuthorizationController(private val authorizationService: AuthorizationSer
     @ApiResponses(
         ApiResponse(code = 200, message = "Authorization check successful"),
         ApiResponse(code = 201, message = "Successfully authorized transaction"),
-        ApiResponse(code = 400, message = "Failed to create merchant"),
+        ApiResponse(code = 400, message = "Failed to authorize transaction"),
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 404, message = "Not found")
     )
