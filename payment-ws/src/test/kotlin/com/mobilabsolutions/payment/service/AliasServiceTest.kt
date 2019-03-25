@@ -38,8 +38,8 @@ import org.mockito.quality.Strictness
 @MockitoSettings(strictness = Strictness.STRICT_STUBS)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AliasServiceTest {
-    private val knownPublicKey = "some public key"
-    private val unknownPublicKey = "other public key"
+    private val knownPublishableKey = "some publishable key"
+    private val unknownPublishableKey = "other publishable key"
     private val knownAliasId = "some alias id"
     private val unknownAliasId = "other alias id"
     private val pspType = "some psp type"
@@ -65,10 +65,10 @@ class AliasServiceTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
-        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, unknownPublicKey))
+        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, unknownPublishableKey))
             .thenReturn(null)
 
-        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLIC, knownPublicKey))
+        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, knownPublishableKey))
             .thenReturn(MerchantApiKey(merchant = Merchant(id = "mobilab",
                 pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
                 " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")))
@@ -89,31 +89,31 @@ class AliasServiceTest {
     @Test
     fun `create alias with wrong header parameters`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(unknownPublicKey, pspType)
+            aliasService.createAlias(unknownPublishableKey, pspType)
         }
     }
 
     @Test
     fun `create alias with unknown pspType`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(knownPublicKey, pspType)
+            aliasService.createAlias(knownPublishableKey, pspType)
         }
     }
 
     @Test
     fun `create alias successfully`() {
-        aliasService.createAlias(knownPublicKey, knownPspType)
+        aliasService.createAlias(knownPublishableKey, knownPspType)
     }
 
     @Test
     fun `exchange alias with wrong alias id`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.exchangeAlias(knownPublicKey, unknownAliasId, Mockito.mock(AliasRequestModel::class.java))
+            aliasService.exchangeAlias(knownPublishableKey, unknownAliasId, Mockito.mock(AliasRequestModel::class.java))
         }
     }
 
     @Test
     fun `exchange alias successfully`() {
-        aliasService.exchangeAlias(knownPublicKey, knownAliasId, AliasRequestModel(pspAlias, Mockito.mock(AliasExtraModel::class.java)))
+        aliasService.exchangeAlias(knownPublishableKey, knownAliasId, AliasRequestModel(pspAlias, Mockito.mock(AliasExtraModel::class.java)))
     }
 }
