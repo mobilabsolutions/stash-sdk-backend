@@ -10,9 +10,9 @@ import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
-import com.mobilabsolutions.payment.model.AuthorizeRequestModel
-import com.mobilabsolutions.payment.model.AuthorizeResponseModel
 import com.mobilabsolutions.payment.model.PaymentInfoModel
+import com.mobilabsolutions.payment.model.PreauthorizeRequestModel
+import com.mobilabsolutions.payment.model.PreauthorizeResponseModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional
  */
 @Service
 @Transactional
-class AuthorizationService(
+class PreauthorizationService(
     private val transactionRepository: TransactionRepository,
     private val merchantApiKeyRepository: MerchantApiKeyRepository,
     private val aliasRepository: AliasRepository,
@@ -38,18 +38,18 @@ class AuthorizationService(
      *
      * @param secretKey Secret key
      * @param idempotentKey Idempotent key
-     * @param authorizeInfo Authorization information
+     * @param preauthorizeInfo Preauthorization information
      * @return Authorization response model
      */
-    fun authorize(secretKey: String, idempotentKey: String, authorizeInfo: AuthorizeRequestModel): ResponseEntity<AuthorizeResponseModel> {
+    fun preauthorize(secretKey: String, idempotentKey: String, preauthorizeInfo: PreauthorizeRequestModel): ResponseEntity<PreauthorizeResponseModel> {
         /**
          * TO-DO: Implement authorization with PSP
          */
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
                 ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
-        val alias = aliasRepository.getFirstById(authorizeInfo.aliasId)
+        val alias = aliasRepository.getFirstById(preauthorizeInfo.aliasId)
                 ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
-        val extra = objectMapper.readValue(alias.extra, AliasExtraModel::class.java)
+        val extra = objectMapper.readValue(alias.extra ?: throw ApiError.ofMessage("Used alias is incomplete, please define a payment configuration on related alias").asInternalServerError(), AliasExtraModel::class.java)
 
         if (extra.paymentMethod != PaymentMethod.CC)
             throw ApiError.ofMessage("Payment method is not of type CC").asBadRequest()
@@ -60,26 +60,26 @@ class AuthorizationService(
         when {
             transactionRepository.getIdByIdempotentKey(idempotentKey) == null -> {
                 val transaction = Transaction(
-                    transactionId = RandomStringUtils.randomAlphanumeric(AuthorizationService.STRING_LENGTH),
+                    transactionId = RandomStringUtils.randomAlphanumeric(PreauthorizationService.STRING_LENGTH),
                     idempotentKey = idempotentKey,
-                    currencyId = authorizeInfo.paymentData.currency,
-                    amount = authorizeInfo.paymentData.amount,
-                    reason = authorizeInfo.paymentData.reason,
+                    currencyId = preauthorizeInfo.paymentData.currency,
+                    amount = preauthorizeInfo.paymentData.amount,
+                    reason = preauthorizeInfo.paymentData.reason,
                     status = TransactionStatus.SUCCESS,
-                    action = TransactionAction.AUTH,
+                    action = TransactionAction.PREAUTH,
                     paymentMethod = extra.paymentMethod,
                     paymentInfo = objectMapper.writeValueAsString(paymentInfoModel),
-                    merchantTransactionId = authorizeInfo.purchaseId,
-                    merchantCustomerId = authorizeInfo.customerId,
+                    merchantTransactionId = preauthorizeInfo.purchaseId,
+                    merchantCustomerId = preauthorizeInfo.customerId,
                     merchant = apiKey.merchant,
                     alias = alias
                 )
                 transactionRepository.save(transaction)
 
-                return ResponseEntity.status(HttpStatus.CREATED).body(AuthorizeResponseModel(transaction.transactionId, transaction.amount,
+                return ResponseEntity.status(HttpStatus.CREATED).body(PreauthorizeResponseModel(transaction.transactionId, transaction.amount,
                     transaction.currencyId, transaction.status, transaction.action))
             }
-            transactionRepository.getIdByIdempotentKeyAndGivenBody(idempotentKey, authorizeInfo) != null -> return ResponseEntity.status(HttpStatus.OK).body(null)
+            transactionRepository.getIdByIdempotentKeyAndGivenBody(idempotentKey, preauthorizeInfo) != null -> return ResponseEntity.status(HttpStatus.OK).body(null)
             else -> throw ApiError.ofMessage("There is already a transaction with given idempotent key").asBadRequest()
         }
     }
