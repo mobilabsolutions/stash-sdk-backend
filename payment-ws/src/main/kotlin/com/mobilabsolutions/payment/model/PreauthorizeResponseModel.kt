@@ -9,8 +9,8 @@ import javax.validation.constraints.NotNull
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel("Authorize Response Model")
-data class AuthorizeResponseModel(
+@ApiModel("Preauthorize Response Model")
+data class PreauthorizeResponseModel(
     @ApiModelProperty("Transaction ID")
     val id: String?,
 

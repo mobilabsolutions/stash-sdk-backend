@@ -736,10 +736,10 @@
 			]
 		},
 		{
-			"name": "Transaction",
+			"name": "Payment",
 			"item": [
 				{
-					"name": "Authorize",
+					"name": "Preauthorize Payment",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -770,7 +770,7 @@
 							"mode": "raw",
 							"raw": "{\n\t\"aliasId\": \"JipfjLKL3BKvIREaRGyM\",\n\t\"paymentData\": {\n\t\t\"amount\": \"20\",\n\t\t\"currency\": \"CAD\",\n\t\t\"reason\": \"reason\"\n\t},\n\t\"purchaseId\": \"1\",\n\t\"customerId\": \"1\"\n}"
 						},
-						"url": "{{wsEndpoint}}/api/v1/authorization"
+						"url": "{{wsEndpoint}}/api/v1/preauthorization"
 					},
 					"response": []
 				}
