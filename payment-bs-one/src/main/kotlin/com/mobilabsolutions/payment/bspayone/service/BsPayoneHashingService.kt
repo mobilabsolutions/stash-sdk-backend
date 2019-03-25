@@ -5,6 +5,7 @@ import com.google.common.hash.Hashing
 import com.mobilabsolutions.payment.bspayone.configuration.BsPayoneProperties
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneRequestType
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.apache.tomcat.util.buf.HexUtils
 import org.springframework.stereotype.Service
@@ -32,6 +33,7 @@ class BsPayoneHashingService(private val bsPayoneProperties: BsPayoneProperties)
      * @return hash
      */
     fun makeCreditCardCheckHash(pspConfigModel: PspConfigModel): String {
+        pspConfigModel.key ?: throw ApiError.ofMessage("`Key` configuration should be defined in BS_PAYONE PSP configuration").asInternalServerError()
         return calculateHash(pspConfigModel.key, pspConfigModel.accountId + bsPayoneProperties.apiVersion + pspConfigModel.merchantId +
             bsPayoneProperties.mode + pspConfigModel.portalId + BsPayoneRequestType.CREDIT_CARD_CHECK.type + RESPONSE_TYPE +
             STORE_CARD_DATA_PARAM_VALUE)

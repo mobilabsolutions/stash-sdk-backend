@@ -30,7 +30,7 @@ class AliasController(private val aliasService: AliasService) {
     @RequestMapping(method = [RequestMethod.POST],
             produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseStatus(HttpStatus.CREATED)
-    fun createAlias(@RequestHeader(value = "Public-Key") publicKey: String, @RequestHeader(value = "PSP-Type") pspType: String) = aliasService.createAlias(publicKey, pspType)
+    fun createAlias(@RequestHeader(value = "Publishable-Key") publishableKey: String, @RequestHeader(value = "PSP-Type") pspType: String) = aliasService.createAlias(publishableKey, pspType)
 
     @ApiOperation(value = "Update the given Alias for payment operations")
     @ApiResponses(
@@ -42,10 +42,10 @@ class AliasController(private val aliasService: AliasService) {
             produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun exchangeAlias(
-        @RequestHeader(value = "Public-Key") publicKey: String,
+        @RequestHeader(value = "Publishable-Key") publishableKey: String,
         @PathVariable("Alias-Id") aliasId: String,
         @Valid @RequestBody alias: AliasRequestModel
-    ) = aliasService.exchangeAlias(publicKey, aliasId, alias)
+    ) = aliasService.exchangeAlias(publishableKey, aliasId, alias)
 
     companion object {
         const val BASE_URL = "alias"

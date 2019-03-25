@@ -35,7 +35,7 @@ class ApiKeyService(
         if (merchantApiKeyList.isEmpty()) throw ApiError.ofMessage("Merchant api keys cannot be found").asBadRequest()
         val apiKeyList = merchantApiKeyList.map {
             when (it.keyType) {
-                KeyType.PUBLIC -> ApiKeyReturnInfoModel(it.id, it.name, it.keyType, it.key)
+                KeyType.PUBLISHABLE -> ApiKeyReturnInfoModel(it.id, it.name, it.keyType, it.key)
                 else -> ApiKeyReturnInfoModel(it.id, it.name, it.keyType)
             }
         }
@@ -77,7 +77,7 @@ class ApiKeyService(
                 ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
 
         return when (merchantApiKey.keyType) {
-            KeyType.PUBLIC -> ApiKeyReturnInfoModel(merchantApiKey.id, merchantApiKey.name, merchantApiKey.keyType, merchantApiKey.key)
+            KeyType.PUBLISHABLE -> ApiKeyReturnInfoModel(merchantApiKey.id, merchantApiKey.name, merchantApiKey.keyType, merchantApiKey.key)
             else -> ApiKeyReturnInfoModel(merchantApiKey.id, merchantApiKey.name, merchantApiKey.keyType)
         }
     }
