@@ -45,8 +45,8 @@ class BsPayoneHashingService(private val bsPayoneProperties: BsPayoneProperties)
      * @param key Key to be hashed
      * @return hashed key
      */
-    fun hashKey(key: String): String {
-        return Hashing.md5().hashString(key, Charsets.UTF_8).toString()
+    fun hashKey(key: String?): String {
+        return Hashing.md5().hashString(key!!, Charsets.UTF_8).toString()
     }
 
     private fun calculateHash(key: String?, data: String): String {

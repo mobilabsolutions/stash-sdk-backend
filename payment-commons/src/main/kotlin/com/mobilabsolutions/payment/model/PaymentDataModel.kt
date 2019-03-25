@@ -10,7 +10,7 @@ import javax.validation.constraints.Size
  */
 @ApiModel("Payment Data Model")
 data class PaymentDataModel(
-    @ApiModelProperty("Amount", example = "300 (Amount in smallest currency unit)")
+    @ApiModelProperty("Amount in smallest currency unit (e.g. cent)", example = "300")
     @field:NotNull
     val amount: Int,
 

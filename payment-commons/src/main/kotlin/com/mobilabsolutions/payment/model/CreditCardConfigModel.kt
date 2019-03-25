@@ -12,5 +12,8 @@ data class CreditCardConfigModel(
     val ccExpiry: String?,
 
     @ApiModelProperty(value = "Credit card type", example = "VISA")
-    val ccType: String?
+    val ccType: String?,
+
+    @ApiModelProperty(value = "Credit card holder name", example = "Max Mustermann")
+    val ccHolderName: String?
 )

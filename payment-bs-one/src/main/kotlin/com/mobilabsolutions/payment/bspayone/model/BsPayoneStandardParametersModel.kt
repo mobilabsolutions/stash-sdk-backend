@@ -11,11 +11,11 @@ import io.swagger.annotations.ApiModelProperty
 data class BsPayoneStandardParametersModel(
     @ApiModelProperty(value = "Merchant ID", example = "42865")
     @JsonProperty(value = "mid")
-    val merchantId: String,
+    val merchantId: String?,
 
     @ApiModelProperty(value = "Portal ID", example = "2030968")
     @JsonProperty(value = "portalid")
-    val portalId: String,
+    val portalId: String?,
 
     @ApiModelProperty(value = "Key", example = "1234567890")
     val key: String,

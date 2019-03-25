@@ -13,13 +13,20 @@ import javax.validation.constraints.NotNull
  */
 @ApiModel(value = "Alias Extra")
 data class AliasExtraModel(
-    @ApiModelProperty(value = "Payment service provider alias")
+    @ApiModelProperty(value = "Credit card configuration")
     @field:Valid
     val ccConfig: CreditCardConfigModel?,
 
-    @ApiModelProperty(value = "Payment service provider alias")
+    @ApiModelProperty(value = "Sepa configuration")
     @field:Valid
     val sepaConfig: SepaConfigModel?,
+
+    @ApiModelProperty(value = "PayPal configuration")
+    @field:Valid
+    val payPalConfig: PayPalConfigModel?,
+
+    @ApiModelProperty(value = "Personal data")
+    val personalData: PersonalDataModel?,
 
     @ApiModelProperty(value = "Payment method", example = "SEPA")
     @field:Enumerated(EnumType.STRING)

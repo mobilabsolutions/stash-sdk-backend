@@ -14,25 +14,27 @@ import javax.persistence.Enumerated
 data class BsPayonePaymentResponseModel(
     @ApiModelProperty(value = "BS Payone response status", example = "APPROVED")
     @field:Enumerated(EnumType.STRING)
-    val status: BsPayoneResponseStatus?,
+    val status: BsPayoneResponseStatus,
 
     @ApiModelProperty(value = "BS Payone transaction id")
     @JsonProperty(value = "txid")
     val transactionId: String?,
 
-    @ApiModelProperty(value = "BS Payone customern id")
+    @ApiModelProperty(value = "BS Payone customer id")
     @JsonProperty(value = "userid")
     val customerId: String?,
 
     @ApiModelProperty(value = "BS Payone error code")
     @JsonProperty(value = "errorcode")
-    val errorCode: String?,
+    val errorCode: String,
 
     @ApiModelProperty(value = "BS Payone error message")
     @JsonProperty(value = "errormessage")
-    val errorMessage: String?,
+    val errorMessage: String,
 
     @ApiModelProperty(value = "BS Payone customer message")
     @JsonProperty(value = "customermessage")
     val customerMessage: String?
-)
+) {
+    fun hasError() = status == BsPayoneResponseStatus.ERROR
+}
