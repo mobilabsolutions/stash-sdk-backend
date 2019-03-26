@@ -8,8 +8,8 @@ import javax.validation.constraints.NotNull
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
-@ApiModel("Authorize Request Model")
-data class AuthorizeRequestModel(
+@ApiModel("Payment Request Model")
+data class PaymentRequestModel(
     @ApiModelProperty("Alias ID", example = "JipfjLKL6BkTIREaRGyX")
     @field:NotNull
     val aliasId: String,

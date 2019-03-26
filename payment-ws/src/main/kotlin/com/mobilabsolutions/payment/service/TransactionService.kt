@@ -9,11 +9,12 @@ import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
-import com.mobilabsolutions.payment.model.AuthorizeRequestModel
-import com.mobilabsolutions.payment.model.AuthorizeResponseModel
 import com.mobilabsolutions.payment.model.PaymentInfoModel
+import com.mobilabsolutions.payment.model.PaymentRequestModel
+import com.mobilabsolutions.payment.model.PaymentResponseModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.server.commons.exception.ApiError
+import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -37,11 +38,11 @@ class TransactionService(
      *
      * @param secretKey Secret key
      * @param idempotentKey Idempotent key
-     * @param authorizeInfo Authorization information
-     * @return Authorization response model
+     * @param authorizeInfo Payment information
+     * @return Payment response model
      */
-    fun authorize(secretKey: String, idempotentKey: String, authorizeInfo: AuthorizeRequestModel): ResponseEntity<AuthorizeResponseModel> {
-        return executeIdempotentTransactionOperation(secretKey, idempotentKey, authorizeInfo, TransactionAction.AUTH)
+    fun authorize(secretKey: String, idempotentKey: String, paymentInfo: PaymentRequestModel): ResponseEntity<PaymentResponseModel> {
+        return executeIdempotentTransactionOperation(secretKey, idempotentKey, paymentInfo, TransactionAction.AUTH)
     }
 
     /**
@@ -49,50 +50,95 @@ class TransactionService(
      *
      * @param secretKey Secret key
      * @param idempotentKey Idempotent key
-     * @param authorizeInfo Authorization information
-     * @return Authorization response model
+     * @param authorizeInfo Payment information
+     * @return Payment response model
      */
-    fun preauthorize(secretKey: String, idempotentKey: String, authorizeInfo: AuthorizeRequestModel): ResponseEntity<AuthorizeResponseModel> {
-        return executeIdempotentTransactionOperation(secretKey, idempotentKey, authorizeInfo, TransactionAction.PREAUTH)
+    fun preauthorize(secretKey: String, idempotentKey: String, paymentInfo: PaymentRequestModel): ResponseEntity<PaymentResponseModel> {
+        return executeIdempotentTransactionOperation(secretKey, idempotentKey, paymentInfo, TransactionAction.PREAUTH)
     }
 
-    private fun executeIdempotentTransactionOperation(secretKey: String, idempotentKey: String, authorizeInfo: AuthorizeRequestModel, transactionAction: TransactionAction): ResponseEntity<AuthorizeResponseModel> {
+    /**
+     * Capture transaction
+     *
+     * @param secretKey Secret key
+     * @param transactionId Transaction ID
+     * @return Payment response model
+     */
+    fun capture(secretKey: String, transactionId: String): ResponseEntity<PaymentResponseModel> {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
             ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
-        val alias = aliasRepository.getFirstById(authorizeInfo.aliasId)
-            ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
-        val extra = objectMapper.readValue(alias.extra
-            ?: throw ApiError.ofMessage("Used alias is incomplete, please define a payment configuration on related alias").asInternalServerError(), AliasExtraModel::class.java)
+        val preauthTransaction = transactionRepository.getByTransactionIdAndAction(transactionId, TransactionAction.PREAUTH)
+            ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
+        if (preauthTransaction.merchant.id != apiKey.merchant.id)
+            throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
 
-        val paymentInfoModel = PaymentInfoModel(extra,
-            objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java))
+        val paymentInfoModel = PaymentInfoModel(objectMapper.readValue(preauthTransaction.alias?.extra, AliasExtraModel::class.java), objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java))
 
         when {
-            transactionRepository.getIdByIdempotentKeyAndAction(idempotentKey, TransactionAction.AUTH) == null -> {
-                val transaction = Transaction(
-                    transactionId = RandomStringUtils.randomAlphanumeric(PreauthorizationService.STRING_LENGTH),
-                    idempotentKey = idempotentKey,
-                    currencyId = authorizeInfo.paymentData.currency,
-                    amount = authorizeInfo.paymentData.amount,
-                    reason = authorizeInfo.paymentData.reason,
+            transactionRepository.getByTransactionIdAndAction(transactionId, TransactionAction.CAPTURE) == null -> {
+                val captureTransaction = Transaction(
+                    transactionId = transactionId,
+                    idempotentKey = preauthTransaction.idempotentKey,
+                    currencyId = preauthTransaction.currencyId,
+                    amount = preauthTransaction.amount,
+                    reason = preauthTransaction.reason,
                     status = TransactionStatus.SUCCESS,
-                    action = TransactionAction.AUTH,
+                    action = TransactionAction.CAPTURE,
+                    paymentMethod = preauthTransaction.paymentMethod,
+                    paymentInfo = objectMapper.writeValueAsString(paymentInfoModel),
+                    merchantTransactionId = preauthTransaction.merchantTransactionId,
+                    merchantCustomerId = preauthTransaction.merchantCustomerId,
+                    merchant = preauthTransaction.merchant,
+                    alias = preauthTransaction.alias
+                )
+                transactionRepository.save(captureTransaction)
+
+                return ResponseEntity.status(HttpStatus.OK).body(PaymentResponseModel(captureTransaction.transactionId, captureTransaction.amount, captureTransaction.currencyId, captureTransaction.status, captureTransaction.action))
+            }
+            else -> return ResponseEntity.status(HttpStatus.OK).body(null)
+        }
+    }
+
+    fun executeIdempotentTransactionOperation(secretKey: String, idempotentKey: String, paymentInfo: PaymentRequestModel, transactionAction: TransactionAction): ResponseEntity<PaymentResponseModel> {
+        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
+            ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
+        val alias = aliasRepository.getFirstById(paymentInfo.aliasId)
+            ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+        val extra = objectMapper.readValue(alias.extra
+            ?: throw ApiError.ofMessage("Used alias is incomplete, please define a payment configuration on related alias").asBadRequest(), AliasExtraModel::class.java)
+
+        val paymentInfoModel = PaymentInfoModel(extra, objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java))
+
+        when {
+            transactionRepository.getIdByIdempotentKeyAndAction(idempotentKey, transactionAction) == null -> {
+                val transaction = Transaction(
+                    transactionId = RandomStringUtils.randomAlphanumeric(TransactionService.STRING_LENGTH),
+                    idempotentKey = idempotentKey,
+                    currencyId = paymentInfo.paymentData.currency,
+                    amount = paymentInfo.paymentData.amount,
+                    reason = paymentInfo.paymentData.reason,
+                    status = TransactionStatus.SUCCESS,
+                    action = transactionAction,
                     paymentMethod = extra.paymentMethod,
                     paymentInfo = objectMapper.writeValueAsString(paymentInfoModel),
-                    merchantTransactionId = authorizeInfo.purchaseId,
-                    merchantCustomerId = authorizeInfo.customerId,
+                    merchantTransactionId = paymentInfo.purchaseId,
+                    merchantCustomerId = paymentInfo.customerId,
                     merchant = apiKey.merchant,
                     alias = alias
                 )
                 transactionRepository.save(transaction)
 
                 return ResponseEntity.status(HttpStatus.CREATED).body(
-                    AuthorizeResponseModel(transaction.transactionId, transaction.amount,
+                    PaymentResponseModel(transaction.transactionId, transaction.amount,
                         transaction.currencyId, transaction.status, transaction.action)
                 )
             }
-            transactionRepository.getIdByIdempotentKeyAndActionAndGivenBody(idempotentKey, TransactionAction.AUTH, authorizeInfo) != null -> return ResponseEntity.status(HttpStatus.OK).body(null)
+            transactionRepository.getIdByIdempotentKeyAndActionAndGivenBody(idempotentKey, transactionAction, paymentInfo) != null -> return ResponseEntity.status(HttpStatus.OK).body(null)
             else -> throw ApiError.ofMessage("There is already a transaction with given idempotent key").asBadRequest()
         }
+    }
+
+    companion object : KLogging() {
+        const val STRING_LENGTH = 20
     }
 }

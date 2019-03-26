@@ -8,8 +8,8 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
-@ApiModel("Authorize Response Model")
-data class AuthorizeResponseModel(
+@ApiModel("Payment Response Model")
+data class PaymentResponseModel(
     @ApiModelProperty("Transaction ID")
     val id: String?,
 
