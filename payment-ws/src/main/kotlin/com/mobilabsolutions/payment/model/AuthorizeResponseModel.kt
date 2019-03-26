@@ -6,10 +6,10 @@ import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
 /**
- * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
+ * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
-@ApiModel("Preauthorize Response Model")
-data class PreauthorizeResponseModel(
+@ApiModel("Authorize Response Model")
+data class AuthorizeResponseModel(
     @ApiModelProperty("Transaction ID")
     val id: String?,
 
@@ -19,9 +19,9 @@ data class PreauthorizeResponseModel(
     @ApiModelProperty("Currency")
     val currency: String?,
 
-    @ApiModelProperty("Status")
+    @ApiModelProperty("Transaction Status")
     val status: TransactionStatus?,
 
-    @ApiModelProperty("Action")
+    @ApiModelProperty("Transaction Action")
     val action: TransactionAction?
 )

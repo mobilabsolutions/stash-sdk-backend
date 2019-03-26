@@ -5,11 +5,12 @@ import com.mobilabsolutions.payment.data.domain.Alias
 import com.mobilabsolutions.payment.data.domain.Merchant
 import com.mobilabsolutions.payment.data.domain.MerchantApiKey
 import com.mobilabsolutions.payment.data.enum.KeyType
+import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
+import com.mobilabsolutions.payment.model.AuthorizeRequestModel
 import com.mobilabsolutions.payment.model.PaymentDataModel
-import com.mobilabsolutions.payment.model.PreauthorizeRequestModel
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
@@ -42,6 +42,9 @@ class PreauthorizationServiceTest {
     private val wrongSecretKey = "wrong key"
     private val correctAliasId = "correct alias id"
     private val wrongAliasId = "wrong alias id"
+    private val purchaseId = "purchase id"
+    private val customerId = "customer id"
+    private val preauthStatus = TransactionAction.PREAUTH
     private val correctPaymentData = PaymentDataModel(1, "EUR", "reason")
     private val wrongPaymentData = PaymentDataModel(2, "EUR", "reason")
     private val pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
@@ -73,52 +76,52 @@ class PreauthorizationServiceTest {
         `when`(aliasIdRepository.getFirstById(correctAliasId)).thenReturn(
                 Alias(active = true, extra = extra)
         )
-        `when`(transactionRepository.getIdByIdempotentKey(newIdempotentKey)).thenReturn(null)
-        `when`(transactionRepository.getIdByIdempotentKey(usedIdempotentKey)).thenReturn(1)
-        `when`(transactionRepository.getIdByIdempotentKeyAndGivenBody(newIdempotentKey, PreauthorizeRequestModel(correctAliasId, correctPaymentData, ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))).thenReturn(1)
-        `when`(transactionRepository.getIdByIdempotentKeyAndGivenBody(newIdempotentKey, PreauthorizeRequestModel(correctAliasId, wrongPaymentData, ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))).thenReturn(null)
+        `when`(transactionRepository.getIdByIdempotentKeyAndAction(newIdempotentKey, preauthStatus)).thenReturn(null)
+        `when`(transactionRepository.getIdByIdempotentKeyAndAction(usedIdempotentKey, preauthStatus)).thenReturn(1)
+        `when`(transactionRepository.getIdByIdempotentKeyAndActionAndGivenBody(newIdempotentKey, preauthStatus, AuthorizeRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId))).thenReturn(1)
+        `when`(transactionRepository.getIdByIdempotentKeyAndActionAndGivenBody(newIdempotentKey, preauthStatus, AuthorizeRequestModel(correctAliasId, wrongPaymentData, purchaseId, customerId))).thenReturn(null)
     }
 
     @Test
     fun `preauthorize transaction with wrong secret key`() {
         Assertions.assertThrows(ApiException::class.java) {
-            preauthorizationService.preauthorize(wrongSecretKey, usedIdempotentKey, Mockito.mock(PreauthorizeRequestModel::class.java))
+            preauthorizationService.preauthorize(wrongSecretKey, usedIdempotentKey, Mockito.mock(AuthorizeRequestModel::class.java))
         }
     }
 
     @Test
     fun `preauthorize transaction with correct secret key`() {
-        preauthorizationService.preauthorize(correctSecretKey, newIdempotentKey, PreauthorizeRequestModel(correctAliasId, correctPaymentData, "1", "1"))
+        preauthorizationService.preauthorize(correctSecretKey, newIdempotentKey, AuthorizeRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId))
     }
 
     @Test
     fun `preauthorize transaction with wrong alias id`() {
         Assertions.assertThrows(ApiException::class.java) {
-            preauthorizationService.preauthorize(correctSecretKey, newIdempotentKey, PreauthorizeRequestModel(wrongAliasId, correctPaymentData, "1", "1"))
+            preauthorizationService.preauthorize(correctSecretKey, newIdempotentKey, AuthorizeRequestModel(wrongAliasId, correctPaymentData, purchaseId, customerId))
         }
     }
 
     @Test
     fun `preauthorize transaction with correct alias id`() {
-        preauthorizationService.preauthorize(correctSecretKey, newIdempotentKey, PreauthorizeRequestModel(correctAliasId, correctPaymentData, "1", "1"))
+        preauthorizationService.preauthorize(correctSecretKey, newIdempotentKey, AuthorizeRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId))
     }
 
     @Test
     fun `preauthorize transaction with used payment data`() {
         Assertions.assertThrows(ApiException::class.java) {
-            preauthorizationService.preauthorize(correctSecretKey, newIdempotentKey, PreauthorizeRequestModel(wrongAliasId, wrongPaymentData, "1", "1"))
+            preauthorizationService.preauthorize(correctSecretKey, newIdempotentKey, AuthorizeRequestModel(wrongAliasId, wrongPaymentData, purchaseId, customerId))
         }
     }
 
     @Test
     fun `preauthorize transaction with new idempotent key`() {
-        val responseEntity = preauthorizationService.preauthorize(correctSecretKey, newIdempotentKey, PreauthorizeRequestModel(correctAliasId, correctPaymentData, "1", "1"))
+        val responseEntity = preauthorizationService.preauthorize(correctSecretKey, newIdempotentKey, AuthorizeRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId))
         Assertions.assertEquals(responseEntity.statusCode, HttpStatus.CREATED)
     }
 
     @Test
     fun `preauthorize transaction with used idempotent key`() {
-        val responseEntity = preauthorizationService.preauthorize(correctSecretKey, usedIdempotentKey, PreauthorizeRequestModel(correctAliasId, correctPaymentData, "1", "1"))
+        val responseEntity = preauthorizationService.preauthorize(correctSecretKey, usedIdempotentKey, AuthorizeRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId))
         Assertions.assertEquals(responseEntity.statusCode, HttpStatus.OK)
     }
 }

@@ -1,7 +1,7 @@
 package com.mobilabsolutions.payment.controller
 
-import com.mobilabsolutions.payment.model.PreauthorizeRequestModel
-import com.mobilabsolutions.payment.model.PreauthorizeResponseModel
+import com.mobilabsolutions.payment.model.AuthorizeRequestModel
+import com.mobilabsolutions.payment.model.AuthorizeResponseModel
 import com.mobilabsolutions.payment.service.PreauthorizationService
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
@@ -21,11 +21,11 @@ import javax.validation.Valid
 @RequestMapping(PreAuthorizationController.BASE_URL)
 class PreAuthorizationController(private val preauthorizationService: PreauthorizationService) {
 
-    @ApiOperation(value = "Authorize transaction")
+    @ApiOperation(value = "Preauthorize transaction")
     @ApiResponses(
-        ApiResponse(code = 200, message = "Authorization check successful"),
-        ApiResponse(code = 201, message = "Successfully authorized transaction"),
-        ApiResponse(code = 400, message = "Failed to authorize transaction"),
+        ApiResponse(code = 200, message = "Preauthorization check successful"),
+        ApiResponse(code = 201, message = "Successfully preauthorized transaction"),
+        ApiResponse(code = 400, message = "Failed to preauthorize transaction"),
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 404, message = "Not found")
     )
@@ -33,11 +33,11 @@ class PreAuthorizationController(private val preauthorizationService: Preauthori
     fun preauthorizeTransaction(
         @RequestHeader(value = "Secret-Key") secretKey: String,
         @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
-        @Valid @RequestBody preauthorizeInfo: PreauthorizeRequestModel
-    ): ResponseEntity<PreauthorizeResponseModel> =
-        preauthorizationService.preauthorize(secretKey, idempotentKey, preauthorizeInfo)
+        @Valid @RequestBody authorizeInfo: AuthorizeRequestModel
+    ): ResponseEntity<AuthorizeResponseModel> =
+        preauthorizationService.preauthorize(secretKey, idempotentKey, authorizeInfo)
 
     companion object {
-        const val BASE_URL = "preauthorization"
+        const val BASE_URL = "preauthorization1"
     }
 }
