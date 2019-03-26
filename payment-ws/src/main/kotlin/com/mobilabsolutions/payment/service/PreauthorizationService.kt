@@ -9,11 +9,12 @@ import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
-import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PaymentInfoModel
 import com.mobilabsolutions.payment.model.PreauthorizeRequestModel
 import com.mobilabsolutions.payment.model.PreauthorizeResponseModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
+import com.mobilabsolutions.payment.model.CaptureResponseModel
+import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
@@ -91,7 +92,10 @@ class PreauthorizationService(
      * @param transactionId Transaction ID
      * @return Preauthorization response model
      */
-    fun capture(secretKey: String, transactionId: String): PreauthorizeResponseModel {
+    fun capture(secretKey: String, transactionId: String): ResponseEntity<CaptureResponseModel> {
+        if (transactionRepository.getByTransactionIdAndAction(transactionId, TransactionAction.CAPTURE) != null)
+            return ResponseEntity.status(HttpStatus.OK).body(null)
+
         val transaction = transactionRepository.getByTransactionIdAndAction(transactionId, TransactionAction.AUTH)
             ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
@@ -99,9 +103,8 @@ class PreauthorizationService(
 
         if (transaction.merchant.id != apiKey.merchant.id)
             throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
-
         val paymentInfo = PaymentInfoModel(objectMapper.readValue(transaction.alias?.extra, AliasExtraModel::class.java),
-                objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java))
+            objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java))
 
         val newTransaction = Transaction(
             transactionId = transactionId,
@@ -120,8 +123,8 @@ class PreauthorizationService(
         )
         transactionRepository.save(newTransaction)
 
-        return PreauthorizeResponseModel(newTransaction.transactionId, newTransaction.amount, newTransaction.currencyId,
-            newTransaction.status, newTransaction.action)
+        return ResponseEntity.status(HttpStatus.CREATED).body(CaptureResponseModel(newTransaction.transactionId,
+            newTransaction.amount, newTransaction.currencyId, newTransaction.status, newTransaction.action))
     }
 
     companion object : KLogging() {

@@ -46,6 +46,8 @@ class PreauthorizationServiceTest {
     private val wrongAliasId = "wrong alias id"
     private val correctTransactionId = "correct transaction id"
     private val wrongTransactionId = "wrong transaction id"
+    private val correctTransactionIdWithoutAuth = "correct transaction id without auth"
+    private val correctTransactionIdAlreadyCaptured = "correct transaction id already captured"
     private val correctPaymentData = PaymentDataModel(1, "EUR", "reason")
     private val wrongPaymentData = PaymentDataModel(2, "EUR", "reason")
     private val pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
@@ -71,19 +73,15 @@ class PreauthorizationServiceTest {
     @BeforeAll
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
-        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, correctSecretKey)).thenReturn(
-            MerchantApiKey(active = true, merchant = Merchant("1", pspConfig = pspConfig))
-        )
-        `when`(aliasIdRepository.getFirstById(correctAliasId)).thenReturn(
-            Alias(active = true, extra = extra)
-        )
+        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, correctSecretKey)).thenReturn(MerchantApiKey(active = true, merchant = Merchant("1", pspConfig = pspConfig)))
+        `when`(aliasIdRepository.getFirstById(correctAliasId)).thenReturn(Alias(active = true, extra = extra))
         `when`(transactionRepository.getIdByIdempotentKey(newIdempotentKey)).thenReturn(null)
         `when`(transactionRepository.getIdByIdempotentKey(usedIdempotentKey)).thenReturn(1)
         `when`(transactionRepository.getIdByIdempotentKeyAndGivenBody(newIdempotentKey, PreauthorizeRequestModel(correctAliasId, correctPaymentData, ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))).thenReturn(1)
         `when`(transactionRepository.getIdByIdempotentKeyAndGivenBody(newIdempotentKey, PreauthorizeRequestModel(correctAliasId, wrongPaymentData, ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))).thenReturn(null)
-        `when`(transactionRepository.getByTransactionIdAndAction(correctTransactionId, TransactionAction.AUTH)).thenReturn(
-            Transaction(amount = 1, merchant = Merchant("1", pspConfig = pspConfig), alias = Alias(active = true, extra = extra))
-        )
+        `when`(transactionRepository.getByTransactionIdAndAction(correctTransactionId, TransactionAction.AUTH)).thenReturn(Transaction(amount = 1, merchant = Merchant("1", pspConfig = pspConfig), alias = Alias(active = true, extra = extra)))
+        `when`(transactionRepository.getByTransactionIdAndAction(correctTransactionIdWithoutAuth, TransactionAction.AUTH)).thenReturn(null)
+        `when`(transactionRepository.getByTransactionIdAndAction(correctTransactionIdAlreadyCaptured, TransactionAction.CAPTURE)).thenReturn(Transaction(amount = 1, merchant = Merchant("1", pspConfig = pspConfig), alias = Alias(active = true, extra = extra)))
     }
 
     @Test
@@ -137,7 +135,28 @@ class PreauthorizationServiceTest {
     }
 
     @Test
-    fun `capture transaction with correct transaction id`() {
-        preauthorizationService.capture(correctSecretKey, correctTransactionId)
+    fun `capture transaction with wrong secret key`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            preauthorizationService.capture(wrongSecretKey, correctTransactionId)
+        }
+    }
+
+    @Test
+    fun `capture transaction successfully`() {
+        val responseEntity = preauthorizationService.capture(correctSecretKey, correctTransactionId)
+        Assertions.assertEquals(responseEntity.statusCode, HttpStatus.CREATED)
+    }
+
+    @Test
+    fun `capture transaction without prior transaction of type auth`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            preauthorizationService.capture(correctSecretKey, correctTransactionIdWithoutAuth)
+        }
+    }
+
+    @Test
+    fun `capture transaction that already has been captured`() {
+        val responseEntity = preauthorizationService.capture(correctSecretKey, correctTransactionIdAlreadyCaptured)
+        Assertions.assertEquals(responseEntity.statusCode, HttpStatus.OK)
     }
 }
