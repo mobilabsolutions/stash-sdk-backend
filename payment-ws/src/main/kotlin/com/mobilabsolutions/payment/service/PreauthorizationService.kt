@@ -96,7 +96,7 @@ class PreauthorizationService(
         if (transactionRepository.getByTransactionIdAndAction(transactionId, TransactionAction.CAPTURE) != null)
             return ResponseEntity.status(HttpStatus.OK).body(null)
 
-        val transaction = transactionRepository.getByTransactionIdAndAction(transactionId, TransactionAction.AUTH)
+        val transaction = transactionRepository.getByTransactionIdAndAction(transactionId, TransactionAction.PREAUTH)
             ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
             ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()

@@ -79,8 +79,8 @@ class PreauthorizationServiceTest {
         `when`(transactionRepository.getIdByIdempotentKey(usedIdempotentKey)).thenReturn(1)
         `when`(transactionRepository.getIdByIdempotentKeyAndGivenBody(newIdempotentKey, PreauthorizeRequestModel(correctAliasId, correctPaymentData, ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))).thenReturn(1)
         `when`(transactionRepository.getIdByIdempotentKeyAndGivenBody(newIdempotentKey, PreauthorizeRequestModel(correctAliasId, wrongPaymentData, ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))).thenReturn(null)
-        `when`(transactionRepository.getByTransactionIdAndAction(correctTransactionId, TransactionAction.AUTH)).thenReturn(Transaction(amount = 1, merchant = Merchant("1", pspConfig = pspConfig), alias = Alias(active = true, extra = extra)))
-        `when`(transactionRepository.getByTransactionIdAndAction(correctTransactionIdWithoutAuth, TransactionAction.AUTH)).thenReturn(null)
+        `when`(transactionRepository.getByTransactionIdAndAction(correctTransactionId, TransactionAction.PREAUTH)).thenReturn(Transaction(amount = 1, merchant = Merchant("1", pspConfig = pspConfig), alias = Alias(active = true, extra = extra)))
+        `when`(transactionRepository.getByTransactionIdAndAction(correctTransactionIdWithoutAuth, TransactionAction.PREAUTH)).thenReturn(null)
         `when`(transactionRepository.getByTransactionIdAndAction(correctTransactionIdAlreadyCaptured, TransactionAction.CAPTURE)).thenReturn(Transaction(amount = 1, merchant = Merchant("1", pspConfig = pspConfig), alias = Alias(active = true, extra = extra)))
     }
 
