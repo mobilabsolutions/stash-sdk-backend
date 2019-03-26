@@ -48,7 +48,7 @@ class PreauthorizationService(
          */
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
                 ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
-        val alias = aliasRepository.getFirstById(preauthorizeInfo.aliasId)
+        val alias = aliasRepository.getFirstByIdAndActive(preauthorizeInfo.aliasId, true)
                 ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         val extra = objectMapper.readValue(alias.extra ?: throw ApiError.ofMessage("Used alias is incomplete, please define a payment configuration on related alias").asInternalServerError(), AliasExtraModel::class.java)
 

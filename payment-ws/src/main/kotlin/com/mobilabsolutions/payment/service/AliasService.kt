@@ -67,7 +67,7 @@ class AliasService(
      */
     fun exchangeAlias(publishableKey: String, aliasId: String, aliasRequestModel: AliasRequestModel) {
         merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofMessage("Publishable Key cannot be found").asBadRequest()
-        aliasRepository.getFirstById(aliasId) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+        aliasRepository.getFirstByIdAndActive(aliasId, true) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         val extra = if (aliasRequestModel.extra != null) objectMapper.writeValueAsString(aliasRequestModel.extra) else null
         aliasRepository.updateAlias(aliasRequestModel.pspAlias, extra, aliasId)
     }
@@ -79,6 +79,8 @@ class AliasService(
      */
     fun deleteAlias(secretKey: String, aliasId: String) {
         merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey) ?: throw ApiError.ofMessage("Secret Key cannot be found").asBadRequest()
-        if (aliasRepository.deleteAliasById(aliasId) == 0) throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+        val alias = aliasRepository.getFirstByIdAndActive(aliasId, true) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+        alias.active = false
+        aliasRepository.save(alias)
     }
 }

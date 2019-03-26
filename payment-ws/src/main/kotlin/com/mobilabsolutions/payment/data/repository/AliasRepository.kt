@@ -11,11 +11,9 @@ import org.springframework.stereotype.Repository
  */
 @Repository
 interface AliasRepository : BaseRepository<Alias, String> {
-    fun getFirstById(id: String): Alias?
+    fun getFirstByIdAndActive(id: String, active: Boolean): Alias?
 
     @Modifying
     @Query("UPDATE Alias a SET a.pspAlias = :pspAlias, a.extra = :extra, a.lastModifiedDate = CURRENT_TIMESTAMP WHERE a.id = :aliasId")
     fun updateAlias(@Param("pspAlias") pspAlias: String?, @Param("extra") extra: String?, @Param("aliasId") aliasId: String)
-
-    fun deleteAliasById(aliasId: String): Int
 }

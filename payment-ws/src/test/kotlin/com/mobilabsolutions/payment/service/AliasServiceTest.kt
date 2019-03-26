@@ -85,10 +85,8 @@ class AliasServiceTest {
             ArgumentMatchers.anyString()
         )
         `when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(Mockito.mock(Psp::class.java))
-        `when`(aliasRepository.getFirstById(unknownAliasId)).thenReturn(null)
-        `when`(aliasRepository.getFirstById(knownAliasId)).thenReturn(Mockito.mock(Alias::class.java))
-        `when`(aliasRepository.deleteAliasById(unknownAliasId)).thenReturn(0)
-        `when`(aliasRepository.deleteAliasById(knownAliasId)).thenReturn(1)
+        `when`(aliasRepository.getFirstByIdAndActive(unknownAliasId, active = true)).thenReturn(null)
+        `when`(aliasRepository.getFirstByIdAndActive(knownAliasId, active = true)).thenReturn(Mockito.mock(Alias::class.java))
     }
 
     @Test

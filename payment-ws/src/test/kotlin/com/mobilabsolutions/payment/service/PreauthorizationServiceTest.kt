@@ -74,7 +74,7 @@ class PreauthorizationServiceTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
         `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, correctSecretKey)).thenReturn(MerchantApiKey(active = true, merchant = Merchant("1", pspConfig = pspConfig)))
-        `when`(aliasIdRepository.getFirstById(correctAliasId)).thenReturn(Alias(active = true, extra = extra))
+        `when`(aliasIdRepository.getFirstByIdAndActive(correctAliasId, true)).thenReturn(Alias(active = true, extra = extra))
         `when`(transactionRepository.getIdByIdempotentKey(newIdempotentKey)).thenReturn(null)
         `when`(transactionRepository.getIdByIdempotentKey(usedIdempotentKey)).thenReturn(1)
         `when`(transactionRepository.getIdByIdempotentKeyAndGivenBody(newIdempotentKey, PreauthorizeRequestModel(correctAliasId, correctPaymentData, ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))).thenReturn(1)
