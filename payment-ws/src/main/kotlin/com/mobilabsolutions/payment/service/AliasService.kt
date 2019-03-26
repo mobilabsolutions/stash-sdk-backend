@@ -71,4 +71,14 @@ class AliasService(
         val extra = if (aliasRequestModel.extra != null) objectMapper.writeValueAsString(aliasRequestModel.extra) else null
         aliasRepository.updateAlias(aliasRequestModel.pspAlias, extra, aliasId)
     }
+
+    /**
+     * Delete an alias using secret key
+     *
+     * @param secretKey Secret key
+     */
+    fun deleteAlias(secretKey: String, aliasId: String) {
+        merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey) ?: throw ApiError.ofMessage("Secret Key cannot be found").asBadRequest()
+        if (aliasRepository.deleteAliasById(aliasId) == 0) throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+    }
 }

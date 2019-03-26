@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
@@ -47,8 +48,23 @@ class AliasController(private val aliasService: AliasService) {
         @Valid @RequestBody alias: AliasRequestModel
     ) = aliasService.exchangeAlias(publishableKey, aliasId, alias)
 
+    @ApiOperation(value = "Delete an Alias")
+    @ApiResponses(
+        ApiResponse(code = 204, message = "Successfully deleted an Alias"),
+        ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 404, message = "Resource not found")
+    )
+    @RequestMapping(DELETE_ALIAS_URL, method = [RequestMethod.DELETE])
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority('admin')")
+    fun deleteAlias(
+        @RequestHeader(value = "Secret-Key") secretKey: String,
+        @PathVariable("Alias-Id") aliasId: String
+    ) = aliasService.deleteAlias(secretKey, aliasId)
+
     companion object {
         const val BASE_URL = "alias"
         const val EXCHANGE_ALIAS_URL = "/{Alias-Id}"
+        const val DELETE_ALIAS_URL = "/{Alias-Id}"
     }
 }
