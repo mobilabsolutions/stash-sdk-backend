@@ -87,10 +87,10 @@ class BsPayonePspTest {
         )
     }
 
-//    @Test
-//    fun `preauthorize transaction with correct alias id`() {
-//        bsPayonePsp.preauthorize(PaymentRequestModel(correctAliasId, PaymentDataModel(300, "EUR", "Book"), "1", "1"))
-//    }
+    @Test
+    fun `preauthorize transaction with correct alias id`() {
+        bsPayonePsp.preauthorize(PaymentRequestModel(correctAliasId, PaymentDataModel(300, "EUR", "Book"), "1", "1"))
+    }
 
     @Test
     fun `preauthorize transaction with wrong alias id`() {
