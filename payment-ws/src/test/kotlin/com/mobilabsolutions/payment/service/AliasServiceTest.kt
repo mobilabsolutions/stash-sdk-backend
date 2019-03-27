@@ -40,6 +40,8 @@ import org.mockito.quality.Strictness
 class AliasServiceTest {
     private val knownPublishableKey = "some publishable key"
     private val unknownPublishableKey = "other publishable key"
+    private val knownSecretKey = "some secret key"
+    private val unknownSecretKey = "other secret key"
     private val knownAliasId = "some alias id"
     private val unknownAliasId = "other alias id"
     private val pspType = "some psp type"
@@ -67,23 +69,27 @@ class AliasServiceTest {
 
         `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, unknownPublishableKey))
             .thenReturn(null)
-
         `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, knownPublishableKey))
             .thenReturn(MerchantApiKey(merchant = Merchant(id = "mobilab",
                 pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
                 " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")))
-
+        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, unknownSecretKey))
+            .thenReturn(null)
+        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, knownSecretKey))
+            .thenReturn(MerchantApiKey(merchant = Merchant(id = "mobilab",
+                pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
+                " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")))
         doNothing().`when`(aliasRepository).updateAlias(
             ArgumentMatchers.anyString(),
             ArgumentMatchers.anyString(),
             ArgumentMatchers.anyString()
         )
-
         `when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(Mockito.mock(Psp::class.java))
-
-        `when`(aliasRepository.getFirstById(unknownAliasId)).thenReturn(null)
-
-        `when`(aliasRepository.getFirstById(knownAliasId)).thenReturn(Mockito.mock(Alias::class.java))
+        `when`(aliasRepository.getFirstByIdAndActive(unknownAliasId, active = true)).thenReturn(null)
+        `when`(aliasRepository.getFirstByIdAndActive(knownAliasId, active = true))
+            .thenReturn(Alias(merchant = Merchant(id = "mobilab",
+            pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
+            " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")))
     }
 
     @Test
@@ -115,5 +121,24 @@ class AliasServiceTest {
     @Test
     fun `exchange alias successfully`() {
         aliasService.exchangeAlias(knownPublishableKey, knownAliasId, AliasRequestModel(pspAlias, Mockito.mock(AliasExtraModel::class.java)))
+    }
+
+    @Test
+    fun `delete alias with wrong secret key`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            aliasService.deleteAlias(unknownSecretKey, knownAliasId)
+        }
+    }
+
+    @Test
+    fun `delete alias with wrong alias id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            aliasService.deleteAlias(knownSecretKey, unknownAliasId)
+        }
+    }
+
+    @Test
+    fun `delete alias successfully`() {
+        aliasService.deleteAlias(knownSecretKey, knownAliasId)
     }
 }

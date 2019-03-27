@@ -85,7 +85,7 @@ class TransactionServiceTest {
         ).thenReturn(
             MerchantApiKey(active = true, merchant = Merchant("1", pspConfig = pspConfig))
         )
-        Mockito.`when`(aliasIdRepository.getFirstById(correctAliasId)).thenReturn(
+        Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(correctAliasId, true)).thenReturn(
             Alias(active = true, extra = extra)
         )
         Mockito.`when`(transactionRepository.getIdByIdempotentKeyAndAction(newIdempotentKey, preauthStatus))
