@@ -40,7 +40,7 @@ class Transaction(
     var currencyId: String? = null,
 
     @Column(name = "amount")
-    var amount: Int = 0,
+    var amount: Int? = 0,
 
     @Column(name = "reason")
     var reason: String? = null,

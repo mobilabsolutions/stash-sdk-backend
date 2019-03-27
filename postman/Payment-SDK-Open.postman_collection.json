@@ -757,12 +757,12 @@
 							},
 							{
 								"key": "Secret-Key",
-								"value": "Tika-5OqpftqPh8vrvyL3UooS",
+								"value": "",
 								"type": "text"
 							},
 							{
 								"key": "Idempotent-Key",
-								"value": "1",
+								"value": "",
 								"type": "text"
 							}
 						],
@@ -775,13 +775,19 @@
 					"response": []
 				},
 				{
-					"name": "Capture",
+					"name": "Capture Payment",
 					"request": {
 						"method": "PUT",
 						"header": [
 							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
 								"key": "Secret-Key",
-								"value": "Tika-5OqpftqPh8vrvyL3UooS",
+								"value": "",
 								"type": "text"
 							}
 						],
@@ -789,7 +795,43 @@
 							"mode": "raw",
 							"raw": ""
 						},
-						"url": "{{wsEndpoint}}/api/v1/preauthorization/txrN5dbKJ3NS0VLbyDN4/capture"
+						"url": "{{wsEndpoint}}/api/v1/preauthorization/{Transaction-Id}/capture"
+					},
+					"response": []
+				},
+				{
+					"name": "Authorize Payment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": ""
+							}
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Secret-Key",
+								"value": "",
+								"type": "text"
+							},
+							{
+								"key": "Idempotent-Key",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"aliasId\": \"JipfjLKL3BKvIREaRGyM\",\n\t\"paymentData\": {\n\t\t\"amount\": \"20\",\n\t\t\"currency\": \"CAD\",\n\t\t\"reason\": \"reason\"\n\t},\n\t\"purchaseId\": \"1\",\n\t\"customerId\": \"1\"\n}"
+						},
+						"url": "{{wsEndpoint}}/api/v1/authorization"
 					},
 					"response": []
 				}
