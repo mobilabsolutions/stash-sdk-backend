@@ -60,7 +60,7 @@ class BsPayonePsp(
     }
 
     override fun preauthorize(preauthorizeRequestModel: PaymentRequestModel, reference: String?): PspPaymentResponseModel {
-        val alias = aliasRepository.getFirstById(preauthorizeRequestModel.aliasId!!) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+        val alias = aliasRepository.getFirstByIdAndActive(preauthorizeRequestModel.aliasId!!, true) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         val result = jsonMapper.readValue(alias.merchant?.pspConfig, PspConfigListModel::class.java)
         val pspConfig = result.psp.firstOrNull { it.type == getProvider().toString() }
             ?: throw ApiError.ofMessage("PSP configuration for '${getProvider()}' cannot be found from used merchant").asBadRequest()

@@ -79,12 +79,12 @@ class BsPayonePspTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
-        Mockito.`when`(aliasIdRepository.getFirstById(correctAliasId)).thenReturn(
+        Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(correctAliasId, true)).thenReturn(
             Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias,
                 merchant = Merchant(id = "1", pspConfig = merchantConfig))
         )
 
-        Mockito.`when`(aliasIdRepository.getFirstById(wrongAliasId)).thenReturn(null)
+        Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(wrongAliasId, true)).thenReturn(null)
 
         Mockito.`when`(bsPayoneClient.preauthorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.CC.type,
             reference, amount.toString(), currency, lastName, country, city, pspAlias, null, null),
