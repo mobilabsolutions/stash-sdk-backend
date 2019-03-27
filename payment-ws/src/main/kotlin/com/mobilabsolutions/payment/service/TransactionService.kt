@@ -41,8 +41,8 @@ class TransactionService(
      * @param authorizeInfo Payment information
      * @return Payment response model
      */
-    fun authorize(secretKey: String, idempotentKey: String, paymentInfo: PaymentRequestModel): ResponseEntity<PaymentResponseModel> {
-        return executeIdempotentTransactionOperation(secretKey, idempotentKey, paymentInfo, TransactionAction.AUTH)
+    fun authorize(secretKey: String, idempotentKey: String, authorizeInfo: PaymentRequestModel): ResponseEntity<PaymentResponseModel> {
+        return executeIdempotentTransactionOperation(secretKey, idempotentKey, authorizeInfo, TransactionAction.AUTH)
     }
 
     /**
@@ -50,11 +50,11 @@ class TransactionService(
      *
      * @param secretKey Secret key
      * @param idempotentKey Idempotent key
-     * @param authorizeInfo Payment information
+     * @param preauthorizeInfo Payment information
      * @return Payment response model
      */
-    fun preauthorize(secretKey: String, idempotentKey: String, paymentInfo: PaymentRequestModel): ResponseEntity<PaymentResponseModel> {
-        return executeIdempotentTransactionOperation(secretKey, idempotentKey, paymentInfo, TransactionAction.PREAUTH)
+    fun preauthorize(secretKey: String, idempotentKey: String, preauthorizeInfo: PaymentRequestModel): ResponseEntity<PaymentResponseModel> {
+        return executeIdempotentTransactionOperation(secretKey, idempotentKey, preauthorizeInfo, TransactionAction.PREAUTH)
     }
 
     /**
@@ -99,7 +99,7 @@ class TransactionService(
         }
     }
 
-    fun executeIdempotentTransactionOperation(secretKey: String, idempotentKey: String, paymentInfo: PaymentRequestModel, transactionAction: TransactionAction): ResponseEntity<PaymentResponseModel> {
+    private fun executeIdempotentTransactionOperation(secretKey: String, idempotentKey: String, paymentInfo: PaymentRequestModel, transactionAction: TransactionAction): ResponseEntity<PaymentResponseModel> {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
             ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
         val alias = aliasRepository.getFirstById(paymentInfo.aliasId!!)

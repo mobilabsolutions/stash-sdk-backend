@@ -43,8 +43,8 @@ class PaymentController(private val transactionService: TransactionService) {
     fun preauthorizeTransaction(
         @RequestHeader(value = "Secret-Key") secretKey: String,
         @Size(min = 5, max = 10) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
-        @Valid @RequestBody authorizeInfo: PaymentRequestModel
-    ): ResponseEntity<PaymentResponseModel> = transactionService.preauthorize(secretKey, idempotentKey, authorizeInfo)
+        @Valid @RequestBody preauthorizeInfo: PaymentRequestModel
+    ): ResponseEntity<PaymentResponseModel> = transactionService.preauthorize(secretKey, idempotentKey, preauthorizeInfo)
 
     @ApiOperation(value = "Capture transaction")
     @ApiResponses(
