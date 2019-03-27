@@ -78,6 +78,7 @@ class AliasService(
      * Delete an alias using secret key
      *
      * @param secretKey Secret key
+     * @param aliasId Alias ID
      */
     fun deleteAlias(secretKey: String, aliasId: String) {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey) ?: throw ApiError.ofMessage("Secret Key cannot be found").asBadRequest()
