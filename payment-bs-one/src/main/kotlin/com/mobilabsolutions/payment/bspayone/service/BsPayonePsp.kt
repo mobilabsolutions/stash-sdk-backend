@@ -12,8 +12,8 @@ import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
+import com.mobilabsolutions.payment.model.PaymentRequestModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
-import com.mobilabsolutions.payment.model.PreauthorizeRequestModel
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.payment.model.PspConfigModel
@@ -61,8 +61,8 @@ class BsPayonePsp(
         ) else null
     }
 
-    override fun preauthorize(preauthorizeRequestModel: PreauthorizeRequestModel): PspPaymentResponseModel {
-        val alias = aliasRepository.getFirstById(preauthorizeRequestModel.aliasId) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+    override fun preauthorize(preauthorizeRequestModel: PaymentRequestModel): PspPaymentResponseModel {
+        val alias = aliasRepository.getFirstById(preauthorizeRequestModel.aliasId!!) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         val result = jsonMapper.readValue(alias.merchant?.pspConfig, PspConfigListModel::class.java)
         val pspConfig = result.psp.firstOrNull { it.type == getProvider().toString() }
             ?: throw ApiError.ofMessage("PSP configuration for '${getProvider()}' cannot be found from used merchant").asBadRequest()
@@ -71,8 +71,8 @@ class BsPayonePsp(
             accountId = pspConfig.accountId,
             clearingType = getBsPayoneClearingType(alias),
             reference = RandomStringUtils.randomAlphanumeric(REFERENCE_LENGTH),
-            amount = preauthorizeRequestModel.paymentData.amount.toString(),
-            currency = preauthorizeRequestModel.paymentData.currency,
+            amount = preauthorizeRequestModel.paymentData!!.amount.toString(),
+            currency = preauthorizeRequestModel.paymentData!!.currency,
             lastName = getPersonalData(alias)?.lastName,
             country = getPersonalData(alias)?.country,
             city = getPersonalData(alias)?.city,

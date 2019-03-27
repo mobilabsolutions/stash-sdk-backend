@@ -1,7 +1,7 @@
 package com.mobilabsolutions.payment.service
 
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
-import com.mobilabsolutions.payment.model.PreauthorizeRequestModel
+import com.mobilabsolutions.payment.model.PaymentRequestModel
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.PspPaymentResponseModel
@@ -21,9 +21,9 @@ interface Psp {
     fun calculatePspConfig(pspConfigModel: PspConfigModel?): PspAliasConfigModel?
 
     /**
-     * Returns authorization response {@link PspAuthorizeResponseModel} for the given authorization request {@link PreauthorizeRequestModel}
+     * Returns authorization response {@link PspAuthorizeResponseModel} for the given authorization request {@link PaymentRequestModel}
      * @see PspPaymentResponseModel
-     * @see PreauthorizeRequestModel
+     * @see PaymentRequestModel
      */
-    fun preauthorize(preauthorizeRequestModel: PreauthorizeRequestModel): PspPaymentResponseModel
+    fun preauthorize(preauthorizeRequestModel: PaymentRequestModel): PspPaymentResponseModel
 }

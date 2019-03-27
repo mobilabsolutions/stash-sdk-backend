@@ -6,12 +6,15 @@ import com.mobilabsolutions.payment.data.domain.Merchant
 import com.mobilabsolutions.payment.data.domain.MerchantApiKey
 import com.mobilabsolutions.payment.data.domain.Transaction
 import com.mobilabsolutions.payment.data.enum.KeyType
+import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.enum.TransactionAction
+import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.PaymentDataModel
 import com.mobilabsolutions.payment.model.PaymentRequestModel
+import com.mobilabsolutions.payment.model.PspPaymentResponseModel
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
@@ -70,12 +73,19 @@ class TransactionServiceTest {
     @Mock
     private lateinit var aliasIdRepository: AliasRepository
 
+    @Mock
+    private lateinit var pspRegistry: PspRegistry
+
+    @Mock
+    private lateinit var psp: Psp
+
     @Spy
     val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
 
     @BeforeAll
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
+
         Mockito.`when`(
             merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(
                 true,
@@ -86,8 +96,12 @@ class TransactionServiceTest {
             MerchantApiKey(active = true, merchant = Merchant("1", pspConfig = pspConfig))
         )
         Mockito.`when`(aliasIdRepository.getFirstById(correctAliasId)).thenReturn(
-            Alias(active = true, extra = extra)
+            Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
         )
+        Mockito.`when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
+        Mockito.`when`(psp.preauthorize(PaymentRequestModel(correctAliasId, correctPaymentData, customerId, purchaseId))).thenReturn(
+            PspPaymentResponseModel("123", TransactionStatus.SUCCESS, "1", null))
+
         Mockito.`when`(transactionRepository.getIdByIdempotentKeyAndAction(newIdempotentKey, preauthStatus))
             .thenReturn(null)
         Mockito.`when`(transactionRepository.getIdByIdempotentKeyAndAction(usedIdempotentKey, preauthStatus))

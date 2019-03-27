@@ -23,7 +23,7 @@ class BSPayoneDefaultClient(
     private val jsonMapper: ObjectMapper,
     private val bsPayoneProperties: BsPayoneProperties,
     private val bsPayoneHashingService: BsPayoneHashingService
-): BsPayoneClient {
+) : BsPayoneClient {
 
     /**
      * Makes preauthorization request to BS Payone.
