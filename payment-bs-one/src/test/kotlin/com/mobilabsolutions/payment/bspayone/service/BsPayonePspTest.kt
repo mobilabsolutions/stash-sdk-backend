@@ -64,7 +64,7 @@ class BsPayonePspTest {
     private lateinit var bsPayoneHashingService: BsPayoneHashingService
 
     @Mock
-    private lateinit var bsPayoneClient: BsPayoneService
+    private lateinit var bsPayoneClient: BsPayoneClient
 
     @Mock
     private lateinit var aliasIdRepository: AliasRepository

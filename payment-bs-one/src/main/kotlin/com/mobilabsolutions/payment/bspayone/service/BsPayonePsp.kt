@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component
 class BsPayonePsp(
     private val bsPayoneHashingService: BsPayoneHashingService,
     private val bsPayoneProperties: BsPayoneProperties,
-    private val bsPayoneClient: BsPayoneService,
+    private val bsPayoneClient: BsPayoneClient,
     private val aliasRepository: AliasRepository,
     private val jsonMapper: ObjectMapper
 ) : Psp {
