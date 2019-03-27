@@ -1,5 +1,6 @@
 package com.mobilabsolutions.payment.model
 
+import com.mobilabsolutions.payment.validation.CountryCode
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import javax.validation.constraints.Email
@@ -29,5 +30,6 @@ data class PersonalDataModel(
     val city: String?,
 
     @ApiModelProperty(value = "Country code of account holder", example = "DE")
+    @field:CountryCode
     val country: String?
 )

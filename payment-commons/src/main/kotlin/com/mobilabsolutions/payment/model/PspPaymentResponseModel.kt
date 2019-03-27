@@ -1,7 +1,7 @@
 package com.mobilabsolutions.payment.model
 
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
-import com.mobilabsolutions.server.commons.exception.ApiException
+import com.mobilabsolutions.server.commons.exception.PaymentError
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
@@ -20,7 +20,7 @@ data class PspPaymentResponseModel(
     val customerId: String?,
 
     @ApiModelProperty(value = "API exception")
-    val apiException: ApiException?
+    val error: PaymentError?
 ) {
-    fun hasError() = apiException != null
+    fun hasError() = error != null
 }

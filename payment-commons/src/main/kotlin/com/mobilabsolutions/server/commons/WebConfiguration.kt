@@ -2,11 +2,11 @@ package com.mobilabsolutions.server.commons
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.http.converter.HttpMessageConverter
+import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
@@ -17,6 +17,7 @@ import springfox.documentation.service.Contact
 import springfox.documentation.spi.DocumentationType
 import springfox.documentation.spring.web.plugins.Docket
 import springfox.documentation.swagger2.annotations.EnableSwagger2
+import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 
 @Configuration
@@ -55,12 +56,11 @@ class WebConfiguration : WebMvcConfigurer {
 
     @Bean
     fun restTemplate(): RestTemplate {
-        val restTemplateBuilder = RestTemplateBuilder()
-        val restTemplate = restTemplateBuilder.messageConverters(MappingJackson2HttpMessageConverter(jsonMapper)).build()
         val requestFactory = HttpComponentsClientHttpRequestFactory()
         requestFactory.setConnectTimeout(DEFAULT_TIMEOUT)
         requestFactory.setReadTimeout(DEFAULT_TIMEOUT)
-        restTemplate.requestFactory = requestFactory
+        val restTemplate = RestTemplate(requestFactory)
+        restTemplate.messageConverters.forEach { this.configureConverters(it) }
         return restTemplate
     }
 
@@ -73,5 +73,15 @@ class WebConfiguration : WebMvcConfigurer {
             .addResourceLocations("classpath:/META-INF/resources/")
         registry.addResourceHandler("/webjars/**")
             .addResourceLocations("classpath:/META-INF/resources/webjars/")
+    }
+
+    private fun configureConverters(messageConverter: HttpMessageConverter<*>) {
+        if (messageConverter is MappingJackson2HttpMessageConverter) {
+            messageConverter.defaultCharset = Charset.forName("UTF-8")
+            messageConverter.objectMapper = jsonMapper
+        }
+        if (messageConverter is StringHttpMessageConverter) {
+            messageConverter.defaultCharset = Charset.forName("UTF-8")
+        }
     }
 }

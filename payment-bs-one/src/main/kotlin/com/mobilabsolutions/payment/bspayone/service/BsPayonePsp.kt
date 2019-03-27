@@ -12,15 +12,16 @@ import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
-import com.mobilabsolutions.payment.model.AuthorizeRequestModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
+import com.mobilabsolutions.payment.model.PreauthorizeRequestModel
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
-import com.mobilabsolutions.payment.model.PspPaymentResponseModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.PspPaymentResponseModel
 import com.mobilabsolutions.payment.service.Psp
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
+import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.stereotype.Component
 
 /**
@@ -30,11 +31,13 @@ import org.springframework.stereotype.Component
 class BsPayonePsp(
     private val bsPayoneHashingService: BsPayoneHashingService,
     private val bsPayoneProperties: BsPayoneProperties,
-    private val bsPayoneService: BSPayoneService,
+    private val bsPayoneClient: BsPayoneClient,
     private val aliasRepository: AliasRepository,
     private val jsonMapper: ObjectMapper
 ) : Psp {
-    companion object : KLogging()
+    companion object : KLogging() {
+        const val REFERENCE_LENGTH = 10
+    }
 
     override fun getProvider(): PaymentServiceProvider {
         return PaymentServiceProvider.BS_PAYONE
@@ -58,17 +61,18 @@ class BsPayonePsp(
         ) else null
     }
 
-    override fun authorize(authorizeRequestModel: AuthorizeRequestModel): PspPaymentResponseModel {
-        val alias = aliasRepository.getFirstById(authorizeRequestModel.aliasId) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+    override fun preauthorize(preauthorizeRequestModel: PreauthorizeRequestModel): PspPaymentResponseModel {
+        val alias = aliasRepository.getFirstById(preauthorizeRequestModel.aliasId) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         val result = jsonMapper.readValue(alias.merchant?.pspConfig, PspConfigListModel::class.java)
         val pspConfig = result.psp.firstOrNull { it.type == getProvider().toString() }
             ?: throw ApiError.ofMessage("PSP configuration for '${getProvider()}' cannot be found from used merchant").asBadRequest()
 
-        val bsPayoneAuthorizeRequest = BsPayonePaymentRequestModel(
+        val bsPayonePreauthorizeRequest = BsPayonePaymentRequestModel(
             accountId = pspConfig.accountId,
             clearingType = getBsPayoneClearingType(alias),
-            reference = authorizeRequestModel.paymentData.reason,
-            amount = authorizeRequestModel.paymentData.amount.toString(),
+            reference = RandomStringUtils.randomAlphanumeric(REFERENCE_LENGTH),
+            amount = preauthorizeRequestModel.paymentData.amount.toString(),
+            currency = preauthorizeRequestModel.paymentData.currency,
             lastName = getPersonalData(alias)?.lastName,
             country = getPersonalData(alias)?.country,
             city = getPersonalData(alias)?.city,
@@ -77,10 +81,13 @@ class BsPayonePsp(
             bic = null
         )
 
-        val response = bsPayoneService.authorization(bsPayoneAuthorizeRequest, pspConfig)
+        val response = bsPayoneClient.preauthorization(bsPayonePreauthorizeRequest, pspConfig)
 
-        if (response.hasError()) return PspPaymentResponseModel(response.transactionId, TransactionStatus.FAIL,
-            response.customerId, BsPayoneErrors.mapResponseCode(response.errorCode, response.errorMessage))
+        if (response.hasError()) {
+            logger.error { "Error during BS Payone preauthorization. Error code: ${response.errorCode}, error message: ${response.errorMessage} " }
+            return PspPaymentResponseModel(response.transactionId, TransactionStatus.FAIL,
+                response.customerId, BsPayoneErrors.mapResponseCode(response.errorCode!!))
+        }
 
         return PspPaymentResponseModel(response.transactionId, TransactionStatus.SUCCESS, response.customerId, null)
     }

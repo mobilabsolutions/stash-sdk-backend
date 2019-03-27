@@ -72,12 +72,6 @@ class ApiError private constructor(details: Map<String, Any>) {
         return ApiException(exceptionMessage, HttpStatus.INTERNAL_SERVER_ERROR, this)
     }
 
-    fun asBadRequest(details: String): ApiException {
-        val errorDetails = HashMap<String, Any>()
-        errorDetails[DETAILS_PROPERTY] = details
-        return ApiException(HttpStatus.BAD_REQUEST, ofDetails(errorDetails))
-    }
-
     fun asException(status: HttpStatus): ApiException {
         return ApiException(status, this)
     }

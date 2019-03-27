@@ -13,18 +13,17 @@ import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
-import java.util.Arrays
 
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
 @Service
-class BSPayoneService(
+class BSPayoneDefaultClient(
     private val restTemplate: RestTemplate,
     private val jsonMapper: ObjectMapper,
     private val bsPayoneProperties: BsPayoneProperties,
     private val bsPayoneHashingService: BsPayoneHashingService
-) {
+): BsPayoneClient {
 
     /**
      * Makes preauthorization request to BS Payone.
@@ -33,10 +32,10 @@ class BSPayoneService(
      * @param pspConfigModel BS Payone configuration
      * @return BS Payone payment response
      */
-    fun authorization(paymentRequest: BsPayonePaymentRequestModel, pspConfigModel: PspConfigModel): BsPayonePaymentResponseModel {
+    override fun preauthorization(paymentRequest: BsPayonePaymentRequestModel, pspConfigModel: PspConfigModel): BsPayonePaymentResponseModel {
         val request = createStandardRequest(paymentRequest, pspConfigModel, BsPayoneRequestType.PREAUTTHORIZATION.type)
         val response = restTemplate.postForEntity(bsPayoneProperties.baseUrl, request, String::class.java)
-        return convertToResponse(response.body, BsPayonePaymentResponseModel::class.java)
+        return convertToResponse(response.body!!, BsPayonePaymentResponseModel::class.java)
     }
 
     /**
@@ -64,12 +63,12 @@ class BSPayoneService(
      * @param response response class
      * @return internal response
      */
-    private fun <T> convertToResponse(body: String?, response: Class<T>): T {
-        val params = body?.split("\\r?\\n".toRegex())!!.dropLastWhile { it.isEmpty() }.toTypedArray()
-        val map = Arrays.stream(params).map { s ->
-            val parts = s.split(Regex("="), 2)
+    private fun <T> convertToResponse(body: String, response: Class<T>): T {
+        val params = body.split("\\r?\\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        val map = params.map { s ->
+            val parts = s.split("=".toRegex(), 2).toTypedArray()
             Maps.immutableEntry(parts[0], parts[1])
-        }.map { it.key to it.value }
+        }.map { it.key to it.value }.toMap()
         return jsonMapper.convertValue(map, response)
     }
 

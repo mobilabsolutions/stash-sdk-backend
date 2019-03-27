@@ -27,6 +27,7 @@ class PreAuthorizationController(private val preauthorizationService: Preauthori
         ApiResponse(code = 201, message = "Successfully authorized transaction"),
         ApiResponse(code = 400, message = "Failed to authorize transaction"),
         ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 403, message = "Forbidden access"),
         ApiResponse(code = 404, message = "Not found")
     )
     @RequestMapping(method = [RequestMethod.PUT])

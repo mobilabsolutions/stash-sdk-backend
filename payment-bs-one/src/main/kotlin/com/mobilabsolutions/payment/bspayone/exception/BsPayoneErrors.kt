@@ -1,7 +1,5 @@
 package com.mobilabsolutions.payment.bspayone.exception
 
-import com.mobilabsolutions.server.commons.exception.ApiError
-import com.mobilabsolutions.server.commons.exception.ApiException
 import com.mobilabsolutions.server.commons.exception.PaymentError
 
 /**
@@ -41,6 +39,7 @@ enum class BsPayoneErrors(private val code: String, private val error: PaymentEr
     AMOUNT_TOO_SMALL("944", PaymentError.PAYMENT_ERROR),
     AMOUNT_TOO_HIGH("945", PaymentError.PAYMENT_ERROR),
     AMOUNT_TOO_BIG_OR_SMALL("962", PaymentError.PAYMENT_ERROR),
+    ALIAS_WRONG_OR_MISSING("1073", PaymentError.PAYMENT_ERROR),
 
     REFUND_LIMIT_EXCEEDED("917", PaymentError.REFUND_ERROR),
 
@@ -53,9 +52,8 @@ enum class BsPayoneErrors(private val code: String, private val error: PaymentEr
     SERVICE_UNAVAILABLE("6502", PaymentError.TEMPORARY_ERROR);
 
     companion object {
-        fun mapResponseCode(responseCode: String, details: String): ApiException {
-            val error = values().firstOrNull { it.code == responseCode }?.error ?: PaymentError.UNKNOWN_ERROR
-            return ApiError.ofMessage(error.error).asBadRequest(details)
+        fun mapResponseCode(responseCode: String): PaymentError {
+            return values().firstOrNull { it.code == responseCode }?.error ?: PaymentError.UNKNOWN_ERROR
         }
     }
 }

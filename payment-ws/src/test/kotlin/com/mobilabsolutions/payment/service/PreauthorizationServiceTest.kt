@@ -5,11 +5,14 @@ import com.mobilabsolutions.payment.data.domain.Alias
 import com.mobilabsolutions.payment.data.domain.Merchant
 import com.mobilabsolutions.payment.data.domain.MerchantApiKey
 import com.mobilabsolutions.payment.data.enum.KeyType
+import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
+import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.PaymentDataModel
 import com.mobilabsolutions.payment.model.PreauthorizeRequestModel
+import com.mobilabsolutions.payment.model.PspPaymentResponseModel
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
@@ -61,6 +64,12 @@ class PreauthorizationServiceTest {
     @Mock
     private lateinit var aliasIdRepository: AliasRepository
 
+    @Mock
+    private lateinit var psp: Psp
+
+    @Mock
+    private lateinit var pspRegistry: PspRegistry
+
     @Spy
     val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
 
@@ -71,10 +80,13 @@ class PreauthorizationServiceTest {
                 MerchantApiKey(active = true, merchant = Merchant("1", pspConfig = pspConfig))
         )
         `when`(aliasIdRepository.getFirstById(correctAliasId)).thenReturn(
-                Alias(active = true, extra = extra)
+                Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
         )
         `when`(transactionRepository.getIdByIdempotentKey(newIdempotentKey)).thenReturn(null)
         `when`(transactionRepository.getIdByIdempotentKey(usedIdempotentKey)).thenReturn(1)
+        `when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
+        `when`(psp.preauthorize(PreauthorizeRequestModel(correctAliasId, correctPaymentData, "1", "1"))).thenReturn(
+            PspPaymentResponseModel("123", TransactionStatus.SUCCESS, "1", null))
         `when`(transactionRepository.getIdByIdempotentKeyAndGivenBody(newIdempotentKey, PreauthorizeRequestModel(correctAliasId, correctPaymentData, ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))).thenReturn(1)
         `when`(transactionRepository.getIdByIdempotentKeyAndGivenBody(newIdempotentKey, PreauthorizeRequestModel(correctAliasId, wrongPaymentData, ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))).thenReturn(null)
     }
