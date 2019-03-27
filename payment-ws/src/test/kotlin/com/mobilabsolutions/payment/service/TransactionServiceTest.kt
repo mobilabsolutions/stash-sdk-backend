@@ -17,6 +17,7 @@ import com.mobilabsolutions.payment.model.PaymentRequestModel
 import com.mobilabsolutions.payment.model.PspPaymentResponseModel
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
+import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -60,7 +61,8 @@ class TransactionServiceTest {
     private val pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
         " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}"
     private val extra =
-        "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\", \"personalData\": {\"lastName\": \"tMustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}}"
+        "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\", \"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}}"
+    private val reference = "Bookrefere"
 
     @InjectMocks
     private lateinit var transactionService: TransactionService
@@ -75,10 +77,13 @@ class TransactionServiceTest {
     private lateinit var aliasIdRepository: AliasRepository
 
     @Mock
+    private lateinit var psp: Psp
+
+    @Mock
     private lateinit var pspRegistry: PspRegistry
 
     @Mock
-    private lateinit var psp: Psp
+    private lateinit var randomStringGenerator: RandomStringGenerator
 
     @Spy
     val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
@@ -100,7 +105,8 @@ class TransactionServiceTest {
             Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
         )
         Mockito.`when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
-        Mockito.`when`(psp.preauthorize(PaymentRequestModel(correctAliasId, correctPaymentData, customerId, purchaseId)))
+        Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(10)).thenReturn(reference)
+        Mockito.`when`(psp.preauthorize(PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId), reference))
             .thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null))
 
         Mockito.`when`(transactionRepository.getIdByIdempotentKeyAndAction(newIdempotentKey, preauthStatus))

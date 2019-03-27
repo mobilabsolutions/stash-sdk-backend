@@ -18,9 +18,9 @@ data class BsPayonePaymentRequestModel(
     @ApiModelProperty(value = "BS Payone clearing type", example = "cc")
     @JsonProperty(value = "clearingtype")
     @field:NotNull
-    val clearingType: String,
+    val clearingType: String?,
 
-    @ApiModelProperty(value = "BS Payone reference", example = "Office material order")
+    @ApiModelProperty(value = "BS Payone reference", example = "8DANasUsXZ")
     @field:NotNull
     val reference: String?,
 

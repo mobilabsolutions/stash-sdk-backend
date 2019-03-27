@@ -8,14 +8,10 @@ import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentRequestModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentResponseModel
 import com.mobilabsolutions.payment.data.domain.Alias
 import com.mobilabsolutions.payment.data.domain.Merchant
-import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.repository.AliasRepository
-import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PaymentDataModel
 import com.mobilabsolutions.payment.model.PaymentRequestModel
-import com.mobilabsolutions.payment.model.PersonalDataModel
-import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
@@ -42,7 +38,24 @@ import org.mockito.quality.Strictness
 class BsPayonePspTest {
     private val correctAliasId = "test"
     private val wrongAliasId = "wrong id"
-    private var pspConfig: PspConfigModel? = null
+    private val merchantConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"123\", \"key\" : \"123\"," +
+        " \"merchantId\" : \"mobilab\", \"accountId\" : \"123\", \"default\" : \"true\"}]}"
+    private val extra =
+        "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\", \"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}}"
+    private val reference = "Book"
+    private val amount = 300
+    private val currency = "EUR"
+    private val customerId = "1"
+    private val purchaseId = "1"
+    private val pspTransactionId = "1123"
+    private val accountId = "123"
+    private val portalId = "123"
+    private val key = "123"
+    private val merchantId = "mobilab"
+    private val lastName = "Mustermann"
+    private val country = "DE"
+    private val city = "Berlin"
+    private val pspAlias = "1234"
 
     @InjectMocks
     private lateinit var bsPayonePsp: BsPayonePsp
@@ -51,7 +64,7 @@ class BsPayonePspTest {
     private lateinit var bsPayoneHashingService: BsPayoneHashingService
 
     @Mock
-    private lateinit var bsPayoneClient: BsPayoneClient
+    private lateinit var bsPayoneClient: BsPayoneService
 
     @Mock
     private lateinit var aliasIdRepository: AliasRepository
@@ -66,41 +79,35 @@ class BsPayonePspTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
-        val merchantConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"123\", \"key\" : \"123\"," +
-            " \"merchantId\" : \"mobilab\", \"accountId\" : \"123\", \"default\" : \"true\"}]}"
-        val config = objectMapper.readValue(merchantConfig, PspConfigListModel::class.java)
-        pspConfig = config.psp.firstOrNull { it.type == PaymentServiceProvider.BS_PAYONE.toString() }
-        val bsPayoneRequestModel = BsPayonePaymentRequestModel("123", BsPayoneClearingType.CC.type, "Book", "300", "EUR", "Mustermann", "DE", "Berlin", "1234", null, null)
-        val extraModel = AliasExtraModel(null, null, null, PersonalDataModel("test@mblb.net", "Max", "Mustermann", null, null, "Berlin", "DE"), PaymentMethod.CC)
-        val extra = objectMapper.writeValueAsString(extraModel)
-
-        val merchant = Merchant(id = "mobilab", pspConfig = merchantConfig)
-
         Mockito.`when`(aliasIdRepository.getFirstById(correctAliasId)).thenReturn(
-            Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = "1234", merchant = merchant)
+            Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias,
+                merchant = Merchant(id = "1", pspConfig = merchantConfig))
         )
 
         Mockito.`when`(aliasIdRepository.getFirstById(wrongAliasId)).thenReturn(null)
 
-        Mockito.`when`(bsPayoneClient.preauthorization(bsPayoneRequestModel, pspConfig!!)).thenReturn(
-            BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, "12345", "1", null, null, null)
+        Mockito.`when`(bsPayoneClient.preauthorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.CC.type,
+            reference, amount.toString(), currency, lastName, country, city, pspAlias, null, null),
+            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true)))
+            .thenReturn(
+            BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
         )
     }
 
     @Test
     fun `preauthorize transaction with correct alias id`() {
-        bsPayonePsp.preauthorize(PaymentRequestModel(correctAliasId, PaymentDataModel(300, "EUR", "Book"), "1", "1"))
+        bsPayonePsp.preauthorize(PaymentRequestModel(correctAliasId, PaymentDataModel(amount, currency, reference), purchaseId, customerId), reference)
     }
 
     @Test
     fun `preauthorize transaction with wrong alias id`() {
         Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.preauthorize(PaymentRequestModel(wrongAliasId, PaymentDataModel(300, "EUR", "Book"), "1", "1"))
+            bsPayonePsp.preauthorize(PaymentRequestModel(wrongAliasId, PaymentDataModel(amount, currency, reference), purchaseId, customerId), reference)
         }
     }
 
     @Test
     fun `calculate PSP config`() {
-        bsPayonePsp.calculatePspConfig(pspConfig)
+        bsPayonePsp.calculatePspConfig(PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true))
     }
 }

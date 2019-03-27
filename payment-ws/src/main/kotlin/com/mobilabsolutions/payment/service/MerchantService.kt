@@ -153,7 +153,7 @@ class MerchantService(
             }
         } as MutableList<PspConfigModel>
         configList.add(pspConfigModel)
-        configList.associateByTo(configMap) { it.type }
+        configList.associateByTo(configMap) { it.type!! }
 
         return configMap.values.toMutableList()
     }

@@ -15,6 +15,7 @@ import com.mobilabsolutions.payment.model.PaymentResponseModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiException
+import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.http.HttpStatus
@@ -32,6 +33,7 @@ class TransactionService(
     private val merchantApiKeyRepository: MerchantApiKeyRepository,
     private val aliasRepository: AliasRepository,
     private val pspRegistry: PspRegistry,
+    private val randomStringGenerator: RandomStringGenerator,
     private val objectMapper: ObjectMapper
 ) {
 
@@ -66,12 +68,12 @@ class TransactionService(
         val paymentInfoModel = PaymentInfoModel(extra, objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java))
 
         val psp = pspRegistry.find(alias.psp!!) ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
-        val pspPaymentResponse = psp.preauthorize(preauthorizeInfo)
+        val pspPaymentResponse = psp.preauthorize(preauthorizeInfo, randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH))
 
         when {
             transactionRepository.getIdByIdempotentKeyAndAction(idempotentKey, TransactionAction.PREAUTH) == null -> {
                 val transaction = Transaction(
-                    transactionId = RandomStringUtils.randomAlphanumeric(TransactionService.STRING_LENGTH),
+                    transactionId = RandomStringUtils.randomAlphanumeric(TransactionService.TRANSACTION_ID_LENGTH),
                     idempotentKey = idempotentKey,
                     currencyId = preauthorizeInfo.paymentData!!.currency,
                     amount = preauthorizeInfo.paymentData!!.amount,
@@ -155,7 +157,7 @@ class TransactionService(
         when {
             transactionRepository.getIdByIdempotentKeyAndAction(idempotentKey, transactionAction) == null -> {
                 val transaction = Transaction(
-                    transactionId = RandomStringUtils.randomAlphanumeric(TransactionService.STRING_LENGTH),
+                    transactionId = RandomStringUtils.randomAlphanumeric(TransactionService.TRANSACTION_ID_LENGTH),
                     idempotentKey = idempotentKey,
                     currencyId = paymentInfo.paymentData!!.currency,
                     amount = paymentInfo.paymentData!!.amount,
@@ -182,6 +184,7 @@ class TransactionService(
     }
 
     companion object : KLogging() {
-        const val STRING_LENGTH = 20
+        const val TRANSACTION_ID_LENGTH = 20
+        const val REFERENCE_LENGTH = 10
     }
 }
