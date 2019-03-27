@@ -66,8 +66,10 @@ class AliasService(
      * @param aliasRequestModel Alias Request Model
      */
     fun exchangeAlias(publishableKey: String, aliasId: String, aliasRequestModel: AliasRequestModel) {
-        merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofMessage("Publishable Key cannot be found").asBadRequest()
-        aliasRepository.getFirstByIdAndActive(aliasId, true) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofMessage("Publishable Key cannot be found").asBadRequest()
+        val alias = aliasRepository.getFirstByIdAndActive(aliasId, true) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+        if (apiKey.merchant.id != alias.merchant?.id) throw ApiError.ofMessage("Alias does not map to correct merchant").asBadRequest()
+
         val extra = if (aliasRequestModel.extra != null) objectMapper.writeValueAsString(aliasRequestModel.extra) else null
         aliasRepository.updateAlias(aliasRequestModel.pspAlias, extra, aliasId)
     }
@@ -81,6 +83,7 @@ class AliasService(
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey) ?: throw ApiError.ofMessage("Secret Key cannot be found").asBadRequest()
         val alias = aliasRepository.getFirstByIdAndActive(aliasId, true) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         if (apiKey.merchant.id != alias.merchant?.id) throw ApiError.ofMessage("Alias does not map to correct merchant").asBadRequest()
+
         alias.active = false
         aliasRepository.save(alias)
     }
