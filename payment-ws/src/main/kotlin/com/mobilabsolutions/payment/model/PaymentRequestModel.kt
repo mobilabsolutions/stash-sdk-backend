@@ -12,12 +12,12 @@ import javax.validation.constraints.NotNull
 data class PaymentRequestModel(
     @ApiModelProperty("Alias ID", example = "JipfjLKL6BkTIREaRGyX")
     @field:NotNull
-    val aliasId: String,
+    val aliasId: String?,
 
     @ApiModelProperty("Payment data")
     @field:Valid
     @field:NotNull
-    val paymentData: PaymentDataModel,
+    val paymentData: PaymentDataModel?,
 
     @ApiModelProperty("Purchase ID", example = "132")
     val purchaseId: String?,

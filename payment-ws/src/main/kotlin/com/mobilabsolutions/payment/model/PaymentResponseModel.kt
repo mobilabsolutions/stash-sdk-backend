@@ -14,7 +14,7 @@ data class PaymentResponseModel(
     val id: String?,
 
     @ApiModelProperty("Amount")
-    val amount: Int,
+    val amount: Int?,
 
     @ApiModelProperty("Currency")
     val currency: String?,
