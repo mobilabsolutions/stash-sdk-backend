@@ -56,7 +56,6 @@ class AliasController(private val aliasService: AliasService) {
     )
     @RequestMapping(DELETE_ALIAS_URL, method = [RequestMethod.DELETE])
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasAuthority('admin')")
     fun deleteAlias(
         @RequestHeader(value = "Secret-Key") secretKey: String,
         @PathVariable("Alias-Id") aliasId: String
