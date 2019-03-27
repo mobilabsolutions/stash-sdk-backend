@@ -86,7 +86,10 @@ class AliasServiceTest {
         )
         `when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(Mockito.mock(Psp::class.java))
         `when`(aliasRepository.getFirstByIdAndActive(unknownAliasId, active = true)).thenReturn(null)
-        `when`(aliasRepository.getFirstByIdAndActive(knownAliasId, active = true)).thenReturn(Mockito.mock(Alias::class.java))
+        `when`(aliasRepository.getFirstByIdAndActive(knownAliasId, active = true))
+            .thenReturn(Alias(merchant = Merchant(id = "mobilab",
+            pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
+            " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")))
     }
 
     @Test
