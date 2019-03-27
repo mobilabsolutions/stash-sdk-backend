@@ -11,9 +11,11 @@ import org.springframework.http.HttpStatus.UNSUPPORTED_MEDIA_TYPE
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.validation.FieldError
 import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
+import org.springframework.web.bind.MissingRequestHeaderException
 import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.UnsatisfiedServletRequestParameterException
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -27,6 +29,7 @@ import org.springframework.web.servlet.NoHandlerFoundException
 import java.util.Arrays
 import java.util.stream.Collectors
 import javax.servlet.http.HttpServletRequest
+import javax.validation.ConstraintViolationException
 
 @ResponseBody
 @ControllerAdvice
@@ -51,6 +54,26 @@ class CommonExceptionHandler {
     }
 
     @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(ConstraintViolationException::class)
+    fun handleConstraintViolationException(exception: ConstraintViolationException): ApiError {
+        logger.error("Bad request", exception)
+        return ApiError.builder()
+            .withMessage("argument.validation.error")
+            .withProperty("errors", exception.message ?: "non readable message")
+            .build()
+    }
+
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(MissingRequestHeaderException::class)
+    fun handleMissingRequestHeaderException(exception: MissingRequestHeaderException): ApiError {
+        logger.error("Bad request", exception)
+        return ApiError.builder()
+            .withMessage("argument.validation.error")
+            .withProperty("errors", exception.message)
+            .build()
+    }
+
+    @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleMethodArgumentNotValidException(exception: MethodArgumentNotValidException): ApiError {
         logger.error("Bad request", exception)
@@ -58,7 +81,7 @@ class CommonExceptionHandler {
         val errorMessage = bindingResult
             .allErrors
             .stream()
-            .map { it.defaultMessage }
+            .map { (it as FieldError).field + ": " + it.defaultMessage }
             .collect(Collectors.joining(", "))
         return ApiError.builder()
             .withMessage("argument.validation.error")
@@ -80,11 +103,11 @@ class CommonExceptionHandler {
 
     @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException::class)
-    fun handleHttpMessageNotReadableException(e: HttpMessageNotReadableException): ApiError {
-        logger.error("Non readable message", e)
+    fun handleHttpMessageNotReadableException(exception: HttpMessageNotReadableException): ApiError {
+        logger.error("Bad request", exception)
         return ApiError.builder()
             .withMessage("argument.validation.error")
-            .withProperty("errors", "Non readable message")
+            .withProperty("errors", "non readable message")
             .build()
     }
 

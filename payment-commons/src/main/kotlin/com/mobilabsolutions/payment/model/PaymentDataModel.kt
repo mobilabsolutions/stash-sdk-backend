@@ -12,14 +12,14 @@ import javax.validation.constraints.Size
 data class PaymentDataModel(
     @ApiModelProperty("Amount in smallest currency unit (e.g. cent)", example = "300")
     @field:NotNull
-    val amount: Int,
+    val amount: Int?,
 
     @ApiModelProperty("Currency", example = "EUR")
     @field:Size(min = 3, max = 3)
     @field:NotNull
-    val currency: String,
+    val currency: String?,
 
     @ApiModelProperty("Reason", example = "Payment for dinner")
     @field:NotNull
-    val reason: String
+    val reason: String?
 )
