@@ -9,8 +9,8 @@ import io.swagger.annotations.ApiModelProperty
 @ApiModel(value = "PayPal Configuration")
 data class PayPalConfigModel(
     @ApiModelProperty(value = "PayPal nonce", example = "cnbaskjcbjakbjv")
-    val nonce: String,
+    val nonce: String?,
 
     @ApiModelProperty(value = "PayPal billing agreement id", example = "123123")
-    val billingAgreementId: String
+    val billingAgreementId: String?
 )
