@@ -147,7 +147,7 @@ class TransactionService(
     private fun executeIdempotentTransactionOperation(secretKey: String, idempotentKey: String, paymentInfo: PaymentRequestModel, transactionAction: TransactionAction): ResponseEntity<PaymentResponseModel> {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
             ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
-        val alias = aliasRepository.getFirstById(paymentInfo.aliasId!!)
+        val alias = aliasRepository.getFirstByIdAndActive(paymentInfo.aliasId!!, true)
             ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         val extra = objectMapper.readValue(alias.extra
             ?: throw ApiError.ofMessage("Used alias is incomplete, please define a payment configuration on related alias").asBadRequest(), AliasExtraModel::class.java)

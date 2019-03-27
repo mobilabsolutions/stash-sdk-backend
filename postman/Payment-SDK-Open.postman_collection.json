@@ -82,6 +82,31 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Delete Alias",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": ""
+							}
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Secret-Key",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": "{{wsEndpoint}}/api/v1/alias/{Alias-Id}"
+					},
+					"response": []
 				}
 			]
 		},
