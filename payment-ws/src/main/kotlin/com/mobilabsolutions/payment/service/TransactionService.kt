@@ -65,7 +65,8 @@ class TransactionService(
 
         val paymentInfoModel = PaymentInfoModel(extra, objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java))
 
-        val psp = pspRegistry.find(alias.psp!!) ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
+        val psp = pspRegistry.find(alias.psp!!)
+            ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
         val pspPaymentResponse = psp.preauthorize(preauthorizeInfo)
 
         when {
