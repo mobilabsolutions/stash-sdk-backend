@@ -7,13 +7,14 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.mobilabsolutions.payment.data.configuration.DataConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 
-@Import(WebConfiguration::class)
+@Import(DataConfiguration::class, WebConfiguration::class)
 @Configuration
 @ComponentScan
 class CommonConfiguration {

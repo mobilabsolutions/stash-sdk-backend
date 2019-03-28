@@ -1,8 +1,9 @@
-package com.mobilabsolutions.payment.bsone.service
+package com.mobilabsolutions.payment.bspayone.service
 
 import com.google.common.base.Charsets
 import com.google.common.hash.Hashing
-import com.mobilabsolutions.payment.bsone.enum.BsPayoneRequestType
+import com.mobilabsolutions.payment.bspayone.configuration.BsPayoneProperties
+import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneRequestType
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
@@ -18,13 +19,11 @@ import javax.crypto.spec.SecretKeySpec
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
 @Service
-class BsPayoneHashingService {
+class BsPayoneHashingService(private val bsPayoneProperties: BsPayoneProperties) {
     companion object : KLogging() {
-        const val API_VERSION = "3.11"
         const val RESPONSE_TYPE = "JSON"
         const val STORE_CARD_DATA_PARAM_VALUE = "yes"
         const val HASH_ALGORITHM = "HmacSHA384"
-        const val MODE = "test" // hardcoding until we implement the mode parameter
     }
 
     /**
@@ -35,8 +34,8 @@ class BsPayoneHashingService {
      */
     fun makeCreditCardCheckHash(pspConfigModel: PspConfigModel): String {
         pspConfigModel.key ?: throw ApiError.ofMessage("`Key` configuration should be defined in BS_PAYONE PSP configuration").asInternalServerError()
-        return calculateHash(pspConfigModel.key, pspConfigModel.accountId + API_VERSION + pspConfigModel.merchantId +
-            MODE + pspConfigModel.portalId + BsPayoneRequestType.CREDIT_CARD_CHECK.type + RESPONSE_TYPE +
+        return calculateHash(pspConfigModel.key, pspConfigModel.accountId + bsPayoneProperties.apiVersion + pspConfigModel.merchantId +
+            bsPayoneProperties.mode + pspConfigModel.portalId + BsPayoneRequestType.CREDIT_CARD_CHECK.type + RESPONSE_TYPE +
             STORE_CARD_DATA_PARAM_VALUE)
     }
 
@@ -46,8 +45,8 @@ class BsPayoneHashingService {
      * @param key Key to be hashed
      * @return hashed key
      */
-    fun hashKey(key: String): String {
-        return Hashing.md5().hashString(key, Charsets.UTF_8).toString()
+    fun hashKey(key: String?): String {
+        return Hashing.md5().hashString(key!!, Charsets.UTF_8).toString()
     }
 
     private fun calculateHash(key: String?, data: String): String {

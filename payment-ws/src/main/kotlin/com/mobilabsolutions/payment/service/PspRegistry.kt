@@ -1,4 +1,4 @@
-package com.mobilabsolutions.payment.service.psp
+package com.mobilabsolutions.payment.service
 
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import org.springframework.stereotype.Component

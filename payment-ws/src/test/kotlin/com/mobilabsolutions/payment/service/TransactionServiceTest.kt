@@ -6,12 +6,15 @@ import com.mobilabsolutions.payment.data.domain.Merchant
 import com.mobilabsolutions.payment.data.domain.MerchantApiKey
 import com.mobilabsolutions.payment.data.domain.Transaction
 import com.mobilabsolutions.payment.data.enum.KeyType
+import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.enum.TransactionAction
+import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.PaymentDataModel
 import com.mobilabsolutions.payment.model.PaymentRequestModel
+import com.mobilabsolutions.payment.model.PspPaymentResponseModel
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
@@ -44,6 +47,7 @@ class TransactionServiceTest {
     private val wrongAliasId = "wrong alias id"
     private val purchaseId = "purchase id"
     private val customerId = "customer id"
+    private val pspTransactionId = "psp transaction id"
     private val correctTransactionId = "correct transaction id"
     private val wrongTransactionId = "wrong transaction id"
     private val correctTransactionIdWithoutAuth = "correct transaction id without auth"
@@ -56,7 +60,7 @@ class TransactionServiceTest {
     private val pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
         " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}"
     private val extra =
-        "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\"}"
+        "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\", \"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}}"
 
     @InjectMocks
     private lateinit var transactionService: TransactionService
@@ -70,12 +74,19 @@ class TransactionServiceTest {
     @Mock
     private lateinit var aliasIdRepository: AliasRepository
 
+    @Mock
+    private lateinit var psp: Psp
+
+    @Mock
+    private lateinit var pspRegistry: PspRegistry
+
     @Spy
     val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
 
     @BeforeAll
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
+
         Mockito.`when`(
             merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(
                 true,
@@ -86,8 +97,12 @@ class TransactionServiceTest {
             MerchantApiKey(active = true, merchant = Merchant("1", pspConfig = pspConfig))
         )
         Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(correctAliasId, true)).thenReturn(
-            Alias(active = true, extra = extra)
+            Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
         )
+        Mockito.`when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
+        Mockito.`when`(psp.preauthorize(PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)))
+            .thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
+
         Mockito.`when`(transactionRepository.getIdByIdempotentKeyAndAction(newIdempotentKey, preauthStatus))
             .thenReturn(null)
         Mockito.`when`(transactionRepository.getIdByIdempotentKeyAndAction(usedIdempotentKey, preauthStatus))
@@ -132,7 +147,7 @@ class TransactionServiceTest {
             Transaction(
                 amount = 1,
                 merchant = Merchant("1", pspConfig = pspConfig),
-                alias = Alias(active = true, extra = extra)
+                alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
             )
         )
         Mockito.`when`(
@@ -150,7 +165,7 @@ class TransactionServiceTest {
             Transaction(
                 amount = 1,
                 merchant = Merchant("1", pspConfig = pspConfig),
-                alias = Alias(active = true, extra = extra)
+                alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
             )
         )
         Mockito.`when`(
@@ -162,7 +177,7 @@ class TransactionServiceTest {
             Transaction(
                 amount = 1,
                 merchant = Merchant("1", pspConfig = pspConfig),
-                alias = Alias(active = true, extra = extra)
+                alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
             )
         )
     }
@@ -251,7 +266,7 @@ class TransactionServiceTest {
 
     @Test
     fun `authorize transaction with correct secret key`() {
-        transactionService.preauthorize(
+        transactionService.authorize(
             correctSecretKey,
             newIdempotentKey,
             PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
@@ -271,7 +286,7 @@ class TransactionServiceTest {
 
     @Test
     fun `authorize transaction with correct alias id`() {
-        transactionService.preauthorize(
+        transactionService.authorize(
             correctSecretKey,
             newIdempotentKey,
             PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
@@ -291,7 +306,7 @@ class TransactionServiceTest {
 
     @Test
     fun `authorize transaction with new idempotent key`() {
-        val responseEntity = transactionService.preauthorize(
+        val responseEntity = transactionService.authorize(
             correctSecretKey,
             newIdempotentKey,
             PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)

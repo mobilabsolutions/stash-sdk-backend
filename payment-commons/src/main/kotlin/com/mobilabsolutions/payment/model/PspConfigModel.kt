@@ -2,14 +2,16 @@ package com.mobilabsolutions.payment.model
 
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
+import javax.validation.constraints.NotNull
 
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
 @ApiModel(value = "PSP Configuration")
-class PspConfigModel(
+data class PspConfigModel(
     @ApiModelProperty(value = "Payment service provider type", example = "BS_PAYONE")
-    val type: String,
+    @field:NotNull
+    val type: String?,
 
     @ApiModelProperty(value = "Merchant ID", example = "42865")
     val merchantId: String?,

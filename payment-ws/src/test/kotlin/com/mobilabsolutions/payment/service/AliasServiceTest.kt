@@ -10,8 +10,6 @@ import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.AliasRequestModel
-import com.mobilabsolutions.payment.service.psp.Psp
-import com.mobilabsolutions.payment.service.psp.PspRegistry
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions

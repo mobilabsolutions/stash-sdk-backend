@@ -9,7 +9,6 @@ import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.model.AliasRequestModel
 import com.mobilabsolutions.payment.model.AliasResponseModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
-import com.mobilabsolutions.payment.service.psp.PspRegistry
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils

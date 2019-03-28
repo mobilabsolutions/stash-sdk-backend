@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED
 import org.springframework.http.HttpStatus.NOT_FOUND
+import org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE
 import org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY
 import org.springframework.http.HttpStatus.UNSUPPORTED_MEDIA_TYPE
 import org.springframework.http.ResponseEntity
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.multipart.MaxUploadSizeExceededException
 import org.springframework.web.multipart.MultipartException
@@ -200,5 +202,15 @@ class CommonExceptionHandler {
             exception
         )
         return ApiError.ofMessage("internal.error")
+    }
+
+    @ResponseStatus(SERVICE_UNAVAILABLE)
+    @ExceptionHandler(ResourceAccessException::class)
+    fun handleResourceAccessException(exception: ResourceAccessException): ApiError {
+        logger.error("Service unavailable.", exception)
+        return ApiError.builder()
+            .withMessage("service.unavailable")
+            .withProperty("errors", exception.message!!)
+            .build()
     }
 }
