@@ -21,7 +21,7 @@ interface Psp {
     fun calculatePspConfig(pspConfigModel: PspConfigModel?): PspAliasConfigModel?
 
     /**
-     * Returns authorization response {@link PspAuthorizeResponseModel} for the given authorization request {@link PaymentRequestModel}
+     * Returns PSP preauthorization payment response {@link PspPaymentResponseModel} for the given preauthorization payment request {@link PaymentRequestModel}
      * @see PspPaymentResponseModel
      * @see PaymentRequestModel
      */
