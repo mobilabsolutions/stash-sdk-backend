@@ -101,7 +101,7 @@ class TransactionServiceTest {
         )
         Mockito.`when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
         Mockito.`when`(psp.preauthorize(PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)))
-            .thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null))
+            .thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
 
         Mockito.`when`(transactionRepository.getIdByIdempotentKeyAndAction(newIdempotentKey, preauthStatus))
             .thenReturn(null)

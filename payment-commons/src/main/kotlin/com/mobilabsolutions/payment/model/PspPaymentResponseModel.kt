@@ -19,8 +19,11 @@ data class PspPaymentResponseModel(
     @ApiModelProperty(value = "BS Payone customer id")
     val customerId: String?,
 
-    @ApiModelProperty(value = "API exception")
-    val error: PaymentError?
+    @ApiModelProperty(value = "Payment error")
+    val error: PaymentError?,
+
+    @ApiModelProperty(value = "Error message")
+    val errorMessage: String?
 ) {
     fun hasError() = error != null
 }

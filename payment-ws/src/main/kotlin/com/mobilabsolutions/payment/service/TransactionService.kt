@@ -88,7 +88,11 @@ class TransactionService(
                 )
                 transactionRepository.save(transaction)
 
-                if (pspPaymentResponse.hasError()) throw ApiError.ofMessage(pspPaymentResponse.error?.error!!).asForbidden()
+                if (pspPaymentResponse.hasError())
+                    throw ApiError.builder()
+                        .withMessage(pspPaymentResponse.error?.error!!)
+                        .withProperty("pspError", pspPaymentResponse.errorMessage!!)
+                        .build().asBadRequest()
 
                 return ResponseEntity.status(HttpStatus.CREATED).body(
                     PaymentResponseModel(transaction.transactionId, transaction.amount,

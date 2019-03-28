@@ -87,11 +87,11 @@ class BsPayonePsp(
 
         if (response.hasError()) {
             logger.error { "Error during BS Payone preauthorization. Error code: ${response.errorCode}, error message: ${response.errorMessage} " }
-            return PspPaymentResponseModel(response.transactionId, TransactionStatus.FAIL,
-                response.customerId, BsPayoneErrors.mapResponseCode(response.errorCode!!))
+            return PspPaymentResponseModel(response.transactionId, TransactionStatus.FAIL, response.customerId,
+                BsPayoneErrors.mapResponseCode(response.errorCode!!), response.errorMessage)
         }
 
-        return PspPaymentResponseModel(response.transactionId, TransactionStatus.SUCCESS, response.customerId, null)
+        return PspPaymentResponseModel(response.transactionId, TransactionStatus.SUCCESS, response.customerId, null, null)
     }
 
     private fun getBsPayoneClearingType(alias: Alias): String {
