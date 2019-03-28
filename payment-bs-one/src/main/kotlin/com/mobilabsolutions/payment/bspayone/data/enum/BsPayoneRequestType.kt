@@ -5,7 +5,7 @@ package com.mobilabsolutions.payment.bspayone.data.enum
  */
 enum class BsPayoneRequestType(val type: String) {
     CREDIT_CARD_CHECK("creditcardcheck"),
-    PREAUTTHORIZATION("preauthorization"),
+    PREAUTHORIZATION("preauthorization"),
     AUTHORIZATION("authorization"),
     CAPTURE("capture"),
     REFUND("refund")

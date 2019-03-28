@@ -33,7 +33,7 @@ class BsPayoneClient(
          * @return BS Payone payment response
          */
         fun preauthorization(paymentRequest: BsPayonePaymentRequestModel, pspConfigModel: PspConfigModel): BsPayonePaymentResponseModel {
-            val request = createStandardRequest(paymentRequest, pspConfigModel, BsPayoneRequestType.PREAUTTHORIZATION.type)
+            val request = createStandardRequest(paymentRequest, pspConfigModel, BsPayoneRequestType.PREAUTHORIZATION.type)
             val response = restTemplate.postForEntity(bsPayoneProperties.baseUrl, request, String::class.java)
             return convertToResponse(response.body!!, BsPayonePaymentResponseModel::class.java)
         }
