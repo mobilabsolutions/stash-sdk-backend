@@ -5,18 +5,12 @@ import com.mobilabsolutions.server.commons.exception.PaymentError
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-enum class BsPayoneErrors(private val code: String, private val error: PaymentError) {
-
-    CVC_INVALID("7", PaymentError.CC_REGISTRATION_ERROR),
-    CARD_STOLEN("43", PaymentError.CC_REGISTRATION_ERROR),
-    CARD_UNKNOWN("56", PaymentError.CC_REGISTRATION_ERROR),
-    CARD_CANCELED("62", PaymentError.CC_REGISTRATION_ERROR),
-    CARD_MISMATCH("880", PaymentError.CC_REGISTRATION_ERROR),
-
-    INVALID_BIC("887", PaymentError.SEPA_REGISTRATION_ERROR),
-    INVALID_IBAN("888", PaymentError.SEPA_REGISTRATION_ERROR),
+enum class BsPayoneErrors(val code: String, val error: PaymentError) {
 
     LIMIT_EXCEEDED("13", PaymentError.PAYMENT_ERROR),
+    CARD_STOLEN("43", PaymentError.PAYMENT_ERROR),
+    CARD_UNKNOWN("56", PaymentError.PAYMENT_ERROR),
+    CARD_CANCELED("62", PaymentError.PAYMENT_ERROR),
     BIC_COUNTRY_NOT_SUPPORTED("889", PaymentError.PAYMENT_ERROR),
     FRAUD_DETECTION("107", PaymentError.PAYMENT_ERROR),
     AMOUNT_TOO_LOW("301", PaymentError.PAYMENT_ERROR),
@@ -33,6 +27,9 @@ enum class BsPayoneErrors(private val code: String, private val error: PaymentEr
     BLACKLIST_CARDPAN_CHECK_REJECTED("732", PaymentError.PAYMENT_ERROR),
     BLACKLIST_BANK_ACCOUNT_CHECK_REJECTED("733", PaymentError.PAYMENT_ERROR),
     BLACKLIST_EMAIL_CHECK_REJECTED("734", PaymentError.PAYMENT_ERROR),
+    INVALID_BIC("887", PaymentError.PAYMENT_ERROR),
+    INVALID_IBAN("888", PaymentError.PAYMENT_ERROR),
+    CARD_MISMATCH("880", PaymentError.PAYMENT_ERROR),
     FRAUD_DETECTION_2("890", PaymentError.PAYMENT_ERROR),
     DEBTOR_LIMIT_EXCEEDED("891", PaymentError.PAYMENT_ERROR),
     PAYMENT_TYPE_MISMATCH("923", PaymentError.PAYMENT_ERROR),
