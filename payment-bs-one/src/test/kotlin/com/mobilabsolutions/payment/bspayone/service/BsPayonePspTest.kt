@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.bspayone.configuration.BsPayoneProperties
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneClearingType
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneResponseStatus
+import com.mobilabsolutions.payment.bspayone.exception.BsPayoneErrors
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentRequestModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentResponseModel
 import com.mobilabsolutions.payment.data.domain.Alias
@@ -15,6 +16,7 @@ import com.mobilabsolutions.payment.model.PaymentRequestModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
+import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -42,8 +44,9 @@ class BsPayonePspTest {
         " \"merchantId\" : \"mobilab\", \"accountId\" : \"123\", \"default\" : \"true\"}]}"
     private val extra =
         "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\", \"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}}"
-    private val reference = "Book"
+    private val reference = "1234567890"
     private val amount = 300
+    private val wrongAmount = -1
     private val currency = "EUR"
     private val customerId = "1"
     private val purchaseId = "1"
@@ -56,6 +59,7 @@ class BsPayonePspTest {
     private val country = "DE"
     private val city = "Berlin"
     private val pspAlias = "1234"
+    private val reason = "Book"
 
     @InjectMocks
     private lateinit var bsPayonePsp: BsPayonePsp
@@ -72,6 +76,9 @@ class BsPayonePspTest {
     @Mock
     private lateinit var bsPayoneProperties: BsPayoneProperties
 
+    @Mock
+    private lateinit var randomStringGenerator: RandomStringGenerator
+
     @Spy
     val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
 
@@ -86,23 +93,39 @@ class BsPayonePspTest {
 
         Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(wrongAliasId, true)).thenReturn(null)
 
+        Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(10)).thenReturn(reference)
+
         Mockito.`when`(bsPayoneClient.preauthorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.CC.type,
             reference, amount.toString(), currency, lastName, country, city, pspAlias, null, null),
             PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true)))
             .thenReturn(
-            BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
+                BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
         )
+
+        Mockito.`when`(bsPayoneClient.preauthorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.CC.type,
+            reference, wrongAmount.toString(), currency, lastName, country, city, pspAlias, null, null),
+            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true)))
+            .thenReturn(
+                BsPayonePaymentResponseModel(BsPayoneResponseStatus.ERROR, null, null, BsPayoneErrors.AMOUNT_TOO_LOW.code, BsPayoneErrors.AMOUNT_TOO_LOW.error.error, "Please change the amount")
+            )
     }
 
     @Test
     fun `preauthorize transaction with correct alias id`() {
-        bsPayonePsp.preauthorize(PaymentRequestModel(correctAliasId, PaymentDataModel(amount, currency, reference), purchaseId, customerId), reference)
+        bsPayonePsp.preauthorize(PaymentRequestModel(correctAliasId, PaymentDataModel(amount, currency, reason), purchaseId, customerId))
     }
 
     @Test
     fun `preauthorize transaction with wrong alias id`() {
         Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.preauthorize(PaymentRequestModel(wrongAliasId, PaymentDataModel(amount, currency, reference), purchaseId, customerId), reference)
+            bsPayonePsp.preauthorize(PaymentRequestModel(wrongAliasId, PaymentDataModel(amount, currency, reason), purchaseId, customerId))
+        }
+    }
+
+    @Test
+    fun `preauthorize transaction with wrong amount`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            bsPayonePsp.preauthorize(PaymentRequestModel(wrongAliasId, PaymentDataModel(wrongAmount, currency, reason), purchaseId, customerId))
         }
     }
 

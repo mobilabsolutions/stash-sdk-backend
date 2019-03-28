@@ -20,6 +20,7 @@ import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.PspPaymentResponseModel
 import com.mobilabsolutions.payment.service.Psp
 import com.mobilabsolutions.server.commons.exception.ApiError
+import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import mu.KLogging
 import org.springframework.stereotype.Component
 
@@ -32,10 +33,13 @@ class BsPayonePsp(
     private val bsPayoneProperties: BsPayoneProperties,
     private val bsPayoneClient: BsPayoneClient,
     private val aliasRepository: AliasRepository,
+    private val randomStringGenerator: RandomStringGenerator,
     private val jsonMapper: ObjectMapper
 ) : Psp {
 
-    companion object : KLogging()
+    companion object : KLogging() {
+        const val REFERENCE_LENGTH = 10
+    }
 
     override fun getProvider(): PaymentServiceProvider {
         return PaymentServiceProvider.BS_PAYONE
@@ -59,7 +63,7 @@ class BsPayonePsp(
         ) else null
     }
 
-    override fun preauthorize(preauthorizeRequestModel: PaymentRequestModel, reference: String?): PspPaymentResponseModel {
+    override fun preauthorize(preauthorizeRequestModel: PaymentRequestModel): PspPaymentResponseModel {
         val alias = aliasRepository.getFirstByIdAndActive(preauthorizeRequestModel.aliasId!!, true) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         val result = jsonMapper.readValue(alias.merchant?.pspConfig, PspConfigListModel::class.java)
         val pspConfig = result.psp.firstOrNull { it.type == getProvider().toString() }
@@ -68,7 +72,7 @@ class BsPayonePsp(
         val bsPayonePreauthorizeRequest = BsPayonePaymentRequestModel(
             accountId = pspConfig.accountId,
             clearingType = getBsPayoneClearingType(alias),
-            reference = reference,
+            reference = randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
             amount = preauthorizeRequestModel.paymentData!!.amount.toString(),
             currency = preauthorizeRequestModel.paymentData!!.currency,
             lastName = getPersonalData(alias)?.lastName,

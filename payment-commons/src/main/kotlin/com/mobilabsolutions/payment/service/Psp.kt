@@ -9,23 +9,21 @@ import com.mobilabsolutions.payment.model.PspPaymentResponseModel
 interface Psp {
     /**
      * Returns the provider type {@link PaymentServiceProvider}
-     * @return @see PaymentServiceProvider
+     * @see PaymentServiceProvider
      */
     fun getProvider(): PaymentServiceProvider
 
     /**
      * Calculates the psp alias configuration {@link PspAliasConfigModel} for the given psp configuration {@link PspConfigModel}
-     * @param pspConfigModel @see PspAliasConfigModel
-     * @return @see PspConfigModel
+     * @see PspAliasConfigModel
+     * @see PspConfigModel
      */
     fun calculatePspConfig(pspConfigModel: PspConfigModel?): PspAliasConfigModel?
 
     /**
      * Returns authorization response {@link PspAuthorizeResponseModel} for the given authorization request {@link PaymentRequestModel}
-     * and payment reference.
-     * @param reference Payment reference
-     * @param preauthorizeRequestModel @see PspPaymentResponseModel
-     * @return @see PaymentRequestModel
+     * @see PspPaymentResponseModel
+     * @see PaymentRequestModel
      */
-    fun preauthorize(preauthorizeRequestModel: PaymentRequestModel, reference: String?): PspPaymentResponseModel
+    fun preauthorize(preauthorizeRequestModel: PaymentRequestModel): PspPaymentResponseModel
 }
