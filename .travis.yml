@@ -1,16 +1,10 @@
-sudo: required
-
-dist: trusty
-
-group: edge
-
 services:
   - docker
 
 language: java
 
 jdk:
-  - oraclejdk11
+  - openjdk11
 
 env:
   - CLUSTER_NAME=main REGION="europe-west3" PROJECT_ID="payment-server-reloaded" REGISTRY_HOSTNAME="eu.gcr.io" MVN_BUILD_JAVA_OPTS=""

@@ -27,7 +27,7 @@ class InitialDataLoader(
 ) : ApplicationListener<ContextRefreshedEvent> {
 
     lateinit var oauthClientId: String
-    lateinit var oauthClienPassword: String
+    lateinit var oauthClientPassword: String
     lateinit var adminUsername: String
     lateinit var adminPassword: String
 
@@ -44,7 +44,7 @@ class InitialDataLoader(
         val oAuthClientDetails = OAuthClientDetails(
             clientId = oauthClientId,
             resourceIds = "payment-sdk-rest-api",
-            clientSecret = oauthClientPasswordEncoder.encode(oauthClienPassword),
+            clientSecret = oauthClientPasswordEncoder.encode(oauthClientPassword),
             scope = "user",
             authorizedGrantTypes = "password,refresh_token",
             accessTokenValidity = 300,
