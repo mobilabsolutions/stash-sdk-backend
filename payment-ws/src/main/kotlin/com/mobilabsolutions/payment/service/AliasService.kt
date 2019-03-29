@@ -35,10 +35,10 @@ class AliasService(
      *
      * @param publishableKey Publishable Key
      * @param pspType PSP Type
-     * @param test indicator whether is the test mode or not
+     * @param pspTestMode indicator whether is the test mode or not
      * @return alias method response
      */
-    fun createAlias(publishableKey: String, pspType: String, test: Boolean?): AliasResponseModel {
+    fun createAlias(publishableKey: String, pspType: String, pspTestMode: Boolean?): AliasResponseModel {
         val generatedAliasId = RandomStringUtils.randomAlphanumeric(STRING_LENGTH)
         val merchantApiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofMessage("Publishable Key cannot be found").asBadRequest()
 
@@ -53,7 +53,7 @@ class AliasService(
             psp = pspConfigType
         )
         aliasRepository.save(alias)
-        val calculatedConfig = psp.calculatePspConfig(pspConfig, test)
+        val calculatedConfig = psp.calculatePspConfig(pspConfig, pspTestMode)
 
         return AliasResponseModel(generatedAliasId, calculatedConfig)
     }

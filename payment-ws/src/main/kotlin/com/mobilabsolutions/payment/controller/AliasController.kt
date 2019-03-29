@@ -33,8 +33,8 @@ class AliasController(private val aliasService: AliasService) {
     fun createAlias(
         @RequestHeader(value = "Publishable-Key") publishableKey: String,
         @RequestHeader(value = "PSP-Type") pspType: String,
-        @RequestHeader(value = "Test", required = false) test: Boolean?
-    ) = aliasService.createAlias(publishableKey, pspType, test)
+        @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?
+    ) = aliasService.createAlias(publishableKey, pspType, pspTestMode)
 
     @ApiOperation(value = "Update the given Alias for payment operations")
     @ApiResponses(

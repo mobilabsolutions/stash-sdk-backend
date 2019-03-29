@@ -46,7 +46,7 @@ class BsPayonePsp(
         return PaymentServiceProvider.BS_PAYONE
     }
 
-    override fun calculatePspConfig(pspConfigModel: PspConfigModel?, test: Boolean?): PspAliasConfigModel? {
+    override fun calculatePspConfig(pspConfigModel: PspConfigModel?, pspTestMode: Boolean?): PspAliasConfigModel? {
         logger.info { "Random config calculation has been called..." }
         return if (pspConfigModel != null) PspAliasConfigModel(
             type = PaymentServiceProvider.BS_PAYONE.toString(),
@@ -55,16 +55,16 @@ class BsPayonePsp(
             request = BsPayoneRequestType.CREDIT_CARD_CHECK.type,
             apiVersion = bsPayoneProperties.apiVersion,
             responseType = BsPayoneHashingService.RESPONSE_TYPE,
-            hash = bsPayoneHashingService.makeCreditCardCheckHash(pspConfigModel, getMode(test)),
+            hash = bsPayoneHashingService.makeCreditCardCheckHash(pspConfigModel, getPspMode(pspTestMode)),
             accountId = pspConfigModel.accountId,
             encoding = bsPayoneProperties.encoding,
-            mode = getMode(test),
+            mode = getPspMode(pspTestMode),
             publicKey = null,
             privateKey = null
         ) else null
     }
 
-    override fun preauthorize(preauthorizeRequestModel: PaymentRequestModel, test: Boolean?): PspPaymentResponseModel {
+    override fun preauthorize(preauthorizeRequestModel: PaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
         val alias = aliasRepository.getFirstByIdAndActive(preauthorizeRequestModel.aliasId!!, true) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         val result = jsonMapper.readValue(alias.merchant?.pspConfig, PspConfigListModel::class.java)
         val pspConfig = result.psp.firstOrNull { it.type == getProvider().toString() }
@@ -84,7 +84,7 @@ class BsPayonePsp(
             bic = null
         )
 
-        val response = bsPayoneClient.preauthorization(bsPayonePreauthorizeRequest, pspConfig, getMode(test))
+        val response = bsPayoneClient.preauthorization(bsPayonePreauthorizeRequest, pspConfig, getPspMode(pspTestMode))
 
         if (response.hasError()) {
             logger.error { "Error during BS Payone preauthorization. Error code: ${response.errorCode}, error message: ${response.errorMessage} " }
@@ -95,7 +95,7 @@ class BsPayonePsp(
         return PspPaymentResponseModel(response.transactionId, TransactionStatus.SUCCESS, response.customerId, null, null)
     }
 
-    private fun getMode(test: Boolean?): String {
+    private fun getPspMode(test: Boolean?): String {
         if (test == null || test == false) return BsPayoneMode.LIVE.mode
         return BsPayoneMode.TEST.mode
     }

@@ -29,7 +29,7 @@
 								"type": "text"
 							},
 							{
-								"key": "Test",
+								"key": "PSP-Test-Mode",
 								"value": "true",
 								"type": "text"
 							}
@@ -796,7 +796,7 @@
 								"type": "text"
 							},
 							{
-								"key": "Test",
+								"key": "PSP-Test-Mode",
 								"value": "true",
 								"type": "text"
 							}
@@ -826,7 +826,7 @@
 								"type": "text"
 							},
 							{
-								"key": "Test",
+								"key": "PSP-Test-Mode",
 								"value": "true",
 								"type": "text"
 							}
@@ -867,7 +867,7 @@
 								"type": "text"
 							},
 							{
-								"key": "Test",
+								"key": "PSP-Test-Mode",
 								"value": "true",
 								"type": "text"
 							}
