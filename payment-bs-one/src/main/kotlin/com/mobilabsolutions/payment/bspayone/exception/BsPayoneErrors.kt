@@ -7,6 +7,10 @@ import com.mobilabsolutions.server.commons.exception.PaymentError
  */
 enum class BsPayoneErrors(val code: String, val error: PaymentError) {
 
+    TEST_MODE_UNAVAILABLE("924", PaymentError.CONFIGURATION_ERROR),
+    LIVE_MODE_UNAVAILABLE("925", PaymentError.CONFIGURATION_ERROR),
+    INCORRECT_MODE("926", PaymentError.CONFIGURATION_ERROR),
+
     LIMIT_EXCEEDED("13", PaymentError.PAYMENT_ERROR),
     CARD_STOLEN("43", PaymentError.PAYMENT_ERROR),
     CARD_UNKNOWN("56", PaymentError.PAYMENT_ERROR),
