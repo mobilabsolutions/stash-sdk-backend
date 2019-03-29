@@ -23,5 +23,8 @@ data class PaymentResponseModel(
     val status: TransactionStatus?,
 
     @ApiModelProperty("Transaction Action")
-    val action: TransactionAction?
+    val action: TransactionAction?,
+
+    @ApiModelProperty("Additional Info")
+    val additionalInfo: String? = null
 )
