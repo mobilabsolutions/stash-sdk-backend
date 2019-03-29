@@ -30,7 +30,6 @@ import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
-import org.springframework.http.HttpStatus
 
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
@@ -102,7 +101,16 @@ class TransactionServiceTest {
             Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
         )
         Mockito.`when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
-        Mockito.`when`(psp.preauthorize(PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)))
+        Mockito.`when`(
+            psp.preauthorize(
+                PaymentRequestModel(
+                    correctAliasId,
+                    correctPaymentData,
+                    purchaseId,
+                    customerId
+                )
+            )
+        )
             .thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
 
         Mockito.`when`(transactionRepository.getByIdempotentKeyAndAction(newIdempotentKey, preauthAction))
@@ -111,7 +119,8 @@ class TransactionServiceTest {
             .thenReturn(executedTransaction)
         Mockito.`when`(transactionRepository.getByIdempotentKeyAndAction(newIdempotentKey, authAction))
             .thenReturn(null)
-        Mockito.`when`(transactionRepository.getByIdempotentKeyAndAction(usedIdempotentKey, authAction)).thenReturn(executedTransaction)
+        Mockito.`when`(transactionRepository.getByIdempotentKeyAndAction(usedIdempotentKey, authAction))
+            .thenReturn(executedTransaction)
         Mockito.`when`(
             transactionRepository.getByTransactionIdAndAction(
                 correctTransactionId,
@@ -130,7 +139,12 @@ class TransactionServiceTest {
                 preauthAction
             )
         ).thenReturn(null)
-        Mockito.`when`(transactionRepository.getByTransactionIdAndAction(correctTransactionIdAlreadyCaptured, captureAction))
+        Mockito.`when`(
+            transactionRepository.getByTransactionIdAndAction(
+                correctTransactionIdAlreadyCaptured,
+                captureAction
+            )
+        )
             .thenReturn(executedTransaction)
         Mockito.`when`(
             transactionRepository.getByTransactionIdAndAction(
@@ -213,22 +227,20 @@ class TransactionServiceTest {
 
     @Test
     fun `preauthorize transaction with new idempotent key`() {
-        val responseEntity = transactionService.preauthorize(
+        transactionService.preauthorize(
             correctSecretKey,
             newIdempotentKey,
             PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
         )
-        Assertions.assertEquals(responseEntity.statusCode, HttpStatus.CREATED)
     }
 
     @Test
     fun `preauthorize transaction with used idempotent key`() {
-        val responseEntity = transactionService.preauthorize(
+        transactionService.preauthorize(
             correctSecretKey,
             usedIdempotentKey,
             PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
         )
-        Assertions.assertEquals(responseEntity.statusCode, HttpStatus.CREATED)
     }
 
     @Test
@@ -284,22 +296,20 @@ class TransactionServiceTest {
 
     @Test
     fun `authorize transaction with new idempotent key`() {
-        val responseEntity = transactionService.authorize(
+        transactionService.authorize(
             correctSecretKey,
             newIdempotentKey,
             PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
         )
-        Assertions.assertEquals(responseEntity.statusCode, HttpStatus.CREATED)
     }
 
     @Test
     fun `authorize transaction with used idempotent key`() {
-        val responseEntity = transactionService.preauthorize(
+        transactionService.preauthorize(
             correctSecretKey,
             usedIdempotentKey,
             PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
         )
-        Assertions.assertEquals(responseEntity.statusCode, HttpStatus.CREATED)
     }
 
     @Test
@@ -318,8 +328,7 @@ class TransactionServiceTest {
 
     @Test
     fun `capture transaction successfully`() {
-        val responseEntity = transactionService.capture(correctSecretKey, correctTransactionId)
-        Assertions.assertEquals(responseEntity.statusCode, HttpStatus.OK)
+        transactionService.capture(correctSecretKey, correctTransactionId)
     }
 
     @Test
@@ -331,7 +340,6 @@ class TransactionServiceTest {
 
     @Test
     fun `capture transaction that already has been captured`() {
-        val responseEntity = transactionService.capture(correctSecretKey, correctTransactionIdAlreadyCaptured)
-        Assertions.assertEquals(responseEntity.statusCode, HttpStatus.OK)
+        transactionService.capture(correctSecretKey, correctTransactionIdAlreadyCaptured)
     }
 }
