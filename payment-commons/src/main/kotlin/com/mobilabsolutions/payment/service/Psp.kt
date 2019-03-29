@@ -15,15 +15,17 @@ interface Psp {
 
     /**
      * Calculates the psp alias configuration {@link PspAliasConfigModel} for the given psp configuration {@link PspConfigModel}
+     * @param test indicator whether is the test mode or not
      * @see PspAliasConfigModel
      * @see PspConfigModel
      */
-    fun calculatePspConfig(pspConfigModel: PspConfigModel?): PspAliasConfigModel?
+    fun calculatePspConfig(pspConfigModel: PspConfigModel?, test: Boolean?): PspAliasConfigModel?
 
     /**
      * Returns psp preauthorization payment response {@link PspPaymentResponseModel} for the given preauthorization payment request {@link PaymentRequestModel}
+     * @param test indicator whether is the test mode or not
      * @see PspPaymentResponseModel
      * @see PaymentRequestModel
      */
-    fun preauthorize(preauthorizeRequestModel: PaymentRequestModel): PspPaymentResponseModel
+    fun preauthorize(preauthorizeRequestModel: PaymentRequestModel, test: Boolean?): PspPaymentResponseModel
 }

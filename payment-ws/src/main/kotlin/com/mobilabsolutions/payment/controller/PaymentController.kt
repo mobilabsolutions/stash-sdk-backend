@@ -43,8 +43,9 @@ class PaymentController(private val transactionService: TransactionService) {
     fun preauthorizeTransaction(
         @RequestHeader(value = "Secret-Key") secretKey: String,
         @Size(min = 5, max = 10) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
+        @RequestHeader(value = "Test", required = false) test: Boolean?,
         @Valid @RequestBody preauthorizeInfo: PaymentRequestModel
-    ): ResponseEntity<PaymentResponseModel> = transactionService.preauthorize(secretKey, idempotentKey, preauthorizeInfo)
+    ): ResponseEntity<PaymentResponseModel> = transactionService.preauthorize(secretKey, idempotentKey, test, preauthorizeInfo)
 
     @ApiOperation(value = "Capture transaction")
     @ApiResponses(
@@ -56,8 +57,9 @@ class PaymentController(private val transactionService: TransactionService) {
     @RequestMapping(PaymentController.CAPTURE_URL, method = [RequestMethod.PUT])
     fun captureTransaction(
         @RequestHeader(value = "Secret-Key") secretKey: String,
+        @RequestHeader(value = "Test", required = false) test: Boolean?,
         @PathVariable(value = "Transaction-Id") transactionId: String
-    ): ResponseEntity<PaymentResponseModel> = transactionService.capture(secretKey, transactionId)
+    ): ResponseEntity<PaymentResponseModel> = transactionService.capture(secretKey, test, transactionId)
 
     @ApiOperation(value = "Authorize transaction")
     @ApiResponses(
@@ -76,8 +78,9 @@ class PaymentController(private val transactionService: TransactionService) {
     fun authorizeTransaction(
         @RequestHeader(value = "Secret-Key") secretKey: String,
         @Size(min = 5, max = 10) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
+        @RequestHeader(value = "Test", required = false) test: Boolean?,
         @Valid @RequestBody authorizeInfo: PaymentRequestModel
-    ): ResponseEntity<PaymentResponseModel> = transactionService.authorize(secretKey, idempotentKey, authorizeInfo)
+    ): ResponseEntity<PaymentResponseModel> = transactionService.authorize(secretKey, idempotentKey, test, authorizeInfo)
 
     companion object {
         const val PREAUTH_URL = "preauthorization"

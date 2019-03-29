@@ -27,6 +27,11 @@
 								"key": "PSP-Type",
 								"value": "BS_PAYONE",
 								"type": "text"
+							},
+							{
+								"key": "Test",
+								"value": "true",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -789,6 +794,11 @@
 								"key": "Idempotent-Key",
 								"value": "",
 								"type": "text"
+							},
+							{
+								"key": "Test",
+								"value": "true",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -813,6 +823,11 @@
 							{
 								"key": "Secret-Key",
 								"value": "",
+								"type": "text"
+							},
+							{
+								"key": "Test",
+								"value": "true",
 								"type": "text"
 							}
 						],
@@ -849,6 +864,11 @@
 							{
 								"key": "Idempotent-Key",
 								"value": "",
+								"type": "text"
+							},
+							{
+								"key": "Test",
+								"value": "true",
 								"type": "text"
 							}
 						],

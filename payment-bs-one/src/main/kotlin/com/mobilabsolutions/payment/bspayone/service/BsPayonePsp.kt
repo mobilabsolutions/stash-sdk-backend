@@ -3,6 +3,7 @@ package com.mobilabsolutions.payment.bspayone.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.bspayone.configuration.BsPayoneProperties
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneClearingType
+import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneMode
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneRequestType
 import com.mobilabsolutions.payment.bspayone.exception.BsPayoneErrors
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentRequestModel
@@ -45,7 +46,7 @@ class BsPayonePsp(
         return PaymentServiceProvider.BS_PAYONE
     }
 
-    override fun calculatePspConfig(pspConfigModel: PspConfigModel?): PspAliasConfigModel? {
+    override fun calculatePspConfig(pspConfigModel: PspConfigModel?, test: Boolean?): PspAliasConfigModel? {
         logger.info { "Random config calculation has been called..." }
         return if (pspConfigModel != null) PspAliasConfigModel(
             type = PaymentServiceProvider.BS_PAYONE.toString(),
@@ -54,16 +55,16 @@ class BsPayonePsp(
             request = BsPayoneRequestType.CREDIT_CARD_CHECK.type,
             apiVersion = bsPayoneProperties.apiVersion,
             responseType = BsPayoneHashingService.RESPONSE_TYPE,
-            hash = bsPayoneHashingService.makeCreditCardCheckHash(pspConfigModel),
+            hash = bsPayoneHashingService.makeCreditCardCheckHash(pspConfigModel, getMode(test)),
             accountId = pspConfigModel.accountId,
             encoding = bsPayoneProperties.encoding,
-            mode = bsPayoneProperties.mode,
+            mode = getMode(test),
             publicKey = null,
             privateKey = null
         ) else null
     }
 
-    override fun preauthorize(preauthorizeRequestModel: PaymentRequestModel): PspPaymentResponseModel {
+    override fun preauthorize(preauthorizeRequestModel: PaymentRequestModel, test: Boolean?): PspPaymentResponseModel {
         val alias = aliasRepository.getFirstByIdAndActive(preauthorizeRequestModel.aliasId!!, true) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         val result = jsonMapper.readValue(alias.merchant?.pspConfig, PspConfigListModel::class.java)
         val pspConfig = result.psp.firstOrNull { it.type == getProvider().toString() }
@@ -83,7 +84,7 @@ class BsPayonePsp(
             bic = null
         )
 
-        val response = bsPayoneClient.preauthorization(bsPayonePreauthorizeRequest, pspConfig)
+        val response = bsPayoneClient.preauthorization(bsPayonePreauthorizeRequest, pspConfig, getMode(test))
 
         if (response.hasError()) {
             logger.error { "Error during BS Payone preauthorization. Error code: ${response.errorCode}, error message: ${response.errorMessage} " }
@@ -92,6 +93,11 @@ class BsPayonePsp(
         }
 
         return PspPaymentResponseModel(response.transactionId, TransactionStatus.SUCCESS, response.customerId, null, null)
+    }
+
+    private fun getMode(test: Boolean?): String {
+        if (test == null || test == false) return BsPayoneMode.LIVE.mode
+        return BsPayoneMode.TEST.mode
     }
 
     private fun getBsPayoneClearingType(alias: Alias): String {
