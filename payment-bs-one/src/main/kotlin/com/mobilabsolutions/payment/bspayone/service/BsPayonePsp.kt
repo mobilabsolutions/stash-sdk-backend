@@ -111,8 +111,8 @@ class BsPayonePsp(
                 country = getPersonalData(alias)?.country,
                 city = getPersonalData(alias)?.city,
                 pspAlias = alias.pspAlias,
-                iban = getSepaConfigData(alias)?.iban,
-                bic = getSepaConfigData(alias)?.bic
+                iban = if (getPaymentMethod(alias) == PaymentMethod.SEPA) getSepaConfigData(alias)?.iban else null,
+                bic = if (getPaymentMethod(alias) == PaymentMethod.SEPA) getSepaConfigData(alias)?.bic else null
         )
 
         val response = bsPayoneClient.authorization(bsPayoneAuthorizeRequest, pspConfig)
@@ -146,5 +146,11 @@ class BsPayonePsp(
         val aliasExtra = jsonMapper.readValue(alias.extra, AliasExtraModel::class.java)
             ?: throw ApiError.ofMessage("Alias extra data cannot be found").asBadRequest()
         return aliasExtra.sepaConfig ?: throw ApiError.ofMessage("Alias not configured properly, sepa config is missing").asInternalServerError()
+    }
+
+    private fun getPaymentMethod(alias: Alias): PaymentMethod? {
+        val aliasExtra = jsonMapper.readValue(alias.extra, AliasExtraModel::class.java)
+            ?: throw ApiError.ofMessage("Alias extra data cannot be found").asBadRequest()
+        return aliasExtra.paymentMethod ?: throw ApiError.ofMessage("Alias not configured properly, payment method is missing").asInternalServerError()
     }
 }
