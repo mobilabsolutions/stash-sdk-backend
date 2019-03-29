@@ -1,6 +1,8 @@
 package com.mobilabsolutions.payment.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.mobilabsolutions.payment.data.domain.Alias
+import com.mobilabsolutions.payment.data.domain.MerchantApiKey
 import com.mobilabsolutions.payment.data.domain.Transaction
 import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.enum.TransactionAction
@@ -13,8 +15,8 @@ import com.mobilabsolutions.payment.model.PaymentInfoModel
 import com.mobilabsolutions.payment.model.PaymentRequestModel
 import com.mobilabsolutions.payment.model.PaymentResponseModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
+import com.mobilabsolutions.payment.model.PspPaymentResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
-import com.mobilabsolutions.server.commons.exception.ApiException
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.http.HttpStatus
@@ -26,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
 @Service
-@Transactional(noRollbackFor = [ApiException::class])
+@Transactional
 class TransactionService(
     private val transactionRepository: TransactionRepository,
     private val merchantApiKeyRepository: MerchantApiKeyRepository,
@@ -43,8 +45,25 @@ class TransactionService(
      * @param authorizeInfo Payment information
      * @return Payment response model
      */
-    fun authorize(secretKey: String, idempotentKey: String, authorizeInfo: PaymentRequestModel): ResponseEntity<PaymentResponseModel> {
-        return executeIdempotentTransactionOperation(secretKey, idempotentKey, authorizeInfo, TransactionAction.AUTH)
+    fun authorize(
+        secretKey: String,
+        idempotentKey: String,
+        authorizeInfo: PaymentRequestModel
+    ): ResponseEntity<PaymentResponseModel> {
+        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
+            ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
+        val alias = aliasRepository.getFirstByIdAndActive(authorizeInfo.aliasId!!, true)
+            ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+        val psp = pspRegistry.find(alias.psp!!)
+            ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest() // TODO will be used after a psp related implementation
+
+        return executeIdempotentTransactionOperation(
+            alias,
+            apiKey,
+            idempotentKey,
+            authorizeInfo,
+            TransactionAction.AUTH
+        ) { PspPaymentResponseModel("test", TransactionStatus.SUCCESS, null, null, null) } // TODO pass psp.authorize function as a parameter
     }
 
     /**
@@ -55,54 +74,25 @@ class TransactionService(
      * @param preauthorizeInfo Payment information
      * @return Payment response model
      */
-    fun preauthorize(secretKey: String, idempotentKey: String, preauthorizeInfo: PaymentRequestModel): ResponseEntity<PaymentResponseModel> {
+    fun preauthorize(
+        secretKey: String,
+        idempotentKey: String,
+        preauthorizeInfo: PaymentRequestModel
+    ): ResponseEntity<PaymentResponseModel> {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
             ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
         val alias = aliasRepository.getFirstByIdAndActive(preauthorizeInfo.aliasId!!, true)
             ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
-        val extra = objectMapper.readValue(alias.extra
-            ?: throw ApiError.ofMessage("Used alias is incomplete, please define a payment configuration on related alias").asBadRequest(), AliasExtraModel::class.java)
-
-        val paymentInfoModel = PaymentInfoModel(extra, objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java))
-
         val psp = pspRegistry.find(alias.psp!!)
             ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
-        val pspPaymentResponse = psp.preauthorize(preauthorizeInfo)
 
-        when {
-            transactionRepository.getIdByIdempotentKeyAndAction(idempotentKey, TransactionAction.PREAUTH) == null -> {
-                val transaction = Transaction(
-                    transactionId = RandomStringUtils.randomAlphanumeric(TransactionService.TRANSACTION_ID_LENGTH),
-                    idempotentKey = idempotentKey,
-                    currencyId = preauthorizeInfo.paymentData!!.currency,
-                    amount = preauthorizeInfo.paymentData!!.amount,
-                    reason = preauthorizeInfo.paymentData!!.reason,
-                    status = pspPaymentResponse.status,
-                    action = TransactionAction.PREAUTH,
-                    paymentMethod = extra.paymentMethod,
-                    paymentInfo = objectMapper.writeValueAsString(paymentInfoModel),
-                    pspTransactionId = pspPaymentResponse.pspTransactionId,
-                    merchantTransactionId = preauthorizeInfo.purchaseId,
-                    merchantCustomerId = preauthorizeInfo.customerId,
-                    merchant = apiKey.merchant,
-                    alias = alias
-                )
-                transactionRepository.save(transaction)
-
-                if (pspPaymentResponse.hasError())
-                    throw ApiError.builder()
-                        .withMessage(pspPaymentResponse.error?.error!!)
-                        .withProperty("pspError", pspPaymentResponse.errorMessage!!)
-                        .build().asBadRequest()
-
-                return ResponseEntity.status(HttpStatus.CREATED).body(
-                    PaymentResponseModel(transaction.transactionId, transaction.amount,
-                        transaction.currencyId, transaction.status, transaction.action)
-                )
-            }
-            transactionRepository.getIdByIdempotentKeyAndActionAndGivenBody(idempotentKey, TransactionAction.PREAUTH, preauthorizeInfo) != null -> return ResponseEntity.status(HttpStatus.OK).body(null)
-            else -> throw ApiError.ofMessage("There is already a transaction with given idempotent key").asBadRequest()
-        }
+        return executeIdempotentTransactionOperation(
+            alias,
+            apiKey,
+            idempotentKey,
+            preauthorizeInfo,
+            TransactionAction.PREAUTH
+        ) { psp.preauthorize(preauthorizeInfo) }
     }
 
     /**
@@ -115,16 +105,37 @@ class TransactionService(
     fun capture(secretKey: String, transactionId: String): ResponseEntity<PaymentResponseModel> {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
             ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
-        val preauthTransaction = transactionRepository.getByTransactionIdAndAction(transactionId, TransactionAction.PREAUTH)
+        val preauthTransaction = transactionRepository.getByTransactionIdAndAction(
+            transactionId,
+            TransactionAction.PREAUTH,
+            TransactionStatus.SUCCESS
+        )
             ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
         if (preauthTransaction.merchant.id != apiKey.merchant.id)
             throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
 
-        val paymentInfoModel = PaymentInfoModel(objectMapper.readValue(preauthTransaction.alias?.extra, AliasExtraModel::class.java), objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java))
+        val paymentInfoModel = PaymentInfoModel(
+            objectMapper.readValue(preauthTransaction.alias?.extra, AliasExtraModel::class.java),
+            objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java)
+        )
+
+        val captureTransaction =
+            transactionRepository.getByTransactionIdAndAction(transactionId, TransactionAction.CAPTURE)
 
         when {
-            transactionRepository.getByTransactionIdAndAction(transactionId, TransactionAction.CAPTURE) == null -> {
-                val captureTransaction = Transaction(
+            captureTransaction != null -> return ResponseEntity.status(HttpStatus.OK).body(
+                PaymentResponseModel(
+                    captureTransaction.transactionId,
+                    captureTransaction.amount,
+                    captureTransaction.currencyId,
+                    captureTransaction.status,
+                    captureTransaction.action,
+                    objectMapper.readValue(captureTransaction.pspResponse, PspPaymentResponseModel::class.java)?.errorMessage
+                )
+            )
+            else -> {
+                val pspPaymentResponse = PspPaymentResponseModel("test", TransactionStatus.SUCCESS, null, null, null) // TODO psp.capture invocation
+                val newTransaction = Transaction(
                     transactionId = transactionId,
                     idempotentKey = preauthTransaction.idempotentKey,
                     currencyId = preauthTransaction.currencyId,
@@ -134,55 +145,86 @@ class TransactionService(
                     action = TransactionAction.CAPTURE,
                     paymentMethod = preauthTransaction.paymentMethod,
                     paymentInfo = objectMapper.writeValueAsString(paymentInfoModel),
+                    pspResponse = objectMapper.writeValueAsString(pspPaymentResponse),
                     merchantTransactionId = preauthTransaction.merchantTransactionId,
                     merchantCustomerId = preauthTransaction.merchantCustomerId,
                     merchant = preauthTransaction.merchant,
                     alias = preauthTransaction.alias
                 )
-                transactionRepository.save(captureTransaction)
+                transactionRepository.save(newTransaction)
 
-                return ResponseEntity.status(HttpStatus.OK).body(PaymentResponseModel(captureTransaction.transactionId, captureTransaction.amount, captureTransaction.currencyId, captureTransaction.status, captureTransaction.action))
+                return ResponseEntity.status(HttpStatus.OK).body(
+                    PaymentResponseModel(
+                        newTransaction.transactionId,
+                        newTransaction.amount,
+                        newTransaction.currencyId,
+                        newTransaction.status,
+                        newTransaction.action,
+                        pspPaymentResponse.errorMessage
+                    )
+                )
             }
-            else -> return ResponseEntity.status(HttpStatus.OK).body(null)
         }
     }
 
-    private fun executeIdempotentTransactionOperation(secretKey: String, idempotentKey: String, paymentInfo: PaymentRequestModel, transactionAction: TransactionAction): ResponseEntity<PaymentResponseModel> {
-        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
-            ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
-        val alias = aliasRepository.getFirstByIdAndActive(paymentInfo.aliasId!!, true)
-            ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
-        val extra = objectMapper.readValue(alias.extra
-            ?: throw ApiError.ofMessage("Used alias is incomplete, please define a payment configuration on related alias").asBadRequest(), AliasExtraModel::class.java)
+    private fun executeIdempotentTransactionOperation(
+        alias: Alias,
+        apiKey: MerchantApiKey,
+        idempotentKey: String,
+        paymentInfo: PaymentRequestModel,
+        transactionAction: TransactionAction,
+        pspAction: ((requestModel: PaymentRequestModel) -> PspPaymentResponseModel)
+    ): ResponseEntity<PaymentResponseModel> {
+        val extra = objectMapper.readValue(
+            alias.extra
+                ?: throw ApiError.ofMessage("Used alias is incomplete, please define a payment configuration on related alias").asBadRequest(),
+            AliasExtraModel::class.java
+        )
 
-        val paymentInfoModel = PaymentInfoModel(extra, objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java))
+        val paymentInfoModel =
+            PaymentInfoModel(extra, objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java))
+
+        val transaction = transactionRepository.getByIdempotentKeyAndAction(idempotentKey, transactionAction)
 
         when {
-            transactionRepository.getIdByIdempotentKeyAndAction(idempotentKey, transactionAction) == null -> {
-                val transaction = Transaction(
+            transaction != null -> return ResponseEntity.status(HttpStatus.CREATED).body(
+                PaymentResponseModel(
+                    transaction.transactionId,
+                    transaction.amount,
+                    transaction.currencyId,
+                    transaction.status,
+                    transaction.action,
+                    objectMapper.readValue(transaction.pspResponse, PspPaymentResponseModel::class.java)?.errorMessage
+                )
+            )
+            else -> {
+                val pspPaymentResponse = pspAction.invoke(paymentInfo)
+                val newTransaction = Transaction(
                     transactionId = RandomStringUtils.randomAlphanumeric(TransactionService.TRANSACTION_ID_LENGTH),
                     idempotentKey = idempotentKey,
                     currencyId = paymentInfo.paymentData!!.currency,
                     amount = paymentInfo.paymentData!!.amount,
                     reason = paymentInfo.paymentData!!.reason,
-                    status = TransactionStatus.SUCCESS,
+                    status = pspPaymentResponse.status ?: TransactionStatus.FAIL,
                     action = transactionAction,
                     paymentMethod = extra.paymentMethod,
                     paymentInfo = objectMapper.writeValueAsString(paymentInfoModel),
+                    pspResponse = objectMapper.writeValueAsString(pspPaymentResponse),
                     merchantTransactionId = paymentInfo.purchaseId,
                     merchantCustomerId = paymentInfo.customerId,
                     merchant = apiKey.merchant,
                     alias = alias
                 )
-                transactionRepository.save(transaction)
+                transactionRepository.save(newTransaction)
 
                 return ResponseEntity.status(HttpStatus.CREATED).body(
-                    PaymentResponseModel(transaction.transactionId, transaction.amount,
-                        transaction.currencyId, transaction.status, transaction.action)
+                    PaymentResponseModel(
+                        newTransaction.transactionId, newTransaction.amount,
+                        newTransaction.currencyId, newTransaction.status,
+                        newTransaction.action, pspPaymentResponse.errorMessage
+                    )
                 )
             }
-            transactionRepository.getIdByIdempotentKeyAndActionAndGivenBody(idempotentKey, transactionAction, paymentInfo) != null -> return ResponseEntity.status(HttpStatus.OK).body(null)
-            else -> throw ApiError.ofMessage("There is already a transaction with given idempotent key").asBadRequest()
         }
     }
 

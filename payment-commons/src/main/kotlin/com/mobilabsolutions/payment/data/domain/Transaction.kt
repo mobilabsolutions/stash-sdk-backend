@@ -62,8 +62,10 @@ class Transaction(
     @Column(name = "payment_info")
     var paymentInfo: String? = null,
 
-    @Column(name = "psp_transaction_id")
-    var pspTransactionId: String? = null,
+    @Lob
+    @Type(type = "org.hibernate.type.TextType")
+    @Column(name = "psp_response")
+    var pspResponse: String? = null,
 
     @Column(name = "merchant_transaction_id")
     var merchantTransactionId: String? = null,

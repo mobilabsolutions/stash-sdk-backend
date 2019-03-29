@@ -28,7 +28,6 @@ class PaymentController(private val transactionService: TransactionService) {
 
     @ApiOperation(value = "Preauthorize transaction")
     @ApiResponses(
-        ApiResponse(code = 200, message = "Preauthorization check successful"),
         ApiResponse(code = 201, message = "Successfully preauthorized transaction"),
         ApiResponse(code = 400, message = "Failed to preauthorize transaction"),
         ApiResponse(code = 401, message = "Unauthorized access"),
@@ -42,7 +41,7 @@ class PaymentController(private val transactionService: TransactionService) {
     )
     fun preauthorizeTransaction(
         @RequestHeader(value = "Secret-Key") secretKey: String,
-        @Size(min = 5, max = 10) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
+        @Size(min = 10, max = 20) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
         @Valid @RequestBody preauthorizeInfo: PaymentRequestModel
     ): ResponseEntity<PaymentResponseModel> = transactionService.preauthorize(secretKey, idempotentKey, preauthorizeInfo)
 
@@ -61,7 +60,6 @@ class PaymentController(private val transactionService: TransactionService) {
 
     @ApiOperation(value = "Authorize transaction")
     @ApiResponses(
-        ApiResponse(code = 200, message = "Authorization check successful"),
         ApiResponse(code = 201, message = "Successfully authorized transaction"),
         ApiResponse(code = 400, message = "Failed to authorize transaction"),
         ApiResponse(code = 401, message = "Unauthorized access"),
@@ -75,7 +73,7 @@ class PaymentController(private val transactionService: TransactionService) {
     )
     fun authorizeTransaction(
         @RequestHeader(value = "Secret-Key") secretKey: String,
-        @Size(min = 5, max = 10) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
+        @Size(min = 10, max = 20) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
         @Valid @RequestBody authorizeInfo: PaymentRequestModel
     ): ResponseEntity<PaymentResponseModel> = transactionService.authorize(secretKey, idempotentKey, authorizeInfo)
 
