@@ -168,7 +168,7 @@ class TransactionService(
                     pspResponse = objectMapper.writeValueAsString(pspPaymentResponse),
                     merchantTransactionId = preauthTransaction.merchantTransactionId,
                     merchantCustomerId = preauthTransaction.merchantCustomerId,
-                    pspTestMode = pspTestMode,
+                    pspTestMode = pspTestMode ?: false,
                     merchant = preauthTransaction.merchant,
                     alias = preauthTransaction.alias
                 )
@@ -231,7 +231,7 @@ class TransactionService(
                     pspResponse = objectMapper.writeValueAsString(pspPaymentResponse),
                     merchantTransactionId = paymentInfo.purchaseId,
                     merchantCustomerId = paymentInfo.customerId,
-                    pspTestMode = pspTestMode,
+                    pspTestMode = pspTestMode ?: false,
                     merchant = apiKey.merchant,
                     alias = alias
                 )
