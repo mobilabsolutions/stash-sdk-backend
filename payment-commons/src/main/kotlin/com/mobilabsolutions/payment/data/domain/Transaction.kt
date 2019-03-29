@@ -73,6 +73,9 @@ class Transaction(
     @Column(name = "merchant_customer_id")
     var merchantCustomerId: String? = null,
 
+    @Column(name = "psp_test_mode")
+    var pspTestMode: Boolean? = false,
+
     @ManyToOne
     @JoinColumn(name = "merchant_id", nullable = false, foreignKey = ForeignKey(name = "fk_merchant_transactionrecord"))
     var merchant: Merchant = Merchant(),

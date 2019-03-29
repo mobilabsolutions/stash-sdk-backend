@@ -43,8 +43,9 @@ class PaymentController(private val transactionService: TransactionService) {
     fun preauthorizeTransaction(
         @RequestHeader(value = "Secret-Key") secretKey: String,
         @Size(min = 10, max = 20) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
+        @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
         @Valid @RequestBody preauthorizeInfo: PaymentRequestModel
-    ) = transactionService.preauthorize(secretKey, idempotentKey, preauthorizeInfo)
+    ) = transactionService.preauthorize(secretKey, idempotentKey, pspTestMode, preauthorizeInfo)
 
     @ApiOperation(value = "Capture transaction")
     @ApiResponses(
@@ -57,8 +58,9 @@ class PaymentController(private val transactionService: TransactionService) {
     @RequestMapping(PaymentController.CAPTURE_URL, method = [RequestMethod.PUT])
     fun captureTransaction(
         @RequestHeader(value = "Secret-Key") secretKey: String,
+        @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
         @PathVariable(value = "Transaction-Id") transactionId: String
-    ) = transactionService.capture(secretKey, transactionId)
+    ) = transactionService.capture(secretKey, pspTestMode, transactionId)
 
     @ApiOperation(value = "Authorize transaction")
     @ApiResponses(
@@ -77,8 +79,9 @@ class PaymentController(private val transactionService: TransactionService) {
     fun authorizeTransaction(
         @RequestHeader(value = "Secret-Key") secretKey: String,
         @Size(min = 10, max = 20) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
+        @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
         @Valid @RequestBody authorizeInfo: PaymentRequestModel
-    ) = transactionService.authorize(secretKey, idempotentKey, authorizeInfo)
+    ) = transactionService.authorize(secretKey, idempotentKey, pspTestMode, authorizeInfo)
 
     companion object {
         const val PREAUTH_URL = "preauthorization"

@@ -30,7 +30,11 @@ class AliasController(private val aliasService: AliasService) {
     @RequestMapping(method = [RequestMethod.POST],
             produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseStatus(HttpStatus.CREATED)
-    fun createAlias(@RequestHeader(value = "Publishable-Key") publishableKey: String, @RequestHeader(value = "PSP-Type") pspType: String) = aliasService.createAlias(publishableKey, pspType)
+    fun createAlias(
+        @RequestHeader(value = "Publishable-Key") publishableKey: String,
+        @RequestHeader(value = "PSP-Type") pspType: String,
+        @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?
+    ) = aliasService.createAlias(publishableKey, pspType, pspTestMode)
 
     @ApiOperation(value = "Update the given Alias for payment operations")
     @ApiResponses(

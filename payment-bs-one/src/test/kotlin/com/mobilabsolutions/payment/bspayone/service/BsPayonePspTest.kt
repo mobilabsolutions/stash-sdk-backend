@@ -3,6 +3,7 @@ package com.mobilabsolutions.payment.bspayone.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.bspayone.configuration.BsPayoneProperties
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneClearingType
+import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneMode
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneResponseStatus
 import com.mobilabsolutions.payment.bspayone.exception.BsPayoneErrors
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentRequestModel
@@ -60,6 +61,7 @@ class BsPayonePspTest {
     private val city = "Berlin"
     private val pspAlias = "1234"
     private val reason = "Book"
+    private val test = true
 
     @InjectMocks
     private lateinit var bsPayonePsp: BsPayonePsp
@@ -97,14 +99,14 @@ class BsPayonePspTest {
 
         Mockito.`when`(bsPayoneClient.preauthorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.CC.type,
             reference, amount.toString(), currency, lastName, country, city, pspAlias, null, null),
-            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true)))
+            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
         )
 
         Mockito.`when`(bsPayoneClient.preauthorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.CC.type,
             reference, wrongAmount.toString(), currency, lastName, country, city, pspAlias, null, null),
-            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true)))
+            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.ERROR, null, null, BsPayoneErrors.AMOUNT_TOO_LOW.code, BsPayoneErrors.AMOUNT_TOO_LOW.error.error, "Please change the amount")
             )
@@ -112,25 +114,32 @@ class BsPayonePspTest {
 
     @Test
     fun `preauthorize transaction with correct alias id`() {
-        bsPayonePsp.preauthorize(PaymentRequestModel(correctAliasId, PaymentDataModel(amount, currency, reason), purchaseId, customerId))
+        bsPayonePsp.preauthorize(PaymentRequestModel(correctAliasId, PaymentDataModel(amount, currency, reason), purchaseId, customerId), test)
     }
 
     @Test
     fun `preauthorize transaction with wrong alias id`() {
         Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.preauthorize(PaymentRequestModel(wrongAliasId, PaymentDataModel(amount, currency, reason), purchaseId, customerId))
+            bsPayonePsp.preauthorize(PaymentRequestModel(wrongAliasId, PaymentDataModel(amount, currency, reason), purchaseId, customerId), test)
         }
     }
 
     @Test
     fun `preauthorize transaction with wrong amount`() {
         Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.preauthorize(PaymentRequestModel(wrongAliasId, PaymentDataModel(wrongAmount, currency, reason), purchaseId, customerId))
+            bsPayonePsp.preauthorize(PaymentRequestModel(wrongAliasId, PaymentDataModel(wrongAmount, currency, reason), purchaseId, customerId), test)
+        }
+    }
+
+    @Test
+    fun `preauthorize test transaction with no mode`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            bsPayonePsp.preauthorize(PaymentRequestModel(wrongAliasId, PaymentDataModel(wrongAmount, currency, reason), purchaseId, customerId), null)
         }
     }
 
     @Test
     fun `calculate PSP config`() {
-        bsPayonePsp.calculatePspConfig(PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true))
+        bsPayonePsp.calculatePspConfig(PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), true)
     }
 }

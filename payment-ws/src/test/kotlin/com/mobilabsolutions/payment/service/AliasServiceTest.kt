@@ -93,20 +93,20 @@ class AliasServiceTest {
     @Test
     fun `create alias with wrong header parameters`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(unknownPublishableKey, pspType)
+            aliasService.createAlias(unknownPublishableKey, pspType, true)
         }
     }
 
     @Test
     fun `create alias with unknown pspType`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(knownPublishableKey, pspType)
+            aliasService.createAlias(knownPublishableKey, pspType, true)
         }
     }
 
     @Test
     fun `create alias successfully`() {
-        aliasService.createAlias(knownPublishableKey, knownPspType)
+        aliasService.createAlias(knownPublishableKey, knownPspType, true)
     }
 
     @Test
