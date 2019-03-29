@@ -18,6 +18,7 @@ import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.PspPaymentResponseModel
+import com.mobilabsolutions.payment.model.SepaConfigModel
 import com.mobilabsolutions.payment.service.Psp
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
@@ -110,8 +111,8 @@ class BsPayonePsp(
                 country = getPersonalData(alias)?.country,
                 city = getPersonalData(alias)?.city,
                 pspAlias = alias.pspAlias,
-                iban = null,
-                bic = null
+                iban = getSepaConfigData(alias)?.iban,
+                bic = getSepaConfigData(alias)?.bic
         )
 
         val response = bsPayoneClient.authorization(bsPayoneAuthorizeRequest, pspConfig)
@@ -137,7 +138,13 @@ class BsPayonePsp(
 
     private fun getPersonalData(alias: Alias): PersonalDataModel? {
         val aliasExtra = jsonMapper.readValue(alias.extra, AliasExtraModel::class.java)
-        ?: throw ApiError.ofMessage("Alias extra data cannot be found").asBadRequest()
+            ?: throw ApiError.ofMessage("Alias extra data cannot be found").asBadRequest()
         return aliasExtra.personalData ?: throw ApiError.ofMessage("Alias not configured properly, personal data is missing").asInternalServerError()
+    }
+
+    private fun getSepaConfigData(alias: Alias): SepaConfigModel? {
+        val aliasExtra = jsonMapper.readValue(alias.extra, AliasExtraModel::class.java)
+            ?: throw ApiError.ofMessage("Alias extra data cannot be found").asBadRequest()
+        return aliasExtra.sepaConfig ?: throw ApiError.ofMessage("Alias not configured properly, sepa config is missing").asInternalServerError()
     }
 }

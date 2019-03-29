@@ -44,9 +44,9 @@ class TransactionService(
      * @return Payment response model
      */
     fun authorize(
-            secretKey: String,
-            idempotentKey: String,
-            authorizeInfo: PaymentRequestModel
+        secretKey: String,
+        idempotentKey: String,
+        authorizeInfo: PaymentRequestModel
     ): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
                 ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
@@ -61,7 +61,7 @@ class TransactionService(
                 idempotentKey,
                 authorizeInfo,
                 TransactionAction.AUTH
-        )  { psp.authorize(authorizeInfo) }
+        ) { psp.authorize(authorizeInfo) }
     }
 
     /**

@@ -112,7 +112,17 @@ class TransactionServiceTest {
             )
         )
             .thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
-
+        Mockito.`when`(
+            psp.authorize(
+                PaymentRequestModel(
+                    correctAliasId,
+                    correctPaymentData,
+                    purchaseId,
+                    customerId
+                )
+            )
+        )
+                .thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
         Mockito.`when`(transactionRepository.getByIdempotentKeyAndAction(newIdempotentKey, preauthAction))
             .thenReturn(null)
         Mockito.`when`(transactionRepository.getByIdempotentKeyAndAction(usedIdempotentKey, preauthAction))
@@ -257,9 +267,9 @@ class TransactionServiceTest {
     @Test
     fun `authorize transaction with correct secret key`() {
         transactionService.authorize(
-            correctSecretKey,
-            newIdempotentKey,
-            PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
+                correctSecretKey,
+                newIdempotentKey,
+                PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
         )
     }
 
