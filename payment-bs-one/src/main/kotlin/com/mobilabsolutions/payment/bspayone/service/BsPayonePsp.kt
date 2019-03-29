@@ -94,6 +94,37 @@ class BsPayonePsp(
         return PspPaymentResponseModel(response.transactionId, TransactionStatus.SUCCESS, response.customerId, null, null)
     }
 
+    override fun authorize(authorizeRequestModel: PaymentRequestModel): PspPaymentResponseModel {
+        val alias = aliasRepository.getFirstByIdAndActive(authorizeRequestModel.aliasId!!, true) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+        val result = jsonMapper.readValue(alias.merchant?.pspConfig, PspConfigListModel::class.java)
+        val pspConfig = result.psp.firstOrNull { it.type == getProvider().toString() }
+                ?: throw ApiError.ofMessage("PSP configuration for '${getProvider()}' cannot be found from used merchant").asBadRequest()
+
+        val bsPayoneAuthorizeRequest = BsPayonePaymentRequestModel(
+                accountId = pspConfig.accountId,
+                clearingType = getBsPayoneClearingType(alias),
+                reference = randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
+                amount = authorizeRequestModel.paymentData!!.amount.toString(),
+                currency = authorizeRequestModel.paymentData!!.currency,
+                lastName = getPersonalData(alias)?.lastName,
+                country = getPersonalData(alias)?.country,
+                city = getPersonalData(alias)?.city,
+                pspAlias = alias.pspAlias,
+                iban = null,
+                bic = null
+        )
+
+        val response = bsPayoneClient.authorization(bsPayoneAuthorizeRequest, pspConfig)
+
+        if (response.hasError()) {
+            logger.error { "Error during BS Payone authorization. Error code: ${response.errorCode}, error message: ${response.errorMessage} " }
+            return PspPaymentResponseModel(response.transactionId, TransactionStatus.FAIL, response.customerId,
+                    BsPayoneErrors.mapResponseCode(response.errorCode!!), response.errorMessage)
+        }
+
+        return PspPaymentResponseModel(response.transactionId, TransactionStatus.SUCCESS, response.customerId, null, null)
+    }
+
     private fun getBsPayoneClearingType(alias: Alias): String {
         val aliasExtra = jsonMapper.readValue(alias.extra, AliasExtraModel::class.java)
             ?: throw ApiError.ofMessage("Alias extra data cannot be found").asBadRequest()

@@ -26,4 +26,11 @@ interface Psp {
      * @see PaymentRequestModel
      */
     fun preauthorize(preauthorizeRequestModel: PaymentRequestModel): PspPaymentResponseModel
+
+    /**
+     * Returns psp authorize payment response {@link PspPaymentResponseModel} for the given authorization payment request {@link PaymentRequestModel}
+     * @see PspPaymentResponseModel
+     * @see PaymentRequestModel
+     */
+    fun authorize(authorizeRequestModel: PaymentRequestModel): PspPaymentResponseModel
 }

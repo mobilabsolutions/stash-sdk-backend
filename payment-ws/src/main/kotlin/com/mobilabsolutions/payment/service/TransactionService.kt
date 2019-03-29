@@ -44,32 +44,24 @@ class TransactionService(
      * @return Payment response model
      */
     fun authorize(
-        secretKey: String,
-        idempotentKey: String,
-        authorizeInfo: PaymentRequestModel
+            secretKey: String,
+            idempotentKey: String,
+            authorizeInfo: PaymentRequestModel
     ): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
-            ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
+                ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
         val alias = aliasRepository.getFirstByIdAndActive(authorizeInfo.aliasId!!, true)
-            ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+                ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         val psp = pspRegistry.find(alias.psp!!)
-            ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest() // TODO will be used after a psp related implementation
+                ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
 
         return executeIdempotentTransactionOperation(
-            alias,
-            apiKey,
-            idempotentKey,
-            authorizeInfo,
-            TransactionAction.AUTH
-        ) {
-            PspPaymentResponseModel(
-                "test",
-                TransactionStatus.SUCCESS,
-                null,
-                null,
-                null
-            )
-        } // TODO pass psp.authorize function as a parameter
+                alias,
+                apiKey,
+                idempotentKey,
+                authorizeInfo,
+                TransactionAction.AUTH
+        )  { psp.authorize(authorizeInfo) }
     }
 
     /**
