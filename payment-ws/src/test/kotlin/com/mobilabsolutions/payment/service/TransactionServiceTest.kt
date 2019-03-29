@@ -51,6 +51,7 @@ class TransactionServiceTest {
     private val wrongTransactionId = "wrong transaction id"
     private val correctTransactionIdWithoutAuth = "correct transaction id without auth"
     private val correctTransactionIdAlreadyCaptured = "already captured transaction"
+    private val correctTransactionIdWrongTestMode = "prod transaction"
     private val test = true
     private val preauthAction = TransactionAction.PREAUTH
     private val authAction = TransactionAction.AUTH
@@ -130,6 +131,7 @@ class TransactionServiceTest {
         ).thenReturn(
             Transaction(
                 amount = 1,
+                pspTestMode = test,
                 merchant = Merchant("1", pspConfig = pspConfig),
                 alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
             )
@@ -156,6 +158,7 @@ class TransactionServiceTest {
         ).thenReturn(
             Transaction(
                 amount = 1,
+                pspTestMode = test,
                 merchant = Merchant("1", pspConfig = pspConfig),
                 alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
             )
@@ -169,10 +172,26 @@ class TransactionServiceTest {
         ).thenReturn(
             Transaction(
                 amount = 1,
+                pspTestMode = test,
                 merchant = Merchant("1", pspConfig = pspConfig),
                 alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
             )
         )
+        Mockito.`when`(
+            transactionRepository.getByTransactionIdAndAction(
+                correctTransactionIdWrongTestMode,
+                preauthAction,
+                TransactionStatus.SUCCESS
+            )
+        ).thenReturn(
+            Transaction(
+                amount = 1,
+                pspTestMode = false,
+                merchant = Merchant("1", pspConfig = pspConfig),
+                alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
+            )
+        )
+
     }
 
     @Test
@@ -356,5 +375,12 @@ class TransactionServiceTest {
     @Test
     fun `capture transaction that already has been captured`() {
         transactionService.capture(correctSecretKey, test, correctTransactionIdAlreadyCaptured)
+    }
+
+    @Test
+    fun `capture transaction with wrong test mode`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            transactionService.capture(correctSecretKey, test, correctTransactionIdWrongTestMode)
+        }
     }
 }

@@ -127,6 +127,10 @@ class TransactionService(
         if (preauthTransaction.merchant.id != apiKey.merchant.id)
             throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
 
+        val testMode = pspTestMode ?: false
+        if (testMode != preauthTransaction.pspTestMode)
+            throw ApiError.ofMessage("PSP test mode for this transaction is different than the mode for preauthorization transaction. Please, check your header").asBadRequest()
+
         val paymentInfoModel = PaymentInfoModel(
             objectMapper.readValue(preauthTransaction.alias?.extra, AliasExtraModel::class.java),
             objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java)
