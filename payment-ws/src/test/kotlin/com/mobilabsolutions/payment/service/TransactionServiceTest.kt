@@ -191,7 +191,6 @@ class TransactionServiceTest {
                 alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
             )
         )
-
     }
 
     @Test

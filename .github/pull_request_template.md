@@ -7,7 +7,10 @@ This ticket implements [PSOS-XX](https://mobilab.atlassian.net/browse/PSOS-XX).
 
 # Checklist
 
-- [ ] Added automated tests
+- [ ] Added unit tests
+<!-- If not, please explain why below -->
+
+- [ ] Updated Postman collection
 <!-- If not, please explain why below -->
 
 - [ ] Improved/Updated documentation
