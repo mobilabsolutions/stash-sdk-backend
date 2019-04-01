@@ -30,10 +30,11 @@ class BsPayoneClient(
      *
      * @param paymentRequest BS Payone payment request
      * @param pspConfigModel BS Payone configuration
+     * @param mode BS Payone mode
      * @return BS Payone payment response
      */
-    fun preauthorization(paymentRequest: BsPayonePaymentRequestModel, pspConfigModel: PspConfigModel): BsPayonePaymentResponseModel {
-        val request = createStandardRequest(paymentRequest, pspConfigModel, BsPayoneRequestType.PREAUTHORIZATION.type)
+    fun preauthorization(paymentRequest: BsPayonePaymentRequestModel, pspConfigModel: PspConfigModel, mode: String): BsPayonePaymentResponseModel {
+        val request = createStandardRequest(paymentRequest, pspConfigModel, BsPayoneRequestType.PREAUTHORIZATION.type, mode)
         val response = restTemplate.postForEntity(bsPayoneProperties.baseUrl, request, String::class.java)
         return convertToResponse(response.body!!, BsPayonePaymentResponseModel::class.java)
     }
@@ -43,10 +44,11 @@ class BsPayoneClient(
      *
      * @param paymentRequest BS Payone payment request
      * @param pspConfigModel BS Payone configuration
+     * @param mode BS Payone mode
      * @return BS Payone payment response
      */
-    fun authorization(paymentRequest: BsPayonePaymentRequestModel, pspConfigModel: PspConfigModel): BsPayonePaymentResponseModel {
-        val request = createStandardRequest(paymentRequest, pspConfigModel, BsPayoneRequestType.AUTHORIZATION.type)
+    fun authorization(paymentRequest: BsPayonePaymentRequestModel, pspConfigModel: PspConfigModel, mode: String): BsPayonePaymentResponseModel {
+        val request = createStandardRequest(paymentRequest, pspConfigModel, BsPayoneRequestType.AUTHORIZATION.type, mode)
         val response = restTemplate.postForEntity(bsPayoneProperties.baseUrl, request, String::class.java)
         return convertToResponse(response.body!!, BsPayonePaymentResponseModel::class.java)
     }
@@ -57,15 +59,17 @@ class BsPayoneClient(
      * @param request BS Payone request
      * @param pspConfigModel BS Payone configuration
      * @param requestType BS Payone request type
+     * @param mode BS Payone mode
      * @return BS Payone request as key/ value map
      */
     private fun createStandardRequest(
         request: Any,
         pspConfigModel: PspConfigModel,
-        requestType: String
+        requestType: String,
+        mode: String
     ): MultiValueMap<String, Any> {
         val result = convertToKeyValue(request)
-        result.putAll(convertToKeyValue(getBsPayoneStandardParameters(pspConfigModel, requestType)))
+        result.putAll(convertToKeyValue(getBsPayoneStandardParameters(pspConfigModel, requestType, mode)))
         return result
     }
 
@@ -103,11 +107,11 @@ class BsPayoneClient(
      *
      * @param pspConfigModel PSP Configuration
      * @param bsPayoneRequestType BS payone request type
+     * @param mode BS Payone mode
      * @return BS Payone standard parameters model
      */
-    private fun getBsPayoneStandardParameters(pspConfigModel: PspConfigModel, bsPayoneRequestType: String): BsPayoneStandardParametersModel {
-        return BsPayoneStandardParametersModel(pspConfigModel.merchantId, pspConfigModel.portalId,
-            bsPayoneHashingService.hashKey(pspConfigModel.key), bsPayoneProperties.apiVersion, bsPayoneProperties.mode,
-            bsPayoneRequestType, bsPayoneProperties.encoding)
+    private fun getBsPayoneStandardParameters(pspConfigModel: PspConfigModel, bsPayoneRequestType: String, mode: String): BsPayoneStandardParametersModel {
+        return BsPayoneStandardParametersModel(pspConfigModel.merchantId, pspConfigModel.portalId, bsPayoneHashingService.hashKey(pspConfigModel.key),
+                bsPayoneProperties.apiVersion, mode, bsPayoneRequestType, bsPayoneProperties.encoding)
     }
 }

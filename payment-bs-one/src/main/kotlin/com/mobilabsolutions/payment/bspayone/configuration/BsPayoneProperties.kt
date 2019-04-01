@@ -9,6 +9,5 @@ import org.springframework.context.annotation.Configuration
 class BsPayoneProperties {
     val apiVersion = "3.11"
     val encoding = "UTF-8"
-    val mode = "test"
     val baseUrl = "https://api.pay1.de/post-gateway/"
 }

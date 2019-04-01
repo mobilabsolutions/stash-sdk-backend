@@ -40,12 +40,14 @@ class TransactionService(
      *
      * @param secretKey Secret key
      * @param idempotentKey Idempotent key
+     * @param pspTestMode indicator whether is the test mode or not
      * @param authorizeInfo Payment information
      * @return Payment response model
      */
     fun authorize(
         secretKey: String,
         idempotentKey: String,
+        pspTestMode: Boolean?,
         authorizeInfo: PaymentRequestModel
     ): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
@@ -56,12 +58,13 @@ class TransactionService(
                 ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
 
         return executeIdempotentTransactionOperation(
-                alias,
-                apiKey,
-                idempotentKey,
-                authorizeInfo,
-                TransactionAction.AUTH
-        ) { psp.authorize(authorizeInfo) }
+            alias,
+            apiKey,
+            idempotentKey,
+            authorizeInfo,
+            pspTestMode,
+            TransactionAction.AUTH
+        ) { psp.authorize(authorizeInfo, pspTestMode) }
     }
 
     /**
@@ -69,12 +72,14 @@ class TransactionService(
      *
      * @param secretKey Secret key
      * @param idempotentKey Idempotent key
+     * @param pspTestMode indicator whether is the test mode or not
      * @param preauthorizeInfo Payment information
      * @return Payment response model
      */
     fun preauthorize(
         secretKey: String,
         idempotentKey: String,
+        pspTestMode: Boolean?,
         preauthorizeInfo: PaymentRequestModel
     ): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
@@ -89,18 +94,20 @@ class TransactionService(
             apiKey,
             idempotentKey,
             preauthorizeInfo,
+            pspTestMode,
             TransactionAction.PREAUTH
-        ) { psp.preauthorize(preauthorizeInfo) }
+        ) { psp.preauthorize(preauthorizeInfo, pspTestMode) }
     }
 
     /**
      * Capture transaction
      *
      * @param secretKey Secret key
+     * @param pspTestMode indicator whether is the test mode or not
      * @param transactionId Transaction ID
      * @return Payment response model
      */
-    fun capture(secretKey: String, transactionId: String): PaymentResponseModel {
+    fun capture(secretKey: String, pspTestMode: Boolean?, transactionId: String): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
             ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
         val preauthTransaction = transactionRepository.getByTransactionIdAndAction(
@@ -111,6 +118,10 @@ class TransactionService(
             ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
         if (preauthTransaction.merchant.id != apiKey.merchant.id)
             throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
+
+        val testMode = pspTestMode ?: false
+        if (testMode != preauthTransaction.pspTestMode)
+            throw ApiError.ofMessage("PSP test mode for this transaction is different than the mode for preauthorization transaction. Please, check your header").asBadRequest()
 
         val paymentInfoModel = PaymentInfoModel(
             objectMapper.readValue(preauthTransaction.alias?.extra, AliasExtraModel::class.java),
@@ -153,6 +164,7 @@ class TransactionService(
                     pspResponse = objectMapper.writeValueAsString(pspPaymentResponse),
                     merchantTransactionId = preauthTransaction.merchantTransactionId,
                     merchantCustomerId = preauthTransaction.merchantCustomerId,
+                    pspTestMode = pspTestMode ?: preauthTransaction.pspTestMode,
                     merchant = preauthTransaction.merchant,
                     alias = preauthTransaction.alias
                 )
@@ -175,6 +187,7 @@ class TransactionService(
         apiKey: MerchantApiKey,
         idempotentKey: String,
         paymentInfo: PaymentRequestModel,
+        pspTestMode: Boolean?,
         transactionAction: TransactionAction,
         pspAction: ((requestModel: PaymentRequestModel) -> PspPaymentResponseModel)
     ): PaymentResponseModel {
@@ -214,6 +227,7 @@ class TransactionService(
                     pspResponse = objectMapper.writeValueAsString(pspPaymentResponse),
                     merchantTransactionId = paymentInfo.purchaseId,
                     merchantCustomerId = paymentInfo.customerId,
+                    pspTestMode = pspTestMode ?: false,
                     merchant = apiKey.merchant,
                     alias = alias
                 )

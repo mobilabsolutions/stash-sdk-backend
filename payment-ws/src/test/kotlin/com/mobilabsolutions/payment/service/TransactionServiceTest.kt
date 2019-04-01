@@ -51,6 +51,8 @@ class TransactionServiceTest {
     private val wrongTransactionId = "wrong transaction id"
     private val correctTransactionIdWithoutAuth = "correct transaction id without auth"
     private val correctTransactionIdAlreadyCaptured = "already captured transaction"
+    private val correctTransactionIdWrongTestMode = "prod transaction"
+    private val test = true
     private val preauthAction = TransactionAction.PREAUTH
     private val authAction = TransactionAction.AUTH
     private val captureAction = TransactionAction.CAPTURE
@@ -108,10 +110,10 @@ class TransactionServiceTest {
                     correctPaymentData,
                     purchaseId,
                     customerId
-                )
+                ),
+                test
             )
-        )
-            .thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
+        ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
         Mockito.`when`(
             psp.authorize(
                 PaymentRequestModel(
@@ -119,10 +121,10 @@ class TransactionServiceTest {
                     correctPaymentData,
                     purchaseId,
                     customerId
-                )
+                ),
+                test
             )
-        )
-                .thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
+        ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
         Mockito.`when`(transactionRepository.getByIdempotentKeyAndAction(newIdempotentKey, preauthAction))
             .thenReturn(null)
         Mockito.`when`(transactionRepository.getByIdempotentKeyAndAction(usedIdempotentKey, preauthAction))
@@ -139,6 +141,7 @@ class TransactionServiceTest {
         ).thenReturn(
             Transaction(
                 amount = 1,
+                pspTestMode = test,
                 merchant = Merchant("1", pspConfig = pspConfig),
                 alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
             )
@@ -165,6 +168,7 @@ class TransactionServiceTest {
         ).thenReturn(
             Transaction(
                 amount = 1,
+                pspTestMode = test,
                 merchant = Merchant("1", pspConfig = pspConfig),
                 alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
             )
@@ -178,6 +182,21 @@ class TransactionServiceTest {
         ).thenReturn(
             Transaction(
                 amount = 1,
+                pspTestMode = test,
+                merchant = Merchant("1", pspConfig = pspConfig),
+                alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
+            )
+        )
+        Mockito.`when`(
+            transactionRepository.getByTransactionIdAndAction(
+                correctTransactionIdWrongTestMode,
+                preauthAction,
+                TransactionStatus.SUCCESS
+            )
+        ).thenReturn(
+            Transaction(
+                amount = 1,
+                pspTestMode = false,
                 merchant = Merchant("1", pspConfig = pspConfig),
                 alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
             )
@@ -190,6 +209,7 @@ class TransactionServiceTest {
             transactionService.preauthorize(
                 wrongSecretKey,
                 usedIdempotentKey,
+                test,
                 Mockito.mock(PaymentRequestModel::class.java)
             )
         }
@@ -200,6 +220,7 @@ class TransactionServiceTest {
         transactionService.preauthorize(
             correctSecretKey,
             newIdempotentKey,
+            test,
             PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
         )
     }
@@ -210,6 +231,7 @@ class TransactionServiceTest {
             transactionService.preauthorize(
                 correctSecretKey,
                 newIdempotentKey,
+                test,
                 PaymentRequestModel(wrongAliasId, correctPaymentData, purchaseId, customerId)
             )
         }
@@ -220,6 +242,7 @@ class TransactionServiceTest {
         transactionService.preauthorize(
             correctSecretKey,
             newIdempotentKey,
+            test,
             PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
         )
     }
@@ -230,6 +253,7 @@ class TransactionServiceTest {
             transactionService.preauthorize(
                 correctSecretKey,
                 newIdempotentKey,
+                test,
                 PaymentRequestModel(wrongAliasId, wrongPaymentData, purchaseId, customerId)
             )
         }
@@ -240,6 +264,7 @@ class TransactionServiceTest {
         transactionService.preauthorize(
             correctSecretKey,
             newIdempotentKey,
+            test,
             PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
         )
     }
@@ -249,6 +274,7 @@ class TransactionServiceTest {
         transactionService.preauthorize(
             correctSecretKey,
             usedIdempotentKey,
+            test,
             PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
         )
     }
@@ -259,6 +285,7 @@ class TransactionServiceTest {
             transactionService.preauthorize(
                 wrongSecretKey,
                 usedIdempotentKey,
+                test,
                 Mockito.mock(PaymentRequestModel::class.java)
             )
         }
@@ -267,9 +294,10 @@ class TransactionServiceTest {
     @Test
     fun `authorize transaction with correct secret key`() {
         transactionService.authorize(
-                correctSecretKey,
-                newIdempotentKey,
-                PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
+            correctSecretKey,
+            newIdempotentKey,
+            test,
+            PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
         )
     }
 
@@ -279,6 +307,7 @@ class TransactionServiceTest {
             transactionService.preauthorize(
                 correctSecretKey,
                 newIdempotentKey,
+                test,
                 PaymentRequestModel(wrongAliasId, correctPaymentData, purchaseId, customerId)
             )
         }
@@ -289,6 +318,7 @@ class TransactionServiceTest {
         transactionService.authorize(
             correctSecretKey,
             newIdempotentKey,
+            test,
             PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
         )
     }
@@ -299,6 +329,7 @@ class TransactionServiceTest {
             transactionService.preauthorize(
                 correctSecretKey,
                 newIdempotentKey,
+                test,
                 PaymentRequestModel(wrongAliasId, wrongPaymentData, purchaseId, customerId)
             )
         }
@@ -309,6 +340,7 @@ class TransactionServiceTest {
         transactionService.authorize(
             correctSecretKey,
             newIdempotentKey,
+            test,
             PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
         )
     }
@@ -318,6 +350,7 @@ class TransactionServiceTest {
         transactionService.preauthorize(
             correctSecretKey,
             usedIdempotentKey,
+            test,
             PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
         )
     }
@@ -325,31 +358,38 @@ class TransactionServiceTest {
     @Test
     fun `capture transaction with wrong transaction id`() {
         Assertions.assertThrows(ApiException::class.java) {
-            transactionService.capture(correctSecretKey, wrongTransactionId)
+            transactionService.capture(correctSecretKey, test, wrongTransactionId)
         }
     }
 
     @Test
     fun `capture transaction with wrong secret key`() {
         Assertions.assertThrows(ApiException::class.java) {
-            transactionService.capture(wrongSecretKey, correctTransactionId)
+            transactionService.capture(wrongSecretKey, test, correctTransactionId)
         }
     }
 
     @Test
     fun `capture transaction successfully`() {
-        transactionService.capture(correctSecretKey, correctTransactionId)
+        transactionService.capture(correctSecretKey, test, correctTransactionId)
     }
 
     @Test
     fun `capture transaction without prior transaction of type auth`() {
         Assertions.assertThrows(ApiException::class.java) {
-            transactionService.capture(correctSecretKey, correctTransactionIdWithoutAuth)
+            transactionService.capture(correctSecretKey, test, correctTransactionIdWithoutAuth)
         }
     }
 
     @Test
     fun `capture transaction that already has been captured`() {
-        transactionService.capture(correctSecretKey, correctTransactionIdAlreadyCaptured)
+        transactionService.capture(correctSecretKey, test, correctTransactionIdAlreadyCaptured)
+    }
+
+    @Test
+    fun `capture transaction with wrong test mode`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            transactionService.capture(correctSecretKey, test, correctTransactionIdWrongTestMode)
+        }
     }
 }

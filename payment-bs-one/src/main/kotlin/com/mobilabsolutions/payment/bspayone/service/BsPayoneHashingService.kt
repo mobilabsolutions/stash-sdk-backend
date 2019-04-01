@@ -32,10 +32,10 @@ class BsPayoneHashingService(private val bsPayoneProperties: BsPayoneProperties)
      * @param pspConfigModel PSP Configuration Model
      * @return hash
      */
-    fun makeCreditCardCheckHash(pspConfigModel: PspConfigModel): String {
+    fun makeCreditCardCheckHash(pspConfigModel: PspConfigModel, mode: String): String {
         pspConfigModel.key ?: throw ApiError.ofMessage("`Key` configuration should be defined in BS_PAYONE PSP configuration").asInternalServerError()
         return calculateHash(pspConfigModel.key, pspConfigModel.accountId + bsPayoneProperties.apiVersion + pspConfigModel.merchantId +
-            bsPayoneProperties.mode + pspConfigModel.portalId + BsPayoneRequestType.CREDIT_CARD_CHECK.type + RESPONSE_TYPE +
+            mode + pspConfigModel.portalId + BsPayoneRequestType.CREDIT_CARD_CHECK.type + RESPONSE_TYPE +
             STORE_CARD_DATA_PARAM_VALUE)
     }
 
