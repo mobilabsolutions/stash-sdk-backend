@@ -33,9 +33,9 @@ interface Psp {
     fun preauthorize(preauthorizeRequestModel: PaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel
     /**
      * Returns psp authorize payment response {@link PspPaymentResponseModel} for the given authorization payment request {@link PaymentRequestModel}
-     * @param PspPaymentResponseModel
+     * @param authorizeRequestModel authorize payment request
      * @param pspTestMode indicator whether is the test mode or not
-     * @return PaymentRequestModel
+     * @return PSP payment response
      */
     fun authorize(authorizeRequestModel: PaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel
 }
