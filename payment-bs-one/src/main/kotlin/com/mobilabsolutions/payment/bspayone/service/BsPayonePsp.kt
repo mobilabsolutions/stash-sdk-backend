@@ -19,6 +19,7 @@ import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.PspPaymentResponseModel
+import com.mobilabsolutions.payment.model.SepaConfigModel
 import com.mobilabsolutions.payment.service.Psp
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
@@ -49,18 +50,18 @@ class BsPayonePsp(
     override fun calculatePspConfig(pspConfigModel: PspConfigModel?, pspTestMode: Boolean?): PspAliasConfigModel? {
         logger.info { "Random config calculation has been called..." }
         return if (pspConfigModel != null) PspAliasConfigModel(
-            type = PaymentServiceProvider.BS_PAYONE.toString(),
-            merchantId = pspConfigModel.merchantId,
-            portalId = pspConfigModel.portalId,
-            request = BsPayoneRequestType.CREDIT_CARD_CHECK.type,
-            apiVersion = bsPayoneProperties.apiVersion,
-            responseType = BsPayoneHashingService.RESPONSE_TYPE,
-            hash = bsPayoneHashingService.makeCreditCardCheckHash(pspConfigModel, getPspMode(pspTestMode)),
-            accountId = pspConfigModel.accountId,
-            encoding = bsPayoneProperties.encoding,
-            mode = getPspMode(pspTestMode),
-            publicKey = null,
-            privateKey = null
+                type = PaymentServiceProvider.BS_PAYONE.toString(),
+                merchantId = pspConfigModel.merchantId,
+                portalId = pspConfigModel.portalId,
+                request = BsPayoneRequestType.CREDIT_CARD_CHECK.type,
+                apiVersion = bsPayoneProperties.apiVersion,
+                responseType = BsPayoneHashingService.RESPONSE_TYPE,
+                hash = bsPayoneHashingService.makeCreditCardCheckHash(pspConfigModel, getPspMode(pspTestMode)),
+                accountId = pspConfigModel.accountId,
+                encoding = bsPayoneProperties.encoding,
+                mode = getPspMode(pspTestMode),
+                publicKey = null,
+                privateKey = null
         ) else null
     }
 
@@ -68,20 +69,20 @@ class BsPayonePsp(
         val alias = aliasRepository.getFirstByIdAndActive(preauthorizeRequestModel.aliasId!!, true) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         val result = jsonMapper.readValue(alias.merchant?.pspConfig, PspConfigListModel::class.java)
         val pspConfig = result.psp.firstOrNull { it.type == getProvider().toString() }
-            ?: throw ApiError.ofMessage("PSP configuration for '${getProvider()}' cannot be found from used merchant").asBadRequest()
+                ?: throw ApiError.ofMessage("PSP configuration for '${getProvider()}' cannot be found from used merchant").asBadRequest()
 
         val bsPayonePreauthorizeRequest = BsPayonePaymentRequestModel(
-            accountId = pspConfig.accountId,
-            clearingType = getBsPayoneClearingType(alias),
-            reference = randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
-            amount = preauthorizeRequestModel.paymentData!!.amount.toString(),
-            currency = preauthorizeRequestModel.paymentData!!.currency,
-            lastName = getPersonalData(alias)?.lastName,
-            country = getPersonalData(alias)?.country,
-            city = getPersonalData(alias)?.city,
-            pspAlias = alias.pspAlias,
-            iban = null,
-            bic = null
+                accountId = pspConfig.accountId,
+                clearingType = getBsPayoneClearingType(alias),
+                reference = randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
+                amount = preauthorizeRequestModel.paymentData!!.amount.toString(),
+                currency = preauthorizeRequestModel.paymentData!!.currency,
+                lastName = getPersonalData(alias)?.lastName,
+                country = getPersonalData(alias)?.country,
+                city = getPersonalData(alias)?.city,
+                pspAlias = alias.pspAlias,
+                iban = null,
+                bic = null
         )
 
         val response = bsPayoneClient.preauthorization(bsPayonePreauthorizeRequest, pspConfig, getPspMode(pspTestMode))
@@ -89,7 +90,39 @@ class BsPayonePsp(
         if (response.hasError()) {
             logger.error { "Error during BS Payone preauthorization. Error code: ${response.errorCode}, error message: ${response.errorMessage} " }
             return PspPaymentResponseModel(response.transactionId, TransactionStatus.FAIL, response.customerId,
-                BsPayoneErrors.mapResponseCode(response.errorCode!!), response.errorMessage)
+                    BsPayoneErrors.mapResponseCode(response.errorCode!!), response.errorMessage)
+        }
+
+        return PspPaymentResponseModel(response.transactionId, TransactionStatus.SUCCESS, response.customerId, null, null)
+    }
+
+    override fun authorize(authorizeRequestModel: PaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
+        val alias = aliasRepository.getFirstByIdAndActive(authorizeRequestModel.aliasId!!, true)
+                ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+        val result = jsonMapper.readValue(alias.merchant?.pspConfig, PspConfigListModel::class.java)
+        val pspConfig = result.psp.firstOrNull { it.type == getProvider().toString() }
+                ?: throw ApiError.ofMessage("PSP configuration for '${getProvider()}' cannot be found from used merchant").asBadRequest()
+
+        val bsPayoneAuthorizeRequest = BsPayonePaymentRequestModel(
+                accountId = pspConfig.accountId,
+                clearingType = getBsPayoneClearingType(alias),
+                reference = randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
+                amount = authorizeRequestModel.paymentData!!.amount.toString(),
+                currency = authorizeRequestModel.paymentData!!.currency,
+                lastName = getPersonalData(alias)?.lastName,
+                country = getPersonalData(alias)?.country,
+                city = getPersonalData(alias)?.city,
+                pspAlias = alias.pspAlias,
+                iban = if (getPaymentMethod(alias) == PaymentMethod.SEPA) getSepaConfigData(alias)?.iban else null,
+                bic = if (getPaymentMethod(alias) == PaymentMethod.SEPA) getSepaConfigData(alias)?.bic else null
+        )
+
+        val response = bsPayoneClient.authorization(bsPayoneAuthorizeRequest, pspConfig, getPspMode(pspTestMode))
+
+        if (response.hasError()) {
+            logger.error { "Error during BS Payone authorization. Error code: ${response.errorCode}, error message: ${response.errorMessage} " }
+            return PspPaymentResponseModel(response.transactionId, TransactionStatus.FAIL, response.customerId,
+                    BsPayoneErrors.mapResponseCode(response.errorCode!!), response.errorMessage)
         }
 
         return PspPaymentResponseModel(response.transactionId, TransactionStatus.SUCCESS, response.customerId, null, null)
@@ -102,7 +135,7 @@ class BsPayonePsp(
 
     private fun getBsPayoneClearingType(alias: Alias): String {
         val aliasExtra = jsonMapper.readValue(alias.extra, AliasExtraModel::class.java)
-            ?: throw ApiError.ofMessage("Alias extra data cannot be found").asBadRequest()
+                ?: throw ApiError.ofMessage("Alias extra data cannot be found").asBadRequest()
         return when (aliasExtra.paymentMethod) {
             PaymentMethod.CC -> BsPayoneClearingType.CC.type
             PaymentMethod.SEPA -> BsPayoneClearingType.SEPA.type
@@ -112,7 +145,22 @@ class BsPayonePsp(
 
     private fun getPersonalData(alias: Alias): PersonalDataModel? {
         val aliasExtra = jsonMapper.readValue(alias.extra, AliasExtraModel::class.java)
-        ?: throw ApiError.ofMessage("Alias extra data cannot be found").asBadRequest()
-        return aliasExtra.personalData ?: throw ApiError.ofMessage("Alias not configured properly, personal data is missing").asInternalServerError()
+                ?: throw ApiError.ofMessage("Alias extra data cannot be found").asBadRequest()
+        return aliasExtra.personalData
+                ?: throw ApiError.ofMessage("Alias not configured properly, personal data is missing").asInternalServerError()
+    }
+
+    private fun getSepaConfigData(alias: Alias): SepaConfigModel? {
+        val aliasExtra = jsonMapper.readValue(alias.extra, AliasExtraModel::class.java)
+                ?: throw ApiError.ofMessage("Alias extra data cannot be found").asBadRequest()
+        return aliasExtra.sepaConfig
+                ?: throw ApiError.ofMessage("Alias not configured properly, sepa config is missing").asInternalServerError()
+    }
+
+    private fun getPaymentMethod(alias: Alias): PaymentMethod? {
+        val aliasExtra = jsonMapper.readValue(alias.extra, AliasExtraModel::class.java)
+                ?: throw ApiError.ofMessage("Alias extra data cannot be found").asBadRequest()
+        return aliasExtra.paymentMethod
+                ?: throw ApiError.ofMessage("Alias not configured properly, payment method is missing").asInternalServerError()
     }
 }

@@ -39,12 +39,16 @@ import org.mockito.quality.Strictness
 @MockitoSettings(strictness = Strictness.STRICT_STUBS)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class BsPayonePspTest {
-    private val correctAliasId = "test"
-    private val wrongAliasId = "wrong id"
+    private val correctCcAliasId = "cc test"
+    private val wrongCcAliasId = "cc wrong id"
+    private val correctSepaAliasId = "sepa test"
+    private val wrongSepaAliasId = "sepa wrong id"
     private val merchantConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"123\", \"key\" : \"123\"," +
         " \"merchantId\" : \"mobilab\", \"accountId\" : \"123\", \"default\" : \"true\"}]}"
-    private val extra =
+    private val extraCC =
         "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\", \"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}}"
+    private val extraSEPA =
+            "{\"email\": \"test@test.com\",\"paymentMethod\": \"SEPA\", \"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}, \"sepaConfig\": {\"iban\": \"DE00123456782599100004\",\"bic\": \"TESTTEST\"}}"
     private val reference = "1234567890"
     private val amount = 300
     private val wrongAmount = -1
@@ -61,6 +65,8 @@ class BsPayonePspTest {
     private val city = "Berlin"
     private val pspAlias = "1234"
     private val reason = "Book"
+    private val iban = "DE00123456782599100004"
+    private val bic = "TESTTEST"
     private val test = true
 
     @InjectMocks
@@ -88,12 +94,19 @@ class BsPayonePspTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
-        Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(correctAliasId, true)).thenReturn(
-            Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias,
+        Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(correctCcAliasId, true)).thenReturn(
+            Alias(active = true, extra = extraCC, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias,
                 merchant = Merchant(id = "1", pspConfig = merchantConfig))
         )
 
-        Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(wrongAliasId, true)).thenReturn(null)
+        Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(correctSepaAliasId, true)).thenReturn(
+            Alias(active = true, extra = extraSEPA, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias,
+                merchant = Merchant(id = "1", pspConfig = merchantConfig))
+        )
+
+        Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(wrongCcAliasId, true)).thenReturn(null)
+
+        Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(wrongSepaAliasId, true)).thenReturn(null)
 
         Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(10)).thenReturn(reference)
 
@@ -101,40 +114,80 @@ class BsPayonePspTest {
             reference, amount.toString(), currency, lastName, country, city, pspAlias, null, null),
             PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
             .thenReturn(
-                BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
-        )
+                    BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
+            )
 
         Mockito.`when`(bsPayoneClient.preauthorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.CC.type,
             reference, wrongAmount.toString(), currency, lastName, country, city, pspAlias, null, null),
             PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
             .thenReturn(
-                BsPayonePaymentResponseModel(BsPayoneResponseStatus.ERROR, null, null, BsPayoneErrors.AMOUNT_TOO_LOW.code, BsPayoneErrors.AMOUNT_TOO_LOW.error.error, "Please change the amount")
+                    BsPayonePaymentResponseModel(BsPayoneResponseStatus.ERROR, null, null, BsPayoneErrors.AMOUNT_TOO_LOW.code, BsPayoneErrors.AMOUNT_TOO_LOW.error.error, "Please change the amount")
+            )
+
+        Mockito.`when`(bsPayoneClient.authorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.SEPA.type,
+            reference, amount.toString(), currency, lastName, country, city, pspAlias, iban, bic),
+            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
+            .thenReturn(
+                    BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
+            )
+
+        Mockito.`when`(bsPayoneClient.authorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.SEPA.type,
+            reference, wrongAmount.toString(), currency, lastName, country, city, pspAlias, iban, bic),
+            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
+            .thenReturn(
+                    BsPayonePaymentResponseModel(BsPayoneResponseStatus.ERROR, null, null, BsPayoneErrors.AMOUNT_TOO_LOW.code, BsPayoneErrors.AMOUNT_TOO_LOW.error.error, "Please change the amount")
             )
     }
 
     @Test
     fun `preauthorize transaction with correct alias id`() {
-        bsPayonePsp.preauthorize(PaymentRequestModel(correctAliasId, PaymentDataModel(amount, currency, reason), purchaseId, customerId), test)
+        bsPayonePsp.preauthorize(PaymentRequestModel(correctCcAliasId, PaymentDataModel(amount, currency, reason), purchaseId, customerId), test)
     }
 
     @Test
     fun `preauthorize transaction with wrong alias id`() {
         Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.preauthorize(PaymentRequestModel(wrongAliasId, PaymentDataModel(amount, currency, reason), purchaseId, customerId), test)
+            bsPayonePsp.preauthorize(PaymentRequestModel(wrongCcAliasId, PaymentDataModel(amount, currency, reason), purchaseId, customerId), test)
         }
     }
 
     @Test
     fun `preauthorize transaction with wrong amount`() {
         Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.preauthorize(PaymentRequestModel(wrongAliasId, PaymentDataModel(wrongAmount, currency, reason), purchaseId, customerId), test)
+            bsPayonePsp.preauthorize(PaymentRequestModel(wrongCcAliasId, PaymentDataModel(wrongAmount, currency, reason), purchaseId, customerId), test)
         }
     }
 
     @Test
     fun `preauthorize test transaction with no mode`() {
         Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.preauthorize(PaymentRequestModel(wrongAliasId, PaymentDataModel(wrongAmount, currency, reason), purchaseId, customerId), null)
+            bsPayonePsp.preauthorize(PaymentRequestModel(wrongCcAliasId, PaymentDataModel(wrongAmount, currency, reason), purchaseId, customerId), null)
+        }
+    }
+
+    @Test
+    fun `authorize transaction with correct alias id`() {
+        bsPayonePsp.authorize(PaymentRequestModel(correctSepaAliasId, PaymentDataModel(amount, currency, reason), purchaseId, customerId), test)
+    }
+
+    @Test
+    fun `authorize transaction with wrong alias id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            bsPayonePsp.authorize(PaymentRequestModel(wrongSepaAliasId, PaymentDataModel(amount, currency, reason), purchaseId, customerId), test)
+        }
+    }
+
+    @Test
+    fun `authorize transaction with wrong amount`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            bsPayonePsp.authorize(PaymentRequestModel(wrongSepaAliasId, PaymentDataModel(wrongAmount, currency, reason), purchaseId, customerId), test)
+        }
+    }
+
+    @Test
+    fun `authorize test transaction with no mode`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            bsPayonePsp.authorize(PaymentRequestModel(wrongSepaAliasId, PaymentDataModel(wrongAmount, currency, reason), purchaseId, customerId), null)
         }
     }
 
