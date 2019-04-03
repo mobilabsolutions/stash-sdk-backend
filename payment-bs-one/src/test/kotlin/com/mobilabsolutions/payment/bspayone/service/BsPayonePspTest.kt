@@ -7,6 +7,8 @@ import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneMode
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneResponseStatus
 import com.mobilabsolutions.payment.bspayone.exception.BsPayoneErrors
 import com.mobilabsolutions.payment.bspayone.model.BsPayoneCaptureRequestModel
+import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasModel
+import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasResponseModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentRequestModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentResponseModel
 import com.mobilabsolutions.payment.data.domain.Alias
@@ -170,6 +172,10 @@ class BsPayonePspTest {
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.ERROR, null, null, BsPayoneErrors.AMOUNT_TOO_LOW.code, BsPayoneErrors.AMOUNT_TOO_LOW.error.error, "Please change the amount")
             )
+
+        Mockito.`when`(bsPayoneClient.deleteAlias(BsPayoneDeleteAliasModel(correctCcAliasId, "yes", "no"),
+            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
+            .thenReturn(BsPayoneDeleteAliasResponseModel(BsPayoneResponseStatus.OK, null, null, null))
     }
 
     @Test
@@ -246,5 +252,17 @@ class BsPayonePspTest {
     @Test
     fun `calculate PSP config`() {
         bsPayonePsp.calculatePspConfig(PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), true)
+    }
+
+    @Test
+    fun `delete alias`() {
+        bsPayonePsp.deleteAlias(correctCcAliasId, test)
+    }
+
+    @Test
+    fun `delete alias with wrong id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            bsPayonePsp.deleteAlias(wrongCcAliasId, test)
+        }
     }
 }
