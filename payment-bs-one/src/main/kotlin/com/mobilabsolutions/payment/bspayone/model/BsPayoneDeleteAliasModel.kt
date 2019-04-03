@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty
 @ApiModel(value = "BS Payone Delete Alias")
 data class BsPayoneDeleteAliasModel(
     @ApiModelProperty(value = "BS Payone customer id", example = "12378")
-    @JsonProperty(value = "userid")
+    @JsonProperty(value = "customerid")
     private val customerId: String?,
 
     @ApiModelProperty(value = "Whether the card data should be deleted", example = "yes")

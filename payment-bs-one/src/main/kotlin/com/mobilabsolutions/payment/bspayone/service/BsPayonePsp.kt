@@ -6,8 +6,8 @@ import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneClearingType
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneMode
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneRequestType
 import com.mobilabsolutions.payment.bspayone.exception.BsPayoneErrors
-import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayoneCaptureRequestModel
+import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentRequestModel
 import com.mobilabsolutions.payment.data.domain.Alias
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
@@ -162,17 +162,15 @@ class BsPayonePsp(
 
     override fun deleteAlias(aliasId: String, pspTestMode: Boolean?) {
         val alias = getAlias(aliasId)
-        if (aliasRepository.countByPspAliasAndActive(alias.pspAlias, true)!! < 2) {
-            val paymentMethod = getAliasExtra(alias).paymentMethod
-            val deleteAliasRequest = BsPayoneDeleteAliasModel(
-                customerId = aliasId,
-                deleteCardData = if (paymentMethod == PaymentMethod.CC) DELETE else DO_NOT_DELETE,
-                deleteBankAccountData = if (paymentMethod == PaymentMethod.SEPA) DELETE else DO_NOT_DELETE
-            )
-            val response = bsPayoneClient.deleteAlias(deleteAliasRequest, getPspConfig(alias), getPspMode(pspTestMode))
-            if (response.hasError()) {
-                logger.error { "Error during BS Payone alias deletion. Error code: ${response.errorCode}, error message: ${response.errorMessage} " }
-            }
+        val paymentMethod = getAliasExtra(alias).paymentMethod
+        val deleteAliasRequest = BsPayoneDeleteAliasModel(
+            customerId = aliasId,
+            deleteCardData = if (paymentMethod == PaymentMethod.CC) DELETE else DO_NOT_DELETE,
+            deleteBankAccountData = if (paymentMethod == PaymentMethod.SEPA) DELETE else DO_NOT_DELETE
+        )
+        val response = bsPayoneClient.deleteAlias(deleteAliasRequest, getPspConfig(alias), getPspMode(pspTestMode))
+        if (response.hasError()) {
+            logger.error { "Error during BS Payone alias deletion. Error code: ${response.errorCode}, error message: ${response.errorMessage} " }
         }
     }
 
