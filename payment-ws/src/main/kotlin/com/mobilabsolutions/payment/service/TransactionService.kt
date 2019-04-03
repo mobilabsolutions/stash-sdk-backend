@@ -16,7 +16,6 @@ import com.mobilabsolutions.payment.model.PaymentRequestModel
 import com.mobilabsolutions.payment.model.PaymentResponseModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.payment.model.PspPaymentResponseModel
-import com.mobilabsolutions.payment.model.PspResponseTransactionModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
@@ -147,7 +146,7 @@ class TransactionService(
             else -> {
                 val psp = pspRegistry.find(preauthTransaction.alias?.psp!!)
                     ?: throw ApiError.ofMessage("PSP implementation '${preauthTransaction.alias?.psp}' cannot be found").asBadRequest()
-                val pspResponseTransactionInfo = objectMapper.readValue(preauthTransaction.pspResponse, PspResponseTransactionModel::class.java)
+                val pspResponseTransactionInfo = objectMapper.readValue(preauthTransaction.pspResponse, PspPaymentResponseModel::class.java)
                 val pspPaymentResponse = psp.capture(preauthTransaction.transactionId!!, pspResponseTransactionInfo.pspTransactionId, pspTestMode)
                 val newTransaction = Transaction(
                     transactionId = transactionId,
@@ -155,7 +154,7 @@ class TransactionService(
                     currencyId = preauthTransaction.currencyId,
                     amount = preauthTransaction.amount,
                     reason = preauthTransaction.reason,
-                    status = TransactionStatus.SUCCESS,
+                    status = pspPaymentResponse.status,
                     action = TransactionAction.CAPTURE,
                     paymentMethod = preauthTransaction.paymentMethod,
                     paymentInfo = objectMapper.writeValueAsString(paymentInfoModel),
