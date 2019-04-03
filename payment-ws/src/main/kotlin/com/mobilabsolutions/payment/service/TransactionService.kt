@@ -5,6 +5,7 @@ import com.mobilabsolutions.payment.data.domain.Alias
 import com.mobilabsolutions.payment.data.domain.MerchantApiKey
 import com.mobilabsolutions.payment.data.domain.Transaction
 import com.mobilabsolutions.payment.data.enum.KeyType
+import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.AliasRepository
@@ -88,6 +89,8 @@ class TransactionService(
             ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         val psp = pspRegistry.find(alias.psp!!)
             ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
+        if (getAliasExtra(alias).paymentMethod != PaymentMethod.CC)
+            throw ApiError.ofMessage("Only credit card is supported for preauthorization").asBadRequest()
 
         return executeIdempotentTransactionOperation(
             alias,
@@ -191,11 +194,7 @@ class TransactionService(
         transactionAction: TransactionAction,
         pspAction: ((requestModel: PaymentRequestModel) -> PspPaymentResponseModel)
     ): PaymentResponseModel {
-        val extra = objectMapper.readValue(
-            alias.extra
-                ?: throw ApiError.ofMessage("Used alias is incomplete, please define a payment configuration on related alias").asBadRequest(),
-            AliasExtraModel::class.java
-        )
+        val extra = getAliasExtra(alias)
 
         val paymentInfoModel =
             PaymentInfoModel(extra, objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java))
@@ -240,6 +239,13 @@ class TransactionService(
                 )
             }
         }
+    }
+
+    private fun getAliasExtra(alias: Alias): AliasExtraModel {
+        return objectMapper.readValue(alias.extra
+                ?: throw ApiError.ofMessage("Used alias is incomplete, please define a payment configuration on related alias").asBadRequest(),
+            AliasExtraModel::class.java
+        )
     }
 
     companion object : KLogging() {

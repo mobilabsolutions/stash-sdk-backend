@@ -95,12 +95,12 @@ class BsPayonePspTest {
         MockitoAnnotations.initMocks(this)
 
         Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(correctCcAliasId, true)).thenReturn(
-            Alias(active = true, extra = extraCC, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias,
+            Alias(id = correctCcAliasId, active = true, extra = extraCC, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias,
                 merchant = Merchant(id = "1", pspConfig = merchantConfig))
         )
 
         Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(correctSepaAliasId, true)).thenReturn(
-            Alias(active = true, extra = extraSEPA, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias,
+            Alias(id = correctSepaAliasId, active = true, extra = extraSEPA, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias,
                 merchant = Merchant(id = "1", pspConfig = merchantConfig))
         )
 
@@ -111,31 +111,31 @@ class BsPayonePspTest {
         Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(10)).thenReturn(reference)
 
         Mockito.`when`(bsPayoneClient.preauthorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.CC.type,
-            reference, amount.toString(), currency, lastName, country, city, pspAlias, null, null),
+            reference, amount.toString(), currency, correctCcAliasId, lastName, country, city, pspAlias, null, null),
             PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
             .thenReturn(
                     BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
             )
 
         Mockito.`when`(bsPayoneClient.preauthorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.CC.type,
-            reference, wrongAmount.toString(), currency, lastName, country, city, pspAlias, null, null),
+            reference, wrongAmount.toString(), currency, correctCcAliasId, lastName, country, city, pspAlias, null, null),
             PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
             .thenReturn(
-                    BsPayonePaymentResponseModel(BsPayoneResponseStatus.ERROR, null, null, BsPayoneErrors.AMOUNT_TOO_LOW.code, BsPayoneErrors.AMOUNT_TOO_LOW.error.error, "Please change the amount")
+                    BsPayonePaymentResponseModel(BsPayoneResponseStatus.ERROR, null, customerId, BsPayoneErrors.AMOUNT_TOO_LOW.code, BsPayoneErrors.AMOUNT_TOO_LOW.error.error, "Please change the amount")
             )
 
         Mockito.`when`(bsPayoneClient.authorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.SEPA.type,
-            reference, amount.toString(), currency, lastName, country, city, pspAlias, iban, bic),
+            reference, amount.toString(), currency, correctSepaAliasId, lastName, country, city, pspAlias, iban, bic),
             PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
             .thenReturn(
                     BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
             )
 
         Mockito.`when`(bsPayoneClient.authorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.SEPA.type,
-            reference, wrongAmount.toString(), currency, lastName, country, city, pspAlias, iban, bic),
+            reference, wrongAmount.toString(), currency, correctSepaAliasId, lastName, country, city, pspAlias, iban, bic),
             PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
             .thenReturn(
-                    BsPayonePaymentResponseModel(BsPayoneResponseStatus.ERROR, null, null, BsPayoneErrors.AMOUNT_TOO_LOW.code, BsPayoneErrors.AMOUNT_TOO_LOW.error.error, "Please change the amount")
+                    BsPayonePaymentResponseModel(BsPayoneResponseStatus.ERROR, null, customerId, BsPayoneErrors.AMOUNT_TOO_LOW.code, BsPayoneErrors.AMOUNT_TOO_LOW.error.error, "Please change the amount")
             )
     }
 

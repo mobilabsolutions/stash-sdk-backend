@@ -31,11 +31,22 @@ interface Psp {
      * @return PSP payment response
      */
     fun preauthorize(preauthorizeRequestModel: PaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel
+
     /**
      * Returns psp authorize payment response {@link PspPaymentResponseModel} for the given authorization payment request {@link PaymentRequestModel}
+     *
      * @param authorizeRequestModel authorize payment request
      * @param pspTestMode indicator whether is the test mode or not
      * @return PSP payment response
      */
     fun authorize(authorizeRequestModel: PaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel
+
+    /**
+     * Deletes the payment method registered at PSP.
+     *
+     * @param aliasId the id of the alias that will be deleted
+     * @param pspTestMode indicator whether is the test mode or not
+     * @return PSP delete alias response
+     */
+    fun deleteAlias(aliasId: String, pspTestMode: Boolean?)
 }

@@ -12,6 +12,7 @@ import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.AliasRequestModel
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
+import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -58,6 +59,12 @@ class AliasServiceTest {
     @Mock
     private lateinit var pspRegistry: PspRegistry
 
+    @Mock
+    private lateinit var psp: Psp
+
+    @Mock
+    private lateinit var randomStringGenerator: RandomStringGenerator
+
     @Spy
     val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
 
@@ -82,10 +89,11 @@ class AliasServiceTest {
             ArgumentMatchers.anyString(),
             ArgumentMatchers.anyString()
         )
-        `when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(Mockito.mock(Psp::class.java))
+        `when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
+
         `when`(aliasRepository.getFirstByIdAndActive(unknownAliasId, active = true)).thenReturn(null)
         `when`(aliasRepository.getFirstByIdAndActive(knownAliasId, active = true))
-            .thenReturn(Alias(merchant = Merchant(id = "mobilab",
+            .thenReturn(Alias(psp = PaymentServiceProvider.BS_PAYONE, merchant = Merchant(id = "mobilab",
             pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
             " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")))
     }
@@ -124,19 +132,19 @@ class AliasServiceTest {
     @Test
     fun `delete alias with wrong secret key`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.deleteAlias(unknownSecretKey, knownAliasId)
+            aliasService.deleteAlias(unknownSecretKey, true, knownAliasId)
         }
     }
 
     @Test
     fun `delete alias with wrong alias id`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.deleteAlias(knownSecretKey, unknownAliasId)
+            aliasService.deleteAlias(knownSecretKey, true, unknownAliasId)
         }
     }
 
     @Test
     fun `delete alias successfully`() {
-        aliasService.deleteAlias(knownSecretKey, knownAliasId)
+        aliasService.deleteAlias(knownSecretKey, true, knownAliasId)
     }
 }

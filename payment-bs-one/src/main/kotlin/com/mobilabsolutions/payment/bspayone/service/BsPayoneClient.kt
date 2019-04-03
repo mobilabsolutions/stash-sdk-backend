@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.collect.Maps
 import com.mobilabsolutions.payment.bspayone.configuration.BsPayoneProperties
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneRequestType
+import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasModel
+import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasResponseModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentRequestModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentResponseModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayoneStandardParametersModel
@@ -51,6 +53,20 @@ class BsPayoneClient(
         val request = createStandardRequest(paymentRequest, pspConfigModel, BsPayoneRequestType.AUTHORIZATION.type, mode)
         val response = restTemplate.postForEntity(bsPayoneProperties.baseUrl, request, String::class.java)
         return convertToResponse(response.body!!, BsPayonePaymentResponseModel::class.java)
+    }
+
+    /**
+     * Makes update user request to BS Payone, which will be used for alias deletion.
+     *
+     * @param deleteAliasRequest BS Payone delete alias request
+     * @param pspConfigModel BS Payone configuration
+     * @param mode BS Payone mode
+     * @return BS Payone delete alias response
+     */
+    fun deleteAlias(deleteAliasRequest: BsPayoneDeleteAliasModel, pspConfigModel: PspConfigModel, mode: String): BsPayoneDeleteAliasResponseModel {
+        val request = createStandardRequest(deleteAliasRequest, pspConfigModel, BsPayoneRequestType.UPDATE_USER.type, mode)
+        val response = restTemplate.postForEntity(bsPayoneProperties.baseUrl, request, String::class.java)
+        return convertToResponse(response.body!!, BsPayoneDeleteAliasResponseModel::class.java)
     }
 
     /**

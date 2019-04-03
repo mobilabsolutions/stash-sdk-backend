@@ -8,5 +8,6 @@ enum class BsPayoneRequestType(val type: String) {
     PREAUTHORIZATION("preauthorization"),
     AUTHORIZATION("authorization"),
     CAPTURE("capture"),
-    REFUND("refund")
+    REFUND("refund"),
+    UPDATE_USER("updateuser")
 }

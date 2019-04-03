@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository
 interface AliasRepository : BaseRepository<Alias, String> {
     fun getFirstByIdAndActive(id: String, active: Boolean): Alias?
 
+    fun countByPspAliasAndActive(pspAlias: String?, active: Boolean): Long?
+
     @Modifying
     @Query("UPDATE Alias a SET a.pspAlias = :pspAlias, a.extra = :extra, a.lastModifiedDate = CURRENT_TIMESTAMP WHERE a.id = :aliasId")
     fun updateAlias(@Param("pspAlias") pspAlias: String?, @Param("extra") extra: String?, @Param("aliasId") aliasId: String)
