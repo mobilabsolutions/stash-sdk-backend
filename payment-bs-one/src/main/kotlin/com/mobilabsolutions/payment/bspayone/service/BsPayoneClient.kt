@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.collect.Maps
 import com.mobilabsolutions.payment.bspayone.configuration.BsPayoneProperties
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneRequestType
+import com.mobilabsolutions.payment.bspayone.model.BsPayoneCaptureRequestModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasResponseModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayoneCaptureRequestModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentRequestModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentResponseModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayoneStandardParametersModel
