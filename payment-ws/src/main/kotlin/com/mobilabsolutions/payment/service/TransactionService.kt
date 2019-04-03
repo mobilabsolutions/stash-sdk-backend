@@ -147,20 +147,17 @@ class TransactionService(
                 )?.errorMessage
             )
             else -> {
-                val pspPaymentResponse = PspPaymentResponseModel(
-                    "test",
-                    TransactionStatus.SUCCESS,
-                    null,
-                    null,
-                    null
-                ) // TODO psp.capture invocation
+                val psp = pspRegistry.find(preauthTransaction.alias?.psp!!)
+                    ?: throw ApiError.ofMessage("PSP implementation '${preauthTransaction.alias?.psp}' cannot be found").asBadRequest()
+                val pspResponseTransactionInfo = objectMapper.readValue(preauthTransaction.pspResponse, PspPaymentResponseModel::class.java)
+                val pspPaymentResponse = psp.capture(preauthTransaction.transactionId!!, pspResponseTransactionInfo.pspTransactionId, pspTestMode)
                 val newTransaction = Transaction(
                     transactionId = transactionId,
                     idempotentKey = preauthTransaction.idempotentKey,
                     currencyId = preauthTransaction.currencyId,
                     amount = preauthTransaction.amount,
                     reason = preauthTransaction.reason,
-                    status = TransactionStatus.SUCCESS,
+                    status = pspPaymentResponse.status,
                     action = TransactionAction.CAPTURE,
                     paymentMethod = preauthTransaction.paymentMethod,
                     paymentInfo = objectMapper.writeValueAsString(paymentInfoModel),
@@ -174,12 +171,9 @@ class TransactionService(
                 transactionRepository.save(newTransaction)
 
                 return PaymentResponseModel(
-                    newTransaction.transactionId,
-                    newTransaction.amount,
-                    newTransaction.currencyId,
-                    newTransaction.status,
-                    newTransaction.action,
-                    pspPaymentResponse.errorMessage
+                    newTransaction.transactionId, newTransaction.amount,
+                    newTransaction.currencyId, newTransaction.status,
+                    newTransaction.action, pspPaymentResponse.errorMessage
                 )
             }
         }

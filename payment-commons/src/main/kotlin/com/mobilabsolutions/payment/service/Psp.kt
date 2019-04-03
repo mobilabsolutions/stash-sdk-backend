@@ -42,6 +42,15 @@ interface Psp {
     fun authorize(authorizeRequestModel: PaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel
 
     /**
+     * Returns psp capture payment response (@link PspPaymentResponseModel} for the given capture payment request
+     * @param transactionId Transaction ID
+     * @param pspTransactionId PSP transaction ID
+     * @param pspTestMode indicator whether is the test mode or not
+     * @return PSP payment response
+     */
+    fun capture(transactionId: String, pspTransactionId: String?, pspTestMode: Boolean?): PspPaymentResponseModel
+
+    /**
      * Deletes the payment method registered at PSP.
      *
      * @param aliasId the id of the alias that will be deleted

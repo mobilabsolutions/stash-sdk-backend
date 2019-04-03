@@ -7,12 +7,15 @@ import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneMode
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneRequestType
 import com.mobilabsolutions.payment.bspayone.exception.BsPayoneErrors
 import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasModel
+import com.mobilabsolutions.payment.bspayone.model.BsPayoneCaptureRequestModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentRequestModel
 import com.mobilabsolutions.payment.data.domain.Alias
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
+import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.AliasRepository
+import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PaymentRequestModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
@@ -36,6 +39,7 @@ class BsPayonePsp(
     private val bsPayoneProperties: BsPayoneProperties,
     private val bsPayoneClient: BsPayoneClient,
     private val aliasRepository: AliasRepository,
+    private val transactionRepository: TransactionRepository,
     private val randomStringGenerator: RandomStringGenerator,
     private val jsonMapper: ObjectMapper
 ) : Psp {
@@ -53,18 +57,18 @@ class BsPayonePsp(
     override fun calculatePspConfig(pspConfigModel: PspConfigModel?, pspTestMode: Boolean?): PspAliasConfigModel? {
         logger.info { "Random config calculation has been called..." }
         return if (pspConfigModel != null) PspAliasConfigModel(
-                type = PaymentServiceProvider.BS_PAYONE.toString(),
-                merchantId = pspConfigModel.merchantId,
-                portalId = pspConfigModel.portalId,
-                request = BsPayoneRequestType.CREDIT_CARD_CHECK.type,
-                apiVersion = bsPayoneProperties.apiVersion,
-                responseType = BsPayoneHashingService.RESPONSE_TYPE,
-                hash = bsPayoneHashingService.makeCreditCardCheckHash(pspConfigModel, getPspMode(pspTestMode)),
-                accountId = pspConfigModel.accountId,
-                encoding = bsPayoneProperties.encoding,
-                mode = getPspMode(pspTestMode),
-                publicKey = null,
-                privateKey = null
+            type = PaymentServiceProvider.BS_PAYONE.toString(),
+            merchantId = pspConfigModel.merchantId,
+            portalId = pspConfigModel.portalId,
+            request = BsPayoneRequestType.CREDIT_CARD_CHECK.type,
+            apiVersion = bsPayoneProperties.apiVersion,
+            responseType = BsPayoneHashingService.RESPONSE_TYPE,
+            hash = bsPayoneHashingService.makeCreditCardCheckHash(pspConfigModel, getPspMode(pspTestMode)),
+            accountId = pspConfigModel.accountId,
+            encoding = bsPayoneProperties.encoding,
+            mode = getPspMode(pspTestMode),
+            publicKey = null,
+            privateKey = null
         ) else null
     }
 
@@ -92,7 +96,7 @@ class BsPayonePsp(
         if (response.hasError()) {
             logger.error { "Error during BS Payone preauthorization. Error code: ${response.errorCode}, error message: ${response.errorMessage} " }
             return PspPaymentResponseModel(response.transactionId, TransactionStatus.FAIL, response.customerId,
-                    BsPayoneErrors.mapResponseCode(response.errorCode!!), response.errorMessage)
+                BsPayoneErrors.mapResponseCode(response.errorCode!!), response.errorMessage)
         }
 
         return PspPaymentResponseModel(response.transactionId, TransactionStatus.SUCCESS, response.customerId, null, null)
@@ -122,7 +126,35 @@ class BsPayonePsp(
         if (response.hasError()) {
             logger.error { "Error during BS Payone authorization. Error code: ${response.errorCode}, error message: ${response.errorMessage} " }
             return PspPaymentResponseModel(response.transactionId, TransactionStatus.FAIL, response.customerId,
-                    BsPayoneErrors.mapResponseCode(response.errorCode!!), response.errorMessage)
+                BsPayoneErrors.mapResponseCode(response.errorCode!!), response.errorMessage)
+        }
+
+        return PspPaymentResponseModel(response.transactionId, TransactionStatus.SUCCESS, response.customerId, null, null)
+    }
+
+    override fun capture(transactionId: String, pspTransactionId: String?, pspTestMode: Boolean?): PspPaymentResponseModel {
+        val transaction = transactionRepository.getByTransactionIdAndAction(
+            transactionId,
+            TransactionAction.PREAUTH,
+            TransactionStatus.SUCCESS
+        ) ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
+        val alias = transaction.alias ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+        val result = jsonMapper.readValue(alias.merchant?.pspConfig, PspConfigListModel::class.java)
+        val pspConfig = result.psp.firstOrNull { it.type == getProvider().toString() }
+            ?: throw ApiError.ofMessage("PSP configuration for '${getProvider()}' cannot be found from used merchant").asBadRequest()
+
+        val bsPayoneCaptureRequest = BsPayoneCaptureRequestModel(
+            pspTransactionId = pspTransactionId,
+            amount = transaction.amount.toString(),
+            currency = transaction.currencyId
+        )
+
+        val response = bsPayoneClient.capture(bsPayoneCaptureRequest, pspConfig, getPspMode(pspTestMode))
+
+        if (response.hasError()) {
+            logger.error { "Error during BS Payone capture. Error code: ${response.errorCode}, error message: ${response.errorMessage} " }
+            return PspPaymentResponseModel(response.transactionId, TransactionStatus.FAIL, response.customerId,
+                BsPayoneErrors.mapResponseCode(response.errorCode!!), response.errorMessage)
         }
 
         return PspPaymentResponseModel(response.transactionId, TransactionStatus.SUCCESS, response.customerId, null, null)
@@ -166,19 +198,19 @@ class BsPayonePsp(
     private fun getPersonalData(alias: Alias): PersonalDataModel? {
         val aliasExtra = getAliasExtra(alias)
         return aliasExtra.personalData
-                ?: throw ApiError.ofMessage("Alias not configured properly, personal data is missing").asInternalServerError()
+            ?: throw ApiError.ofMessage("Alias not configured properly, personal data is missing").asInternalServerError()
     }
 
     private fun getSepaConfigData(alias: Alias): SepaConfigModel? {
         val aliasExtra = getAliasExtra(alias)
         return aliasExtra.sepaConfig
-                ?: throw ApiError.ofMessage("Alias not configured properly, sepa config is missing").asInternalServerError()
+            ?: throw ApiError.ofMessage("Alias not configured properly, sepa config is missing").asInternalServerError()
     }
 
     private fun getPaymentMethod(alias: Alias): PaymentMethod? {
         val aliasExtra = getAliasExtra(alias)
         return aliasExtra.paymentMethod
-                ?: throw ApiError.ofMessage("Alias not configured properly, payment method is missing").asInternalServerError()
+            ?: throw ApiError.ofMessage("Alias not configured properly, payment method is missing").asInternalServerError()
     }
 
     private fun getAliasExtra(alias: Alias): AliasExtraModel {

@@ -7,6 +7,7 @@ import com.mobilabsolutions.payment.bspayone.configuration.BsPayoneProperties
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneRequestType
 import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasResponseModel
+import com.mobilabsolutions.payment.bspayone.model.BsPayoneCaptureRequestModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentRequestModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentResponseModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayoneStandardParametersModel
@@ -51,6 +52,20 @@ class BsPayoneClient(
      */
     fun authorization(paymentRequest: BsPayonePaymentRequestModel, pspConfigModel: PspConfigModel, mode: String): BsPayonePaymentResponseModel {
         val request = createStandardRequest(paymentRequest, pspConfigModel, BsPayoneRequestType.AUTHORIZATION.type, mode)
+        val response = restTemplate.postForEntity(bsPayoneProperties.baseUrl, request, String::class.java)
+        return convertToResponse(response.body!!, BsPayonePaymentResponseModel::class.java)
+    }
+
+    /**
+    * Makes capture request to BS Payone.
+    *
+    * @param paymentRequest BS Payone payment request
+    * @param pspConfigModel BS Payone configuration
+    * @param mode BS Payone mode
+    * @return BS Payone payment response
+    */
+    fun capture(paymentRequest: BsPayoneCaptureRequestModel, pspConfigModel: PspConfigModel, mode: String): BsPayonePaymentResponseModel {
+        val request = createStandardRequest(paymentRequest, pspConfigModel, BsPayoneRequestType.CAPTURE.type, mode)
         val response = restTemplate.postForEntity(bsPayoneProperties.baseUrl, request, String::class.java)
         return convertToResponse(response.body!!, BsPayonePaymentResponseModel::class.java)
     }
