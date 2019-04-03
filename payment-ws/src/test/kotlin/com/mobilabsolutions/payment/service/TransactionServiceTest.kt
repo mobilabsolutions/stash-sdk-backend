@@ -46,7 +46,7 @@ class TransactionServiceTest {
     private val wrongAliasId = "wrong alias id"
     private val purchaseId = "purchase id"
     private val customerId = "customer id"
-    private val pspTransactionId = "psp transaction id"
+    private val pspTransactionId = "325105132"
     private val correctTransactionId = "correct transaction id"
     private val wrongTransactionId = "wrong transaction id"
     private val correctTransactionIdWithoutAuth = "correct transaction id without auth"
@@ -125,6 +125,13 @@ class TransactionServiceTest {
                 test
             )
         ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
+        Mockito.`when`(
+            psp.capture(
+                correctTransactionId,
+                pspTransactionId,
+                test
+            )
+        ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
         Mockito.`when`(transactionRepository.getByIdempotentKeyAndAction(newIdempotentKey, preauthAction))
             .thenReturn(null)
         Mockito.`when`(transactionRepository.getByIdempotentKeyAndAction(usedIdempotentKey, preauthAction))
@@ -136,14 +143,17 @@ class TransactionServiceTest {
         Mockito.`when`(
             transactionRepository.getByTransactionIdAndAction(
                 correctTransactionId,
-                preauthAction
+                preauthAction,
+                TransactionStatus.SUCCESS
             )
         ).thenReturn(
             Transaction(
                 amount = 1,
+                transactionId = correctTransactionId,
                 pspTestMode = test,
                 merchant = Merchant("1", pspConfig = pspConfig),
-                alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
+                alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE),
+                pspResponse = pspResponse
             )
         )
         Mockito.`when`(
@@ -161,20 +171,6 @@ class TransactionServiceTest {
             .thenReturn(executedTransaction)
         Mockito.`when`(
             transactionRepository.getByTransactionIdAndAction(
-                correctTransactionId,
-                preauthAction,
-                TransactionStatus.SUCCESS
-            )
-        ).thenReturn(
-            Transaction(
-                amount = 1,
-                pspTestMode = test,
-                merchant = Merchant("1", pspConfig = pspConfig),
-                alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
-            )
-        )
-        Mockito.`when`(
-            transactionRepository.getByTransactionIdAndAction(
                 correctTransactionIdAlreadyCaptured,
                 preauthAction,
                 TransactionStatus.SUCCESS
@@ -184,7 +180,8 @@ class TransactionServiceTest {
                 amount = 1,
                 pspTestMode = test,
                 merchant = Merchant("1", pspConfig = pspConfig),
-                alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
+                alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE),
+                pspResponse = pspResponse
             )
         )
         Mockito.`when`(
@@ -198,7 +195,8 @@ class TransactionServiceTest {
                 amount = 1,
                 pspTestMode = false,
                 merchant = Merchant("1", pspConfig = pspConfig),
-                alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
+                alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE),
+                pspResponse = pspResponse
             )
         )
     }
