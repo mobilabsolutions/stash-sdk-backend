@@ -29,6 +29,11 @@
 								"type": "text"
 							},
 							{
+								"key": "Idempotent-Key",
+								"value": "",
+								"type": "text"
+							},
+							{
 								"key": "PSP-Test-Mode",
 								"value": "true",
 								"type": "text"

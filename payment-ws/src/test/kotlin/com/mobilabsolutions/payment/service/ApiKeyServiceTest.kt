@@ -15,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
@@ -47,23 +46,15 @@ class ApiKeyServiceTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
-        `when`(merchantApiKeyRepository.getAllByMerchantId(knownMerchantId)).thenReturn(merchantApiKeys)
-
-        `when`(merchantRepository.getMerchantById(unknownMerchantId)).thenReturn(null)
-
-        `when`(merchantRepository.getMerchantById(knownMerchantId)).thenReturn(Mockito.mock(Merchant::class.java))
-
-        `when`(merchantApiKeyRepository.getFirstById(unknownApiKeyId)).thenReturn(null)
-
-        `when`(merchantApiKeyRepository.getFirstById(knownApiKeyId)).thenReturn(MerchantApiKey(merchant = Merchant()))
-
-        `when`(merchantApiKeyRepository.editApiKey(null, unknownApiKeyId)).thenReturn(0)
-
-        `when`(merchantApiKeyRepository.editApiKey(null, knownApiKeyId)).thenReturn(1)
-
-        `when`(merchantApiKeyRepository.deleteMerchantApiKeyById(unknownApiKeyId)).thenReturn(0)
-
-        `when`(merchantApiKeyRepository.deleteMerchantApiKeyById(knownApiKeyId)).thenReturn(1)
+        Mockito.`when`(merchantApiKeyRepository.getAllByMerchantId(knownMerchantId)).thenReturn(merchantApiKeys)
+        Mockito.`when`(merchantRepository.getMerchantById(unknownMerchantId)).thenReturn(null)
+        Mockito.`when`(merchantRepository.getMerchantById(knownMerchantId)).thenReturn(Mockito.mock(Merchant::class.java))
+        Mockito.`when`(merchantApiKeyRepository.getFirstById(unknownApiKeyId)).thenReturn(null)
+        Mockito.`when`(merchantApiKeyRepository.getFirstById(knownApiKeyId)).thenReturn(MerchantApiKey(merchant = Merchant()))
+        Mockito.`when`(merchantApiKeyRepository.editApiKey(null, unknownApiKeyId)).thenReturn(0)
+        Mockito.`when`(merchantApiKeyRepository.editApiKey(null, knownApiKeyId)).thenReturn(1)
+        Mockito.`when`(merchantApiKeyRepository.deleteMerchantApiKeyById(unknownApiKeyId)).thenReturn(0)
+        Mockito.`when`(merchantApiKeyRepository.deleteMerchantApiKeyById(knownApiKeyId)).thenReturn(1)
     }
 
     @Test
