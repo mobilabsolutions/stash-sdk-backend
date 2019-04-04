@@ -77,18 +77,18 @@ class BsPayonePsp(
         val pspConfig = getPspConfig(alias)
 
         val bsPayonePreauthorizeRequest = BsPayonePaymentRequestModel(
-                accountId = pspConfig.accountId,
-                clearingType = getBsPayoneClearingType(alias),
-                reference = randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
-                amount = preauthorizeRequestModel.paymentData!!.amount.toString(),
-                currency = preauthorizeRequestModel.paymentData!!.currency,
-                customerId = alias.id,
-                lastName = getPersonalData(alias)?.lastName,
-                country = getPersonalData(alias)?.country,
-                city = getPersonalData(alias)?.city,
-                pspAlias = alias.pspAlias,
-                iban = null,
-                bic = null
+            accountId = pspConfig.accountId,
+            clearingType = getBsPayoneClearingType(alias),
+            reference = randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
+            amount = preauthorizeRequestModel.paymentData!!.amount.toString(),
+            currency = preauthorizeRequestModel.paymentData!!.currency,
+            customerId = alias.id,
+            lastName = getPersonalData(alias)?.lastName,
+            country = getPersonalData(alias)?.country,
+            city = getPersonalData(alias)?.city,
+            pspAlias = alias.pspAlias,
+            iban = null,
+            bic = null
         )
 
         val response = bsPayoneClient.preauthorization(bsPayonePreauthorizeRequest, pspConfig, getPspMode(pspTestMode))
@@ -107,18 +107,18 @@ class BsPayonePsp(
         val pspConfig = getPspConfig(alias)
 
         val bsPayoneAuthorizeRequest = BsPayonePaymentRequestModel(
-                accountId = pspConfig.accountId,
-                clearingType = getBsPayoneClearingType(alias),
-                reference = randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
-                amount = authorizeRequestModel.paymentData!!.amount.toString(),
-                currency = authorizeRequestModel.paymentData!!.currency,
-                customerId = alias.id,
-                lastName = getPersonalData(alias)?.lastName,
-                country = getPersonalData(alias)?.country,
-                city = getPersonalData(alias)?.city,
-                pspAlias = alias.pspAlias,
-                iban = if (getPaymentMethod(alias) == PaymentMethod.SEPA) getSepaConfigData(alias)?.iban else null,
-                bic = if (getPaymentMethod(alias) == PaymentMethod.SEPA) getSepaConfigData(alias)?.bic else null
+            accountId = pspConfig.accountId,
+            clearingType = getBsPayoneClearingType(alias),
+            reference = randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
+            amount = authorizeRequestModel.paymentData!!.amount.toString(),
+            currency = authorizeRequestModel.paymentData!!.currency,
+            customerId = alias.id,
+            lastName = getPersonalData(alias)?.lastName,
+            country = getPersonalData(alias)?.country,
+            city = getPersonalData(alias)?.city,
+            pspAlias = alias.pspAlias,
+            iban = if (getPaymentMethod(alias) == PaymentMethod.SEPA) getSepaConfigData(alias)?.iban else null,
+            bic = if (getPaymentMethod(alias) == PaymentMethod.SEPA) getSepaConfigData(alias)?.bic else null
         )
 
         val response = bsPayoneClient.authorization(bsPayoneAuthorizeRequest, pspConfig, getPspMode(pspTestMode))
