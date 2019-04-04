@@ -89,13 +89,11 @@ class AliasServiceTest {
             ArgumentMatchers.anyString(),
             ArgumentMatchers.anyString()
         )
-        Mockito.`when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(Mockito.mock(Psp::class.java))
+        Mockito.`when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
         Mockito.`when`(aliasRepository.getFirstByIdAndActive(unknownAliasId, active = true)).thenReturn(null)
-        Mockito.`when`(aliasRepository.getFirstByIdAndActive(knownAliasId, active = true))
-            .thenReturn(Alias(merchant = merchant))
+        Mockito.`when`(aliasRepository.getFirstByIdAndActive(knownAliasId, active = true)).thenReturn(Alias(psp = PaymentServiceProvider.BS_PAYONE, merchant = merchant))
         Mockito.`when`(aliasRepository.getByIdempotentKeyAndActiveAndMerchant(newIdempotentKey, true, merchant)).thenReturn(null)
         Mockito.`when`(aliasRepository.getByIdempotentKeyAndActiveAndMerchant(usedIdempotentKey, true, merchant)).thenReturn(Alias(merchant = merchant))
-        Mockito.`when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
     }
 
     @Test
