@@ -79,12 +79,20 @@ class AliasService(
      * Delete an alias using secret key
      *
      * @param secretKey Secret key
+     * @param pspTestMode indicator whether is the test mode or not
      * @param aliasId Alias ID
      */
-    fun deleteAlias(secretKey: String, aliasId: String) {
+    fun deleteAlias(secretKey: String, pspTestMode: Boolean?, aliasId: String) {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey) ?: throw ApiError.ofMessage("Secret Key cannot be found").asBadRequest()
         val alias = aliasRepository.getFirstByIdAndActive(aliasId, true) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         if (apiKey.merchant.id != alias.merchant?.id) throw ApiError.ofMessage("Alias does not map to correct merchant").asBadRequest()
+
+        val result = objectMapper.readValue(apiKey.merchant.pspConfig ?: throw ApiError.ofMessage("There are no PSP configurations defined for used merchant").asInternalServerError(), PspConfigListModel::class.java)
+        val pspConfig = result.psp.firstOrNull { it.type == alias.psp.toString() }
+        val pspConfigType = PaymentServiceProvider.valueOf(pspConfig?.type ?: throw ApiError.ofMessage("PSP configuration for '${alias.psp}' cannot be found from used merchant").asBadRequest())
+        val psp = pspRegistry.find(pspConfigType) ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
+
+        psp.deleteAlias(aliasId, pspTestMode)
 
         alias.active = false
         aliasRepository.save(alias)

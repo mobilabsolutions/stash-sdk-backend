@@ -4,8 +4,8 @@ import com.mobilabsolutions.payment.model.ApiKeyRequestModel
 import com.mobilabsolutions.payment.model.EditApiKeyRequestModel
 import com.mobilabsolutions.payment.service.ApiKeyService
 import io.swagger.annotations.ApiOperation
-import io.swagger.annotations.ApiResponses
 import io.swagger.annotations.ApiResponse
+import io.swagger.annotations.ApiResponses
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize

@@ -63,8 +63,9 @@ class AliasController(private val aliasService: AliasService) {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteAlias(
         @RequestHeader(value = "Secret-Key") secretKey: String,
+        @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
         @PathVariable("Alias-Id") aliasId: String
-    ) = aliasService.deleteAlias(secretKey, aliasId)
+    ) = aliasService.deleteAlias(secretKey, pspTestMode, aliasId)
 
     companion object {
         const val BASE_URL = "alias"

@@ -64,6 +64,9 @@ class AliasServiceTest {
     private lateinit var pspRegistry: PspRegistry
 
     @Mock
+    private lateinit var psp: Psp
+
+    @Mock
     private lateinit var randomStringGenerator: RandomStringGenerator
 
     @Spy
@@ -92,6 +95,7 @@ class AliasServiceTest {
             .thenReturn(Alias(merchant = merchant))
         Mockito.`when`(aliasRepository.getByIdempotentKeyAndActiveAndMerchant(newIdempotentKey, true, merchant)).thenReturn(null)
         Mockito.`when`(aliasRepository.getByIdempotentKeyAndActiveAndMerchant(usedIdempotentKey, true, merchant)).thenReturn(Alias(merchant = merchant))
+        Mockito.`when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
     }
 
     @Test
@@ -140,19 +144,19 @@ class AliasServiceTest {
     @Test
     fun `delete alias with wrong secret key`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.deleteAlias(unknownSecretKey, knownAliasId)
+            aliasService.deleteAlias(unknownSecretKey, true, knownAliasId)
         }
     }
 
     @Test
     fun `delete alias with wrong alias id`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.deleteAlias(knownSecretKey, unknownAliasId)
+            aliasService.deleteAlias(knownSecretKey, true, unknownAliasId)
         }
     }
 
     @Test
     fun `delete alias successfully`() {
-        aliasService.deleteAlias(knownSecretKey, knownAliasId)
+        aliasService.deleteAlias(knownSecretKey, true, knownAliasId)
     }
 }
