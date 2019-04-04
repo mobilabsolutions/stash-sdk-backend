@@ -12,8 +12,8 @@ import com.mobilabsolutions.payment.model.AliasResponseModel
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.server.commons.exception.ApiError
+import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import mu.KLogging
-import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -26,6 +26,7 @@ class AliasService(
     private val aliasRepository: AliasRepository,
     private val merchantApiKeyRepository: MerchantApiKeyRepository,
     private val pspRegistry: PspRegistry,
+    private val randomStringGenerator: RandomStringGenerator,
     private val objectMapper: ObjectMapper
 ) {
     companion object : KLogging() {
@@ -104,8 +105,8 @@ class AliasService(
         calculatedConfig: PspAliasConfigModel?,
         idempotentKey: String
     ): AliasResponseModel {
-        val alias = aliasRepository.getByIdempotentKey(idempotentKey)
-        val generatedAliasId = RandomStringUtils.randomAlphanumeric(STRING_LENGTH)
+        val alias = aliasRepository.getByIdempotentKeyAndActiveAndMerchant(idempotentKey, true, merchant)
+        val generatedAliasId = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
 
         when {
             alias != null -> return AliasResponseModel(
