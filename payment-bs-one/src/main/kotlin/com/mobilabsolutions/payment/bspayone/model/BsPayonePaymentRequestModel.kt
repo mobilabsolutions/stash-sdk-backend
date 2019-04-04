@@ -32,6 +32,11 @@ data class BsPayonePaymentRequestModel(
     @field:NotNull
     val currency: String?,
 
+    @ApiModelProperty(value = "Customer id", example = "12378")
+    @JsonProperty(value = "customerid")
+    @field:NotNull
+    val customerId: String?,
+
     @ApiModelProperty(value = "Last name", example = "Mustermann")
     @JsonProperty(value = "lastname")
     @field:NotNull
