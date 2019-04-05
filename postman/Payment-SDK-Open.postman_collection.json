@@ -103,6 +103,11 @@
 								"key": "Secret-Key",
 								"value": "",
 								"type": "text"
+							},
+							{
+								"key": "PSP-Test-Mode",
+								"value": "true",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -650,6 +655,21 @@
 			"item": [
 				{
 					"name": "Request Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "07a8884e-3f7f-4bbd-b4b7-8cddbd32d44b",
+								"exec": [
+									"var response = JSON.parse(responseBody);",
+									"",
+									"postman.setEnvironmentVariable(\"access_token\", response.access_token);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"auth": {
 							"type": "basic",
