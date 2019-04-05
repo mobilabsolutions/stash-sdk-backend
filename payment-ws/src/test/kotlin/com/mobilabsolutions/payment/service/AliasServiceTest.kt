@@ -22,7 +22,6 @@ import org.mockito.ArgumentMatchers
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.doNothing
 import org.mockito.MockitoAnnotations
 import org.mockito.Spy
@@ -41,11 +40,16 @@ class AliasServiceTest {
     private val unknownPublishableKey = "other publishable key"
     private val knownSecretKey = "some secret key"
     private val unknownSecretKey = "other secret key"
+    private val newIdempotentKey = "new key"
+    private val usedIdempotentKey = "used key"
     private val knownAliasId = "some alias id"
     private val unknownAliasId = "other alias id"
     private val pspType = "some psp type"
     private val pspAlias = "some psp alias"
     private val knownPspType = "BS_PAYONE"
+    private val merchant = Merchant(id = "mobilab",
+        pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
+        " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")
 
     @InjectMocks
     private lateinit var aliasService: AliasService
@@ -72,49 +76,55 @@ class AliasServiceTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
-        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, unknownPublishableKey))
+        Mockito.`when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, unknownPublishableKey))
             .thenReturn(null)
-        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, knownPublishableKey))
-            .thenReturn(MerchantApiKey(merchant = Merchant(id = "mobilab",
-                pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
-                " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")))
-        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, unknownSecretKey))
+        Mockito.`when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, knownPublishableKey))
+            .thenReturn(MerchantApiKey(merchant = merchant))
+        Mockito.`when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, unknownSecretKey))
             .thenReturn(null)
-        `when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, knownSecretKey))
-            .thenReturn(MerchantApiKey(merchant = Merchant(id = "mobilab",
-                pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
-                " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")))
+        Mockito.`when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, knownSecretKey))
+            .thenReturn(MerchantApiKey(merchant = merchant))
         doNothing().`when`(aliasRepository).updateAlias(
             ArgumentMatchers.anyString(),
             ArgumentMatchers.anyString(),
             ArgumentMatchers.anyString()
         )
-        `when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
-
-        `when`(aliasRepository.getFirstByIdAndActive(unknownAliasId, active = true)).thenReturn(null)
-        `when`(aliasRepository.getFirstByIdAndActive(knownAliasId, active = true))
-            .thenReturn(Alias(psp = PaymentServiceProvider.BS_PAYONE, merchant = Merchant(id = "mobilab",
-            pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
-            " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")))
+        Mockito.`when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
+        Mockito.`when`(aliasRepository.getFirstByIdAndActive(unknownAliasId, active = true)).thenReturn(null)
+        Mockito.`when`(aliasRepository.getFirstByIdAndActive(knownAliasId, active = true)).thenReturn(Alias(psp = PaymentServiceProvider.BS_PAYONE, merchant = merchant))
+        Mockito.`when`(aliasRepository.getByIdempotentKeyAndActiveAndMerchant(newIdempotentKey, true, merchant)).thenReturn(null)
+        Mockito.`when`(aliasRepository.getByIdempotentKeyAndActiveAndMerchant(usedIdempotentKey, true, merchant)).thenReturn(Alias(merchant = merchant))
     }
 
     @Test
     fun `create alias with wrong header parameters`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(unknownPublishableKey, pspType, true)
+            aliasService.createAlias(unknownPublishableKey, pspType, usedIdempotentKey, true)
         }
     }
 
     @Test
     fun `create alias with unknown pspType`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(knownPublishableKey, pspType, true)
+            aliasService.createAlias(knownPublishableKey, pspType, usedIdempotentKey, true)
         }
     }
 
     @Test
+    fun `create alias with new idempotent key`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            aliasService.createAlias(knownPublishableKey, pspType, newIdempotentKey, true)
+        }
+    }
+
+    @Test
+    fun `create alias with used idempotent key`() {
+        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, true)
+    }
+
+    @Test
     fun `create alias successfully`() {
-        aliasService.createAlias(knownPublishableKey, knownPspType, true)
+        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, true)
     }
 
     @Test

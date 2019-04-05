@@ -132,13 +132,13 @@ class TransactionServiceTest {
                 test
             )
         ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
-        Mockito.`when`(transactionRepository.getByIdempotentKeyAndAction(newIdempotentKey, preauthAction))
+        Mockito.`when`(transactionRepository.getByIdempotentKeyAndActionAndMerchant(newIdempotentKey, preauthAction, merchant = Merchant("1", pspConfig = pspConfig)))
             .thenReturn(null)
-        Mockito.`when`(transactionRepository.getByIdempotentKeyAndAction(usedIdempotentKey, preauthAction))
+        Mockito.`when`(transactionRepository.getByIdempotentKeyAndActionAndMerchant(usedIdempotentKey, preauthAction, merchant = Merchant("1", pspConfig = pspConfig)))
             .thenReturn(executedTransaction)
-        Mockito.`when`(transactionRepository.getByIdempotentKeyAndAction(newIdempotentKey, authAction))
+        Mockito.`when`(transactionRepository.getByIdempotentKeyAndActionAndMerchant(newIdempotentKey, authAction, merchant = Merchant("1", pspConfig = pspConfig)))
             .thenReturn(null)
-        Mockito.`when`(transactionRepository.getByIdempotentKeyAndAction(usedIdempotentKey, authAction))
+        Mockito.`when`(transactionRepository.getByIdempotentKeyAndActionAndMerchant(usedIdempotentKey, authAction, merchant = Merchant("1", pspConfig = pspConfig)))
             .thenReturn(executedTransaction)
         Mockito.`when`(
             transactionRepository.getByTransactionIdAndAction(

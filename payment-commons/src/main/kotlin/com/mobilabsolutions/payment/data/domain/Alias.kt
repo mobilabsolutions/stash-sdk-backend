@@ -25,6 +25,9 @@ class Alias(
     @Column(name = "id", length = 20)
     var id: String? = null,
 
+    @Column(name = "idempotent_key")
+    var idempotentKey: String? = null,
+
     @Column(name = "psp_alias")
     var pspAlias: String? = null,
 

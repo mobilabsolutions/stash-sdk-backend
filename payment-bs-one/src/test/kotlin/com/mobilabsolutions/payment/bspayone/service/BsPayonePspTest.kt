@@ -116,13 +116,9 @@ class BsPayonePspTest {
             Alias(id = correctSepaAliasId, active = true, extra = extraSEPA, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias,
                 merchant = Merchant(id = "1", pspConfig = merchantConfig))
         )
-
         Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(wrongCcAliasId, true)).thenReturn(null)
-
         Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(wrongSepaAliasId, true)).thenReturn(null)
-
         Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(10)).thenReturn(reference)
-
         Mockito.`when`(transactionRepository.getByTransactionIdAndAction(correctTransactionId, TransactionAction.PREAUTH, TransactionStatus.SUCCESS))
             .thenReturn(Transaction(
                 amount = amount,
@@ -132,41 +128,35 @@ class BsPayonePspTest {
                 alias = Alias(active = true, extra = extraCC, psp = PaymentServiceProvider.BS_PAYONE, merchant = Merchant("1", pspConfig = merchantConfig)),
                 pspResponse = pspResponse
             ))
-
         Mockito.`when`(bsPayoneClient.preauthorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.CC.type,
             reference, amount.toString(), currency, correctCcAliasId, lastName, country, city, pspAlias, null, null),
             PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
             )
-
         Mockito.`when`(bsPayoneClient.preauthorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.CC.type,
             reference, wrongAmount.toString(), currency, correctCcAliasId, lastName, country, city, pspAlias, null, null),
             PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.ERROR, null, null, BsPayoneErrors.AMOUNT_TOO_LOW.code, BsPayoneErrors.AMOUNT_TOO_LOW.error.error, "Please change the amount")
             )
-
         Mockito.`when`(bsPayoneClient.authorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.SEPA.type,
             reference, amount.toString(), currency, correctSepaAliasId, lastName, country, city, pspAlias, iban, bic),
             PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
             )
-
         Mockito.`when`(bsPayoneClient.authorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.SEPA.type,
             reference, wrongAmount.toString(), currency, correctSepaAliasId, lastName, country, city, pspAlias, iban, bic),
             PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.ERROR, null, null, BsPayoneErrors.AMOUNT_TOO_LOW.code, BsPayoneErrors.AMOUNT_TOO_LOW.error.error, "Please change the amount")
             )
-
         Mockito.`when`(bsPayoneClient.capture(BsPayoneCaptureRequestModel(pspTransactionId, amount.toString(), currency),
             PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
             )
-
         Mockito.`when`(bsPayoneClient.capture(BsPayoneCaptureRequestModel(pspTransactionId, amount.toString(), currency),
             PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
             .thenReturn(

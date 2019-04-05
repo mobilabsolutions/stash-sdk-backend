@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import javax.validation.Valid
+import javax.validation.constraints.Size
 
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
@@ -33,8 +34,9 @@ class AliasController(private val aliasService: AliasService) {
     fun createAlias(
         @RequestHeader(value = "Publishable-Key") publishableKey: String,
         @RequestHeader(value = "PSP-Type") pspType: String,
+        @Size(min = 10, max = 20) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?
-    ) = aliasService.createAlias(publishableKey, pspType, pspTestMode)
+    ) = aliasService.createAlias(publishableKey, pspType, idempotentKey, pspTestMode)
 
     @ApiOperation(value = "Update the given Alias for payment operations")
     @ApiResponses(

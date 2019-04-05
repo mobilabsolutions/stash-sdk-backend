@@ -21,7 +21,6 @@ import org.mockito.ArgumentMatchers
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.doNothing
 import org.mockito.MockitoAnnotations
 import org.mockito.Spy
@@ -41,7 +40,9 @@ class MerchantServiceTest {
     private val unknownPspType = "BS"
     private val knownMerchantId = "mobilab"
     private val unknownMerchantId = "test"
-    private var merchant = Merchant()
+    private var merchant = Merchant(id = knownMerchantId,
+        pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
+        " {\"type\" : \"other\", \"merchantId\" : \"test merchant\", \"default\" : \"true\"}]}")
 
     @Spy
     val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
@@ -59,24 +60,16 @@ class MerchantServiceTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
-        merchant = Merchant(id = knownMerchantId,
-            pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
-                " {\"type\" : \"other\", \"merchantId\" : \"test merchant\", \"default\" : \"true\"}]}")
-
-        `when`(merchantRepository.getMerchantById(knownMerchantId)).thenReturn(merchant)
-
-        `when`(merchantRepository.getMerchantById(unknownMerchantId)).thenReturn(null)
-
+        Mockito.`when`(merchantRepository.getMerchantById(knownMerchantId)).thenReturn(merchant)
+        Mockito.`when`(merchantRepository.getMerchantById(unknownMerchantId)).thenReturn(null)
         doNothing().`when`(merchantRepository).updateMerchant(
             ArgumentMatchers.anyString(),
             ArgumentMatchers.anyString()
         )
-
-        `when`(authorityRepository.getAuthorityByName(knownMerchantId)).thenReturn(
+        Mockito.`when`(authorityRepository.getAuthorityByName(knownMerchantId)).thenReturn(
             Mockito.mock(Authority::class.java)
         )
-
-        `when`(authorityRepository.getAuthorityByName(unknownMerchantId)).thenReturn(null)
+        Mockito.`when`(authorityRepository.getAuthorityByName(unknownMerchantId)).thenReturn(null)
     }
 
     @Test

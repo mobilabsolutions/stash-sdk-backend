@@ -17,7 +17,6 @@ import org.mockito.ArgumentMatchers
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.doNothing
 import org.mockito.MockitoAnnotations
 import org.mockito.junit.jupiter.MockitoExtension
@@ -58,24 +57,24 @@ class UserDetailsServiceTest {
         MockitoAnnotations.initMocks(this)
         ReflectionTestUtils.setField(userDetailsService, "adminUsername", "admin")
 
-        `when`(merchantUserRepository.findByEmail(knownEmail)).thenReturn(
+        Mockito.`when`(merchantUserRepository.findByEmail(knownEmail)).thenReturn(
             MerchantUser(
                 email = knownEmail,
                 password = userPassword,
                 authorities = setOf()
             )
         )
-        `when`(merchantUserRepository.findByEmail(unknownEmail)).thenReturn(null)
+        Mockito.`when`(merchantUserRepository.findByEmail(unknownEmail)).thenReturn(null)
         doNothing().`when`(merchantUserRepository).updateMerchantUser(
             ArgumentMatchers.anyString(),
             ArgumentMatchers.anyString(),
             ArgumentMatchers.anyString(),
             ArgumentMatchers.anyString()
         )
-        `when`(userPasswordEncoder.matches(userPassword, userPassword)).thenReturn(true)
-        `when`(userPasswordEncoder.encode(userPassword)).thenReturn(anotherUserPassword)
-        `when`(authorityRepository.getAuthorityByName(knownMerchant)).thenReturn(Mockito.mock(Authority::class.java))
-        `when`(authorityRepository.getAuthorityByName(unKnownMerchant)).thenReturn(null)
+        Mockito.`when`(userPasswordEncoder.matches(userPassword, userPassword)).thenReturn(true)
+        Mockito.`when`(userPasswordEncoder.encode(userPassword)).thenReturn(anotherUserPassword)
+        Mockito.`when`(authorityRepository.getAuthorityByName(knownMerchant)).thenReturn(Mockito.mock(Authority::class.java))
+        Mockito.`when`(authorityRepository.getAuthorityByName(unKnownMerchant)).thenReturn(null)
     }
 
     @Test
