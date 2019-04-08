@@ -1,7 +1,7 @@
 # Payment SDK Backend
 [![Travis CI build status](https://travis-ci.com/mobilabsolutions/payment-sdk-backend-open.svg?branch=master)](https://travis-ci.com/mobilabsolutions/payment-sdk-backend-open)
 
-This repository contains code and documentation related to backend component of Payment SDK system. 
+This repository contains code and documentation related to a backend component of Payment SDK system. 
 
 ## Requirements
 
@@ -26,8 +26,7 @@ The resulting jar file will be produced in the directory named `target`.
 
 ## Starting the service locally
 
-You can start the services locally from `payment-ws` folder by running:
-`docker-compose up` to start the following services :
+You should run `docker-compose up` from `payment-ws` folder to start the following services :
 - **PostgreSQL** - listens on port 5432, username:password - `payment:payment`
 - **payment-ws** - listens on port 8080
 
