@@ -1,5 +1,5 @@
 # Payment SDK Backend
-[![Travis CI build status](https://travis-ci.com/mobilabsolutions/payment-sdk-backend-open.svg?branch=master)](https://travis-ci.com/mobilabsolutions/payment-sdk-backend-open)
+[![Travis CI build status](https://travis-ci.com/mobilabsolutions/payment-sdk-backend-open.svg?token=eZip4D1t6wvFGqNxU2ki&branch=master)](https://travis-ci.com/mobilabsolutions/payment-sdk-backend-open)
 
 This repository contains code and documentation related to a backend component of Payment SDK system. 
 
