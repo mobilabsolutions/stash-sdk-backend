@@ -55,11 +55,32 @@ mvn spring-boot:run -Dspring.profiles.active=local
 
 You can now access Payment SDK here: http://localhost:8080/ 
 
+## Request authentication
+
+In Payment SDK there are `secret` and `publishable` keys, which should be generated for merchants. Those keys will later be used for requests authentication.
+
+Publishable key is used for authentication of alias related requests:
+- Create alias
+- Exchange alias
+- Delete alias
+
+Secret key is used for authentication of transaction related requests:
+- Preauthorization
+- Capture
+- Authorization
+- Reversal
+- Refund
+
+## Idempotency
+
+Payment SDK uses a concept of idempotency both for aliases and transactions. Idempotent operation is the one that produces the same result, no matter how many times is called. Idempotency is performed by sending an `Idempotent-Key` a header for `Create Alias`, `Preauthorization`, `Authorization` and `Refund` request. This will provide that the same alias cannot be added more than once, or that the transaction will not be performed more times, if unintentionally called.
+
 ## Feedback
 
 The Payment SDK Backend is in active development, we welcome your feedback! Please use [GitHub Issues](https://github.com/mobilabsolutions/payment-sdk-backend-open/issues) to report any issues or give a feedback.
 
 ## Documentation
 
-To get familiar with the overall Payment SDK project, please visit [Common Wiki](https://github.com/mobilabsolutions/payment-sdk-wiki-open/wiki).For the backend architecture and flow, please visit [Backend Wiki](https://github.com/mobilabsolutions/payment-sdk-backend-open/wiki).
-API Documentation can be found on [Payment SDK Swagger](https://payment-dev.mblb.net/api/v1/swagger-ui.html) page.
+- [Overall documentation](https://github.com/mobilabsolutions/payment-sdk-wiki-open/wiki)
+- [Backend Wiki](https://github.com/mobilabsolutions/payment-sdk-backend-open/wiki)
+- [API Documentation](https://payment-dev.mblb.net/api/v1/swagger-ui.html)
