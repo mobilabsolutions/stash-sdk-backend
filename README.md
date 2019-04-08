@@ -1,11 +1,11 @@
 # Payment SDK Backend
-[![Travis CI build status](https://travis-ci.com/mobilabsolutions/payment-sdk-backend-open.svg?token=eZip4D1t6wvFGqNxU2ki&branch=master)](https://travis-ci.com/mobilabsolutions/payment-sdk-backend-open)
+[![Travis CI build status](https://travis-ci.com/mobilabsolutions/payment-sdk-backend-open.svg?branch=master)](https://travis-ci.com/mobilabsolutions/payment-sdk-backend-open)
 
-This repository contains code and documentation related to a backend component of Payment SDK system. 
+This repository contains code and documentation related to the backend component of the Payment SDK system. 
 
 ## Requirements
 
-- A favourite IDE
+- Preferred IDE
 - JDK 8 or later
 - Maven
 
@@ -53,7 +53,7 @@ After that, you can run the app directly from Maven using the Spring Boot plugin
 mvn spring-boot:run -Dspring.profiles.active=local
 ```
 
-Yo can now access Payment SDK here: http://localhost:8080/ 
+You can now access Payment SDK here: http://localhost:8080/ 
 
 ## Feedback
 
@@ -61,5 +61,5 @@ The Payment SDK Backend is in active development, we welcome your feedback! Plea
 
 ## Documentation
 
-To get familiar with the overall Payment SDK project, please visit [Common wiki](https://github.com/mobilabsolutions/payment-sdk-wiki-open/wiki).For the backend architecture and flow, please visit [Backend Wiki](https://github.com/mobilabsolutions/payment-sdk-backend-open/wiki).
+To get familiar with the overall Payment SDK project, please visit [Common Wiki](https://github.com/mobilabsolutions/payment-sdk-wiki-open/wiki).For the backend architecture and flow, please visit [Backend Wiki](https://github.com/mobilabsolutions/payment-sdk-backend-open/wiki).
 API Documentation can be found on [Payment SDK Swagger](https://payment-dev.mblb.net/api/v1/swagger-ui.html) page.
