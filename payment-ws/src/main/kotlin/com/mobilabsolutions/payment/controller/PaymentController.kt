@@ -1,6 +1,7 @@
 package com.mobilabsolutions.payment.controller
 
 import com.mobilabsolutions.payment.model.PaymentRequestModel
+import com.mobilabsolutions.payment.model.ReversalRequestModel
 import com.mobilabsolutions.payment.service.TransactionService
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
@@ -54,8 +55,8 @@ class PaymentController(private val transactionService: TransactionService) {
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 404, message = "Not found")
     )
-    @ResponseStatus(HttpStatus.OK)
     @RequestMapping(PaymentController.CAPTURE_URL, method = [RequestMethod.PUT])
+    @ResponseStatus(HttpStatus.OK)
     fun captureTransaction(
         @RequestHeader(value = "Secret-Key") secretKey: String,
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
@@ -83,9 +84,31 @@ class PaymentController(private val transactionService: TransactionService) {
         @Valid @RequestBody authorizeInfo: PaymentRequestModel
     ) = transactionService.authorize(secretKey, idempotentKey, pspTestMode, authorizeInfo)
 
+    @ApiOperation(value = "Reverse transaction")
+    @ApiResponses(
+        ApiResponse(code = 200, message = "Successfully reversed transaction"),
+        ApiResponse(code = 400, message = "Failed to reverse transaction"),
+        ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 404, message = "Not found")
+    )
+    @RequestMapping(
+        PaymentController.REVERSE_URL,
+        method = [RequestMethod.PUT],
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @ResponseStatus(HttpStatus.OK)
+    fun reverseTransaction(
+        @RequestHeader(value = "Secret-Key") secretKey: String,
+        @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
+        @PathVariable(value = "Transaction-Id") transactionId: String,
+        @RequestBody reverseInfo: ReversalRequestModel
+    ) = transactionService.reverse(secretKey, pspTestMode, transactionId, reverseInfo)
+
     companion object {
         const val PREAUTH_URL = "preauthorization"
         const val CAPTURE_URL = "preauthorization/{Transaction-Id}/capture"
         const val AUTH_URL = "authorization"
+        const val REVERSE_URL = "preauthorization/{Transaction-Id}/reverse"
     }
 }

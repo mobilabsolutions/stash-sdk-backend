@@ -15,6 +15,7 @@ import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.PaymentDataModel
 import com.mobilabsolutions.payment.model.PaymentRequestModel
 import com.mobilabsolutions.payment.model.PspPaymentResponseModel
+import com.mobilabsolutions.payment.model.ReversalRequestModel
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
@@ -51,11 +52,13 @@ class TransactionServiceTest {
     private val wrongTransactionId = "wrong transaction id"
     private val correctTransactionIdWithoutAuth = "correct transaction id without auth"
     private val correctTransactionIdAlreadyCaptured = "already captured transaction"
+    private val correctTransactionIdAlreadyReversed = "already reversed transaction"
     private val correctTransactionIdWrongTestMode = "prod transaction"
     private val test = true
     private val preauthAction = TransactionAction.PREAUTH
     private val authAction = TransactionAction.AUTH
     private val captureAction = TransactionAction.CAPTURE
+    private val reverseAction = TransactionAction.REVERSAL
     private val correctPaymentData = PaymentDataModel(1, "EUR", "reason")
     private val wrongPaymentData = PaymentDataModel(2, "EUR", "reason")
     private val pspResponse = "{\"pspTransactionId\":\"325105132\",\"status\":\"SUCCESS\",\"customerId\":\"160624370\"}"
@@ -64,6 +67,8 @@ class TransactionServiceTest {
         " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}"
     private val extra =
         "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\", \"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}}"
+
+    private val reverseInfo = ReversalRequestModel("some reason")
 
     @InjectMocks
     private lateinit var transactionService: TransactionService
@@ -172,6 +177,28 @@ class TransactionServiceTest {
         Mockito.`when`(
             transactionRepository.getByTransactionIdAndAction(
                 correctTransactionIdAlreadyCaptured,
+                preauthAction,
+                TransactionStatus.SUCCESS
+            )
+        ).thenReturn(
+            Transaction(
+                amount = 1,
+                pspTestMode = test,
+                merchant = Merchant("1", pspConfig = pspConfig),
+                alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE),
+                pspResponse = pspResponse
+            )
+        )
+        Mockito.`when`(
+            transactionRepository.getByTransactionIdAndAction(
+                correctTransactionIdAlreadyReversed,
+                reverseAction
+            )
+        )
+            .thenReturn(executedTransaction)
+        Mockito.`when`(
+            transactionRepository.getByTransactionIdAndAction(
+                correctTransactionIdAlreadyReversed,
                 preauthAction,
                 TransactionStatus.SUCCESS
             )
@@ -388,6 +415,44 @@ class TransactionServiceTest {
     fun `capture transaction with wrong test mode`() {
         Assertions.assertThrows(ApiException::class.java) {
             transactionService.capture(correctSecretKey, test, correctTransactionIdWrongTestMode)
+        }
+    }
+
+    @Test
+    fun `reverse transaction with wrong transaction id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            transactionService.reverse(correctSecretKey, test, wrongTransactionId, reverseInfo)
+        }
+    }
+
+    @Test
+    fun `reverse transaction with wrong secret key`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            transactionService.reverse(wrongSecretKey, test, wrongTransactionId, reverseInfo)
+        }
+    }
+
+    @Test
+    fun `reverse transaction successfully`() {
+        transactionService.reverse(correctSecretKey, test, correctTransactionId, reverseInfo)
+    }
+
+    @Test
+    fun `reverse transaction without prior transaction of type auth`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            transactionService.reverse(correctSecretKey, test, correctTransactionIdWithoutAuth, reverseInfo)
+        }
+    }
+
+    @Test
+    fun `reverse transaction that already has been reversed`() {
+        transactionService.reverse(correctSecretKey, test, correctTransactionIdAlreadyReversed, reverseInfo)
+    }
+
+    @Test
+    fun `reverse transaction with wrong test mode`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            transactionService.reverse(correctSecretKey, test, correctTransactionIdWrongTestMode, reverseInfo)
         }
     }
 }

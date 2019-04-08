@@ -17,6 +17,7 @@ import com.mobilabsolutions.payment.model.PaymentRequestModel
 import com.mobilabsolutions.payment.model.PaymentResponseModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.payment.model.PspPaymentResponseModel
+import com.mobilabsolutions.payment.model.ReversalRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
@@ -174,6 +175,94 @@ class TransactionService(
                     newTransaction.transactionId, newTransaction.amount,
                     newTransaction.currencyId, newTransaction.status,
                     newTransaction.action, pspPaymentResponse.errorMessage
+                )
+            }
+        }
+    }
+
+    /**
+     * Reverse transaction
+     *
+     * @param secretKey Secret Key
+     * @param pspTestMode indicator whether is the test mode or not
+     * @param transactionId Transaction ID
+     * @param reverseInfo Reversion request model
+     * @return Payment response model
+     */
+    fun reverse(
+        secretKey: String,
+        pspTestMode: Boolean?,
+        transactionId: String,
+        reverseInfo: ReversalRequestModel
+    ): PaymentResponseModel {
+        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
+            ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
+        val preauthTransaction = transactionRepository.getByTransactionIdAndAction(
+            transactionId,
+            TransactionAction.PREAUTH,
+            TransactionStatus.SUCCESS
+        )
+            ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
+        if (preauthTransaction.merchant.id != apiKey.merchant.id)
+            throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
+
+        val testMode = pspTestMode ?: false
+        if (testMode != preauthTransaction.pspTestMode)
+            throw ApiError.ofMessage("PSP test mode for this transaction is different than the mode for preauthorization transaction. Please, check your header").asBadRequest()
+
+        val paymentInfoModel = PaymentInfoModel(
+            objectMapper.readValue(preauthTransaction.alias?.extra, AliasExtraModel::class.java),
+            objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java)
+        )
+
+        val reversalTransaction =
+            transactionRepository.getByTransactionIdAndAction(transactionId, TransactionAction.REVERSAL)
+
+        when {
+            reversalTransaction != null -> return PaymentResponseModel(
+                reversalTransaction.transactionId,
+                reversalTransaction.amount,
+                reversalTransaction.currencyId,
+                reversalTransaction.status,
+                reversalTransaction.action,
+                reversalTransaction.pspResponse
+                /*
+                pspResponse after PSP implementation:
+
+
+                objectMapper.readValue(
+                    captureTransaction.pspResponse,
+                    PspPaymentResponseModel::class.java
+                )?.errorMessage
+                 */
+            )
+            else -> {
+                /**
+                TO-DO: PSP IMPLEMENTATION
+                 */
+                val newTransaction = Transaction(
+                    transactionId = transactionId,
+                    idempotentKey = preauthTransaction.idempotentKey,
+                    currencyId = preauthTransaction.currencyId,
+                    amount = preauthTransaction.amount,
+                    reason = reverseInfo.reason,
+                    status = TransactionStatus.SUCCESS,
+                    action = TransactionAction.REVERSAL,
+                    paymentMethod = preauthTransaction.paymentMethod,
+                    paymentInfo = objectMapper.writeValueAsString(paymentInfoModel),
+                    pspResponse = "TO BE ADDED AFTER PSP IMPLEMENTATION",
+                    merchantTransactionId = preauthTransaction.merchantTransactionId,
+                    merchantCustomerId = preauthTransaction.merchantCustomerId,
+                    pspTestMode = pspTestMode ?: preauthTransaction.pspTestMode,
+                    merchant = preauthTransaction.merchant,
+                    alias = preauthTransaction.alias
+                )
+                transactionRepository.save(newTransaction)
+
+                return PaymentResponseModel(
+                    newTransaction.transactionId, newTransaction.amount,
+                    newTransaction.currencyId, newTransaction.status,
+                    newTransaction.action, "ERROR MESSAGE TO BE ADDED AFTER PSP IMPLEMENTATION"
                 )
             }
         }
