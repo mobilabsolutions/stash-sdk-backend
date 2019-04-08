@@ -47,7 +47,7 @@ class BsPayonePsp(
 
     companion object : KLogging() {
         const val REFERENCE_LENGTH = 10
-        const val CAPTURE_AMOUNT_FOR_CANCELLING_TRANSACTION = 0
+        const val AMOUNT_FOR_CANCELLING_TRANSACTION = 0
         const val DELETE = "yes"
         const val DO_NOT_DELETE = "no"
     }
@@ -136,12 +136,12 @@ class BsPayonePsp(
 
     override fun capture(transactionId: String, pspTransactionId: String?, pspTestMode: Boolean?): PspPaymentResponseModel {
         val transaction = findPreauthTransaction(transactionId)
-        return performCapture(pspTransactionId, pspTestMode, transaction, transaction.amount!!)
+        return executeRequest(pspTransactionId, pspTestMode, transaction, transaction.amount!!)
     }
 
     override fun reverse(transactionId: String, pspTransactionId: String?, pspTestMode: Boolean?): PspPaymentResponseModel {
         val transaction = findPreauthTransaction(transactionId)
-        return performCapture(pspTransactionId, pspTestMode, transaction, CAPTURE_AMOUNT_FOR_CANCELLING_TRANSACTION)
+        return executeRequest(pspTransactionId, pspTestMode, transaction, AMOUNT_FOR_CANCELLING_TRANSACTION)
     }
 
     override fun deleteAlias(aliasId: String, pspTestMode: Boolean?) {
@@ -214,7 +214,7 @@ class BsPayonePsp(
         ) ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
     }
 
-    private fun performCapture(pspTransactionId: String?, pspTestMode: Boolean?, transaction: Transaction, amount: Int): PspPaymentResponseModel {
+    private fun executeRequest(pspTransactionId: String?, pspTestMode: Boolean?, transaction: Transaction, amount: Int): PspPaymentResponseModel {
         val alias = transaction.alias ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         val result = jsonMapper.readValue(alias.merchant?.pspConfig, PspConfigListModel::class.java)
         val pspConfig = result.psp.firstOrNull { it.type == getProvider().toString() }
