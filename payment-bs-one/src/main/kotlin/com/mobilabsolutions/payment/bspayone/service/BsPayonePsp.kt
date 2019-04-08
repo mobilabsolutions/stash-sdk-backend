@@ -136,12 +136,12 @@ class BsPayonePsp(
 
     override fun capture(transactionId: String, pspTransactionId: String?, pspTestMode: Boolean?): PspPaymentResponseModel {
         val transaction = findPreauthTransaction(transactionId)
-        return performCapture(transactionId, pspTransactionId, pspTestMode, transaction, transaction.amount!!)
+        return performCapture(pspTransactionId, pspTestMode, transaction, transaction.amount!!)
     }
 
     override fun reverse(transactionId: String, pspTransactionId: String?, pspTestMode: Boolean?): PspPaymentResponseModel {
         val transaction = findPreauthTransaction(transactionId)
-        return performCapture(transactionId, pspTransactionId, pspTestMode, transaction, CAPTURE_AMOUNT_FOR_CANCELLING_TRANSACTION)
+        return performCapture(pspTransactionId, pspTestMode, transaction, CAPTURE_AMOUNT_FOR_CANCELLING_TRANSACTION)
     }
 
     override fun deleteAlias(aliasId: String, pspTestMode: Boolean?) {
@@ -214,7 +214,7 @@ class BsPayonePsp(
         ) ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
     }
 
-    private fun performCapture(transactionId: String, pspTransactionId: String?, pspTestMode: Boolean?, transaction: Transaction, amount: Int): PspPaymentResponseModel {
+    private fun performCapture(pspTransactionId: String?, pspTestMode: Boolean?, transaction: Transaction, amount: Int): PspPaymentResponseModel {
         val alias = transaction.alias ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         val result = jsonMapper.readValue(alias.merchant?.pspConfig, PspConfigListModel::class.java)
         val pspConfig = result.psp.firstOrNull { it.type == getProvider().toString() }

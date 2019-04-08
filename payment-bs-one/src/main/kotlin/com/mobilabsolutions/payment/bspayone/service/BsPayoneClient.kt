@@ -66,6 +66,7 @@ class BsPayoneClient(
     */
     fun capture(paymentRequest: BsPayoneCaptureRequestModel, pspConfigModel: PspConfigModel, mode: String): BsPayonePaymentResponseModel {
         val request = createStandardRequest(paymentRequest, pspConfigModel, BsPayoneRequestType.CAPTURE.type, mode)
+        println(request)
         val response = restTemplate.postForEntity(bsPayoneProperties.baseUrl, request, String::class.java)
         return convertToResponse(response.body!!, BsPayonePaymentResponseModel::class.java)
     }

@@ -127,11 +127,6 @@ class TransactionService(
         if (testMode != preauthTransaction.pspTestMode)
             throw ApiError.ofMessage("PSP test mode for this transaction is different than the mode for preauthorization transaction. Please, check your header").asBadRequest()
 
-        val paymentInfoModel = PaymentInfoModel(
-            objectMapper.readValue(preauthTransaction.alias?.extra, AliasExtraModel::class.java),
-            objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java)
-        )
-
         val captureTransaction =
             transactionRepository.getByTransactionIdAndAction(transactionId, TransactionAction.CAPTURE)
 
@@ -161,7 +156,7 @@ class TransactionService(
                     status = pspPaymentResponse.status,
                     action = TransactionAction.CAPTURE,
                     paymentMethod = preauthTransaction.paymentMethod,
-                    paymentInfo = objectMapper.writeValueAsString(paymentInfoModel),
+                    paymentInfo = objectMapper.writeValueAsString(readPaymentInfo(preauthTransaction, apiKey)),
                     pspResponse = objectMapper.writeValueAsString(pspPaymentResponse),
                     merchantTransactionId = preauthTransaction.merchantTransactionId,
                     merchantCustomerId = preauthTransaction.merchantCustomerId,
@@ -203,17 +198,15 @@ class TransactionService(
             TransactionStatus.SUCCESS
         )
             ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
+        if (transactionRepository.getByTransactionIdAndAction(transactionId, TransactionAction.CAPTURE, TransactionStatus.SUCCESS) != null)
+            throw ApiError.ofMessage("Transaction was already captured, please try the refund instead").asBadRequest()
+
         if (preauthTransaction.merchant.id != apiKey.merchant.id)
             throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
 
         val testMode = pspTestMode ?: false
         if (testMode != preauthTransaction.pspTestMode)
             throw ApiError.ofMessage("PSP test mode for this transaction is different than the mode for preauthorization transaction. Please, check your header").asBadRequest()
-
-        val paymentInfoModel = PaymentInfoModel(
-            objectMapper.readValue(preauthTransaction.alias?.extra, AliasExtraModel::class.java),
-            objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java)
-        )
 
         val reversalTransaction =
             transactionRepository.getByTransactionIdAndAction(transactionId, TransactionAction.REVERSAL)
@@ -225,32 +218,27 @@ class TransactionService(
                 reversalTransaction.currencyId,
                 reversalTransaction.status,
                 reversalTransaction.action,
-                reversalTransaction.pspResponse
-                /*
-                pspResponse after PSP implementation:
-
-
                 objectMapper.readValue(
-                    captureTransaction.pspResponse,
+                    reversalTransaction.pspResponse,
                     PspPaymentResponseModel::class.java
                 )?.errorMessage
-                 */
             )
             else -> {
-                /**
-                TO-DO: PSP IMPLEMENTATION
-                 */
+                val psp = pspRegistry.find(preauthTransaction.alias?.psp!!)
+                    ?: throw ApiError.ofMessage("PSP implementation '${preauthTransaction.alias?.psp}' cannot be found").asBadRequest()
+                val pspResponseTransactionInfo = objectMapper.readValue(preauthTransaction.pspResponse, PspPaymentResponseModel::class.java)
+                val pspReversalResponse = psp.reverse(preauthTransaction.transactionId!!, pspResponseTransactionInfo.pspTransactionId, pspTestMode)
                 val newTransaction = Transaction(
                     transactionId = transactionId,
                     idempotentKey = preauthTransaction.idempotentKey,
                     currencyId = preauthTransaction.currencyId,
                     amount = preauthTransaction.amount,
                     reason = reverseInfo.reason,
-                    status = TransactionStatus.SUCCESS,
+                    status = pspReversalResponse.status,
                     action = TransactionAction.REVERSAL,
                     paymentMethod = preauthTransaction.paymentMethod,
-                    paymentInfo = objectMapper.writeValueAsString(paymentInfoModel),
-                    pspResponse = "TO BE ADDED AFTER PSP IMPLEMENTATION",
+                    paymentInfo = objectMapper.writeValueAsString(readPaymentInfo(preauthTransaction, apiKey)),
+                    pspResponse = objectMapper.writeValueAsString(pspReversalResponse),
                     merchantTransactionId = preauthTransaction.merchantTransactionId,
                     merchantCustomerId = preauthTransaction.merchantCustomerId,
                     pspTestMode = pspTestMode ?: preauthTransaction.pspTestMode,
@@ -262,7 +250,7 @@ class TransactionService(
                 return PaymentResponseModel(
                     newTransaction.transactionId, newTransaction.amount,
                     newTransaction.currencyId, newTransaction.status,
-                    newTransaction.action, "ERROR MESSAGE TO BE ADDED AFTER PSP IMPLEMENTATION"
+                    newTransaction.action, pspReversalResponse.errorMessage
                 )
             }
         }
@@ -328,6 +316,13 @@ class TransactionService(
         return objectMapper.readValue(alias.extra
                 ?: throw ApiError.ofMessage("Used alias is incomplete, please define a payment configuration on related alias").asBadRequest(),
             AliasExtraModel::class.java
+        )
+    }
+
+    private fun readPaymentInfo(transaction: Transaction, apiKey: MerchantApiKey): PaymentInfoModel {
+        return PaymentInfoModel(
+            objectMapper.readValue(transaction.alias?.extra, AliasExtraModel::class.java),
+            objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java)
         )
     }
 
