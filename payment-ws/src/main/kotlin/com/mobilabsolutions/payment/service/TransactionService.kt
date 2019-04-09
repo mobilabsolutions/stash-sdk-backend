@@ -12,6 +12,7 @@ import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
+import com.mobilabsolutions.payment.model.PaymentDataModel
 import com.mobilabsolutions.payment.model.PaymentInfoModel
 import com.mobilabsolutions.payment.model.PaymentRequestModel
 import com.mobilabsolutions.payment.model.PaymentResponseModel
@@ -73,7 +74,7 @@ class TransactionService(
      * Preauthorize transaction
      *
      * @param secretKey Secret key
-     * @param idempotentKey Idempotent key
+
      * @param pspTestMode indicator whether is the test mode or not
      * @param preauthorizeInfo Payment information
      * @return Payment response model
@@ -111,7 +112,11 @@ class TransactionService(
      * @param transactionId Transaction ID
      * @return Payment response model
      */
-    fun capture(secretKey: String, pspTestMode: Boolean?, transactionId: String): PaymentResponseModel {
+    fun capture(
+        secretKey: String,
+        pspTestMode: Boolean?,
+        transactionId: String
+    ): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
             ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
         val preauthTransaction = transactionRepository.getByTransactionIdAndAction(
@@ -266,6 +271,53 @@ class TransactionService(
                 )
             }
         }
+    }
+
+    /**
+     * Refund transaction
+     *
+     * @param secretKey Secret Key
+     * @param idempotentKey Idempotent key
+     * @param pspTestMode indicator whether is the test mode or not
+     * @param transactionId Transaction ID
+     * @param refundInfo Payment information
+     * @return Payment response model
+     */
+    fun refund(
+        secretKey: String,
+        idempotentKey: String,
+        pspTestMode: Boolean?,
+        transactionId: String,
+        refundInfo: PaymentDataModel
+    ): PaymentResponseModel {
+        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
+            ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
+        val alias = aliasRepository.getByIdempotentKeyAndActiveAndMerchant(idempotentKey, true, apiKey.merchant)
+            ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+        val psp = pspRegistry.find(alias.psp!!)
+            ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
+
+        val prevTransaction = transactionRepository.getByTransactionIdAndActions(
+            transactionId,
+            TransactionAction.CAPTURE,
+            TransactionAction.AUTH,
+            TransactionStatus.SUCCESS
+        )
+            ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
+
+        if (prevTransaction.merchant.id != apiKey.merchant.id)
+            throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
+
+        val paymentRequestModel = PaymentRequestModel(alias.id, refundInfo, null, null)
+
+        return executeIdempotentTransactionOperation(
+            alias,
+            apiKey,
+            idempotentKey,
+            paymentRequestModel,
+            pspTestMode,
+            TransactionAction.REFUND
+        ) { PspPaymentResponseModel("test", TransactionStatus.SUCCESS, null, null, null) } // TODO pass psp.refund function as a parameter
     }
 
     private fun executeIdempotentTransactionOperation(
