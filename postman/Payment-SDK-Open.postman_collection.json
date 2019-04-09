@@ -914,6 +914,47 @@
                         "url": "{{wsEndpoint}}/api/v1/preauthorization/{Transaction-Id}/reverse"
                     },
                     "response": []
+                },
+                {
+                    "name": "Refund Payment",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": {
+                                "token": ""
+                            }
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "name": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Secret-Key",
+                                "value": "",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Idempotent-Key",
+                                "value": "",
+                                "type": "text"
+                            },
+                            {
+                                "key": "PSP-Test-Mode",
+                                "value": "true",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n\t\"amount\": \"20\",\n\t\t\"currency\": \"CAD\",\n\t\t\"reason\": \"reason\"\n\t}\"\n}"
+                        },
+                        "url": "{{wsEndpoint}}/api/v1/authorization/{Transaction-Id}/refund"
+                    },
+                    "response": []
                 }
 			]
 		}
