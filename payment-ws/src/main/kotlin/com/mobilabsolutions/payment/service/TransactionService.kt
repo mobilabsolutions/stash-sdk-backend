@@ -64,6 +64,7 @@ class TransactionService(
             alias,
             apiKey,
             idempotentKey,
+            null,
             authorizeInfo,
             pspTestMode,
             TransactionAction.AUTH
@@ -98,6 +99,7 @@ class TransactionService(
             alias,
             apiKey,
             idempotentKey,
+            null,
             preauthorizeInfo,
             pspTestMode,
             TransactionAction.PREAUTH
@@ -280,18 +282,16 @@ class TransactionService(
     ): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
             ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
-        val alias = aliasRepository.getByIdempotentKeyAndActiveAndMerchant(idempotentKey, true, apiKey.merchant)
-            ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
-        val psp = pspRegistry.find(alias.psp!!)
-            ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
-
         val prevTransaction = transactionRepository.getByTransactionIdAndActions(
             transactionId,
             TransactionAction.CAPTURE,
             TransactionAction.AUTH,
             TransactionStatus.SUCCESS
-        )
-            ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
+        ) ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
+
+        val alias = prevTransaction.alias
+        val psp = pspRegistry.find(alias!!.psp!!)
+            ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
 
         if (prevTransaction.merchant.id != apiKey.merchant.id)
             throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
@@ -302,6 +302,7 @@ class TransactionService(
             alias,
             apiKey,
             idempotentKey,
+            prevTransaction.transactionId,
             paymentRequestModel,
             pspTestMode,
             TransactionAction.REFUND
@@ -312,6 +313,7 @@ class TransactionService(
         alias: Alias,
         apiKey: MerchantApiKey,
         idempotentKey: String,
+        transactionId: String?,
         paymentInfo: PaymentRequestModel,
         pspTestMode: Boolean?,
         transactionAction: TransactionAction,
@@ -337,7 +339,7 @@ class TransactionService(
             else -> {
                 val pspPaymentResponse = pspAction.invoke(paymentInfo)
                 val newTransaction = Transaction(
-                    transactionId = RandomStringUtils.randomAlphanumeric(TransactionService.TRANSACTION_ID_LENGTH),
+                    transactionId = transactionId ?: RandomStringUtils.randomAlphanumeric(TransactionService.TRANSACTION_ID_LENGTH),
                     idempotentKey = idempotentKey,
                     currencyId = paymentInfo.paymentData!!.currency,
                     amount = paymentInfo.paymentData!!.amount,
