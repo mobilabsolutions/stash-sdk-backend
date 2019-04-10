@@ -103,7 +103,7 @@ class PaymentController(private val transactionService: TransactionService) {
         @RequestHeader(value = "Secret-Key") secretKey: String,
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
         @PathVariable(value = "Transaction-Id") transactionId: String,
-        @RequestBody reverseInfo: ReversalRequestModel
+        @Valid @RequestBody reverseInfo: ReversalRequestModel
     ) = transactionService.reverse(secretKey, pspTestMode, transactionId, reverseInfo)
 
     @ApiOperation(value = "Refund transaction")
@@ -125,7 +125,7 @@ class PaymentController(private val transactionService: TransactionService) {
         @Size(min = 10, max = 20) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
         @PathVariable(value = "Transaction-Id") transactionId: String,
-        @RequestBody refundInfo: PaymentDataModel
+        @Valid @RequestBody refundInfo: PaymentDataModel
     ) = transactionService.refund(secretKey, idempotentKey, pspTestMode, transactionId, refundInfo)
 
     companion object {

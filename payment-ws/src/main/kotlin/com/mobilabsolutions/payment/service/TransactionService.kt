@@ -61,13 +61,12 @@ class TransactionService(
                 ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
 
         return executeIdempotentTransactionOperation(
-            alias,
-            apiKey,
-            idempotentKey,
-            null,
-            authorizeInfo,
-            pspTestMode,
-            TransactionAction.AUTH
+            alias = alias,
+            apiKey = apiKey,
+            idempotentKey = idempotentKey,
+            paymentInfo = authorizeInfo,
+            pspTestMode = pspTestMode,
+            transactionAction = TransactionAction.AUTH
         ) { psp.authorize(authorizeInfo, pspTestMode) }
     }
 
@@ -96,13 +95,12 @@ class TransactionService(
             throw ApiError.ofMessage("Only credit card is supported for preauthorization").asBadRequest()
 
         return executeIdempotentTransactionOperation(
-            alias,
-            apiKey,
-            idempotentKey,
-            null,
-            preauthorizeInfo,
-            pspTestMode,
-            TransactionAction.PREAUTH
+            alias = alias,
+            apiKey = apiKey,
+            idempotentKey = idempotentKey,
+            paymentInfo = preauthorizeInfo,
+            pspTestMode = pspTestMode,
+            transactionAction = TransactionAction.PREAUTH
         ) { psp.preauthorize(preauthorizeInfo, pspTestMode) }
     }
 
@@ -299,13 +297,13 @@ class TransactionService(
         val paymentRequestModel = PaymentRequestModel(alias.id, refundInfo, null, null)
 
         return executeIdempotentTransactionOperation(
-            alias,
-            apiKey,
-            idempotentKey,
-            prevTransaction.transactionId,
-            paymentRequestModel,
-            pspTestMode,
-            TransactionAction.REFUND
+            alias = alias,
+            apiKey = apiKey,
+            idempotentKey = idempotentKey,
+            transactionId = prevTransaction.transactionId,
+            paymentInfo = paymentRequestModel,
+            pspTestMode = pspTestMode,
+            transactionAction = TransactionAction.REFUND
         ) { PspPaymentResponseModel("test", TransactionStatus.SUCCESS, null, null, null) } // TODO pass psp.refund function as a parameter
     }
 
@@ -313,7 +311,7 @@ class TransactionService(
         alias: Alias,
         apiKey: MerchantApiKey,
         idempotentKey: String,
-        transactionId: String?,
+        transactionId: String? = null,
         paymentInfo: PaymentRequestModel,
         pspTestMode: Boolean?,
         transactionAction: TransactionAction,
