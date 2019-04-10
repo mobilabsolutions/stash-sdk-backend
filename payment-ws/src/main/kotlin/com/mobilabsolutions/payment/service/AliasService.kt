@@ -3,6 +3,7 @@ package com.mobilabsolutions.payment.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.domain.Alias
 import com.mobilabsolutions.payment.data.domain.Merchant
+import com.mobilabsolutions.payment.data.domain.MerchantApiKey
 import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.repository.AliasRepository
@@ -63,16 +64,22 @@ class AliasService(
      * Update an alias for alias id and alias model
      *
      * @param publishableKey Publishable Key
+     * @param pspTestMode indicator whether is the test mode or not
      * @param aliasId Alias ID
      * @param aliasRequestModel Alias Request Model
      */
-    fun exchangeAlias(publishableKey: String, aliasId: String, aliasRequestModel: AliasRequestModel) {
+    fun exchangeAlias(publishableKey: String, pspTestMode: Boolean?, aliasId: String, aliasRequestModel: AliasRequestModel) {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofMessage("Publishable Key cannot be found").asBadRequest()
         val alias = aliasRepository.getFirstByIdAndActive(aliasId, true) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         if (apiKey.merchant.id != alias.merchant?.id) throw ApiError.ofMessage("Alias does not map to correct merchant").asBadRequest()
+        val psp = findPsp(apiKey, alias)
+        val pspRegisterAliasResponse = psp.registerAlias(aliasId, aliasRequestModel.extra, pspTestMode)
+        if (pspRegisterAliasResponse != null)
+            aliasRequestModel.extra?.payPalConfig?.billingAgreementId = pspRegisterAliasResponse.billingAgreementId
 
+        val pspAlias = aliasRequestModel.pspAlias ?: pspRegisterAliasResponse?.token
         val extra = if (aliasRequestModel.extra != null) objectMapper.writeValueAsString(aliasRequestModel.extra) else null
-        aliasRepository.updateAlias(aliasRequestModel.pspAlias, extra, aliasId)
+        aliasRepository.updateAlias(pspAlias, extra, aliasId)
     }
 
     /**
@@ -86,11 +93,7 @@ class AliasService(
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey) ?: throw ApiError.ofMessage("Secret Key cannot be found").asBadRequest()
         val alias = aliasRepository.getFirstByIdAndActive(aliasId, true) ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         if (apiKey.merchant.id != alias.merchant?.id) throw ApiError.ofMessage("Alias does not map to correct merchant").asBadRequest()
-
-        val result = objectMapper.readValue(apiKey.merchant.pspConfig ?: throw ApiError.ofMessage("There are no PSP configurations defined for used merchant").asInternalServerError(), PspConfigListModel::class.java)
-        val pspConfig = result.psp.firstOrNull { it.type == alias.psp.toString() }
-        val pspConfigType = PaymentServiceProvider.valueOf(pspConfig?.type ?: throw ApiError.ofMessage("PSP configuration for '${alias.psp}' cannot be found from used merchant").asBadRequest())
-        val psp = pspRegistry.find(pspConfigType) ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
+        val psp = findPsp(apiKey, alias)
 
         psp.deleteAlias(aliasId, pspTestMode)
 
@@ -137,5 +140,22 @@ class AliasService(
                 )
             }
         }
+    }
+
+    /**
+     * Finds the corresponding PSP for the given api key and alias
+     *
+     * @param apiKey merchant api key
+     * @param alias alias
+     * @return PSP
+     */
+    private fun findPsp(apiKey: MerchantApiKey, alias: Alias): Psp {
+        val result = objectMapper.readValue(apiKey.merchant.pspConfig
+            ?: throw ApiError.ofMessage("There are no PSP configurations defined for used merchant").asInternalServerError(), PspConfigListModel::class.java)
+        val pspConfig = result.psp.firstOrNull { it.type == alias.psp.toString() }
+        val pspConfigType = PaymentServiceProvider.valueOf(pspConfig?.type
+            ?: throw ApiError.ofMessage("PSP configuration for '${alias.psp}' cannot be found from used merchant").asBadRequest())
+        return pspRegistry.find(pspConfigType)
+            ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
     }
 }

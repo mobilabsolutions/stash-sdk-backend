@@ -25,11 +25,20 @@ data class PspConfigModel(
     @ApiModelProperty(value = "Account ID", example = "42949")
     val accountId: String?,
 
-    @ApiModelProperty(value = "Public key")
-    val publicKey: String?,
+    @ApiModelProperty(value = "Sandbox (test) merchant ID", example = "1234")
+    val sandboxMerchantId: String?,
 
-    @ApiModelProperty(value = "Private key")
-    val privateKey: String?,
+    @ApiModelProperty(value = "Sandbox (test) public key", example = "bbdjshcjdhdsgf")
+    val sandboxPublicKey: String?,
+
+    @ApiModelProperty(value = "Sandbox (test) private key", example = "ncbcjdheufhdhfjh")
+    val sandboxPrivateKey: String?,
+
+    @ApiModelProperty(value = "Production public key", example = "bbdjshcjdhdsgf")
+    val productionPublicKey: String?,
+
+    @ApiModelProperty(value = "Production private key", example = "ncbcjdheufhdhfjh")
+    val productionPrivateKey: String?,
 
     @ApiModelProperty(value = "Default flag", example = "true")
     val default: Boolean = true

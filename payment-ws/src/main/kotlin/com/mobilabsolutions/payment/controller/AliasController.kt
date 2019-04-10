@@ -49,9 +49,10 @@ class AliasController(private val aliasService: AliasService) {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun exchangeAlias(
         @RequestHeader(value = "Publishable-Key") publishableKey: String,
+        @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
         @PathVariable("Alias-Id") aliasId: String,
         @Valid @RequestBody alias: AliasRequestModel
-    ) = aliasService.exchangeAlias(publishableKey, aliasId, alias)
+    ) = aliasService.exchangeAlias(publishableKey, pspTestMode, aliasId, alias)
 
     @ApiOperation(value = "Delete an Alias")
     @ApiResponses(

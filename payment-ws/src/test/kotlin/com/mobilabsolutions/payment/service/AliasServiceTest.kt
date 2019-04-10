@@ -130,13 +130,13 @@ class AliasServiceTest {
     @Test
     fun `exchange alias with wrong alias id`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.exchangeAlias(knownPublishableKey, unknownAliasId, Mockito.mock(AliasRequestModel::class.java))
+            aliasService.exchangeAlias(knownPublishableKey, true, unknownAliasId, Mockito.mock(AliasRequestModel::class.java))
         }
     }
 
     @Test
     fun `exchange alias successfully`() {
-        aliasService.exchangeAlias(knownPublishableKey, knownAliasId, AliasRequestModel(pspAlias, Mockito.mock(AliasExtraModel::class.java)))
+        aliasService.exchangeAlias(knownPublishableKey, true, knownAliasId, AliasRequestModel(pspAlias, Mockito.mock(AliasExtraModel::class.java)))
     }
 
     @Test

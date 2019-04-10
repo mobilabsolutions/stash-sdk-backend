@@ -11,6 +11,10 @@
 
     <artifactId>payment-commons</artifactId>
 
+    <properties>
+        <braintree-version>2.93.0</braintree-version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -45,6 +49,13 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
+        </dependency>
+
+        <!--Braintree-->
+        <dependency>
+            <groupId>com.braintreepayments.gateway</groupId>
+            <artifactId>braintree-java</artifactId>
+            <version>${braintree-version}</version>
         </dependency>
 
         <!--Util-->
