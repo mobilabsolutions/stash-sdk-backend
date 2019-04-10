@@ -42,6 +42,7 @@ class TransactionServiceTest {
     private val newIdempotentKey = "new key"
     private val usedIdempotentKey = "used key"
     private val correctSecretKey = "correct key"
+    private val someSecretKey = "some secret key"
     private val wrongSecretKey = "wrong key"
     private val correctAliasId = "correct alias id"
     private val wrongAliasId = "wrong alias id"
@@ -111,6 +112,15 @@ class TransactionServiceTest {
                 true,
                 KeyType.SECRET,
                 correctSecretKey
+            )
+        ).thenReturn(
+            MerchantApiKey(active = true, merchant = Merchant("1", pspConfig = pspConfig))
+        )
+        Mockito.`when`(
+            merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(
+                true,
+                KeyType.SECRET,
+                someSecretKey
             )
         ).thenReturn(
             MerchantApiKey(active = true, merchant = Merchant("1", pspConfig = pspConfig))
@@ -501,7 +511,7 @@ class TransactionServiceTest {
     fun `refund transaction with correct secret key`() {
         transactionService.refund(
             correctSecretKey,
-            newIdempotentKey,
+            usedIdempotentKey,
             test,
             correctTransactionId,
             correctPaymentData
@@ -533,8 +543,8 @@ class TransactionServiceTest {
     @Test
     fun `refund transaction successfully`() {
         transactionService.refund(
-            correctSecretKey,
-            newIdempotentKey,
+            someSecretKey,
+            usedIdempotentKey,
             test,
             correctTransactionId,
             correctPaymentData
