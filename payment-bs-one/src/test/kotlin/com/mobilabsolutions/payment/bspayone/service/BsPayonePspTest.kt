@@ -78,6 +78,7 @@ class BsPayonePspTest {
     private val bic = "TESTTEST"
     private val pspResponse = "{\"pspTransactionId\":\"325105132\",\"status\":\"SUCCESS\",\"customerId\":\"160624370\"}"
     private val test = true
+    private val reversalAmount = 0
 
     @InjectMocks
     private lateinit var bsPayonePsp: BsPayonePsp
@@ -162,10 +163,15 @@ class BsPayonePspTest {
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.ERROR, null, null, BsPayoneErrors.AMOUNT_TOO_LOW.code, BsPayoneErrors.AMOUNT_TOO_LOW.error.error, "Please change the amount")
             )
-
         Mockito.`when`(bsPayoneClient.deleteAlias(BsPayoneDeleteAliasModel(correctCcAliasId, "yes", "no"),
             PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
-            .thenReturn(BsPayoneDeleteAliasResponseModel(BsPayoneResponseStatus.OK, null, null, null))
+            .thenReturn(BsPayoneDeleteAliasResponseModel(BsPayoneResponseStatus.OK, null, null, null)
+            )
+        Mockito.`when`(bsPayoneClient.capture(BsPayoneCaptureRequestModel(pspTransactionId, reversalAmount.toString(), currency),
+            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
+            .thenReturn(
+                BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
+            )
     }
 
     @Test
@@ -236,6 +242,25 @@ class BsPayonePspTest {
     fun `capture test transaction with no mode`() {
         Assertions.assertThrows(ApiException::class.java) {
             bsPayonePsp.capture(wrongTransactionId, pspTransactionId, null)
+        }
+    }
+
+    @Test
+    fun `reverse transaction with correct transaction id`() {
+        bsPayonePsp.reverse(correctTransactionId, pspTransactionId, test)
+    }
+
+    @Test
+    fun `reverse transaction with wrong transaction id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            bsPayonePsp.reverse(wrongTransactionId, pspTransactionId, test)
+        }
+    }
+
+    @Test
+    fun `reverse test transaction with no mode`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            bsPayonePsp.reverse(wrongTransactionId, pspTransactionId, null)
         }
     }
 

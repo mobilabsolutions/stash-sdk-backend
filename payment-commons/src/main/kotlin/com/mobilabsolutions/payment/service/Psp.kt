@@ -42,7 +42,8 @@ interface Psp {
     fun authorize(authorizeRequestModel: PaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel
 
     /**
-     * Returns psp capture payment response (@link PspPaymentResponseModel} for the given capture payment request
+     * Returns psp capture payment response (@link PspPaymentResponseModel} for the given transaction id and psp transaction id
+     *
      * @param transactionId Transaction ID
      * @param pspTransactionId PSP transaction ID
      * @param pspTestMode indicator whether is the test mode or not
@@ -51,7 +52,17 @@ interface Psp {
     fun capture(transactionId: String, pspTransactionId: String?, pspTestMode: Boolean?): PspPaymentResponseModel
 
     /**
-     * Deletes the payment method registered at PSP.
+     * Returns psp reversal payment response (@link PspPaymentResponseModel} for the given transaction id and psp transaction id
+     *
+     * @param transactionId Transaction ID
+     * @param pspTransactionId PSP transaction ID
+     * @param pspTestMode indicator whether is the test mode or not
+     * @return PSP payment response
+     */
+    fun reverse(transactionId: String, pspTransactionId: String?, pspTestMode: Boolean?): PspPaymentResponseModel
+
+    /**
+     * Deletes the payment method registered at PSP
      *
      * @param aliasId the id of the alias that will be deleted
      * @param pspTestMode indicator whether is the test mode or not
