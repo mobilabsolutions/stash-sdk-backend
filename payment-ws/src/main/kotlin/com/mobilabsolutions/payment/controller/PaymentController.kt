@@ -1,5 +1,6 @@
 package com.mobilabsolutions.payment.controller
 
+import com.mobilabsolutions.payment.model.PaymentDataModel
 import com.mobilabsolutions.payment.model.PaymentRequestModel
 import com.mobilabsolutions.payment.model.ReversalRequestModel
 import com.mobilabsolutions.payment.service.TransactionService
@@ -102,13 +103,36 @@ class PaymentController(private val transactionService: TransactionService) {
         @RequestHeader(value = "Secret-Key") secretKey: String,
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
         @PathVariable(value = "Transaction-Id") transactionId: String,
-        @RequestBody reverseInfo: ReversalRequestModel
+        @Valid @RequestBody reverseInfo: ReversalRequestModel
     ) = transactionService.reverse(secretKey, pspTestMode, transactionId, reverseInfo)
+
+    @ApiOperation(value = "Refund transaction")
+    @ApiResponses(
+        ApiResponse(code = 201, message = "Successfully refunded transaction"),
+        ApiResponse(code = 400, message = "Failed to refund transaction"),
+        ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 404, message = "Not found")
+    )
+    @RequestMapping(
+        PaymentController.REFUND_URL,
+        method = [RequestMethod.PUT],
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @ResponseStatus(HttpStatus.CREATED)
+    fun refundTransaction(
+        @RequestHeader(value = "Secret-Key") secretKey: String,
+        @Size(min = 10, max = 20) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
+        @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
+        @PathVariable(value = "Transaction-Id") transactionId: String,
+        @Valid @RequestBody refundInfo: PaymentDataModel
+    ) = transactionService.refund(secretKey, idempotentKey, pspTestMode, transactionId, refundInfo)
 
     companion object {
         const val PREAUTH_URL = "preauthorization"
         const val CAPTURE_URL = "preauthorization/{Transaction-Id}/capture"
         const val AUTH_URL = "authorization"
         const val REVERSE_URL = "preauthorization/{Transaction-Id}/reverse"
+        const val REFUND_URL = "authorization/{Transaction-Id}/refund"
     }
 }
