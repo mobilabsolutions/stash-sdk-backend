@@ -67,8 +67,19 @@ class TransactionServiceTest {
         " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}"
     private val extra =
         "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\", \"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}}"
-
     private val reverseInfo = ReversalRequestModel("some reason")
+    private val prevTransaction = Transaction(
+        amount = 1,
+        pspTestMode = test,
+        merchant = Merchant(
+            "1",
+            pspConfig = pspConfig),
+        alias = Alias(
+            id = correctAliasId,
+            active = true,
+            extra = extra,
+            psp = PaymentServiceProvider.BS_PAYONE),
+        pspResponse = pspResponse)
 
     @InjectMocks
     private lateinit var transactionService: TransactionService
@@ -107,10 +118,7 @@ class TransactionServiceTest {
         Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(correctAliasId, true)).thenReturn(
             Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
         )
-        Mockito.`when`(aliasIdRepository.getByIdempotentKeyAndActiveAndMerchant(newIdempotentKey, true, merchant = Merchant("1", pspConfig = pspConfig))).thenReturn(
-            Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
-        )
-        Mockito.`when`(aliasIdRepository.getByIdempotentKeyAndActiveAndMerchant(usedIdempotentKey, true, merchant = Merchant("1", pspConfig = pspConfig))).thenReturn(
+        Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(prevTransaction.alias!!.id!!, true)).thenReturn(
             Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
         )
         Mockito.`when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
@@ -240,13 +248,7 @@ class TransactionServiceTest {
                 TransactionStatus.SUCCESS
             )
         ).thenReturn(
-            Transaction(
-                amount = 1,
-                pspTestMode = test,
-                merchant = Merchant("1", pspConfig = pspConfig),
-                alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE),
-                pspResponse = pspResponse
-            )
+            prevTransaction
         )
     }
 
