@@ -118,9 +118,6 @@ class TransactionServiceTest {
         Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(correctAliasId, true)).thenReturn(
             Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
         )
-        Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(prevTransaction.alias!!.id!!, true)).thenReturn(
-            Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
-        )
         Mockito.`when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
         Mockito.`when`(
             psp.preauthorize(

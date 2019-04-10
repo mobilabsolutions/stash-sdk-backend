@@ -287,9 +287,8 @@ class TransactionService(
             TransactionStatus.SUCCESS
         ) ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
 
-        val alias = aliasRepository.getFirstByIdAndActive(prevTransaction.alias!!.id!!, true)
-            ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
-        val psp = pspRegistry.find(alias.psp!!)
+        val alias = prevTransaction.alias
+        val psp = pspRegistry.find(alias!!.psp!!)
             ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
 
         if (prevTransaction.merchant.id != apiKey.merchant.id)
