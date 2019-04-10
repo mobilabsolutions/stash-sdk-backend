@@ -107,6 +107,12 @@ class TransactionServiceTest {
         Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(correctAliasId, true)).thenReturn(
             Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
         )
+        Mockito.`when`(aliasIdRepository.getByIdempotentKeyAndActiveAndMerchant(newIdempotentKey, true, merchant = Merchant("1", pspConfig = pspConfig))).thenReturn(
+            Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
+        )
+        Mockito.`when`(aliasIdRepository.getByIdempotentKeyAndActiveAndMerchant(usedIdempotentKey, true, merchant = Merchant("1", pspConfig = pspConfig))).thenReturn(
+            Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)
+        )
         Mockito.`when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
         Mockito.`when`(
             psp.preauthorize(
@@ -221,6 +227,22 @@ class TransactionServiceTest {
             Transaction(
                 amount = 1,
                 pspTestMode = false,
+                merchant = Merchant("1", pspConfig = pspConfig),
+                alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE),
+                pspResponse = pspResponse
+            )
+        )
+        Mockito.`when`(
+            transactionRepository.getByTransactionIdAndActions(
+                correctTransactionId,
+                captureAction,
+                authAction,
+                TransactionStatus.SUCCESS
+            )
+        ).thenReturn(
+            Transaction(
+                amount = 1,
+                pspTestMode = test,
                 merchant = Merchant("1", pspConfig = pspConfig),
                 alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE),
                 pspResponse = pspResponse
@@ -454,5 +476,62 @@ class TransactionServiceTest {
         Assertions.assertThrows(ApiException::class.java) {
             transactionService.reverse(correctSecretKey, test, correctTransactionIdWrongTestMode, reverseInfo)
         }
+    }
+
+    @Test
+    fun `refund transaction with wrong secret key`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            transactionService.refund(
+                wrongSecretKey,
+                usedIdempotentKey,
+                test,
+                correctTransactionId,
+                Mockito.mock(PaymentDataModel::class.java)
+            )
+        }
+    }
+
+    @Test
+    fun `refund transaction with correct secret key`() {
+        transactionService.refund(
+            correctSecretKey,
+            newIdempotentKey,
+            test,
+            correctTransactionId,
+            correctPaymentData
+        )
+    }
+
+    @Test
+    fun `refund transaction with new idempotent key`() {
+        transactionService.refund(
+            correctSecretKey,
+            newIdempotentKey,
+            test,
+            correctTransactionId,
+            correctPaymentData
+        )
+    }
+
+    @Test
+    fun `refund transaction with used idempotent key`() {
+        transactionService.refund(
+            correctSecretKey,
+            usedIdempotentKey,
+            test,
+            correctTransactionId,
+            correctPaymentData
+        )
+    }
+
+    @Test
+    fun `refund transaction successfully`() {
+        transactionService.refund(
+            correctSecretKey,
+            newIdempotentKey,
+            test,
+            correctTransactionId,
+            correctPaymentData
+        )
     }
 }
