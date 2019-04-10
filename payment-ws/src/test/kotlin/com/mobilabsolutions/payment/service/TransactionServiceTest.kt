@@ -42,6 +42,7 @@ class TransactionServiceTest {
     private val newIdempotentKey = "new key"
     private val usedIdempotentKey = "used key"
     private val correctSecretKey = "correct key"
+    private val someSecretKey = "some secret key"
     private val wrongSecretKey = "wrong key"
     private val correctAliasId = "correct alias id"
     private val wrongAliasId = "wrong alias id"
@@ -67,8 +68,19 @@ class TransactionServiceTest {
         " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}"
     private val extra =
         "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\", \"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}}"
-
     private val reverseInfo = ReversalRequestModel("some reason")
+    private val prevTransaction = Transaction(
+        amount = 1,
+        pspTestMode = test,
+        merchant = Merchant(
+            "1",
+            pspConfig = pspConfig),
+        alias = Alias(
+            id = correctAliasId,
+            active = true,
+            extra = extra,
+            psp = PaymentServiceProvider.BS_PAYONE),
+        pspResponse = pspResponse)
 
     @InjectMocks
     private lateinit var transactionService: TransactionService
@@ -100,6 +112,15 @@ class TransactionServiceTest {
                 true,
                 KeyType.SECRET,
                 correctSecretKey
+            )
+        ).thenReturn(
+            MerchantApiKey(active = true, merchant = Merchant("1", pspConfig = pspConfig))
+        )
+        Mockito.`when`(
+            merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(
+                true,
+                KeyType.SECRET,
+                someSecretKey
             )
         ).thenReturn(
             MerchantApiKey(active = true, merchant = Merchant("1", pspConfig = pspConfig))
@@ -232,6 +253,16 @@ class TransactionServiceTest {
                 alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE),
                 pspResponse = pspResponse
             )
+        )
+        Mockito.`when`(
+            transactionRepository.getByTransactionIdAndActions(
+                correctTransactionId,
+                captureAction,
+                authAction,
+                TransactionStatus.SUCCESS
+            )
+        ).thenReturn(
+            prevTransaction
         )
     }
 
@@ -461,5 +492,62 @@ class TransactionServiceTest {
         Assertions.assertThrows(ApiException::class.java) {
             transactionService.reverse(correctSecretKey, test, correctTransactionIdWrongTestMode, reverseInfo)
         }
+    }
+
+    @Test
+    fun `refund transaction with wrong secret key`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            transactionService.refund(
+                wrongSecretKey,
+                usedIdempotentKey,
+                test,
+                correctTransactionId,
+                Mockito.mock(PaymentDataModel::class.java)
+            )
+        }
+    }
+
+    @Test
+    fun `refund transaction with correct secret key`() {
+        transactionService.refund(
+            correctSecretKey,
+            usedIdempotentKey,
+            test,
+            correctTransactionId,
+            correctPaymentData
+        )
+    }
+
+    @Test
+    fun `refund transaction with new idempotent key`() {
+        transactionService.refund(
+            correctSecretKey,
+            newIdempotentKey,
+            test,
+            correctTransactionId,
+            correctPaymentData
+        )
+    }
+
+    @Test
+    fun `refund transaction with used idempotent key`() {
+        transactionService.refund(
+            correctSecretKey,
+            usedIdempotentKey,
+            test,
+            correctTransactionId,
+            correctPaymentData
+        )
+    }
+
+    @Test
+    fun `refund transaction successfully`() {
+        transactionService.refund(
+            someSecretKey,
+            usedIdempotentKey,
+            test,
+            correctTransactionId,
+            correctPaymentData
+        )
     }
 }
