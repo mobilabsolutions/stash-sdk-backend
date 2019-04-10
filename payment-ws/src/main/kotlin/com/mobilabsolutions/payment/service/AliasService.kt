@@ -77,7 +77,7 @@ class AliasService(
         if (pspRegisterAliasResponse != null)
             aliasRequestModel.extra?.payPalConfig?.billingAgreementId = pspRegisterAliasResponse.billingAgreementId
 
-        val pspAlias = aliasRequestModel.pspAlias ?: pspRegisterAliasResponse?.token
+        val pspAlias = aliasRequestModel.pspAlias ?: pspRegisterAliasResponse?.pspAlias
         val extra = if (aliasRequestModel.extra != null) objectMapper.writeValueAsString(aliasRequestModel.extra) else null
         aliasRepository.updateAlias(pspAlias, extra, aliasId)
     }

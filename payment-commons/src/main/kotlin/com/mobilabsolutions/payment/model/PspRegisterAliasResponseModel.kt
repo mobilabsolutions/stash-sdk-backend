@@ -8,8 +8,8 @@ import io.swagger.annotations.ApiModelProperty
  */
 @ApiModel(value = "PSP Register Alias Response")
 data class PspRegisterAliasResponseModel(
-    @ApiModelProperty(value = "Payment token, psp alias in Payment SDK", example = "jdklaoa")
-    val token: String?,
+    @ApiModelProperty(value = "Payment service provider alias", example = "jdklaoa")
+    val pspAlias: String?,
 
     @ApiModelProperty(value = "Braintree's billing agreement id")
     val billingAgreementId: String?

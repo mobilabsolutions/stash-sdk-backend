@@ -37,7 +37,7 @@ import org.mockito.quality.Strictness
 class BraintreePspTest {
     private val correctAliasId = "correct id"
     private val wrongAliasId = "wrong id"
-    private val pspAlias = "token 1"
+    private val pspAlias = "pspAlias 1"
     private val merchantId = "123"
     private val publicKey = "1234"
     private val privateKey = "12345"
