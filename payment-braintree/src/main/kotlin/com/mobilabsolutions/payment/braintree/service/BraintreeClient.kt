@@ -26,22 +26,31 @@ class BraintreeClient {
      */
     fun registerPayPal(request: BraintreeRegisterAliasRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreeRegisterAliasResponseModel {
         val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
+
         val customerRequest = CustomerRequest().id(request.customerId)
         braintreeGateway.customer().create(customerRequest)
-        val paymentMethodRequest = PaymentMethodRequest().customerId(request.customerId).paymentMethodNonce(request.nonce)
+
+        val paymentMethodRequest = PaymentMethodRequest()
+            .customerId(request.customerId)
+            .paymentMethodNonce(request.nonce)
             .deviceData(request.deviceData)
         val paymentMethodResponse = braintreeGateway.paymentMethod().create(paymentMethodRequest)
+
         if (paymentMethodResponse.target == null)
             throw ApiError.builder()
                 .withMessage("PayPal registration failed")
                 .withProperty("braintree.message", paymentMethodResponse.message)
                 .build().asInternalServerError()
-        return BraintreeRegisterAliasResponseModel(paymentMethodResponse.target.token, (paymentMethodResponse.target as PayPalAccount).billingAgreementId)
+
+        return BraintreeRegisterAliasResponseModel(
+            paymentMethodResponse.target.token,
+            (paymentMethodResponse.target as PayPalAccount).billingAgreementId)
     }
 
     private fun configureBraintreeGateway(pspConfigModel: PspConfigModel, mode: String): BraintreeGateway {
         if (mode == BraintreeMode.PRODUCTION.mode)
             return BraintreeGateway(mode, pspConfigModel.merchantId, pspConfigModel.productionPublicKey, pspConfigModel.productionPrivateKey)
+
         return BraintreeGateway(mode, pspConfigModel.sandboxMerchantId, pspConfigModel.sandboxPublicKey, pspConfigModel.sandboxPrivateKey)
     }
 }

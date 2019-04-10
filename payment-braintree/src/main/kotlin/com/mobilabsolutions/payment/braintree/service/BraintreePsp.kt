@@ -67,6 +67,7 @@ class BraintreePsp(
             nonce = aliasExtra.payPalConfig!!.nonce,
             deviceData = aliasExtra.payPalConfig!!.deviceData
         )
+
         val braintreeResponse = braintreeClient.registerPayPal(braintreeRequest, pspConfig, getBraintreeMode(pspTestMode))
         return PspRegisterAliasResponseModel(braintreeResponse.token, braintreeResponse.billingAgreementId)
     }
