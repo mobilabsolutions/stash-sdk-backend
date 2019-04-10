@@ -17,6 +17,7 @@
 		<module>payment-ws</module>
         <module>payment-commons</module>
         <module>payment-bs-one</module>
+        <module>payment-braintree</module>
     </modules>
 
     <properties>
