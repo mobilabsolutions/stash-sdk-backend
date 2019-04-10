@@ -64,6 +64,7 @@ class TransactionService(
             alias,
             apiKey,
             idempotentKey,
+            null,
             authorizeInfo,
             pspTestMode,
             TransactionAction.AUTH
@@ -98,6 +99,7 @@ class TransactionService(
             alias,
             apiKey,
             idempotentKey,
+            null,
             preauthorizeInfo,
             pspTestMode,
             TransactionAction.PREAUTH
@@ -300,6 +302,7 @@ class TransactionService(
             alias,
             apiKey,
             idempotentKey,
+            prevTransaction.transactionId,
             paymentRequestModel,
             pspTestMode,
             TransactionAction.REFUND
@@ -310,6 +313,7 @@ class TransactionService(
         alias: Alias,
         apiKey: MerchantApiKey,
         idempotentKey: String,
+        transactionId: String?,
         paymentInfo: PaymentRequestModel,
         pspTestMode: Boolean?,
         transactionAction: TransactionAction,
@@ -335,7 +339,7 @@ class TransactionService(
             else -> {
                 val pspPaymentResponse = pspAction.invoke(paymentInfo)
                 val newTransaction = Transaction(
-                    transactionId = RandomStringUtils.randomAlphanumeric(TransactionService.TRANSACTION_ID_LENGTH),
+                    transactionId = transactionId ?: RandomStringUtils.randomAlphanumeric(TransactionService.TRANSACTION_ID_LENGTH),
                     idempotentKey = idempotentKey,
                     currencyId = paymentInfo.paymentData!!.currency,
                     amount = paymentInfo.paymentData!!.amount,
