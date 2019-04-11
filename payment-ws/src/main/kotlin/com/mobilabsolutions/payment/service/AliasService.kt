@@ -74,11 +74,11 @@ class AliasService(
         if (apiKey.merchant.id != alias.merchant?.id) throw ApiError.ofMessage("Alias does not map to correct merchant").asBadRequest()
         val psp = findPsp(apiKey, alias)
         val pspRegisterAliasResponse = psp.registerAlias(aliasId, aliasRequestModel.extra, pspTestMode)
-        if (pspRegisterAliasResponse != null)
-            aliasRequestModel.extra?.payPalConfig?.billingAgreementId = pspRegisterAliasResponse.billingAgreementId
+        val paypalConfig = aliasRequestModel.extra?.payPalConfig?.copy(billingAgreementId = pspRegisterAliasResponse?.billingAgreementId)
+        val aliasExtraModel = aliasRequestModel.extra?.copy(payPalConfig = paypalConfig)
 
         val pspAlias = aliasRequestModel.pspAlias ?: pspRegisterAliasResponse?.pspAlias
-        val extra = if (aliasRequestModel.extra != null) objectMapper.writeValueAsString(aliasRequestModel.extra) else null
+        val extra = if (aliasExtraModel != null) objectMapper.writeValueAsString(aliasExtraModel) else null
         aliasRepository.updateAlias(pspAlias, extra, aliasId)
     }
 

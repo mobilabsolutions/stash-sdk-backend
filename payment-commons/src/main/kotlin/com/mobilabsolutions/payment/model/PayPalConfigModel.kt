@@ -12,7 +12,7 @@ data class PayPalConfigModel(
     val nonce: String?,
 
     @ApiModelProperty(value = "PayPal billing agreement id", example = "123123")
-    var billingAgreementId: String?,
+    val billingAgreementId: String?,
 
     @ApiModelProperty(value = "PayPal device data", example = "{\"correlation_id\":\"73e463b6abef4de690f3b90c940b54d3\"}")
     val deviceData: String?
