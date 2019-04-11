@@ -165,13 +165,30 @@ class TransactionServiceTest {
                 test
             )
         ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
-        Mockito.`when`(transactionRepository.getByIdempotentKeyAndActionAndMerchant(newIdempotentKey, preauthAction, merchant = Merchant("1", pspConfig = pspConfig)))
+        Mockito.`when`(
+            transactionRepository.getByIdempotentKeyAndActionAndMerchantAndAlias(
+                newIdempotentKey,
+                preauthAction,
+                merchant = Merchant("1", pspConfig = pspConfig),
+                alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)))
             .thenReturn(null)
-        Mockito.`when`(transactionRepository.getByIdempotentKeyAndActionAndMerchant(usedIdempotentKey, preauthAction, merchant = Merchant("1", pspConfig = pspConfig)))
+        Mockito.`when`(transactionRepository.getByIdempotentKeyAndActionAndMerchantAndAlias(
+            usedIdempotentKey,
+            preauthAction,
+            merchant = Merchant("1", pspConfig = pspConfig),
+            alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)))
             .thenReturn(executedTransaction)
-        Mockito.`when`(transactionRepository.getByIdempotentKeyAndActionAndMerchant(newIdempotentKey, authAction, merchant = Merchant("1", pspConfig = pspConfig)))
+        Mockito.`when`(transactionRepository.getByIdempotentKeyAndActionAndMerchantAndAlias(
+            newIdempotentKey,
+            authAction,
+            merchant = Merchant("1", pspConfig = pspConfig),
+            alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)))
             .thenReturn(null)
-        Mockito.`when`(transactionRepository.getByIdempotentKeyAndActionAndMerchant(usedIdempotentKey, authAction, merchant = Merchant("1", pspConfig = pspConfig)))
+        Mockito.`when`(transactionRepository.getByIdempotentKeyAndActionAndMerchantAndAlias(
+            usedIdempotentKey,
+            authAction,
+            merchant = Merchant("1", pspConfig = pspConfig),
+            alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE)))
             .thenReturn(executedTransaction)
         Mockito.`when`(
             transactionRepository.getByTransactionIdAndAction(

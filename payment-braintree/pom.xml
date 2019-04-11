@@ -11,6 +11,10 @@
 
     <artifactId>payment-braintree</artifactId>
 
+    <properties>
+        <braintree-version>2.93.0</braintree-version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -37,6 +41,13 @@
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
+        </dependency>
+
+        <!--Braintree-->
+        <dependency>
+            <groupId>com.braintreepayments.gateway</groupId>
+            <artifactId>braintree-java</artifactId>
+            <version>${braintree-version}</version>
         </dependency>
 
         <!--Util-->
