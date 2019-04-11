@@ -35,10 +35,10 @@ data class PspConfigModel(
     val sandboxPrivateKey: String?,
 
     @ApiModelProperty(value = "Production public key", example = "bbdjshcjdhdsgf")
-    val productionPublicKey: String?,
+    val publicKey: String?,
 
     @ApiModelProperty(value = "Production private key", example = "ncbcjdheufhdhfjh")
-    val productionPrivateKey: String?,
+    val privateKey: String?,
 
     @ApiModelProperty(value = "Default flag", example = "true")
     val default: Boolean = true

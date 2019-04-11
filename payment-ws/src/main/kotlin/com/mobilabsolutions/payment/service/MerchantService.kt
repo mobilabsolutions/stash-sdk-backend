@@ -51,8 +51,8 @@ class MerchantService(
                         sandboxMerchantId = pspConfigRequestModel.pspConfig.sandboxMerchantId,
                         sandboxPublicKey = pspConfigRequestModel.pspConfig.sandboxPublicKey,
                         sandboxPrivateKey = pspConfigRequestModel.pspConfig.sandboxPrivateKey,
-                        productionPublicKey = pspConfigRequestModel.pspConfig.productionPublicKey,
-                        productionPrivateKey = pspConfigRequestModel.pspConfig.productionPrivateKey
+                        publicKey = pspConfigRequestModel.pspConfig.publicKey,
+                        privateKey = pspConfigRequestModel.pspConfig.privateKey
                     )
                 )
             )
@@ -112,8 +112,8 @@ class MerchantService(
                         sandboxMerchantId = pspUpsertConfigRequestModel.sandboxMerchantId,
                         sandboxPublicKey = pspUpsertConfigRequestModel.sandboxPublicKey,
                         sandboxPrivateKey = pspUpsertConfigRequestModel.sandboxPrivateKey,
-                        productionPublicKey = pspUpsertConfigRequestModel.productionPublicKey,
-                        productionPrivateKey = pspUpsertConfigRequestModel.productionPrivateKey
+                        publicKey = pspUpsertConfigRequestModel.publicKey,
+                        privateKey = pspUpsertConfigRequestModel.privateKey
                     )
                 )
             )
@@ -164,5 +164,5 @@ class MerchantService(
         return configMap.values.toMutableList()
     }
 
-    private fun PspConfigModel.setDefault(default: Boolean) = PspConfigModel(type, merchantId, portalId, key, accountId, sandboxMerchantId, sandboxPublicKey, sandboxPrivateKey, productionPublicKey, productionPrivateKey, default = default)
+    private fun PspConfigModel.setDefault(default: Boolean) = PspConfigModel(type, merchantId, portalId, key, accountId, sandboxMerchantId, sandboxPublicKey, sandboxPrivateKey, publicKey, privateKey, default = default)
 }

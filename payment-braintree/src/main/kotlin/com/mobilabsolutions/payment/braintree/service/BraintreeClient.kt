@@ -49,7 +49,7 @@ class BraintreeClient {
 
     private fun configureBraintreeGateway(pspConfigModel: PspConfigModel, mode: String): BraintreeGateway {
         if (mode == BraintreeMode.PRODUCTION.mode)
-            return BraintreeGateway(mode, pspConfigModel.merchantId, pspConfigModel.productionPublicKey, pspConfigModel.productionPrivateKey)
+            return BraintreeGateway(mode, pspConfigModel.merchantId, pspConfigModel.publicKey, pspConfigModel.privateKey)
 
         return BraintreeGateway(mode, pspConfigModel.sandboxMerchantId, pspConfigModel.sandboxPublicKey, pspConfigModel.sandboxPrivateKey)
     }

@@ -49,8 +49,8 @@ class BraintreePsp(
             accountId = null,
             encoding = null,
             mode = braintreeMode,
-            publicKey = if (braintreeMode == BraintreeMode.PRODUCTION.mode) pspConfigModel.productionPublicKey else pspConfigModel.sandboxPublicKey,
-            privateKey = if (braintreeMode == BraintreeMode.PRODUCTION.mode) pspConfigModel.productionPrivateKey else pspConfigModel.sandboxPrivateKey
+            publicKey = if (braintreeMode == BraintreeMode.PRODUCTION.mode) pspConfigModel.publicKey else pspConfigModel.sandboxPublicKey,
+            privateKey = if (braintreeMode == BraintreeMode.PRODUCTION.mode) pspConfigModel.privateKey else pspConfigModel.sandboxPrivateKey
         ) else null
     }
 
