@@ -185,7 +185,7 @@ class BsPayonePspTest {
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
             )
-        Mockito.`when`(bsPayoneClient.refund(BsPayoneRefundRequestModel(pspTransactionId, captureSequenceNumber, amount.toString(), currency),
+        Mockito.`when`(bsPayoneClient.refund(BsPayoneRefundRequestModel(pspTransactionId, captureSequenceNumber, (amount*-1).toString(), currency),
             PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, true), BsPayoneMode.TEST.mode))
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
@@ -285,6 +285,20 @@ class BsPayonePspTest {
     @Test
     fun `refund transaction with correct transaction id`() {
         bsPayonePsp.refund(correctTransactionId, pspTransactionId, test)
+    }
+
+    @Test
+    fun `refund transaction with wrong transaction id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            bsPayonePsp.refund(wrongTransactionId, pspTransactionId, test)
+        }
+    }
+
+    @Test
+    fun `refund test transaction with no mode`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            bsPayonePsp.refund(wrongTransactionId, pspTransactionId, null)
+        }
     }
 
     @Test
