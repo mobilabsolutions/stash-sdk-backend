@@ -44,7 +44,7 @@ class PaymentController(private val transactionService: TransactionService) {
     @ResponseStatus(HttpStatus.CREATED)
     fun preauthorizeTransaction(
         @RequestHeader(value = "Secret-Key") secretKey: String,
-        @Size(min = 10, max = 20) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
+        @Size(min = 10, max = 40) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
         @Valid @RequestBody preauthorizeInfo: PaymentRequestModel
     ) = transactionService.preauthorize(secretKey, idempotentKey, pspTestMode, preauthorizeInfo)
@@ -80,7 +80,7 @@ class PaymentController(private val transactionService: TransactionService) {
     @ResponseStatus(HttpStatus.CREATED)
     fun authorizeTransaction(
         @RequestHeader(value = "Secret-Key") secretKey: String,
-        @Size(min = 10, max = 20) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
+        @Size(min = 10, max = 40) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
         @Valid @RequestBody authorizeInfo: PaymentRequestModel
     ) = transactionService.authorize(secretKey, idempotentKey, pspTestMode, authorizeInfo)
@@ -122,7 +122,7 @@ class PaymentController(private val transactionService: TransactionService) {
     @ResponseStatus(HttpStatus.CREATED)
     fun refundTransaction(
         @RequestHeader(value = "Secret-Key") secretKey: String,
-        @Size(min = 10, max = 20) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
+        @Size(min = 10, max = 40) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
         @PathVariable(value = "Transaction-Id") transactionId: String,
         @Valid @RequestBody refundInfo: PaymentDataModel
