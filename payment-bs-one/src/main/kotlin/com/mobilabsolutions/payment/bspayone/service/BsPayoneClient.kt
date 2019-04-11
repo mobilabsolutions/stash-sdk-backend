@@ -79,8 +79,8 @@ class BsPayoneClient(
      * @param mode BS Payone mode
      * @return BS Payone payment response
      */
-    fun refund(paymentRequest: BsPayoneRefundRequestModel, pspConfigModel: PspConfigModel, mode: String): BsPayonePaymentResponseModel {
-        val request = createStandardRequest(paymentRequest, pspConfigModel, BsPayoneRequestType.REFUND.type, mode)
+    fun refund(refundRequest: BsPayoneRefundRequestModel, pspConfigModel: PspConfigModel, mode: String): BsPayonePaymentResponseModel {
+        val request = createStandardRequest(refundRequest, pspConfigModel, BsPayoneRequestType.REFUND.type, mode)
         val response = restTemplate.postForEntity(bsPayoneProperties.baseUrl, request, String::class.java)
         return convertToResponse(response.body!!, BsPayonePaymentResponseModel::class.java)
     }
