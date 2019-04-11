@@ -159,7 +159,7 @@ class BsPayonePsp(
 
         val bsPayoneRefundRequest = BsPayoneRefundRequestModel(
             pspTransactionId = pspTransactionId,
-            sequenceNumber = if (transaction.paymentMethod == PaymentMethod.CC) 2 else 1,
+            sequenceNumber = if (transaction.action == TransactionAction.CAPTURE) 2 else 1,
             amount = (transaction.amount!!*-1).toString(),
             currency = transaction.currencyId
         )

@@ -15,7 +15,7 @@ data class BsPayoneRefundRequestModel(
     @field:NotNull
     val pspTransactionId: String?,
 
-    @ApiModelProperty(value = "BS Payone Sequence Number", example = "CC: authorization 0, refund 1. SEPA: preauthorization 0, capture 1, refund 2")
+    @ApiModelProperty(value = "BS Payone Sequence Number", example = "CC, SEPA: authorization 0, refund 1. CC: preauthorization 0, capture 1, refund 2")
     @JsonProperty(value = "sequencenumber")
     @field:NotNull
     val sequenceNumber: Int?,
