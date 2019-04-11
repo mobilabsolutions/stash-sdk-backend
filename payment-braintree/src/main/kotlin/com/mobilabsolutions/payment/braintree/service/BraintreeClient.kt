@@ -5,7 +5,6 @@ import com.braintreegateway.CustomerRequest
 import com.braintreegateway.PayPalAccount
 import com.braintreegateway.PaymentMethodRequest
 import com.braintreegateway.exceptions.TimeoutException
-import com.braintreegateway.exceptions.UnexpectedException
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
 import com.mobilabsolutions.payment.braintree.model.BraintreeRegisterAliasRequestModel
 import com.mobilabsolutions.payment.braintree.model.BraintreeRegisterAliasResponseModel
@@ -30,9 +29,8 @@ class BraintreeClient {
      * @return Braintree payment method response
      */
     fun registerPayPal(request: BraintreeRegisterAliasRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreeRegisterAliasResponseModel {
-        val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
-
         try {
+            val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
             val customerRequest = CustomerRequest().id(request.customerId)
             braintreeGateway.customer().create(customerRequest)
 
@@ -54,7 +52,7 @@ class BraintreeClient {
         } catch (exception: TimeoutException) {
             logger.error { exception.message }
             throw ApiError.ofMessage("Timeout error during PayPal registration").asInternalServerError()
-        } catch (exception: UnexpectedException) {
+        } catch (exception: Exception) {
             logger.error { exception.message }
             throw ApiError.ofMessage("Unexpected error during PayPal registration").asInternalServerError()
         }
