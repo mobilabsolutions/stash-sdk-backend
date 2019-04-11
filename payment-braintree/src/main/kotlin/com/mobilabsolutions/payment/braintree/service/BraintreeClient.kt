@@ -4,6 +4,7 @@ import com.braintreegateway.BraintreeGateway
 import com.braintreegateway.CustomerRequest
 import com.braintreegateway.PayPalAccount
 import com.braintreegateway.PaymentMethodRequest
+import com.braintreegateway.exceptions.BraintreeException
 import com.braintreegateway.exceptions.TimeoutException
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
 import com.mobilabsolutions.payment.braintree.model.BraintreeRegisterAliasRequestModel
@@ -52,7 +53,7 @@ class BraintreeClient {
         } catch (exception: TimeoutException) {
             logger.error { exception.message }
             throw ApiError.ofMessage("Timeout error during PayPal registration").asInternalServerError()
-        } catch (exception: Exception) {
+        } catch (exception: BraintreeException) {
             logger.error { exception.message }
             throw ApiError.ofMessage("Unexpected error during PayPal registration").asInternalServerError()
         }
