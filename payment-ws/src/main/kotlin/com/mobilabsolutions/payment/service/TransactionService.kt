@@ -322,7 +322,7 @@ class TransactionService(
         val paymentInfoModel =
             PaymentInfoModel(extra, objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java))
 
-        val transaction = transactionRepository.getByIdempotentKeyAndActionAndMerchant(idempotentKey, transactionAction, apiKey.merchant)
+        val transaction = transactionRepository.getByIdempotentKeyAndActionAndMerchantAndAlias(idempotentKey, transactionAction, apiKey.merchant, alias)
 
         when {
             transaction != null -> return PaymentResponseModel(

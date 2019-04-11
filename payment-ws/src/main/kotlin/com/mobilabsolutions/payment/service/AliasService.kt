@@ -116,7 +116,7 @@ class AliasService(
         calculatedConfig: PspAliasConfigModel?,
         idempotentKey: String
     ): AliasResponseModel {
-        val alias = aliasRepository.getByIdempotentKeyAndActiveAndMerchant(idempotentKey, true, merchant)
+        val alias = aliasRepository.getByIdempotentKeyAndActiveAndMerchantAndPspType(idempotentKey, true, merchant, pspConfigType)
         val generatedAliasId = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
 
         when {

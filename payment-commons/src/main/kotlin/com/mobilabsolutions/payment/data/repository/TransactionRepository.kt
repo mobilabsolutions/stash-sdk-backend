@@ -1,5 +1,6 @@
 package com.mobilabsolutions.payment.data.repository
 
+import com.mobilabsolutions.payment.data.domain.Alias
 import com.mobilabsolutions.payment.data.domain.Merchant
 import com.mobilabsolutions.payment.data.domain.Transaction
 import com.mobilabsolutions.payment.data.enum.TransactionAction
@@ -14,8 +15,8 @@ import org.springframework.stereotype.Repository
 @Repository
 interface TransactionRepository : BaseRepository<Transaction, Long> {
 
-    @Query("SELECT DISTINCT tr FROM Transaction tr WHERE tr.idempotentKey = :idempotentKey AND tr.action = :action AND tr.merchant = :merchant")
-    fun getByIdempotentKeyAndActionAndMerchant(@Param("idempotentKey") idempotentKey: String, @Param("action") action: TransactionAction, merchant: Merchant): Transaction?
+    @Query("SELECT DISTINCT tr FROM Transaction tr WHERE tr.idempotentKey = :idempotentKey AND tr.action = :action AND tr.merchant = :merchant AND (tr.alias = :alias OR :alias IS NULL)")
+    fun getByIdempotentKeyAndActionAndMerchantAndAlias(@Param("idempotentKey") idempotentKey: String, @Param("action") action: TransactionAction, @Param("merchant") merchant: Merchant, @Param("alias") alias: Alias?): Transaction?
 
     @Query("SELECT DISTINCT tr FROM Transaction tr WHERE tr.transactionId = :transactionId AND tr.action = :action AND (tr.status = :status OR :status IS NULL)")
     fun getByTransactionIdAndAction(@Param("transactionId") transactionId: String, @Param("action") action: TransactionAction, @Param("status") status: TransactionStatus? = null): Transaction?
