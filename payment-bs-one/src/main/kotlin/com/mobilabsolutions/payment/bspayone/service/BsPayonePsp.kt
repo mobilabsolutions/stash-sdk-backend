@@ -9,6 +9,7 @@ import com.mobilabsolutions.payment.bspayone.exception.BsPayoneErrors
 import com.mobilabsolutions.payment.bspayone.model.BsPayoneCaptureRequestModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentRequestModel
+import com.mobilabsolutions.payment.bspayone.model.BsPayoneRefundRequestModel
 import com.mobilabsolutions.payment.data.domain.Alias
 import com.mobilabsolutions.payment.data.domain.Transaction
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
@@ -142,6 +143,36 @@ class BsPayonePsp(
     override fun reverse(transactionId: String, pspTransactionId: String?, pspTestMode: Boolean?): PspPaymentResponseModel {
         val transaction = findPreauthTransaction(transactionId)
         return executeRequest(pspTransactionId, pspTestMode, transaction, AMOUNT_FOR_CANCELLING_TRANSACTION)
+    }
+
+    override fun refund(transactionId: String, pspTransactionId: String?, pspTestMode: Boolean?): PspPaymentResponseModel {
+        val transaction = transactionRepository.getByTransactionIdAndActions(
+            transactionId,
+            TransactionAction.CAPTURE,
+            TransactionAction.AUTH,
+            TransactionStatus.SUCCESS
+        ) ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
+        val alias = transaction.alias ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+        val result = jsonMapper.readValue(alias.merchant?.pspConfig, PspConfigListModel::class.java)
+        val pspConfig = result.psp.firstOrNull { it.type == getProvider().toString() }
+            ?: throw ApiError.ofMessage("PSP configuration for '${getProvider()}' cannot be found from used merchant").asBadRequest()
+
+        val bsPayoneRefundRequest = BsPayoneRefundRequestModel(
+            pspTransactionId = pspTransactionId,
+            sequenceNumber = if (transaction.paymentMethod == PaymentMethod.CC) 2 else 1,
+            amount = (transaction.amount!!*-1).toString(),
+            currency = transaction.currencyId
+        )
+
+        val response = bsPayoneClient.refund(bsPayoneRefundRequest, pspConfig, getPspMode(pspTestMode))
+
+        if (response.hasError()) {
+            logger.error { "Error during BS Payone refund. Error code: ${response.errorCode}, error message: ${response.errorMessage} " }
+            return PspPaymentResponseModel(response.transactionId, TransactionStatus.FAIL, response.customerId,
+                BsPayoneErrors.mapResponseCode(response.errorCode!!), response.errorMessage)
+        }
+
+        return PspPaymentResponseModel(response.transactionId, TransactionStatus.SUCCESS, response.customerId, null, null)
     }
 
     override fun deleteAlias(aliasId: String, pspTestMode: Boolean?) {

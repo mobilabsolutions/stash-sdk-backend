@@ -62,6 +62,16 @@ interface Psp {
     fun reverse(transactionId: String, pspTransactionId: String?, pspTestMode: Boolean?): PspPaymentResponseModel
 
     /**
+     * Returns psp refund payment response (@link PspPaymentResponseModel} for the given transaction id and psp transaction id
+     *
+     * @param transactionId Transaction ID
+     * @param pspTransactionId PSP transaction ID
+     * @param pspTestMode indicator whether is the test mode or not
+     * @return PSP payment response
+     */
+    fun refund(transactionId: String, pspTransactionId: String?, pspTestMode: Boolean?): PspPaymentResponseModel
+
+    /**
      * Deletes the payment method registered at PSP
      *
      * @param aliasId the id of the alias that will be deleted
