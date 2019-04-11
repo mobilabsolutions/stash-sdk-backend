@@ -1,7 +1,5 @@
 package com.mobilabsolutions.server.commons.exception
 
-import com.braintreegateway.exceptions.TimeoutException
-import com.braintreegateway.exceptions.UnexpectedException
 import mu.KLogging
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.FORBIDDEN
@@ -210,26 +208,6 @@ class CommonExceptionHandler {
     @ExceptionHandler(ResourceAccessException::class)
     fun handleResourceAccessException(exception: ResourceAccessException): ApiError {
         logger.error("Service unavailable.", exception)
-        return ApiError.builder()
-            .withMessage("service.unavailable")
-            .withProperty("errors", exception.message!!)
-            .build()
-    }
-
-    @ResponseStatus(SERVICE_UNAVAILABLE)
-    @ExceptionHandler(TimeoutException::class)
-    fun handleBraintreeTimeoutException(exception: TimeoutException): ApiError {
-        logger.error("Timeout exception.", exception)
-        return ApiError.builder()
-            .withMessage("service.unavailable")
-            .withProperty("errors", exception.message!!)
-            .build()
-    }
-
-    @ResponseStatus(SERVICE_UNAVAILABLE)
-    @ExceptionHandler(UnexpectedException::class)
-    fun handleBraintreeUnexpectedException(exception: UnexpectedException): ApiError {
-        logger.error("Unexpected exception.", exception)
         return ApiError.builder()
             .withMessage("service.unavailable")
             .withProperty("errors", exception.message!!)

@@ -4,11 +4,14 @@ import com.braintreegateway.BraintreeGateway
 import com.braintreegateway.CustomerRequest
 import com.braintreegateway.PayPalAccount
 import com.braintreegateway.PaymentMethodRequest
+import com.braintreegateway.exceptions.TimeoutException
+import com.braintreegateway.exceptions.UnexpectedException
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
 import com.mobilabsolutions.payment.braintree.model.BraintreeRegisterAliasRequestModel
 import com.mobilabsolutions.payment.braintree.model.BraintreeRegisterAliasResponseModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.server.commons.exception.ApiError
+import mu.KLogging
 import org.springframework.stereotype.Service
 
 /**
@@ -16,6 +19,8 @@ import org.springframework.stereotype.Service
  */
 @Service
 class BraintreeClient {
+
+    companion object : KLogging()
 
     /**
      * Registers PayPal payment method at Braintree.
@@ -27,24 +32,32 @@ class BraintreeClient {
     fun registerPayPal(request: BraintreeRegisterAliasRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreeRegisterAliasResponseModel {
         val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
 
-        val customerRequest = CustomerRequest().id(request.customerId)
-        braintreeGateway.customer().create(customerRequest)
+        try {
+            val customerRequest = CustomerRequest().id(request.customerId)
+            braintreeGateway.customer().create(customerRequest)
 
-        val paymentMethodRequest = PaymentMethodRequest()
-            .customerId(request.customerId)
-            .paymentMethodNonce(request.nonce)
-            .deviceData(request.deviceData)
-        val paymentMethodResponse = braintreeGateway.paymentMethod().create(paymentMethodRequest)
+            val paymentMethodRequest = PaymentMethodRequest()
+                .customerId(request.customerId)
+                .paymentMethodNonce(request.nonce)
+                .deviceData(request.deviceData)
+            val paymentMethodResponse = braintreeGateway.paymentMethod().create(paymentMethodRequest)
 
-        if (paymentMethodResponse.target == null)
-            throw ApiError.builder()
-                .withMessage("PayPal registration failed")
-                .withProperty("braintree.message", paymentMethodResponse.message)
-                .build().asInternalServerError()
+            if (paymentMethodResponse.target == null)
+                throw ApiError.builder()
+                    .withMessage("PayPal registration failed")
+                    .withProperty("braintree.message", paymentMethodResponse.message)
+                    .build().asInternalServerError()
 
-        return BraintreeRegisterAliasResponseModel(
-            paymentMethodResponse.target.token,
-            (paymentMethodResponse.target as PayPalAccount).billingAgreementId)
+            return BraintreeRegisterAliasResponseModel(
+                paymentMethodResponse.target.token,
+                (paymentMethodResponse.target as PayPalAccount).billingAgreementId)
+        } catch (exception: TimeoutException) {
+            logger.error { exception.message }
+            throw ApiError.ofMessage("Timeout error during PayPal registration").asInternalServerError()
+        } catch (exception: UnexpectedException) {
+            logger.error { exception.message }
+            throw ApiError.ofMessage("Unexpected error during PayPal registration").asInternalServerError()
+        }
     }
 
     private fun configureBraintreeGateway(pspConfigModel: PspConfigModel, mode: String): BraintreeGateway {
