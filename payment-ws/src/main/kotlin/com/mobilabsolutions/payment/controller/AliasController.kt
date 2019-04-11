@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
@@ -22,6 +23,7 @@ import javax.validation.constraints.Size
  */
 @RestController
 @RequestMapping(AliasController.BASE_URL)
+@Validated
 class AliasController(private val aliasService: AliasService) {
 
     @ApiOperation(value = "Create an Alias for payment operations")
@@ -34,7 +36,7 @@ class AliasController(private val aliasService: AliasService) {
     fun createAlias(
         @RequestHeader(value = "Publishable-Key") publishableKey: String,
         @RequestHeader(value = "PSP-Type") pspType: String,
-        @Size(min = 10, max = 20) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
+        @Size(min = 10, max = 40) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?
     ) = aliasService.createAlias(publishableKey, pspType, idempotentKey, pspTestMode)
 

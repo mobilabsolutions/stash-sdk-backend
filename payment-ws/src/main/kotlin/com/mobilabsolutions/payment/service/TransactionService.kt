@@ -61,13 +61,12 @@ class TransactionService(
                 ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
 
         return executeIdempotentTransactionOperation(
-            alias,
-            apiKey,
-            idempotentKey,
-            null,
-            authorizeInfo,
-            pspTestMode,
-            TransactionAction.AUTH
+            alias = alias,
+            apiKey = apiKey,
+            idempotentKey = idempotentKey,
+            paymentInfo = authorizeInfo,
+            pspTestMode = pspTestMode,
+            transactionAction = TransactionAction.AUTH
         ) { psp.authorize(authorizeInfo, pspTestMode) }
     }
 
@@ -96,13 +95,12 @@ class TransactionService(
             throw ApiError.ofMessage("Only credit card is supported for preauthorization").asBadRequest()
 
         return executeIdempotentTransactionOperation(
-            alias,
-            apiKey,
-            idempotentKey,
-            null,
-            preauthorizeInfo,
-            pspTestMode,
-            TransactionAction.PREAUTH
+            alias = alias,
+            apiKey = apiKey,
+            idempotentKey = idempotentKey,
+            paymentInfo = preauthorizeInfo,
+            pspTestMode = pspTestMode,
+            transactionAction = TransactionAction.PREAUTH
         ) { psp.preauthorize(preauthorizeInfo, pspTestMode) }
     }
 
@@ -315,7 +313,7 @@ class TransactionService(
         alias: Alias,
         apiKey: MerchantApiKey,
         idempotentKey: String,
-        transactionId: String?,
+        transactionId: String? = null,
         paymentInfo: PaymentRequestModel,
         pspTestMode: Boolean?,
         transactionAction: TransactionAction,
