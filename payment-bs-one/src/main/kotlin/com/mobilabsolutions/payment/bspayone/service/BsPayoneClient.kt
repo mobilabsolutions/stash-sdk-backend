@@ -5,14 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.collect.Maps
 import com.mobilabsolutions.payment.bspayone.configuration.BsPayoneProperties
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneRequestType
-import com.mobilabsolutions.payment.bspayone.model.BsPayoneCaptureRequestModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasResponseModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentRequestModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentResponseModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayoneRefundRequestModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayoneStandardParametersModel
-import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.bspayone.model.request.BsPayoneCaptureRequestModel
+import com.mobilabsolutions.payment.bspayone.model.request.BsPayoneDeleteAliasRequestModel
+import com.mobilabsolutions.payment.bspayone.model.response.BsPayoneDeleteAliasResponseModel
+import com.mobilabsolutions.payment.bspayone.model.request.BsPayonePaymentRequestModel
+import com.mobilabsolutions.payment.bspayone.model.response.BsPayonePaymentResponseModel
+import com.mobilabsolutions.payment.bspayone.model.request.BsPayoneRefundRequestModel
+import com.mobilabsolutions.payment.bspayone.model.request.BsPayoneStandardParametersModel
+import com.mobilabsolutions.payment.model.request.PspConfigModel
 import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
@@ -93,7 +93,7 @@ class BsPayoneClient(
      * @param mode BS Payone mode
      * @return BS Payone delete alias response
      */
-    fun deleteAlias(deleteAliasRequest: BsPayoneDeleteAliasModel, pspConfigModel: PspConfigModel, mode: String): BsPayoneDeleteAliasResponseModel {
+    fun deleteAlias(deleteAliasRequest: BsPayoneDeleteAliasRequestModel, pspConfigModel: PspConfigModel, mode: String): BsPayoneDeleteAliasResponseModel {
         val request = createStandardRequest(deleteAliasRequest, pspConfigModel, BsPayoneRequestType.UPDATE_USER.type, mode)
         val response = restTemplate.postForEntity(bsPayoneProperties.baseUrl, request, String::class.java)
         return convertToResponse(response.body!!, BsPayoneDeleteAliasResponseModel::class.java)
@@ -158,6 +158,6 @@ class BsPayoneClient(
      */
     private fun getBsPayoneStandardParameters(pspConfigModel: PspConfigModel, bsPayoneRequestType: String, mode: String): BsPayoneStandardParametersModel {
         return BsPayoneStandardParametersModel(pspConfigModel.merchantId, pspConfigModel.portalId, bsPayoneHashingService.hashKey(pspConfigModel.key),
-                bsPayoneProperties.apiVersion, mode, bsPayoneRequestType, bsPayoneProperties.encoding)
+            bsPayoneProperties.apiVersion, mode, bsPayoneRequestType, bsPayoneProperties.encoding)
     }
 }

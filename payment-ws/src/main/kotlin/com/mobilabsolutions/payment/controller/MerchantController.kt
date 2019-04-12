@@ -1,8 +1,8 @@
 package com.mobilabsolutions.payment.controller
 
-import com.mobilabsolutions.payment.model.MerchantRequestModel
-import com.mobilabsolutions.payment.model.PspConfigRequestModel
-import com.mobilabsolutions.payment.model.PspUpsertConfigRequestModel
+import com.mobilabsolutions.payment.model.request.MerchantRequestModel
+import com.mobilabsolutions.payment.model.request.PspConfigRequestModel
+import com.mobilabsolutions.payment.model.request.PspUpsertConfigRequestModel
 import com.mobilabsolutions.payment.service.MerchantService
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse

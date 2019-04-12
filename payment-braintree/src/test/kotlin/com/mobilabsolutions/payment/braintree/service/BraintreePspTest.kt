@@ -1,14 +1,14 @@
 package com.mobilabsolutions.payment.braintree.service
 
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
-import com.mobilabsolutions.payment.braintree.model.BraintreeRegisterAliasRequestModel
-import com.mobilabsolutions.payment.braintree.model.BraintreeRegisterAliasResponseModel
+import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
+import com.mobilabsolutions.payment.braintree.model.response.BraintreeRegisterAliasResponseModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
-import com.mobilabsolutions.payment.model.AliasExtraModel
-import com.mobilabsolutions.payment.model.PayPalConfigModel
-import com.mobilabsolutions.payment.model.PspConfigModel
-import com.mobilabsolutions.payment.model.PspRegisterAliasRequestModel
+import com.mobilabsolutions.payment.model.request.AliasExtraModel
+import com.mobilabsolutions.payment.model.request.PayPalConfigModel
+import com.mobilabsolutions.payment.model.request.PspConfigModel
+import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll

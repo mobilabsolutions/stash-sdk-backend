@@ -4,8 +4,8 @@ import com.mobilabsolutions.payment.data.domain.Merchant
 import com.mobilabsolutions.payment.data.domain.MerchantApiKey
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
-import com.mobilabsolutions.payment.model.ApiKeyRequestModel
-import com.mobilabsolutions.payment.model.EditApiKeyRequestModel
+import com.mobilabsolutions.payment.model.request.ApiKeyRequestModel
+import com.mobilabsolutions.payment.model.request.EditApiKeyRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll

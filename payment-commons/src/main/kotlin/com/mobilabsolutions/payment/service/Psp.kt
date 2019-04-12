@@ -1,16 +1,16 @@
 package com.mobilabsolutions.payment.service
 
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
-import com.mobilabsolutions.payment.model.PspAliasConfigModel
-import com.mobilabsolutions.payment.model.PspCaptureRequestModel
-import com.mobilabsolutions.payment.model.PspConfigModel
-import com.mobilabsolutions.payment.model.PspDeleteAliasRequestModel
-import com.mobilabsolutions.payment.model.PspPaymentRequestModel
-import com.mobilabsolutions.payment.model.PspPaymentResponseModel
-import com.mobilabsolutions.payment.model.PspRefundRequestModel
-import com.mobilabsolutions.payment.model.PspRegisterAliasRequestModel
-import com.mobilabsolutions.payment.model.PspRegisterAliasResponseModel
-import com.mobilabsolutions.payment.model.PspReversalRequestModel
+import com.mobilabsolutions.payment.model.request.PspAliasConfigModel
+import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
+import com.mobilabsolutions.payment.model.request.PspConfigModel
+import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
+import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
+import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
+import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
+import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
+import com.mobilabsolutions.payment.model.response.PspRegisterAliasResponseModel
+import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
 
 interface Psp {
     /**

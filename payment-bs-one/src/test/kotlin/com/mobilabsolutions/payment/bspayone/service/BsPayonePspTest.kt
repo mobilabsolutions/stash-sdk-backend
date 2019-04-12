@@ -5,22 +5,22 @@ import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneClearingType
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneMode
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneResponseStatus
 import com.mobilabsolutions.payment.bspayone.exception.BsPayoneErrors
-import com.mobilabsolutions.payment.bspayone.model.BsPayoneCaptureRequestModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasResponseModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentRequestModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentResponseModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayoneRefundRequestModel
+import com.mobilabsolutions.payment.bspayone.model.request.BsPayoneCaptureRequestModel
+import com.mobilabsolutions.payment.bspayone.model.request.BsPayoneDeleteAliasRequestModel
+import com.mobilabsolutions.payment.bspayone.model.response.BsPayoneDeleteAliasResponseModel
+import com.mobilabsolutions.payment.bspayone.model.request.BsPayonePaymentRequestModel
+import com.mobilabsolutions.payment.bspayone.model.response.BsPayonePaymentResponseModel
+import com.mobilabsolutions.payment.bspayone.model.request.BsPayoneRefundRequestModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.enum.TransactionAction
-import com.mobilabsolutions.payment.model.PaymentDataModel
-import com.mobilabsolutions.payment.model.PspCaptureRequestModel
-import com.mobilabsolutions.payment.model.PspConfigModel
-import com.mobilabsolutions.payment.model.PspDeleteAliasRequestModel
-import com.mobilabsolutions.payment.model.PspPaymentRequestModel
-import com.mobilabsolutions.payment.model.PspRefundRequestModel
-import com.mobilabsolutions.payment.model.PspReversalRequestModel
+import com.mobilabsolutions.payment.model.request.PaymentDataModel
+import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
+import com.mobilabsolutions.payment.model.request.PspConfigModel
+import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
+import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
+import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
+import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiException
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import org.junit.jupiter.api.Assertions
@@ -121,14 +121,14 @@ class BsPayonePspTest {
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.ERROR, null, null, BsPayoneErrors.TRANSACTION_NOT_FOUND.code, BsPayoneErrors.TRANSACTION_NOT_FOUND.error.error, "Transaction id wrong or missing")
             )
-        Mockito.`when`(bsPayoneClient.deleteAlias(BsPayoneDeleteAliasModel(correctCcAliasId, "yes", "no"), pspConfig, BsPayoneMode.TEST.mode))
+        Mockito.`when`(bsPayoneClient.deleteAlias(BsPayoneDeleteAliasRequestModel(correctCcAliasId, "yes", "no"), pspConfig, BsPayoneMode.TEST.mode))
             .thenReturn(BsPayoneDeleteAliasResponseModel(BsPayoneResponseStatus.OK, null, null, null)
             )
         Mockito.`when`(bsPayoneClient.capture(BsPayoneCaptureRequestModel(pspTransactionId, reversalAmount.toString(), currency), pspConfig, BsPayoneMode.TEST.mode))
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
             )
-        Mockito.`when`(bsPayoneClient.refund(BsPayoneRefundRequestModel(pspTransactionId, captureSequenceNumber, (amount*-1).toString(), currency), pspConfig, BsPayoneMode.TEST.mode))
+        Mockito.`when`(bsPayoneClient.refund(BsPayoneRefundRequestModel(pspTransactionId, captureSequenceNumber, (amount * -1).toString(), currency), pspConfig, BsPayoneMode.TEST.mode))
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
             )

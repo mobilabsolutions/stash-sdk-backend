@@ -1,8 +1,8 @@
 package com.mobilabsolutions.payment.controller
 
-import com.mobilabsolutions.payment.model.MerchantUserChangePasswordModel
-import com.mobilabsolutions.payment.model.MerchantUserCreateModel
-import com.mobilabsolutions.payment.model.MerchantUserUpdateModel
+import com.mobilabsolutions.payment.model.request.MerchantUserChangePasswordModel
+import com.mobilabsolutions.payment.model.request.MerchantUserCreateModel
+import com.mobilabsolutions.payment.model.request.MerchantUserUpdateModel
 import com.mobilabsolutions.payment.service.UserDetailsServiceImpl
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse

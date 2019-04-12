@@ -5,24 +5,24 @@ import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneClearingType
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneMode
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneRequestType
 import com.mobilabsolutions.payment.bspayone.exception.BsPayoneErrors
-import com.mobilabsolutions.payment.bspayone.model.BsPayoneCaptureRequestModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentRequestModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayoneRefundRequestModel
+import com.mobilabsolutions.payment.bspayone.model.request.BsPayoneCaptureRequestModel
+import com.mobilabsolutions.payment.bspayone.model.request.BsPayoneDeleteAliasRequestModel
+import com.mobilabsolutions.payment.bspayone.model.request.BsPayonePaymentRequestModel
+import com.mobilabsolutions.payment.bspayone.model.request.BsPayoneRefundRequestModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
-import com.mobilabsolutions.payment.model.PspAliasConfigModel
-import com.mobilabsolutions.payment.model.PspCaptureRequestModel
-import com.mobilabsolutions.payment.model.PspConfigModel
-import com.mobilabsolutions.payment.model.PspDeleteAliasRequestModel
-import com.mobilabsolutions.payment.model.PspPaymentRequestModel
-import com.mobilabsolutions.payment.model.PspPaymentResponseModel
-import com.mobilabsolutions.payment.model.PspRefundRequestModel
-import com.mobilabsolutions.payment.model.PspRegisterAliasRequestModel
-import com.mobilabsolutions.payment.model.PspRegisterAliasResponseModel
-import com.mobilabsolutions.payment.model.PspReversalRequestModel
+import com.mobilabsolutions.payment.model.request.PspAliasConfigModel
+import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
+import com.mobilabsolutions.payment.model.request.PspConfigModel
+import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
+import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
+import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
+import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
+import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
+import com.mobilabsolutions.payment.model.response.PspRegisterAliasResponseModel
+import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
 import com.mobilabsolutions.payment.service.Psp
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
@@ -151,7 +151,7 @@ class BsPayonePsp(
         val bsPayoneRefundRequest = BsPayoneRefundRequestModel(
             pspTransactionId = pspRefundRequestModel.pspTransactionId,
             sequenceNumber = if (pspRefundRequestModel.action == TransactionAction.CAPTURE) 2 else 1,
-            amount = (pspRefundRequestModel.amount!!*-1).toString(),
+            amount = (pspRefundRequestModel.amount!! * -1).toString(),
             currency = pspRefundRequestModel.currency
         )
 
@@ -167,7 +167,7 @@ class BsPayonePsp(
     }
 
     override fun deleteAlias(pspDeleteAliasRequestModel: PspDeleteAliasRequestModel, pspTestMode: Boolean?) {
-        val deleteAliasRequest = BsPayoneDeleteAliasModel(
+        val deleteAliasRequest = BsPayoneDeleteAliasRequestModel(
             customerId = pspDeleteAliasRequestModel.aliasId,
             deleteCardData = if (pspDeleteAliasRequestModel.paymentMethod == PaymentMethod.CC) DELETE else DO_NOT_DELETE,
             deleteBankAccountData = if (pspDeleteAliasRequestModel.paymentMethod == PaymentMethod.SEPA) DELETE else DO_NOT_DELETE

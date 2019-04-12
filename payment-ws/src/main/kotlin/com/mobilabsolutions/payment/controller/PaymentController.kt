@@ -1,8 +1,8 @@
 package com.mobilabsolutions.payment.controller
 
-import com.mobilabsolutions.payment.model.PaymentDataModel
-import com.mobilabsolutions.payment.model.PaymentRequestModel
-import com.mobilabsolutions.payment.model.ReversalRequestModel
+import com.mobilabsolutions.payment.model.request.PaymentDataModel
+import com.mobilabsolutions.payment.model.request.PaymentRequestModel
+import com.mobilabsolutions.payment.model.request.ReversalRequestModel
 import com.mobilabsolutions.payment.service.TransactionService
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse

@@ -6,12 +6,12 @@ import com.mobilabsolutions.payment.data.domain.Merchant
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.repository.AuthorityRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
-import com.mobilabsolutions.payment.model.MerchantRequestModel
-import com.mobilabsolutions.payment.model.PspConfigListModel
-import com.mobilabsolutions.payment.model.PspConfigModel
-import com.mobilabsolutions.payment.model.PspConfigRequestModel
-import com.mobilabsolutions.payment.model.PspConfigResponseModel
-import com.mobilabsolutions.payment.model.PspUpsertConfigRequestModel
+import com.mobilabsolutions.payment.model.request.MerchantRequestModel
+import com.mobilabsolutions.payment.model.response.PspConfigListModel
+import com.mobilabsolutions.payment.model.request.PspConfigModel
+import com.mobilabsolutions.payment.model.request.PspConfigRequestModel
+import com.mobilabsolutions.payment.model.response.PspConfigResponseModel
+import com.mobilabsolutions.payment.model.request.PspUpsertConfigRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -41,19 +41,19 @@ class MerchantService(
         val pspConfig = objectMapper.writeValueAsString(
             PspConfigListModel(
                 psp = upsertPSPConfig(
-                        configList.psp, PspConfigModel(
-                        default = pspConfigRequestModel.pspConfig.default,
-                        type = pspConfigRequestModel.pspId.toString(),
-                        merchantId = pspConfigRequestModel.pspConfig.merchantId,
-                        portalId = pspConfigRequestModel.pspConfig.portalId,
-                        key = pspConfigRequestModel.pspConfig.key,
-                        accountId = pspConfigRequestModel.pspConfig.accountId,
-                        sandboxMerchantId = pspConfigRequestModel.pspConfig.sandboxMerchantId,
-                        sandboxPublicKey = pspConfigRequestModel.pspConfig.sandboxPublicKey,
-                        sandboxPrivateKey = pspConfigRequestModel.pspConfig.sandboxPrivateKey,
-                        publicKey = pspConfigRequestModel.pspConfig.publicKey,
-                        privateKey = pspConfigRequestModel.pspConfig.privateKey
-                    )
+                    configList.psp, PspConfigModel(
+                    default = pspConfigRequestModel.pspConfig.default,
+                    type = pspConfigRequestModel.pspId.toString(),
+                    merchantId = pspConfigRequestModel.pspConfig.merchantId,
+                    portalId = pspConfigRequestModel.pspConfig.portalId,
+                    key = pspConfigRequestModel.pspConfig.key,
+                    accountId = pspConfigRequestModel.pspConfig.accountId,
+                    sandboxMerchantId = pspConfigRequestModel.pspConfig.sandboxMerchantId,
+                    sandboxPublicKey = pspConfigRequestModel.pspConfig.sandboxPublicKey,
+                    sandboxPrivateKey = pspConfigRequestModel.pspConfig.sandboxPrivateKey,
+                    publicKey = pspConfigRequestModel.pspConfig.publicKey,
+                    privateKey = pspConfigRequestModel.pspConfig.privateKey
+                )
                 )
             )
         )
@@ -102,19 +102,19 @@ class MerchantService(
         val pspConfig = objectMapper.writeValueAsString(
             PspConfigListModel(
                 psp = upsertPSPConfig(
-                        configList.psp, PspConfigModel(
-                        default = pspUpsertConfigRequestModel.default,
-                        type = pspId,
-                        merchantId = pspUpsertConfigRequestModel.merchantId,
-                        portalId = pspUpsertConfigRequestModel.portalId,
-                        key = pspUpsertConfigRequestModel.key,
-                        accountId = pspUpsertConfigRequestModel.accountId,
-                        sandboxMerchantId = pspUpsertConfigRequestModel.sandboxMerchantId,
-                        sandboxPublicKey = pspUpsertConfigRequestModel.sandboxPublicKey,
-                        sandboxPrivateKey = pspUpsertConfigRequestModel.sandboxPrivateKey,
-                        publicKey = pspUpsertConfigRequestModel.publicKey,
-                        privateKey = pspUpsertConfigRequestModel.privateKey
-                    )
+                    configList.psp, PspConfigModel(
+                    default = pspUpsertConfigRequestModel.default,
+                    type = pspId,
+                    merchantId = pspUpsertConfigRequestModel.merchantId,
+                    portalId = pspUpsertConfigRequestModel.portalId,
+                    key = pspUpsertConfigRequestModel.key,
+                    accountId = pspUpsertConfigRequestModel.accountId,
+                    sandboxMerchantId = pspUpsertConfigRequestModel.sandboxMerchantId,
+                    sandboxPublicKey = pspUpsertConfigRequestModel.sandboxPublicKey,
+                    sandboxPrivateKey = pspUpsertConfigRequestModel.sandboxPrivateKey,
+                    publicKey = pspUpsertConfigRequestModel.publicKey,
+                    privateKey = pspUpsertConfigRequestModel.privateKey
+                )
                 )
             )
         )

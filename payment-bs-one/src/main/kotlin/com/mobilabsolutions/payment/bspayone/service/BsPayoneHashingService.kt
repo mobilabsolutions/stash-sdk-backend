@@ -4,7 +4,7 @@ import com.google.common.base.Charsets
 import com.google.common.hash.Hashing
 import com.mobilabsolutions.payment.bspayone.configuration.BsPayoneProperties
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneRequestType
-import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.request.PspConfigModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.apache.tomcat.util.buf.HexUtils

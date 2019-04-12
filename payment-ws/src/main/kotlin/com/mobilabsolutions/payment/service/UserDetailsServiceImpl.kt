@@ -4,9 +4,9 @@ import com.mobilabsolutions.payment.data.domain.Authority
 import com.mobilabsolutions.payment.data.domain.MerchantUser
 import com.mobilabsolutions.payment.data.repository.AuthorityRepository
 import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
-import com.mobilabsolutions.payment.model.MerchantUserChangePasswordModel
-import com.mobilabsolutions.payment.model.MerchantUserCreateModel
-import com.mobilabsolutions.payment.model.MerchantUserUpdateModel
+import com.mobilabsolutions.payment.model.request.MerchantUserChangePasswordModel
+import com.mobilabsolutions.payment.model.request.MerchantUserCreateModel
+import com.mobilabsolutions.payment.model.request.MerchantUserUpdateModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.springframework.beans.factory.annotation.Qualifier

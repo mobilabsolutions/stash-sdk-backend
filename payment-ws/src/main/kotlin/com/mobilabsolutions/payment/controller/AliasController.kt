@@ -1,6 +1,6 @@
 package com.mobilabsolutions.payment.controller
 
-import com.mobilabsolutions.payment.model.AliasRequestModel
+import com.mobilabsolutions.payment.model.request.AliasRequestModel
 import com.mobilabsolutions.payment.service.AliasService
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse

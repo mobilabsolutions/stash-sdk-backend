@@ -8,8 +8,8 @@ import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
-import com.mobilabsolutions.payment.model.AliasExtraModel
-import com.mobilabsolutions.payment.model.AliasRequestModel
+import com.mobilabsolutions.payment.model.request.AliasExtraModel
+import com.mobilabsolutions.payment.model.request.AliasRequestModel
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
