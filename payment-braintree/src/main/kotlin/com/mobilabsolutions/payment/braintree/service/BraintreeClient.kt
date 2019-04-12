@@ -5,6 +5,7 @@ import com.braintreegateway.CustomerRequest
 import com.braintreegateway.PayPalAccount
 import com.braintreegateway.PaymentMethodRequest
 import com.braintreegateway.exceptions.BraintreeException
+import com.braintreegateway.exceptions.NotFoundException
 import com.braintreegateway.exceptions.TimeoutException
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
@@ -23,13 +24,14 @@ class BraintreeClient {
     companion object : KLogging()
 
     /**
-     * Registers PayPal payment method at Braintree.
+     * Registers PayPal alias at Braintree
      *
      * @param request Braintree register alias request
      * @param pspConfigModel Braintree configuration
+     * @param mode sandbox or production mode
      * @return Braintree payment method response
      */
-    fun registerPayPal(request: BraintreeRegisterAliasRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreeRegisterAliasResponseModel {
+    fun registerPayPalAlias(request: BraintreeRegisterAliasRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreeRegisterAliasResponseModel {
         try {
             val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
             val customerRequest = CustomerRequest().id(request.customerId)
@@ -56,6 +58,26 @@ class BraintreeClient {
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
             throw ApiError.ofMessage("Unexpected error during PayPal registration").asInternalServerError()
+        }
+    }
+
+    /**
+     * Deletes PayPal alias at Braintree
+     *
+     * @param pspAlias Braintree PayPal alias
+     * @param pspConfigModel Braintree configuration
+     * @param mode sandbox or production mode
+     */
+    fun deletePayPalAlias(pspAlias: String, pspConfigModel: PspConfigModel, mode: String) {
+        try {
+            val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
+            braintreeGateway.paymentMethod().delete(pspAlias)
+        } catch (exception: NotFoundException) {
+            logger.error { exception.message }
+            throw ApiError.ofMessage("PayPal alias doesn't exist at Braintree").asInternalServerError()
+        } catch (exception: BraintreeException) {
+            logger.error { exception.message }
+            throw ApiError.ofMessage("Error during PayPal alias deletion").asInternalServerError()
         }
     }
 

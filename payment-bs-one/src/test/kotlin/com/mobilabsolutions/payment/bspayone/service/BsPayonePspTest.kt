@@ -7,16 +7,16 @@ import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneResponseStatus
 import com.mobilabsolutions.payment.bspayone.exception.BsPayoneErrors
 import com.mobilabsolutions.payment.bspayone.model.request.BsPayoneCaptureRequestModel
 import com.mobilabsolutions.payment.bspayone.model.request.BsPayoneDeleteAliasRequestModel
-import com.mobilabsolutions.payment.bspayone.model.response.BsPayoneDeleteAliasResponseModel
 import com.mobilabsolutions.payment.bspayone.model.request.BsPayonePaymentRequestModel
-import com.mobilabsolutions.payment.bspayone.model.response.BsPayonePaymentResponseModel
 import com.mobilabsolutions.payment.bspayone.model.request.BsPayoneRefundRequestModel
+import com.mobilabsolutions.payment.bspayone.model.response.BsPayoneDeleteAliasResponseModel
+import com.mobilabsolutions.payment.bspayone.model.response.BsPayonePaymentResponseModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.enum.TransactionAction
+import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
-import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
@@ -191,6 +191,6 @@ class BsPayonePspTest {
 
     @Test
     fun `delete alias`() {
-        bsPayonePsp.deleteAlias(PspDeleteAliasRequestModel(correctCcAliasId, PaymentMethod.CC, pspConfig), test)
+        bsPayonePsp.deleteAlias(PspDeleteAliasRequestModel(correctCcAliasId, null, PaymentMethod.CC, pspConfig), test)
     }
 }
