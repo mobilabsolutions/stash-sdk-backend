@@ -90,10 +90,22 @@ class AliasServiceTest {
             ArgumentMatchers.anyString()
         )
         Mockito.`when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
-        Mockito.`when`(aliasRepository.getFirstByIdAndActive(unknownAliasId, active = true)).thenReturn(null)
-        Mockito.`when`(aliasRepository.getFirstByIdAndActive(knownAliasId, active = true)).thenReturn(Alias(psp = PaymentServiceProvider.BS_PAYONE, merchant = merchant))
-        Mockito.`when`(aliasRepository.getByIdempotentKeyAndActiveAndMerchant(newIdempotentKey, true, merchant)).thenReturn(null)
-        Mockito.`when`(aliasRepository.getByIdempotentKeyAndActiveAndMerchant(usedIdempotentKey, true, merchant)).thenReturn(Alias(merchant = merchant))
+        Mockito.`when`(
+            aliasRepository.getFirstByIdAndActive(
+                unknownAliasId, active = true))
+            .thenReturn(null)
+        Mockito.`when`(
+            aliasRepository.getFirstByIdAndActive(
+                knownAliasId, active = true))
+            .thenReturn(Alias(psp = PaymentServiceProvider.BS_PAYONE, merchant = merchant))
+        Mockito.`when`(
+            aliasRepository.getByIdempotentKeyAndActiveAndMerchantAndPspType(
+                newIdempotentKey, true, merchant, PaymentServiceProvider.BS_PAYONE))
+            .thenReturn(null)
+        Mockito.`when`(
+            aliasRepository.getByIdempotentKeyAndActiveAndMerchantAndPspType(
+                usedIdempotentKey, true, merchant, PaymentServiceProvider.BS_PAYONE))
+            .thenReturn(Alias(merchant = merchant))
     }
 
     @Test
@@ -130,13 +142,13 @@ class AliasServiceTest {
     @Test
     fun `exchange alias with wrong alias id`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.exchangeAlias(knownPublishableKey, unknownAliasId, Mockito.mock(AliasRequestModel::class.java))
+            aliasService.exchangeAlias(knownPublishableKey, true, unknownAliasId, Mockito.mock(AliasRequestModel::class.java))
         }
     }
 
     @Test
     fun `exchange alias successfully`() {
-        aliasService.exchangeAlias(knownPublishableKey, knownAliasId, AliasRequestModel(pspAlias, Mockito.mock(AliasExtraModel::class.java)))
+        aliasService.exchangeAlias(knownPublishableKey, true, knownAliasId, AliasRequestModel(pspAlias, Mockito.mock(AliasExtraModel::class.java)))
     }
 
     @Test

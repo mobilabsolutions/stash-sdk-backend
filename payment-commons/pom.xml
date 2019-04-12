@@ -11,6 +11,10 @@
 
     <artifactId>payment-commons</artifactId>
 
+    <properties>
+        <braintree-version>2.93.0</braintree-version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

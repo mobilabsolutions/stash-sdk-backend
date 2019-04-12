@@ -41,13 +41,16 @@ class MerchantService(
         val pspConfig = objectMapper.writeValueAsString(
             PspConfigListModel(
                 psp = upsertPSPConfig(
-                    configList.psp, PspConfigModel(
+                        configList.psp, PspConfigModel(
                         default = pspConfigRequestModel.pspConfig.default,
                         type = pspConfigRequestModel.pspId.toString(),
                         merchantId = pspConfigRequestModel.pspConfig.merchantId,
                         portalId = pspConfigRequestModel.pspConfig.portalId,
                         key = pspConfigRequestModel.pspConfig.key,
                         accountId = pspConfigRequestModel.pspConfig.accountId,
+                        sandboxMerchantId = pspConfigRequestModel.pspConfig.sandboxMerchantId,
+                        sandboxPublicKey = pspConfigRequestModel.pspConfig.sandboxPublicKey,
+                        sandboxPrivateKey = pspConfigRequestModel.pspConfig.sandboxPrivateKey,
                         publicKey = pspConfigRequestModel.pspConfig.publicKey,
                         privateKey = pspConfigRequestModel.pspConfig.privateKey
                     )
@@ -99,13 +102,16 @@ class MerchantService(
         val pspConfig = objectMapper.writeValueAsString(
             PspConfigListModel(
                 psp = upsertPSPConfig(
-                    configList.psp, PspConfigModel(
+                        configList.psp, PspConfigModel(
                         default = pspUpsertConfigRequestModel.default,
                         type = pspId,
                         merchantId = pspUpsertConfigRequestModel.merchantId,
                         portalId = pspUpsertConfigRequestModel.portalId,
                         key = pspUpsertConfigRequestModel.key,
                         accountId = pspUpsertConfigRequestModel.accountId,
+                        sandboxMerchantId = pspUpsertConfigRequestModel.sandboxMerchantId,
+                        sandboxPublicKey = pspUpsertConfigRequestModel.sandboxPublicKey,
+                        sandboxPrivateKey = pspUpsertConfigRequestModel.sandboxPrivateKey,
                         publicKey = pspUpsertConfigRequestModel.publicKey,
                         privateKey = pspUpsertConfigRequestModel.privateKey
                     )
@@ -158,5 +164,5 @@ class MerchantService(
         return configMap.values.toMutableList()
     }
 
-    private fun PspConfigModel.setDefault(default: Boolean) = PspConfigModel(type, merchantId, portalId, key, accountId, publicKey, privateKey, default = default)
+    private fun PspConfigModel.setDefault(default: Boolean) = PspConfigModel(type, merchantId, portalId, key, accountId, sandboxMerchantId, sandboxPublicKey, sandboxPrivateKey, publicKey, privateKey, default = default)
 }

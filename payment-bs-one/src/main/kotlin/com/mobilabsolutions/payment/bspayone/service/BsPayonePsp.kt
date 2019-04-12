@@ -25,6 +25,7 @@ import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.PspPaymentResponseModel
+import com.mobilabsolutions.payment.model.PspRegisterAliasResponseModel
 import com.mobilabsolutions.payment.model.SepaConfigModel
 import com.mobilabsolutions.payment.service.Psp
 import com.mobilabsolutions.server.commons.exception.ApiError
@@ -58,7 +59,7 @@ class BsPayonePsp(
     }
 
     override fun calculatePspConfig(pspConfigModel: PspConfigModel?, pspTestMode: Boolean?): PspAliasConfigModel? {
-        logger.info { "Random config calculation has been called..." }
+        logger.info { "BS Payone config calculation has been called..." }
         return if (pspConfigModel != null) PspAliasConfigModel(
             type = PaymentServiceProvider.BS_PAYONE.toString(),
             merchantId = pspConfigModel.merchantId,
@@ -73,6 +74,10 @@ class BsPayonePsp(
             publicKey = null,
             privateKey = null
         ) else null
+    }
+
+    override fun registerAlias(aliasId: String, aliasExtra: AliasExtraModel?, pspTestMode: Boolean?): PspRegisterAliasResponseModel? {
+        return null
     }
 
     override fun preauthorize(preauthorizeRequestModel: PaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {

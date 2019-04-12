@@ -74,7 +74,7 @@ class BsPayoneClient(
     /**
      * Makes refund request to BS Payone.
      *
-     * @param paymentRequest BS Payone payment request
+     * @param refundRequest BS Payone payment request
      * @param pspConfigModel BS Payone configuration
      * @param mode BS Payone mode
      * @return BS Payone payment response

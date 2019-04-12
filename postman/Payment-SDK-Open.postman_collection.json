@@ -72,7 +72,12 @@
 								"key": "Publishable-Key",
 								"value": "",
 								"type": "text"
-							}
+							},
+                            {
+                                "key": "PSP-Test-Mode",
+                                "value": "true",
+                                "type": "text"
+                            }
 						],
 						"body": {
 							"mode": "raw",
