@@ -18,11 +18,11 @@ import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.request.PspConfigModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
-import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
-import com.mobilabsolutions.payment.model.response.PspRegisterAliasResponseModel
 import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
+import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
+import com.mobilabsolutions.payment.model.response.PspRegisterAliasResponseModel
 import com.mobilabsolutions.payment.service.Psp
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
@@ -130,6 +130,7 @@ class BsPayonePsp(
     }
 
     override fun capture(pspCaptureRequestModel: PspCaptureRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
+        logger.info("BS Payone capture for {} mode", getPspMode(pspTestMode))
         return executeRequest(
             pspCaptureRequestModel.pspTransactionId!!,
             pspCaptureRequestModel.currency!!,
@@ -139,6 +140,7 @@ class BsPayonePsp(
     }
 
     override fun reverse(pspReversalRequestModel: PspReversalRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
+        logger.info("BS Payone reverse for {} mode", getPspMode(pspTestMode))
         return executeRequest(
             pspReversalRequestModel.pspTransactionId!!,
             pspReversalRequestModel.currency!!,
@@ -148,6 +150,7 @@ class BsPayonePsp(
     }
 
     override fun refund(pspRefundRequestModel: PspRefundRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
+        logger.info("BS Payone refund for {} mode", getPspMode(pspTestMode))
         val bsPayoneRefundRequest = BsPayoneRefundRequestModel(
             pspTransactionId = pspRefundRequestModel.pspTransactionId,
             sequenceNumber = if (pspRefundRequestModel.action == TransactionAction.CAPTURE) 2 else 1,
@@ -167,6 +170,7 @@ class BsPayonePsp(
     }
 
     override fun deleteAlias(pspDeleteAliasRequestModel: PspDeleteAliasRequestModel, pspTestMode: Boolean?) {
+        logger.info("BS Payone alias deletion for {} mode", getPspMode(pspTestMode))
         val deleteAliasRequest = BsPayoneDeleteAliasRequestModel(
             customerId = pspDeleteAliasRequestModel.aliasId,
             deleteCardData = if (pspDeleteAliasRequestModel.paymentMethod == PaymentMethod.CC) DELETE else DO_NOT_DELETE,

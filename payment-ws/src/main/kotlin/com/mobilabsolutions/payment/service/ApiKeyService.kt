@@ -4,11 +4,11 @@ import com.mobilabsolutions.payment.data.domain.MerchantApiKey
 import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
+import com.mobilabsolutions.payment.model.request.ApiKeyRequestModel
+import com.mobilabsolutions.payment.model.request.EditApiKeyRequestModel
 import com.mobilabsolutions.payment.model.response.ApiKeyReturnInfoModel
 import com.mobilabsolutions.payment.model.response.CreateApiKeyResponseModel
 import com.mobilabsolutions.payment.model.response.GetApiKeyResponseModel
-import com.mobilabsolutions.payment.model.request.ApiKeyRequestModel
-import com.mobilabsolutions.payment.model.request.EditApiKeyRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
@@ -31,6 +31,7 @@ class ApiKeyService(
      * @return api key method response
      */
     fun getMerchantApiKeyInfo(merchantId: String): GetApiKeyResponseModel {
+        logger.info("Retrieving merchant {} keys", merchantId)
         val merchantApiKeyList = merchantApiKeyRepository.getAllByMerchantId(merchantId)
         if (merchantApiKeyList.isEmpty()) throw ApiError.ofMessage("Merchant api keys cannot be found").asBadRequest()
         val apiKeyList = merchantApiKeyList.map {
@@ -50,6 +51,7 @@ class ApiKeyService(
      * @return merchant api key method response
      */
     fun createMerchantApiKey(merchantId: String, apiKeyInfo: ApiKeyRequestModel): CreateApiKeyResponseModel {
+        logger.info("Creating merchant {} key", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId)
                 ?: throw ApiError.ofMessage("Merchant cannot be found").asBadRequest()
         val generatedKey = merchantId + "-" + RandomStringUtils.randomAlphanumeric(ApiKeyService.STRING_LENGTH)
