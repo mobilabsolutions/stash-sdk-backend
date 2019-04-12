@@ -81,6 +81,13 @@ class BraintreeClient {
         }
     }
 
+    /**
+     * Returns Braintree Gateway based on the mode and Braintree PSP configuration
+     *
+     * @param pspConfigModel Braintree configuration
+     * @param mode sandbox or production mode
+     * @return Braintree Gateway
+     */
     private fun configureBraintreeGateway(pspConfigModel: PspConfigModel, mode: String): BraintreeGateway {
         if (mode == BraintreeMode.PRODUCTION.mode)
             return BraintreeGateway(mode, pspConfigModel.merchantId, pspConfigModel.publicKey, pspConfigModel.privateKey)
