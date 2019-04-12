@@ -294,17 +294,19 @@ class TransactionService(
         if (prevTransaction.merchant.id != apiKey.merchant.id)
             throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
 
-        val paymentRequestModel = PaymentRequestModel(alias.id, refundInfo, null, null)
+        val pspResponseTransactionInfo = objectMapper.readValue(prevTransaction.pspResponse, PspPaymentResponseModel::class.java)
+
+        val paymentRequestModel = PaymentRequestModel(alias.id, refundInfo, prevTransaction.merchantTransactionId, prevTransaction.merchantCustomerId)
 
         return executeIdempotentTransactionOperation(
-            alias = alias,
-            apiKey = apiKey,
-            idempotentKey = idempotentKey,
-            transactionId = prevTransaction.transactionId,
-            paymentInfo = paymentRequestModel,
-            pspTestMode = pspTestMode,
-            transactionAction = TransactionAction.REFUND
-        ) { PspPaymentResponseModel("test", TransactionStatus.SUCCESS, null, null, null) } // TODO pass psp.refund function as a parameter
+            alias,
+            apiKey,
+            idempotentKey,
+            prevTransaction.transactionId,
+            paymentRequestModel,
+            pspTestMode,
+            TransactionAction.REFUND
+        ) { psp.refund(transactionId, pspResponseTransactionInfo.pspTransactionId, pspTestMode) }
     }
 
     private fun executeIdempotentTransactionOperation(

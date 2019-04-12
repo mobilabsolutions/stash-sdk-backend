@@ -11,6 +11,7 @@ import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasResponseModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentRequestModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentResponseModel
+import com.mobilabsolutions.payment.bspayone.model.BsPayoneRefundRequestModel
 import com.mobilabsolutions.payment.data.domain.Alias
 import com.mobilabsolutions.payment.data.domain.Merchant
 import com.mobilabsolutions.payment.data.domain.Transaction
@@ -79,6 +80,17 @@ class BsPayonePspTest {
     private val pspResponse = "{\"pspTransactionId\":\"325105132\",\"status\":\"SUCCESS\",\"customerId\":\"160624370\"}"
     private val test = true
     private val reversalAmount = 0
+    private val captureSequenceNumber = 1
+    private val prevTransaction = Transaction(
+        transactionId = correctTransactionId,
+        action = TransactionAction.AUTH,
+        amount = amount,
+        currencyId = currency,
+        pspTestMode = test,
+        merchant = Merchant("1", pspConfig = merchantConfig),
+        alias = Alias(active = true, extra = extraCC, psp = PaymentServiceProvider.BS_PAYONE, merchant = Merchant("1", pspConfig = merchantConfig)),
+        pspResponse = pspResponse
+    )
 
     @InjectMocks
     private lateinit var bsPayonePsp: BsPayonePsp
@@ -112,7 +124,6 @@ class BsPayonePspTest {
             Alias(id = correctCcAliasId, active = true, extra = extraCC, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias,
                 merchant = Merchant(id = "1", pspConfig = merchantConfig))
         )
-
         Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(correctSepaAliasId, true)).thenReturn(
             Alias(id = correctSepaAliasId, active = true, extra = extraSEPA, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias,
                 merchant = Merchant(id = "1", pspConfig = merchantConfig))
@@ -129,6 +140,8 @@ class BsPayonePspTest {
                 alias = Alias(active = true, extra = extraCC, psp = PaymentServiceProvider.BS_PAYONE, merchant = Merchant("1", pspConfig = merchantConfig)),
                 pspResponse = pspResponse
             ))
+        Mockito.`when`(transactionRepository.getByTransactionIdAndActions(correctTransactionId, TransactionAction.CAPTURE, TransactionAction.AUTH, TransactionStatus.SUCCESS))
+            .thenReturn(prevTransaction)
         Mockito.`when`(bsPayoneClient.preauthorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.CC.type,
             reference, amount.toString(), currency, correctCcAliasId, lastName, country, city, pspAlias, null, null),
             PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, null, null, null, true), BsPayoneMode.TEST.mode))
@@ -168,6 +181,11 @@ class BsPayonePspTest {
             .thenReturn(BsPayoneDeleteAliasResponseModel(BsPayoneResponseStatus.OK, null, null, null)
             )
         Mockito.`when`(bsPayoneClient.capture(BsPayoneCaptureRequestModel(pspTransactionId, reversalAmount.toString(), currency),
+            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, null, null, null, true), BsPayoneMode.TEST.mode))
+            .thenReturn(
+                BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
+            )
+        Mockito.`when`(bsPayoneClient.refund(BsPayoneRefundRequestModel(pspTransactionId, captureSequenceNumber, (amount*-1).toString(), currency),
             PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, null, null, null, true), BsPayoneMode.TEST.mode))
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
@@ -261,6 +279,25 @@ class BsPayonePspTest {
     fun `reverse test transaction with no mode`() {
         Assertions.assertThrows(ApiException::class.java) {
             bsPayonePsp.reverse(wrongTransactionId, pspTransactionId, null)
+        }
+    }
+
+    @Test
+    fun `refund transaction with correct transaction id`() {
+        bsPayonePsp.refund(correctTransactionId, pspTransactionId, test)
+    }
+
+    @Test
+    fun `refund transaction with wrong transaction id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            bsPayonePsp.refund(wrongTransactionId, pspTransactionId, test)
+        }
+    }
+
+    @Test
+    fun `refund test transaction with no mode`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            bsPayonePsp.refund(wrongTransactionId, pspTransactionId, null)
         }
     }
 

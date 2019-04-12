@@ -166,6 +166,13 @@ class TransactionServiceTest {
             )
         ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
         Mockito.`when`(
+            psp.refund(
+                correctTransactionId,
+                pspTransactionId,
+                test
+            )
+        ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
+        Mockito.`when`(
             transactionRepository.getByIdempotentKeyAndActionAndMerchantAndAlias(
                 newIdempotentKey,
                 preauthAction,

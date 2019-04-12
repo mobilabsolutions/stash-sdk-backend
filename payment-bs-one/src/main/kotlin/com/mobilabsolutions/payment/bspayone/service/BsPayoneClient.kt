@@ -10,6 +10,7 @@ import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasResponseModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentRequestModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentResponseModel
+import com.mobilabsolutions.payment.bspayone.model.BsPayoneRefundRequestModel
 import com.mobilabsolutions.payment.bspayone.model.BsPayoneStandardParametersModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import org.springframework.stereotype.Service
@@ -66,6 +67,20 @@ class BsPayoneClient(
     */
     fun capture(paymentRequest: BsPayoneCaptureRequestModel, pspConfigModel: PspConfigModel, mode: String): BsPayonePaymentResponseModel {
         val request = createStandardRequest(paymentRequest, pspConfigModel, BsPayoneRequestType.CAPTURE.type, mode)
+        val response = restTemplate.postForEntity(bsPayoneProperties.baseUrl, request, String::class.java)
+        return convertToResponse(response.body!!, BsPayonePaymentResponseModel::class.java)
+    }
+
+    /**
+     * Makes refund request to BS Payone.
+     *
+     * @param refundRequest BS Payone payment request
+     * @param pspConfigModel BS Payone configuration
+     * @param mode BS Payone mode
+     * @return BS Payone payment response
+     */
+    fun refund(refundRequest: BsPayoneRefundRequestModel, pspConfigModel: PspConfigModel, mode: String): BsPayonePaymentResponseModel {
+        val request = createStandardRequest(refundRequest, pspConfigModel, BsPayoneRequestType.REFUND.type, mode)
         val response = restTemplate.postForEntity(bsPayoneProperties.baseUrl, request, String::class.java)
         return convertToResponse(response.body!!, BsPayonePaymentResponseModel::class.java)
     }
