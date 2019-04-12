@@ -1,8 +1,8 @@
 package com.mobilabsolutions.payment.controller
 
-import com.mobilabsolutions.payment.model.MerchantUserChangePasswordModel
-import com.mobilabsolutions.payment.model.MerchantUserCreateModel
-import com.mobilabsolutions.payment.model.MerchantUserUpdateModel
+import com.mobilabsolutions.payment.model.request.MerchantUserPasswordRequestModel
+import com.mobilabsolutions.payment.model.request.MerchantUserRequestModel
+import com.mobilabsolutions.payment.model.request.EditMerchantUserRequestModel
 import com.mobilabsolutions.payment.service.UserDetailsServiceImpl
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
@@ -39,7 +39,7 @@ class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServ
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAuthority('admin')")
-    fun createUser(@PathVariable("Merchant-Id") merchantId: String, @Valid @RequestBody merchantUserCreateModel: MerchantUserCreateModel) {
+    fun createUser(@PathVariable("Merchant-Id") merchantId: String, @Valid @RequestBody merchantUserCreateModel: MerchantUserRequestModel) {
         userDetailsServiceImpl.createMerchantUser(merchantId, merchantUserCreateModel)
     }
 
@@ -56,7 +56,7 @@ class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServ
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
-    fun updateUser(@PathVariable("Merchant-Id") merchantId: String, @PathVariable("User-Id") userId: String, @Valid @RequestBody merchantUserUpdateModel: MerchantUserUpdateModel) {
+    fun updateUser(@PathVariable("Merchant-Id") merchantId: String, @PathVariable("User-Id") userId: String, @Valid @RequestBody merchantUserUpdateModel: EditMerchantUserRequestModel) {
         val principal = SecurityContextHolder.getContext().authentication.principal as String
         userDetailsServiceImpl.updateMerchantUser(userId, principal, merchantUserUpdateModel)
     }
@@ -74,7 +74,7 @@ class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServ
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
-    fun changeUserPassword(@PathVariable("Merchant-Id") merchantId: String, @PathVariable("User-Id") userId: String, @Valid @RequestBody merchantUserChangePasswordModel: MerchantUserChangePasswordModel) {
+    fun changeUserPassword(@PathVariable("Merchant-Id") merchantId: String, @PathVariable("User-Id") userId: String, @Valid @RequestBody merchantUserChangePasswordModel: MerchantUserPasswordRequestModel) {
         val principal = SecurityContextHolder.getContext().authentication.principal as String
         userDetailsServiceImpl.changePasswordMerchantUser(userId, principal, merchantUserChangePasswordModel)
     }

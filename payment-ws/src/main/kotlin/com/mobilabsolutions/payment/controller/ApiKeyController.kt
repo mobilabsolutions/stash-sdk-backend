@@ -1,7 +1,7 @@
 package com.mobilabsolutions.payment.controller
 
-import com.mobilabsolutions.payment.model.ApiKeyRequestModel
-import com.mobilabsolutions.payment.model.EditApiKeyRequestModel
+import com.mobilabsolutions.payment.model.request.ApiKeyRequestModel
+import com.mobilabsolutions.payment.model.request.EditApiKeyRequestModel
 import com.mobilabsolutions.payment.service.ApiKeyService
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse

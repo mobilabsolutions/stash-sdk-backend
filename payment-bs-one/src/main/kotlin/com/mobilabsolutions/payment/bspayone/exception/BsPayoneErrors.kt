@@ -40,6 +40,7 @@ enum class BsPayoneErrors(val code: String, val error: PaymentError) {
     AMOUNT_TOO_SMALL("944", PaymentError.PAYMENT_ERROR),
     AMOUNT_TOO_HIGH("945", PaymentError.PAYMENT_ERROR),
     AMOUNT_TOO_BIG_OR_SMALL("962", PaymentError.PAYMENT_ERROR),
+    TRANSACTION_NOT_FOUND("1008", PaymentError.PAYMENT_ERROR),
     ALIAS_WRONG_OR_MISSING("1073", PaymentError.PAYMENT_ERROR),
 
     REFUND_LIMIT_EXCEEDED("917", PaymentError.REFUND_ERROR),

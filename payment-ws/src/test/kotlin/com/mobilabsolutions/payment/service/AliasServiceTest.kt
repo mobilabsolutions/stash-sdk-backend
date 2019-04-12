@@ -9,7 +9,7 @@ import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
-import com.mobilabsolutions.payment.model.AliasRequestModel
+import com.mobilabsolutions.payment.model.request.AliasRequestModel
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
@@ -50,6 +50,8 @@ class AliasServiceTest {
     private val merchant = Merchant(id = "mobilab",
         pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
         " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")
+    private val extra =
+        "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\", \"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}}"
 
     @InjectMocks
     private lateinit var aliasService: AliasService
@@ -97,7 +99,7 @@ class AliasServiceTest {
         Mockito.`when`(
             aliasRepository.getFirstByIdAndActive(
                 knownAliasId, active = true))
-            .thenReturn(Alias(psp = PaymentServiceProvider.BS_PAYONE, merchant = merchant))
+            .thenReturn(Alias(psp = PaymentServiceProvider.BS_PAYONE, extra = extra, merchant = merchant))
         Mockito.`when`(
             aliasRepository.getByIdempotentKeyAndActiveAndMerchantAndPspType(
                 newIdempotentKey, true, merchant, PaymentServiceProvider.BS_PAYONE))

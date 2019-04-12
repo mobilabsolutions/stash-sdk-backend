@@ -12,13 +12,18 @@ import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
-import com.mobilabsolutions.payment.model.PaymentDataModel
 import com.mobilabsolutions.payment.model.PaymentInfoModel
-import com.mobilabsolutions.payment.model.PaymentRequestModel
-import com.mobilabsolutions.payment.model.PaymentResponseModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
-import com.mobilabsolutions.payment.model.PspPaymentResponseModel
-import com.mobilabsolutions.payment.model.ReversalRequestModel
+import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
+import com.mobilabsolutions.payment.model.request.PaymentRequestModel
+import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
+import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
+import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
+import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
+import com.mobilabsolutions.payment.model.request.ReversalRequestModel
+import com.mobilabsolutions.payment.model.response.PaymentResponseModel
+import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
@@ -60,6 +65,18 @@ class TransactionService(
         val psp = pspRegistry.find(alias.psp!!)
                 ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
 
+        val pspAuthorizeRequest = PspPaymentRequestModel(
+            aliasId = authorizeInfo.aliasId,
+            paymentData = authorizeInfo.paymentData,
+            lastName = getAliasExtra(alias).personalData?.lastName,
+            city = getAliasExtra(alias).personalData?.city,
+            country = getAliasExtra(alias).personalData?.country,
+            paymentMethod = getAliasExtra(alias).paymentMethod,
+            iban = getAliasExtra(alias).sepaConfig?.iban,
+            bic = getAliasExtra(alias).sepaConfig?.bic,
+            pspAlias = alias.pspAlias,
+            pspConfig = getPspConfig(alias)
+        )
         return executeIdempotentTransactionOperation(
             alias = alias,
             apiKey = apiKey,
@@ -67,7 +84,7 @@ class TransactionService(
             paymentInfo = authorizeInfo,
             pspTestMode = pspTestMode,
             transactionAction = TransactionAction.AUTH
-        ) { psp.authorize(authorizeInfo, pspTestMode) }
+        ) { psp.authorize(pspAuthorizeRequest, pspTestMode) }
     }
 
     /**
@@ -94,6 +111,18 @@ class TransactionService(
         if (getAliasExtra(alias).paymentMethod != PaymentMethod.CC)
             throw ApiError.ofMessage("Only credit card is supported for preauthorization").asBadRequest()
 
+        val pspPreauthorizeRequest = PspPaymentRequestModel(
+            aliasId = preauthorizeInfo.aliasId,
+            paymentData = preauthorizeInfo.paymentData,
+            lastName = getAliasExtra(alias).personalData?.lastName,
+            city = getAliasExtra(alias).personalData?.city,
+            country = getAliasExtra(alias).personalData?.country,
+            paymentMethod = getAliasExtra(alias).paymentMethod,
+            iban = getAliasExtra(alias).sepaConfig?.iban,
+            bic = getAliasExtra(alias).sepaConfig?.bic,
+            pspAlias = alias.pspAlias,
+            pspConfig = getPspConfig(alias)
+        )
         return executeIdempotentTransactionOperation(
             alias = alias,
             apiKey = apiKey,
@@ -101,7 +130,7 @@ class TransactionService(
             paymentInfo = preauthorizeInfo,
             pspTestMode = pspTestMode,
             transactionAction = TransactionAction.PREAUTH
-        ) { psp.preauthorize(preauthorizeInfo, pspTestMode) }
+        ) { psp.preauthorize(pspPreauthorizeRequest, pspTestMode) }
     }
 
     /**
@@ -150,8 +179,13 @@ class TransactionService(
             else -> {
                 val psp = pspRegistry.find(preauthTransaction.alias?.psp!!)
                     ?: throw ApiError.ofMessage("PSP implementation '${preauthTransaction.alias?.psp}' cannot be found").asBadRequest()
-                val pspResponseTransactionInfo = objectMapper.readValue(preauthTransaction.pspResponse, PspPaymentResponseModel::class.java)
-                val pspPaymentResponse = psp.capture(preauthTransaction.transactionId!!, pspResponseTransactionInfo.pspTransactionId, pspTestMode)
+                val pspCaptureRequest = PspCaptureRequestModel(
+                    pspTransactionId = getPspPaymentResponse(preauthTransaction).pspTransactionId,
+                    amount = preauthTransaction.amount,
+                    currency = preauthTransaction.currencyId,
+                    pspConfig = getPspConfig(preauthTransaction.alias!!)
+                )
+                val pspPaymentResponse = psp.capture(pspCaptureRequest, pspTestMode)
                 val newTransaction = Transaction(
                     transactionId = transactionId,
                     idempotentKey = preauthTransaction.idempotentKey,
@@ -231,8 +265,12 @@ class TransactionService(
             else -> {
                 val psp = pspRegistry.find(preauthTransaction.alias?.psp!!)
                     ?: throw ApiError.ofMessage("PSP implementation '${preauthTransaction.alias?.psp}' cannot be found").asBadRequest()
-                val pspResponseTransactionInfo = objectMapper.readValue(preauthTransaction.pspResponse, PspPaymentResponseModel::class.java)
-                val pspReversalResponse = psp.reverse(preauthTransaction.transactionId!!, pspResponseTransactionInfo.pspTransactionId, pspTestMode)
+                val pspReversalRequest = PspReversalRequestModel(
+                    pspTransactionId = getPspPaymentResponse(preauthTransaction).pspTransactionId,
+                    currency = preauthTransaction.currencyId,
+                    pspConfig = getPspConfig(preauthTransaction.alias!!)
+                )
+                val pspReversalResponse = psp.reverse(pspReversalRequest, pspTestMode)
                 val newTransaction = Transaction(
                     transactionId = transactionId,
                     idempotentKey = preauthTransaction.idempotentKey,
@@ -276,7 +314,7 @@ class TransactionService(
         idempotentKey: String,
         pspTestMode: Boolean?,
         transactionId: String,
-        refundInfo: PaymentDataModel
+        refundInfo: PaymentDataRequestModel
     ): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
             ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
@@ -294,9 +332,19 @@ class TransactionService(
         if (prevTransaction.merchant.id != apiKey.merchant.id)
             throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
 
-        val pspResponseTransactionInfo = objectMapper.readValue(prevTransaction.pspResponse, PspPaymentResponseModel::class.java)
-
-        val paymentRequestModel = PaymentRequestModel(alias.id, refundInfo, prevTransaction.merchantTransactionId, prevTransaction.merchantCustomerId)
+        val paymentRequestModel = PaymentRequestModel(
+            alias.id,
+            refundInfo,
+            prevTransaction.merchantTransactionId,
+            prevTransaction.merchantCustomerId
+        )
+        val pspRefundRequest = PspRefundRequestModel(
+            pspTransactionId = getPspPaymentResponse(prevTransaction).pspTransactionId,
+            amount = prevTransaction.amount,
+            currency = prevTransaction.currencyId,
+            action = prevTransaction.action,
+            pspConfig = getPspConfig(prevTransaction.alias!!)
+        )
 
         return executeIdempotentTransactionOperation(
             alias,
@@ -306,7 +354,7 @@ class TransactionService(
             paymentRequestModel,
             pspTestMode,
             TransactionAction.REFUND
-        ) { psp.refund(transactionId, pspResponseTransactionInfo.pspTransactionId, pspTestMode) }
+        ) { psp.refund(pspRefundRequest, pspTestMode) }
     }
 
     private fun executeIdempotentTransactionOperation(
@@ -322,7 +370,10 @@ class TransactionService(
         val extra = getAliasExtra(alias)
 
         val paymentInfoModel =
-            PaymentInfoModel(extra, objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java))
+            PaymentInfoModel(
+                extra,
+                objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java)
+            )
 
         val transaction = transactionRepository.getByIdempotentKeyAndActionAndMerchantAndAlias(idempotentKey, transactionAction, apiKey.merchant, alias)
 
@@ -378,6 +429,16 @@ class TransactionService(
             objectMapper.readValue(transaction.alias?.extra, AliasExtraModel::class.java),
             objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java)
         )
+    }
+
+    private fun getPspPaymentResponse(transaction: Transaction): PspPaymentResponseModel {
+        return objectMapper.readValue(transaction.pspResponse, PspPaymentResponseModel::class.java)
+    }
+
+    private fun getPspConfig(alias: Alias): PspConfigModel {
+        val result = objectMapper.readValue(alias.merchant?.pspConfig, PspConfigListModel::class.java)
+        return result.psp.firstOrNull { it.type == alias.psp!!.toString() }
+            ?: throw ApiError.ofMessage("PSP configuration for '${alias.psp}' cannot be found from used merchant").asBadRequest()
     }
 
     companion object : KLogging() {

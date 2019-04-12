@@ -1,29 +1,26 @@
 package com.mobilabsolutions.payment.bspayone.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.bspayone.configuration.BsPayoneProperties
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneClearingType
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneMode
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneResponseStatus
 import com.mobilabsolutions.payment.bspayone.exception.BsPayoneErrors
-import com.mobilabsolutions.payment.bspayone.model.BsPayoneCaptureRequestModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayoneDeleteAliasResponseModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentRequestModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayonePaymentResponseModel
-import com.mobilabsolutions.payment.bspayone.model.BsPayoneRefundRequestModel
-import com.mobilabsolutions.payment.data.domain.Alias
-import com.mobilabsolutions.payment.data.domain.Merchant
-import com.mobilabsolutions.payment.data.domain.Transaction
+import com.mobilabsolutions.payment.bspayone.model.request.BsPayoneCaptureRequestModel
+import com.mobilabsolutions.payment.bspayone.model.request.BsPayoneDeleteAliasRequestModel
+import com.mobilabsolutions.payment.bspayone.model.response.BsPayoneDeleteAliasResponseModel
+import com.mobilabsolutions.payment.bspayone.model.request.BsPayonePaymentRequestModel
+import com.mobilabsolutions.payment.bspayone.model.response.BsPayonePaymentResponseModel
+import com.mobilabsolutions.payment.bspayone.model.request.BsPayoneRefundRequestModel
+import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.enum.TransactionAction
-import com.mobilabsolutions.payment.data.enum.TransactionStatus
-import com.mobilabsolutions.payment.data.repository.AliasRepository
-import com.mobilabsolutions.payment.data.repository.TransactionRepository
-import com.mobilabsolutions.payment.model.PaymentDataModel
-import com.mobilabsolutions.payment.model.PaymentRequestModel
+import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
+import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.PspConfigModel
-import com.mobilabsolutions.server.commons.CommonConfiguration
+import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
+import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
+import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
+import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiException
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import org.junit.jupiter.api.Assertions
@@ -35,7 +32,6 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
-import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
@@ -48,24 +44,14 @@ import org.mockito.quality.Strictness
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class BsPayonePspTest {
     private val correctCcAliasId = "cc test"
-    private val wrongCcAliasId = "cc wrong id"
     private val correctSepaAliasId = "sepa test"
-    private val wrongSepaAliasId = "sepa wrong id"
-    private val merchantConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"123\", \"key\" : \"123\"," +
-        " \"merchantId\" : \"mobilab\", \"accountId\" : \"123\", \"default\" : \"true\"}]}"
-    private val extraCC =
-        "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\", \"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}}"
-    private val extraSEPA =
-        "{\"email\": \"test@test.com\",\"paymentMethod\": \"SEPA\", \"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}, \"sepaConfig\": {\"iban\": \"DE00123456782599100004\",\"bic\": \"TESTTEST\"}}"
     private val reference = "1234567890"
     private val amount = 300
     private val wrongAmount = -1
     private val currency = "EUR"
     private val customerId = "1"
-    private val purchaseId = "1"
-    private val correctTransactionId = "99"
-    private val wrongTransactionId = "-1"
     private val pspTransactionId = "1123"
+    private val wrongPspTransactionId = "1123"
     private val accountId = "123"
     private val portalId = "123"
     private val key = "123"
@@ -77,19 +63,21 @@ class BsPayonePspTest {
     private val reason = "Book"
     private val iban = "DE00123456782599100004"
     private val bic = "TESTTEST"
-    private val pspResponse = "{\"pspTransactionId\":\"325105132\",\"status\":\"SUCCESS\",\"customerId\":\"160624370\"}"
     private val test = true
     private val reversalAmount = 0
-    private val captureSequenceNumber = 1
-    private val prevTransaction = Transaction(
-        transactionId = correctTransactionId,
-        action = TransactionAction.AUTH,
-        amount = amount,
-        currencyId = currency,
-        pspTestMode = test,
-        merchant = Merchant("1", pspConfig = merchantConfig),
-        alias = Alias(active = true, extra = extraCC, psp = PaymentServiceProvider.BS_PAYONE, merchant = Merchant("1", pspConfig = merchantConfig)),
-        pspResponse = pspResponse
+    private val captureSequenceNumber = 2
+    private val pspConfig = PspConfigModel(
+        PaymentServiceProvider.BS_PAYONE.toString(),
+        merchantId,
+        portalId,
+        key,
+        accountId,
+        null,
+        null,
+        null,
+        null,
+        null,
+        true
     )
 
     @InjectMocks
@@ -102,91 +90,56 @@ class BsPayonePspTest {
     private lateinit var bsPayoneClient: BsPayoneClient
 
     @Mock
-    private lateinit var aliasIdRepository: AliasRepository
-
-    @Mock
-    private lateinit var transactionRepository: TransactionRepository
-
-    @Mock
     private lateinit var bsPayoneProperties: BsPayoneProperties
 
     @Mock
     private lateinit var randomStringGenerator: RandomStringGenerator
 
-    @Spy
-    val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
-
     @BeforeAll
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
-        Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(correctCcAliasId, true)).thenReturn(
-            Alias(id = correctCcAliasId, active = true, extra = extraCC, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias,
-                merchant = Merchant(id = "1", pspConfig = merchantConfig))
-        )
-        Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(correctSepaAliasId, true)).thenReturn(
-            Alias(id = correctSepaAliasId, active = true, extra = extraSEPA, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias,
-                merchant = Merchant(id = "1", pspConfig = merchantConfig))
-        )
-        Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(wrongCcAliasId, true)).thenReturn(null)
-        Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(wrongSepaAliasId, true)).thenReturn(null)
         Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(10)).thenReturn(reference)
-        Mockito.`when`(transactionRepository.getByTransactionIdAndAction(correctTransactionId, TransactionAction.PREAUTH, TransactionStatus.SUCCESS))
-            .thenReturn(Transaction(
-                amount = amount,
-                currencyId = currency,
-                pspTestMode = test,
-                merchant = Merchant("1", pspConfig = merchantConfig),
-                alias = Alias(active = true, extra = extraCC, psp = PaymentServiceProvider.BS_PAYONE, merchant = Merchant("1", pspConfig = merchantConfig)),
-                pspResponse = pspResponse
-            ))
-        Mockito.`when`(transactionRepository.getByTransactionIdAndActions(correctTransactionId, TransactionAction.CAPTURE, TransactionAction.AUTH, TransactionStatus.SUCCESS))
-            .thenReturn(prevTransaction)
         Mockito.`when`(bsPayoneClient.preauthorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.CC.type,
-            reference, amount.toString(), currency, correctCcAliasId, lastName, country, city, pspAlias, null, null),
-            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, null, null, null, true), BsPayoneMode.TEST.mode))
+            reference, amount.toString(), currency, correctCcAliasId, lastName, country, city, pspAlias, null, null), pspConfig, BsPayoneMode.TEST.mode))
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
             )
         Mockito.`when`(bsPayoneClient.preauthorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.CC.type,
-            reference, wrongAmount.toString(), currency, correctCcAliasId, lastName, country, city, pspAlias, null, null),
-            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, null, null, null, true), BsPayoneMode.TEST.mode))
+            reference, wrongAmount.toString(), currency, correctCcAliasId, lastName, country, city, pspAlias, null, null), pspConfig, BsPayoneMode.TEST.mode))
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.ERROR, null, null, BsPayoneErrors.AMOUNT_TOO_LOW.code, BsPayoneErrors.AMOUNT_TOO_LOW.error.error, "Please change the amount")
             )
         Mockito.`when`(bsPayoneClient.authorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.SEPA.type,
-            reference, amount.toString(), currency, correctSepaAliasId, lastName, country, city, pspAlias, iban, bic),
-            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, null, null, null, true), BsPayoneMode.TEST.mode))
+            reference, amount.toString(), currency, correctSepaAliasId, lastName, country, city, null, iban, bic), pspConfig, BsPayoneMode.TEST.mode))
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
             )
         Mockito.`when`(bsPayoneClient.authorization(BsPayonePaymentRequestModel(accountId, BsPayoneClearingType.SEPA.type,
-            reference, wrongAmount.toString(), currency, correctSepaAliasId, lastName, country, city, pspAlias, iban, bic),
-            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, null, null, null, true), BsPayoneMode.TEST.mode))
+            reference, wrongAmount.toString(), currency, correctSepaAliasId, lastName, country, city, null, iban, bic), pspConfig, BsPayoneMode.TEST.mode))
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.ERROR, null, null, BsPayoneErrors.AMOUNT_TOO_LOW.code, BsPayoneErrors.AMOUNT_TOO_LOW.error.error, "Please change the amount")
             )
-        Mockito.`when`(bsPayoneClient.capture(BsPayoneCaptureRequestModel(pspTransactionId, amount.toString(), currency),
-            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, null, null, null, true), BsPayoneMode.TEST.mode))
+        Mockito.`when`(bsPayoneClient.capture(BsPayoneCaptureRequestModel(pspTransactionId, amount.toString(), currency), pspConfig, BsPayoneMode.TEST.mode))
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
             )
-        Mockito.`when`(bsPayoneClient.capture(BsPayoneCaptureRequestModel(pspTransactionId, amount.toString(), currency),
-            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, null, null, null, true), BsPayoneMode.TEST.mode))
+        Mockito.`when`(bsPayoneClient.capture(BsPayoneCaptureRequestModel(pspTransactionId, wrongAmount.toString(), currency), pspConfig, BsPayoneMode.TEST.mode))
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.ERROR, null, null, BsPayoneErrors.AMOUNT_TOO_LOW.code, BsPayoneErrors.AMOUNT_TOO_LOW.error.error, "Please change the amount")
             )
-        Mockito.`when`(bsPayoneClient.deleteAlias(BsPayoneDeleteAliasModel(correctCcAliasId, "yes", "no"),
-            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, null, null, null, true), BsPayoneMode.TEST.mode))
+        Mockito.`when`(bsPayoneClient.capture(BsPayoneCaptureRequestModel(wrongPspTransactionId, amount.toString(), currency), pspConfig, BsPayoneMode.TEST.mode))
+            .thenReturn(
+                BsPayonePaymentResponseModel(BsPayoneResponseStatus.ERROR, null, null, BsPayoneErrors.TRANSACTION_NOT_FOUND.code, BsPayoneErrors.TRANSACTION_NOT_FOUND.error.error, "Transaction id wrong or missing")
+            )
+        Mockito.`when`(bsPayoneClient.deleteAlias(BsPayoneDeleteAliasRequestModel(correctCcAliasId, "yes", "no"), pspConfig, BsPayoneMode.TEST.mode))
             .thenReturn(BsPayoneDeleteAliasResponseModel(BsPayoneResponseStatus.OK, null, null, null)
             )
-        Mockito.`when`(bsPayoneClient.capture(BsPayoneCaptureRequestModel(pspTransactionId, reversalAmount.toString(), currency),
-            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, null, null, null, true), BsPayoneMode.TEST.mode))
+        Mockito.`when`(bsPayoneClient.capture(BsPayoneCaptureRequestModel(pspTransactionId, reversalAmount.toString(), currency), pspConfig, BsPayoneMode.TEST.mode))
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
             )
-        Mockito.`when`(bsPayoneClient.refund(BsPayoneRefundRequestModel(pspTransactionId, captureSequenceNumber, (amount*-1).toString(), currency),
-            PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, null, null, null, true), BsPayoneMode.TEST.mode))
+        Mockito.`when`(bsPayoneClient.refund(BsPayoneRefundRequestModel(pspTransactionId, captureSequenceNumber, (amount * -1).toString(), currency), pspConfig, BsPayoneMode.TEST.mode))
             .thenReturn(
                 BsPayonePaymentResponseModel(BsPayoneResponseStatus.APPROVED, pspTransactionId, customerId, null, null, null)
             )
@@ -194,127 +147,50 @@ class BsPayonePspTest {
 
     @Test
     fun `preauthorize transaction with correct alias id`() {
-        bsPayonePsp.preauthorize(PaymentRequestModel(correctCcAliasId, PaymentDataModel(amount, currency, reason), purchaseId, customerId), test)
-    }
-
-    @Test
-    fun `preauthorize transaction with wrong alias id`() {
-        Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.preauthorize(PaymentRequestModel(wrongCcAliasId, PaymentDataModel(amount, currency, reason), purchaseId, customerId), test)
-        }
-    }
-
-    @Test
-    fun `preauthorize transaction with wrong amount`() {
-        Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.preauthorize(PaymentRequestModel(wrongCcAliasId, PaymentDataModel(wrongAmount, currency, reason), purchaseId, customerId), test)
-        }
-    }
-
-    @Test
-    fun `preauthorize test transaction with no mode`() {
-        Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.preauthorize(PaymentRequestModel(wrongCcAliasId, PaymentDataModel(wrongAmount, currency, reason), purchaseId, customerId), null)
-        }
+        bsPayonePsp.preauthorize(PspPaymentRequestModel(correctCcAliasId, PaymentDataRequestModel(amount, currency, reason), lastName, city, country, PaymentMethod.CC, null, null, pspAlias, pspConfig), test)
     }
 
     @Test
     fun `authorize transaction with correct alias id`() {
-        bsPayonePsp.authorize(PaymentRequestModel(correctSepaAliasId, PaymentDataModel(amount, currency, reason), purchaseId, customerId), test)
+        bsPayonePsp.authorize(PspPaymentRequestModel(correctSepaAliasId, PaymentDataRequestModel(amount, currency, reason), lastName, city, country, PaymentMethod.SEPA, iban, bic, null, pspConfig), test)
     }
 
     @Test
-    fun `authorize transaction with wrong alias id`() {
+    fun `preauthorize with wrong payment method`() {
         Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.authorize(PaymentRequestModel(wrongSepaAliasId, PaymentDataModel(amount, currency, reason), purchaseId, customerId), test)
+            bsPayonePsp.preauthorize(PspPaymentRequestModel(correctCcAliasId, PaymentDataRequestModel(amount, currency, reason), lastName, city, country, PaymentMethod.PAY_PAL, null, null, pspAlias, pspConfig), test)
         }
     }
 
     @Test
-    fun `authorize transaction with wrong amount`() {
+    fun `authorize with wrong payment method`() {
         Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.authorize(PaymentRequestModel(wrongSepaAliasId, PaymentDataModel(wrongAmount, currency, reason), purchaseId, customerId), test)
-        }
-    }
-
-    @Test
-    fun `authorize test transaction with no mode`() {
-        Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.authorize(PaymentRequestModel(wrongSepaAliasId, PaymentDataModel(wrongAmount, currency, reason), purchaseId, customerId), null)
+            bsPayonePsp.authorize(PspPaymentRequestModel(correctSepaAliasId, PaymentDataRequestModel(amount, currency, reason), lastName, city, country, PaymentMethod.PAY_PAL, iban, bic, null, pspConfig), test)
         }
     }
 
     @Test
     fun `capture transaction with correct transaction id`() {
-        bsPayonePsp.capture(correctTransactionId, pspTransactionId, test)
-    }
-
-    @Test
-    fun `capture transaction with wrong transaction id`() {
-        Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.capture(wrongTransactionId, pspTransactionId, test)
-        }
-    }
-
-    @Test
-    fun `capture test transaction with no mode`() {
-        Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.capture(wrongTransactionId, pspTransactionId, null)
-        }
+        bsPayonePsp.capture(PspCaptureRequestModel(pspTransactionId, amount, currency, pspConfig), test)
     }
 
     @Test
     fun `reverse transaction with correct transaction id`() {
-        bsPayonePsp.reverse(correctTransactionId, pspTransactionId, test)
-    }
-
-    @Test
-    fun `reverse transaction with wrong transaction id`() {
-        Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.reverse(wrongTransactionId, pspTransactionId, test)
-        }
-    }
-
-    @Test
-    fun `reverse test transaction with no mode`() {
-        Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.reverse(wrongTransactionId, pspTransactionId, null)
-        }
+        bsPayonePsp.reverse(PspReversalRequestModel(pspTransactionId, currency, pspConfig), test)
     }
 
     @Test
     fun `refund transaction with correct transaction id`() {
-        bsPayonePsp.refund(correctTransactionId, pspTransactionId, test)
-    }
-
-    @Test
-    fun `refund transaction with wrong transaction id`() {
-        Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.refund(wrongTransactionId, pspTransactionId, test)
-        }
-    }
-
-    @Test
-    fun `refund test transaction with no mode`() {
-        Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.refund(wrongTransactionId, pspTransactionId, null)
-        }
+        bsPayonePsp.refund(PspRefundRequestModel(pspTransactionId, amount, currency, TransactionAction.CAPTURE, pspConfig), test)
     }
 
     @Test
     fun `calculate PSP config`() {
-        bsPayonePsp.calculatePspConfig(PspConfigModel(PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, null, null, null, true), true)
+        bsPayonePsp.calculatePspConfig(pspConfig, true)
     }
 
     @Test
     fun `delete alias`() {
-        bsPayonePsp.deleteAlias(correctCcAliasId, test)
-    }
-
-    @Test
-    fun `delete alias with wrong id`() {
-        Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.deleteAlias(wrongCcAliasId, test)
-        }
+        bsPayonePsp.deleteAlias(PspDeleteAliasRequestModel(correctCcAliasId, PaymentMethod.CC, pspConfig), test)
     }
 }

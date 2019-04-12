@@ -1,8 +1,8 @@
 package com.mobilabsolutions.payment.controller
 
-import com.mobilabsolutions.payment.model.PaymentDataModel
-import com.mobilabsolutions.payment.model.PaymentRequestModel
-import com.mobilabsolutions.payment.model.ReversalRequestModel
+import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
+import com.mobilabsolutions.payment.model.request.PaymentRequestModel
+import com.mobilabsolutions.payment.model.request.ReversalRequestModel
 import com.mobilabsolutions.payment.service.TransactionService
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
@@ -125,7 +125,7 @@ class PaymentController(private val transactionService: TransactionService) {
         @Size(min = 10, max = 40) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
         @PathVariable(value = "Transaction-Id") transactionId: String,
-        @Valid @RequestBody refundInfo: PaymentDataModel
+        @Valid @RequestBody refundInfo: PaymentDataRequestModel
     ) = transactionService.refund(secretKey, idempotentKey, pspTestMode, transactionId, refundInfo)
 
     companion object {

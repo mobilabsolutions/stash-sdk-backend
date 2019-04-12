@@ -7,8 +7,8 @@ import com.braintreegateway.PaymentMethodRequest
 import com.braintreegateway.exceptions.BraintreeException
 import com.braintreegateway.exceptions.TimeoutException
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
-import com.mobilabsolutions.payment.braintree.model.BraintreeRegisterAliasRequestModel
-import com.mobilabsolutions.payment.braintree.model.BraintreeRegisterAliasResponseModel
+import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
+import com.mobilabsolutions.payment.braintree.model.response.BraintreeRegisterAliasResponseModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
