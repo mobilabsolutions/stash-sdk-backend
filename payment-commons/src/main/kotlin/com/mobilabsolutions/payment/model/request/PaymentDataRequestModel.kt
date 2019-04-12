@@ -9,7 +9,7 @@ import javax.validation.constraints.Size
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
 @ApiModel("Payment Data Model")
-data class PaymentDataModel(
+data class PaymentDataRequestModel(
     @ApiModelProperty("Amount in smallest currency unit (e.g. cent)", example = "300")
     @field:NotNull
     val amount: Int?,

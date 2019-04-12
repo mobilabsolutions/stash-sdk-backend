@@ -12,7 +12,7 @@ import com.mobilabsolutions.payment.bspayone.model.request.BsPayonePaymentReques
 import com.mobilabsolutions.payment.bspayone.model.response.BsPayonePaymentResponseModel
 import com.mobilabsolutions.payment.bspayone.model.request.BsPayoneRefundRequestModel
 import com.mobilabsolutions.payment.bspayone.model.request.BsPayoneStandardParametersModel
-import com.mobilabsolutions.payment.model.request.PspConfigModel
+import com.mobilabsolutions.payment.model.PspConfigModel
 import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap

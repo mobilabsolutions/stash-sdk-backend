@@ -5,9 +5,9 @@ import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAli
 import com.mobilabsolutions.payment.braintree.model.response.BraintreeRegisterAliasResponseModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
-import com.mobilabsolutions.payment.model.request.AliasExtraModel
-import com.mobilabsolutions.payment.model.request.PayPalConfigModel
-import com.mobilabsolutions.payment.model.request.PspConfigModel
+import com.mobilabsolutions.payment.model.AliasExtraModel
+import com.mobilabsolutions.payment.model.PayPalConfigModel
+import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
@@ -40,7 +40,18 @@ class BraintreePspTest {
     private val billingAgreementId = "billing agreement"
     private val test = true
     private val pspConfig = PspConfigModel(
-        PaymentServiceProvider.BRAINTREE.toString(), null, null, null, null, merchantId, publicKey, privateKey, null, null, true)
+        PaymentServiceProvider.BRAINTREE.toString(),
+        null,
+        null,
+        null,
+        null,
+        merchantId,
+        publicKey,
+        privateKey,
+        null,
+        null,
+        true
+    )
 
     @InjectMocks
     private lateinit var braintreePsp: BraintreePsp
@@ -53,20 +64,36 @@ class BraintreePspTest {
         MockitoAnnotations.initMocks(this)
 
         Mockito.`when`(braintreeClient.registerPayPal(BraintreeRegisterAliasRequestModel(correctAliasId, nonce, deviceData),
-            PspConfigModel(PaymentServiceProvider.BRAINTREE.toString(), null, null, null, null,
-                merchantId, publicKey, privateKey, null, null, true), BraintreeMode.SANDBOX.mode))
+            PspConfigModel(
+                PaymentServiceProvider.BRAINTREE.toString(), null, null, null, null,
+                merchantId, publicKey, privateKey, null, null, true
+            ), BraintreeMode.SANDBOX.mode))
             .thenReturn(BraintreeRegisterAliasResponseModel(pspAlias, billingAgreementId))
     }
 
     @Test
     fun `register alias with correct alias id`() {
-        braintreePsp.registerAlias(PspRegisterAliasRequestModel(correctAliasId, AliasExtraModel(null, null, PayPalConfigModel(nonce, billingAgreementId, deviceData), null, PaymentMethod.PAY_PAL), pspConfig), test)
+        braintreePsp.registerAlias(PspRegisterAliasRequestModel(correctAliasId,
+            AliasExtraModel(
+                null,
+                null,
+                PayPalConfigModel(nonce, billingAgreementId, deviceData),
+                null,
+                PaymentMethod.PAY_PAL
+            ), pspConfig), test)
     }
 
     @Test
     fun `register alias with wrong payment method`() {
         Assertions.assertThrows(ApiException::class.java) {
-            braintreePsp.registerAlias(PspRegisterAliasRequestModel(correctAliasId, AliasExtraModel(null, null, PayPalConfigModel(nonce, billingAgreementId, deviceData), null, PaymentMethod.CC), pspConfig), test)
+            braintreePsp.registerAlias(PspRegisterAliasRequestModel(correctAliasId,
+                AliasExtraModel(
+                    null,
+                    null,
+                    PayPalConfigModel(nonce, billingAgreementId, deviceData),
+                    null,
+                    PaymentMethod.CC
+                ), pspConfig), test)
         }
     }
 

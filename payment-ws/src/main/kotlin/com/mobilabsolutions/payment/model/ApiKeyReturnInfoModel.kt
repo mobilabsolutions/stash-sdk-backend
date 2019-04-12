@@ -1,4 +1,4 @@
-package com.mobilabsolutions.payment.model.response
+package com.mobilabsolutions.payment.model
 
 import com.mobilabsolutions.payment.data.enum.KeyType
 import io.swagger.annotations.ApiModelProperty

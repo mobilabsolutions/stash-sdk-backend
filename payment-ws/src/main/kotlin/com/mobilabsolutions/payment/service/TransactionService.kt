@@ -11,19 +11,19 @@ import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
-import com.mobilabsolutions.payment.model.request.AliasExtraModel
-import com.mobilabsolutions.payment.model.request.PaymentDataModel
-import com.mobilabsolutions.payment.model.request.PaymentInfoModel
+import com.mobilabsolutions.payment.model.AliasExtraModel
+import com.mobilabsolutions.payment.model.PaymentInfoModel
+import com.mobilabsolutions.payment.model.PspConfigListModel
+import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentRequestModel
-import com.mobilabsolutions.payment.model.response.PaymentResponseModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
-import com.mobilabsolutions.payment.model.response.PspConfigListModel
-import com.mobilabsolutions.payment.model.request.PspConfigModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
-import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
 import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
 import com.mobilabsolutions.payment.model.request.ReversalRequestModel
+import com.mobilabsolutions.payment.model.response.PaymentResponseModel
+import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
@@ -314,7 +314,7 @@ class TransactionService(
         idempotentKey: String,
         pspTestMode: Boolean?,
         transactionId: String,
-        refundInfo: PaymentDataModel
+        refundInfo: PaymentDataRequestModel
     ): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
             ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
@@ -332,7 +332,12 @@ class TransactionService(
         if (prevTransaction.merchant.id != apiKey.merchant.id)
             throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
 
-        val paymentRequestModel = PaymentRequestModel(alias.id, refundInfo, prevTransaction.merchantTransactionId, prevTransaction.merchantCustomerId)
+        val paymentRequestModel = PaymentRequestModel(
+            alias.id,
+            refundInfo,
+            prevTransaction.merchantTransactionId,
+            prevTransaction.merchantCustomerId
+        )
         val pspRefundRequest = PspRefundRequestModel(
             pspTransactionId = getPspPaymentResponse(prevTransaction).pspTransactionId,
             amount = prevTransaction.amount,
@@ -365,7 +370,10 @@ class TransactionService(
         val extra = getAliasExtra(alias)
 
         val paymentInfoModel =
-            PaymentInfoModel(extra, objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java))
+            PaymentInfoModel(
+                extra,
+                objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java)
+            )
 
         val transaction = transactionRepository.getByIdempotentKeyAndActionAndMerchantAndAlias(idempotentKey, transactionAction, apiKey.merchant, alias)
 

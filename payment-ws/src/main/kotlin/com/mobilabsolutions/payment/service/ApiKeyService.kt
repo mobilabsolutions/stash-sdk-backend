@@ -4,9 +4,9 @@ import com.mobilabsolutions.payment.data.domain.MerchantApiKey
 import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
+import com.mobilabsolutions.payment.model.ApiKeyReturnInfoModel
 import com.mobilabsolutions.payment.model.request.ApiKeyRequestModel
 import com.mobilabsolutions.payment.model.request.EditApiKeyRequestModel
-import com.mobilabsolutions.payment.model.response.ApiKeyReturnInfoModel
 import com.mobilabsolutions.payment.model.response.CreateApiKeyResponseModel
 import com.mobilabsolutions.payment.model.response.GetApiKeyResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
@@ -36,7 +36,12 @@ class ApiKeyService(
         if (merchantApiKeyList.isEmpty()) throw ApiError.ofMessage("Merchant api keys cannot be found").asBadRequest()
         val apiKeyList = merchantApiKeyList.map {
             when (it.keyType) {
-                KeyType.PUBLISHABLE -> ApiKeyReturnInfoModel(it.id, it.name, it.keyType, it.key)
+                KeyType.PUBLISHABLE -> ApiKeyReturnInfoModel(
+                    it.id,
+                    it.name,
+                    it.keyType,
+                    it.key
+                )
                 else -> ApiKeyReturnInfoModel(it.id, it.name, it.keyType)
             }
         }
@@ -79,8 +84,17 @@ class ApiKeyService(
                 ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
 
         return when (merchantApiKey.keyType) {
-            KeyType.PUBLISHABLE -> ApiKeyReturnInfoModel(merchantApiKey.id, merchantApiKey.name, merchantApiKey.keyType, merchantApiKey.key)
-            else -> ApiKeyReturnInfoModel(merchantApiKey.id, merchantApiKey.name, merchantApiKey.keyType)
+            KeyType.PUBLISHABLE -> ApiKeyReturnInfoModel(
+                merchantApiKey.id,
+                merchantApiKey.name,
+                merchantApiKey.keyType,
+                merchantApiKey.key
+            )
+            else -> ApiKeyReturnInfoModel(
+                merchantApiKey.id,
+                merchantApiKey.name,
+                merchantApiKey.keyType
+            )
         }
     }
 

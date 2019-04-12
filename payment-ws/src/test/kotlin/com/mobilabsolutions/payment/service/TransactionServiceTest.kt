@@ -13,10 +13,10 @@ import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
-import com.mobilabsolutions.payment.model.request.PaymentDataModel
+import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
-import com.mobilabsolutions.payment.model.request.PspConfigModel
+import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
@@ -67,8 +67,8 @@ class TransactionServiceTest {
     private val authAction = TransactionAction.AUTH
     private val captureAction = TransactionAction.CAPTURE
     private val reverseAction = TransactionAction.REVERSAL
-    private val correctPaymentData = PaymentDataModel(1, "EUR", "reason")
-    private val wrongPaymentData = PaymentDataModel(2, "EUR", "reason")
+    private val correctPaymentData = PaymentDataRequestModel(1, "EUR", "reason")
+    private val wrongPaymentData = PaymentDataRequestModel(2, "EUR", "reason")
     private val pspResponse = "{\"pspTransactionId\":\"325105132\",\"status\":\"SUCCESS\",\"customerId\":\"160624370\"}"
     private val pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"123\", \"key\" : \"123\"," +
         " \"merchantId\" : \"mobilab\", \"accountId\" : \"123\", \"default\" : \"true\"}]}"
@@ -76,7 +76,8 @@ class TransactionServiceTest {
         "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\", \"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}}"
     private val reverseInfo = ReversalRequestModel("some reason")
     private val pspConfigModel = PspConfigModel(
-        PaymentServiceProvider.BS_PAYONE.toString(), "mobilab", "123", "123", "123", null, null, null, null, null, true)
+        PaymentServiceProvider.BS_PAYONE.toString(), "mobilab", "123", "123", "123", null, null, null, null, null, true
+    )
 
     @InjectMocks
     private lateinit var transactionService: TransactionService
@@ -333,7 +334,12 @@ class TransactionServiceTest {
             correctSecretKey,
             newIdempotentKey,
             test,
-            PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
+            PaymentRequestModel(
+                correctAliasId,
+                correctPaymentData,
+                purchaseId,
+                customerId
+            )
         )
     }
 
@@ -344,7 +350,12 @@ class TransactionServiceTest {
                 correctSecretKey,
                 newIdempotentKey,
                 test,
-                PaymentRequestModel(wrongAliasId, correctPaymentData, purchaseId, customerId)
+                PaymentRequestModel(
+                    wrongAliasId,
+                    correctPaymentData,
+                    purchaseId,
+                    customerId
+                )
             )
         }
     }
@@ -355,7 +366,12 @@ class TransactionServiceTest {
             correctSecretKey,
             newIdempotentKey,
             test,
-            PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
+            PaymentRequestModel(
+                correctAliasId,
+                correctPaymentData,
+                purchaseId,
+                customerId
+            )
         )
     }
 
@@ -366,7 +382,12 @@ class TransactionServiceTest {
                 correctSecretKey,
                 newIdempotentKey,
                 test,
-                PaymentRequestModel(wrongAliasId, wrongPaymentData, purchaseId, customerId)
+                PaymentRequestModel(
+                    wrongAliasId,
+                    wrongPaymentData,
+                    purchaseId,
+                    customerId
+                )
             )
         }
     }
@@ -377,7 +398,12 @@ class TransactionServiceTest {
             correctSecretKey,
             newIdempotentKey,
             test,
-            PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
+            PaymentRequestModel(
+                correctAliasId,
+                correctPaymentData,
+                purchaseId,
+                customerId
+            )
         )
     }
 
@@ -387,7 +413,12 @@ class TransactionServiceTest {
             correctSecretKey,
             usedIdempotentKey,
             test,
-            PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
+            PaymentRequestModel(
+                correctAliasId,
+                correctPaymentData,
+                purchaseId,
+                customerId
+            )
         )
     }
 
@@ -409,7 +440,12 @@ class TransactionServiceTest {
             correctSecretKey,
             newIdempotentKey,
             test,
-            PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
+            PaymentRequestModel(
+                correctAliasId,
+                correctPaymentData,
+                purchaseId,
+                customerId
+            )
         )
     }
 
@@ -420,7 +456,12 @@ class TransactionServiceTest {
                 correctSecretKey,
                 newIdempotentKey,
                 test,
-                PaymentRequestModel(wrongAliasId, correctPaymentData, purchaseId, customerId)
+                PaymentRequestModel(
+                    wrongAliasId,
+                    correctPaymentData,
+                    purchaseId,
+                    customerId
+                )
             )
         }
     }
@@ -431,7 +472,12 @@ class TransactionServiceTest {
             correctSecretKey,
             newIdempotentKey,
             test,
-            PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
+            PaymentRequestModel(
+                correctAliasId,
+                correctPaymentData,
+                purchaseId,
+                customerId
+            )
         )
     }
 
@@ -442,7 +488,12 @@ class TransactionServiceTest {
                 correctSecretKey,
                 newIdempotentKey,
                 test,
-                PaymentRequestModel(wrongAliasId, wrongPaymentData, purchaseId, customerId)
+                PaymentRequestModel(
+                    wrongAliasId,
+                    wrongPaymentData,
+                    purchaseId,
+                    customerId
+                )
             )
         }
     }
@@ -453,7 +504,12 @@ class TransactionServiceTest {
             correctSecretKey,
             newIdempotentKey,
             test,
-            PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
+            PaymentRequestModel(
+                correctAliasId,
+                correctPaymentData,
+                purchaseId,
+                customerId
+            )
         )
     }
 
@@ -463,7 +519,12 @@ class TransactionServiceTest {
             correctSecretKey,
             usedIdempotentKey,
             test,
-            PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId)
+            PaymentRequestModel(
+                correctAliasId,
+                correctPaymentData,
+                purchaseId,
+                customerId
+            )
         )
     }
 
@@ -551,7 +612,7 @@ class TransactionServiceTest {
                 usedIdempotentKey,
                 test,
                 correctTransactionId,
-                Mockito.mock(PaymentDataModel::class.java)
+                Mockito.mock(PaymentDataRequestModel::class.java)
             )
         }
     }

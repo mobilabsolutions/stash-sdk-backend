@@ -4,9 +4,9 @@ import com.mobilabsolutions.payment.data.domain.Authority
 import com.mobilabsolutions.payment.data.domain.MerchantUser
 import com.mobilabsolutions.payment.data.repository.AuthorityRepository
 import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
-import com.mobilabsolutions.payment.model.request.MerchantUserChangePasswordModel
-import com.mobilabsolutions.payment.model.request.MerchantUserCreateModel
-import com.mobilabsolutions.payment.model.request.MerchantUserUpdateModel
+import com.mobilabsolutions.payment.model.request.EditMerchantUserRequestModel
+import com.mobilabsolutions.payment.model.request.MerchantUserPasswordRequestModel
+import com.mobilabsolutions.payment.model.request.MerchantUserRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.springframework.beans.factory.annotation.Qualifier
@@ -51,7 +51,7 @@ class UserDetailsServiceImpl(
      * @param merchantUserModel Merchant user model
      */
     @Transactional
-    fun updateMerchantUser(userId: String, principal: String, merchantUserModel: MerchantUserUpdateModel) {
+    fun updateMerchantUser(userId: String, principal: String, merchantUserModel: EditMerchantUserRequestModel) {
         if (principal != adminUsername && principal != userId) throw ApiError.ofMessage("Authenticated user doesn't have the required rights for this operation").asForbidden()
         merchantUserRepository.updateMerchantUser(
             userId,
@@ -72,7 +72,7 @@ class UserDetailsServiceImpl(
     fun changePasswordMerchantUser(
         userId: String,
         principal: String,
-        merchantUserChangePasswordModel: MerchantUserChangePasswordModel
+        merchantUserChangePasswordModel: MerchantUserPasswordRequestModel
     ) {
         if (principal != adminUsername && principal != userId) throw ApiError.ofMessage("Authenticated user doesn't have the required rights for this operation").asForbidden()
 
@@ -91,14 +91,14 @@ class UserDetailsServiceImpl(
      * @param merchantUserModel Merchant user model
      */
     @Transactional
-    fun createMerchantUser(merchantId: String, merchantUserModel: MerchantUserCreateModel) {
+    fun createMerchantUser(merchantId: String, merchantUserModel: MerchantUserRequestModel) {
         val authority = authorityRepository.getAuthorityByName(merchantId) ?: throw ApiError.ofMessage("There is no role defined for merchant '$merchantId'").asBadRequest()
         merchantUserRepository.save(merchantUserModel.toMerchantUser(authority))
     }
 
     private fun MerchantUser.toUserDetails() = User(email, password, enabled, true, true, true, authorities)
 
-    private fun MerchantUserCreateModel.toMerchantUser(authority: Authority) = MerchantUser(
+    private fun MerchantUserRequestModel.toMerchantUser(authority: Authority) = MerchantUser(
         email,
         firstname,
         lastname,

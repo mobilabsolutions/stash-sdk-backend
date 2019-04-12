@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
 @ApiModel(value = "Merchant user change password model")
-data class MerchantUserChangePasswordModel(
+data class MerchantUserPasswordRequestModel(
     @ApiModelProperty(value = "Old password of the merchant user", example = "old-password")
     @field:NotNull
     val oldPassword: String,

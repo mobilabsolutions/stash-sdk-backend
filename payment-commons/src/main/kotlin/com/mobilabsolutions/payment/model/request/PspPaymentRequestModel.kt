@@ -1,6 +1,7 @@
 package com.mobilabsolutions.payment.model.request
 
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
+import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.validation.CountryCode
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
@@ -18,7 +19,7 @@ data class PspPaymentRequestModel(
 
     @ApiModelProperty("Payment data")
     @field:Valid
-    val paymentData: PaymentDataModel?,
+    val paymentData: PaymentDataRequestModel?,
 
     @ApiModelProperty(value = "Last name of user", example = "Mustermann")
     val lastName: String?,

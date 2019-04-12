@@ -17,7 +17,7 @@ data class PaymentRequestModel(
     @ApiModelProperty("Payment data")
     @field:Valid
     @field:NotNull
-    val paymentData: PaymentDataModel?,
+    val paymentData: PaymentDataRequestModel?,
 
     @ApiModelProperty("Purchase ID", example = "132")
     val purchaseId: String?,

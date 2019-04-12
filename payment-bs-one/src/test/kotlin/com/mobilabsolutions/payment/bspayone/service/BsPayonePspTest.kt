@@ -14,9 +14,9 @@ import com.mobilabsolutions.payment.bspayone.model.request.BsPayoneRefundRequest
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.enum.TransactionAction
-import com.mobilabsolutions.payment.model.request.PaymentDataModel
+import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
-import com.mobilabsolutions.payment.model.request.PspConfigModel
+import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
@@ -67,7 +67,18 @@ class BsPayonePspTest {
     private val reversalAmount = 0
     private val captureSequenceNumber = 2
     private val pspConfig = PspConfigModel(
-        PaymentServiceProvider.BS_PAYONE.toString(), merchantId, portalId, key, accountId, null, null, null, null, null, true)
+        PaymentServiceProvider.BS_PAYONE.toString(),
+        merchantId,
+        portalId,
+        key,
+        accountId,
+        null,
+        null,
+        null,
+        null,
+        null,
+        true
+    )
 
     @InjectMocks
     private lateinit var bsPayonePsp: BsPayonePsp
@@ -136,25 +147,25 @@ class BsPayonePspTest {
 
     @Test
     fun `preauthorize transaction with correct alias id`() {
-        bsPayonePsp.preauthorize(PspPaymentRequestModel(correctCcAliasId, PaymentDataModel(amount, currency, reason), lastName, city, country, PaymentMethod.CC, null, null, pspAlias, pspConfig), test)
+        bsPayonePsp.preauthorize(PspPaymentRequestModel(correctCcAliasId, PaymentDataRequestModel(amount, currency, reason), lastName, city, country, PaymentMethod.CC, null, null, pspAlias, pspConfig), test)
     }
 
     @Test
     fun `authorize transaction with correct alias id`() {
-        bsPayonePsp.authorize(PspPaymentRequestModel(correctSepaAliasId, PaymentDataModel(amount, currency, reason), lastName, city, country, PaymentMethod.SEPA, iban, bic, null, pspConfig), test)
+        bsPayonePsp.authorize(PspPaymentRequestModel(correctSepaAliasId, PaymentDataRequestModel(amount, currency, reason), lastName, city, country, PaymentMethod.SEPA, iban, bic, null, pspConfig), test)
     }
 
     @Test
     fun `preauthorize with wrong payment method`() {
         Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.preauthorize(PspPaymentRequestModel(correctCcAliasId, PaymentDataModel(amount, currency, reason), lastName, city, country, PaymentMethod.PAY_PAL, null, null, pspAlias, pspConfig), test)
+            bsPayonePsp.preauthorize(PspPaymentRequestModel(correctCcAliasId, PaymentDataRequestModel(amount, currency, reason), lastName, city, country, PaymentMethod.PAY_PAL, null, null, pspAlias, pspConfig), test)
         }
     }
 
     @Test
     fun `authorize with wrong payment method`() {
         Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.authorize(PspPaymentRequestModel(correctSepaAliasId, PaymentDataModel(amount, currency, reason), lastName, city, country, PaymentMethod.PAY_PAL, iban, bic, null, pspConfig), test)
+            bsPayonePsp.authorize(PspPaymentRequestModel(correctSepaAliasId, PaymentDataRequestModel(amount, currency, reason), lastName, city, country, PaymentMethod.PAY_PAL, iban, bic, null, pspConfig), test)
         }
     }
 

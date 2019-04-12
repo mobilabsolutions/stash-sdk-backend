@@ -1,6 +1,5 @@
-package com.mobilabsolutions.payment.model.response
+package com.mobilabsolutions.payment.model
 
-import com.mobilabsolutions.payment.model.request.PspConfigModel
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 

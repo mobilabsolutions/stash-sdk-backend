@@ -7,7 +7,7 @@ import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.repository.AuthorityRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.model.request.MerchantRequestModel
-import com.mobilabsolutions.payment.model.response.PspConfigListModel
+import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.payment.model.request.PspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspUpsertConfigRequestModel
 import com.mobilabsolutions.server.commons.CommonConfiguration

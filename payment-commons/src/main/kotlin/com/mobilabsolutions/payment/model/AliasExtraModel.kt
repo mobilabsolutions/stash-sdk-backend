@@ -1,4 +1,4 @@
-package com.mobilabsolutions.payment.model.request
+package com.mobilabsolutions.payment.model
 
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import io.swagger.annotations.ApiModel

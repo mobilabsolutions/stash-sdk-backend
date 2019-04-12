@@ -4,9 +4,9 @@ import com.mobilabsolutions.payment.data.domain.Authority
 import com.mobilabsolutions.payment.data.domain.MerchantUser
 import com.mobilabsolutions.payment.data.repository.AuthorityRepository
 import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
-import com.mobilabsolutions.payment.model.request.MerchantUserChangePasswordModel
-import com.mobilabsolutions.payment.model.request.MerchantUserCreateModel
-import com.mobilabsolutions.payment.model.request.MerchantUserUpdateModel
+import com.mobilabsolutions.payment.model.request.MerchantUserPasswordRequestModel
+import com.mobilabsolutions.payment.model.request.MerchantUserRequestModel
+import com.mobilabsolutions.payment.model.request.EditMerchantUserRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -92,13 +92,13 @@ class UserDetailsServiceTest {
         userDetailsService.updateMerchantUser(
             "some email",
             "some email",
-            Mockito.mock(MerchantUserUpdateModel::class.java)
+            Mockito.mock(EditMerchantUserRequestModel::class.java)
         )
     }
 
     @Test
     fun `update successfully with admin merchant user`() {
-        userDetailsService.updateMerchantUser("some email", "admin", Mockito.mock(MerchantUserUpdateModel::class.java))
+        userDetailsService.updateMerchantUser("some email", "admin", Mockito.mock(EditMerchantUserRequestModel::class.java))
     }
 
     @Test
@@ -107,7 +107,7 @@ class UserDetailsServiceTest {
             userDetailsService.updateMerchantUser(
                 "some email",
                 "other email",
-                Mockito.mock(MerchantUserUpdateModel::class.java)
+                Mockito.mock(EditMerchantUserRequestModel::class.java)
             )
         }
     }
@@ -117,7 +117,7 @@ class UserDetailsServiceTest {
         userDetailsService.changePasswordMerchantUser(
             knownEmail,
             knownEmail,
-            MerchantUserChangePasswordModel(userPassword, "new password")
+            MerchantUserPasswordRequestModel(userPassword, "new password")
         )
     }
 
@@ -127,7 +127,7 @@ class UserDetailsServiceTest {
             userDetailsService.changePasswordMerchantUser(
                 knownEmail,
                 knownEmail,
-                MerchantUserChangePasswordModel(anotherUserPassword, "new password")
+                MerchantUserPasswordRequestModel(anotherUserPassword, "new password")
             )
         }
     }
@@ -137,7 +137,7 @@ class UserDetailsServiceTest {
         userDetailsService.changePasswordMerchantUser(
             knownEmail,
             "admin",
-            MerchantUserChangePasswordModel(userPassword, "new password")
+            MerchantUserPasswordRequestModel(userPassword, "new password")
         )
     }
 
@@ -145,7 +145,7 @@ class UserDetailsServiceTest {
     fun `create merchant user successfully`() {
         userDetailsService.createMerchantUser(
             knownMerchant,
-            MerchantUserCreateModel(knownEmail, userPassword, "test name", "test lastname", "test locale")
+            MerchantUserRequestModel(knownEmail, userPassword, "test name", "test lastname", "test locale")
         )
     }
 
@@ -154,7 +154,7 @@ class UserDetailsServiceTest {
         Assertions.assertThrows(ApiException::class.java) {
             userDetailsService.createMerchantUser(
                 unKnownMerchant,
-                Mockito.mock(MerchantUserCreateModel::class.java)
+                Mockito.mock(MerchantUserRequestModel::class.java)
             )
         }
     }
