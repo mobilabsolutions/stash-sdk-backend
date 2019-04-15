@@ -5,15 +5,15 @@ import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAli
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
-import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
-import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
-import com.mobilabsolutions.payment.model.response.PspRegisterAliasResponseModel
 import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
+import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
+import com.mobilabsolutions.payment.model.response.PspRegisterAliasResponseModel
 import com.mobilabsolutions.payment.service.Psp
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
@@ -36,7 +36,7 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
         val braintreeMode = getBraintreeMode(pspTestMode)
         return if (pspConfigModel != null) PspAliasConfigModel(
             type = PaymentServiceProvider.BRAINTREE.toString(),
-            merchantId = if (braintreeMode == BraintreeMode.PRODUCTION.mode) pspConfigModel.merchantId else pspConfigModel.sandboxMerchantId,
+            merchantId = null,
             portalId = null,
             request = null,
             apiVersion = null,
@@ -45,8 +45,9 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
             accountId = null,
             encoding = null,
             mode = braintreeMode,
-            publicKey = if (braintreeMode == BraintreeMode.PRODUCTION.mode) pspConfigModel.publicKey else pspConfigModel.sandboxPublicKey,
-            privateKey = if (braintreeMode == BraintreeMode.PRODUCTION.mode) pspConfigModel.privateKey else pspConfigModel.sandboxPrivateKey
+            publicKey = null,
+            privateKey = null,
+            clientToken = braintreeClient.generateClientToken(pspConfigModel, braintreeMode)
         ) else null
     }
 
