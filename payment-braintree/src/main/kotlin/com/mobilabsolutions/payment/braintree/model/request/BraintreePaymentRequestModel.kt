@@ -13,8 +13,8 @@ data class BraintreePaymentRequestModel(
     @field:NotNull
     val amount: String?,
 
-    @ApiModelProperty(value = "PayPal nonce", example = "cnbaskjcbjakbjv")
-    val nonce: String?,
+    @ApiModelProperty(value = "Payment token, psp alias in Payment SDK", example = "jdklaoa")
+    val token: String?,
 
     @ApiModelProperty(value = "Device Data", example = "device 1")
     val deviceData: String?
