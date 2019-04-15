@@ -39,5 +39,8 @@ data class PspAliasConfigModel(
     val publicKey: String?,
 
     @ApiModelProperty(value = "Private key", example = "ncbcjdheufhdhfjh")
-    val privateKey: String?
+    val privateKey: String?,
+
+    @ApiModelProperty(value = "Client token", example = "eyJ2ZXJzaW9uIjoyLCJhdXRob3JpemF0aW9uRmluZ2VycHJpbnQiOiJk")
+    val clientToken: String?
 )

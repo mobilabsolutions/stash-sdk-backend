@@ -39,7 +39,7 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
         val braintreeMode = getBraintreeMode(pspTestMode)
         return if (pspConfigModel != null) PspAliasConfigModel(
             type = PaymentServiceProvider.BRAINTREE.toString(),
-            merchantId = if (braintreeMode == BraintreeMode.PRODUCTION.mode) pspConfigModel.merchantId else pspConfigModel.sandboxMerchantId,
+            merchantId = null,
             portalId = null,
             request = null,
             apiVersion = null,
@@ -48,8 +48,9 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
             accountId = null,
             encoding = null,
             mode = braintreeMode,
-            publicKey = if (braintreeMode == BraintreeMode.PRODUCTION.mode) pspConfigModel.publicKey else pspConfigModel.sandboxPublicKey,
-            privateKey = if (braintreeMode == BraintreeMode.PRODUCTION.mode) pspConfigModel.privateKey else pspConfigModel.sandboxPrivateKey
+            publicKey = null,
+            privateKey = null,
+            clientToken = braintreeClient.generateClientToken(pspConfigModel, braintreeMode)
         ) else null
     }
 
