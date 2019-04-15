@@ -27,6 +27,7 @@ class BraintreeClient {
      *
      * @param pspConfigModel Braintree configuration
      * @param mode sandbox or production mode
+     * @return client token
      */
     fun generateClientToken(pspConfigModel: PspConfigModel, mode: String): String {
         try {
