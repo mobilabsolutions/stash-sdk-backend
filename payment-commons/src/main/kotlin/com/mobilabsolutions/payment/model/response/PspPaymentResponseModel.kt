@@ -16,7 +16,7 @@ data class PspPaymentResponseModel(
     @ApiModelProperty("Transaction status", example = "SUCCESS")
     val status: TransactionStatus?,
 
-    @ApiModelProperty(value = "BS Payone customer id")
+    @ApiModelProperty(value = "Customer id")
     val customerId: String?,
 
     @ApiModelProperty(value = "Payment error")

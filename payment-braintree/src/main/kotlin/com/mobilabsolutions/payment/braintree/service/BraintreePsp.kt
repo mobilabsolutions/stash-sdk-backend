@@ -1,19 +1,22 @@
 package com.mobilabsolutions.payment.braintree.service
 
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
+import com.mobilabsolutions.payment.braintree.exception.BraintreeErrors
+import com.mobilabsolutions.payment.braintree.model.request.BraintreePaymentRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
+import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
-import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
-import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
-import com.mobilabsolutions.payment.model.response.PspRegisterAliasResponseModel
 import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
+import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
+import com.mobilabsolutions.payment.model.response.PspRegisterAliasResponseModel
 import com.mobilabsolutions.payment.service.Psp
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
@@ -71,7 +74,22 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
     }
 
     override fun authorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        logger.info { "Braintree authorize payment has been called..." }
+        val braintreeMode = getBraintreeMode(pspTestMode)
+
+        val request = BraintreePaymentRequestModel(
+            amount = pspPaymentRequestModel.paymentData?.amount.toString(),
+            token = pspPaymentRequestModel.pspAlias,
+            deviceData = pspPaymentRequestModel.extra?.payPalConfig!!.deviceData
+        )
+        val response = braintreeClient.authorization(request, pspPaymentRequestModel.pspConfig!!, braintreeMode)
+
+        if (response.errorCode != null) {
+            logger.error("Error during Braintree authorization. Error code: {}, error message: {}", response.errorCode, response.errorMessage)
+            return PspPaymentResponseModel(response.transactionId, TransactionStatus.FAIL, null,
+                BraintreeErrors.mapResponseCode(response.errorCode), response.errorMessage)
+        }
+        return PspPaymentResponseModel(response.transactionId, TransactionStatus.SUCCESS, null, null, null)
     }
 
     override fun capture(pspCaptureRequestModel: PspCaptureRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {

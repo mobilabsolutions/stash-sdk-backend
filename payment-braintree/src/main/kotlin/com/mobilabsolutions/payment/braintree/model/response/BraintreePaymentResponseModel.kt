@@ -8,19 +8,16 @@ import io.swagger.annotations.ApiModelProperty
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
 @ApiModel(value = "Braintree Payment Response")
-data class BraintreePaymentResponseModel (
+data class BraintreePaymentResponseModel(
     @ApiModelProperty(value = "Braintree response status", example = "AUTHORIZED")
     val status: Transaction.Status?,
 
-    @ApiModelProperty(value = "Braintree  transaction id")
+    @ApiModelProperty(value = "Braintree  transaction id", example = "frtdqw7m")
     val transactionId: String?,
 
-    @ApiModelProperty(value = "Braintree  customer id")
-    val customerId: String?,
-
     @ApiModelProperty(value = "Braintree  error code")
-    val errorCode: String?,
+    val errorCode: String? = null,
 
     @ApiModelProperty(value = "Braintree  error message")
-    val errorMessage: String?
+    val errorMessage: String? = null
 )
