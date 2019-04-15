@@ -68,12 +68,7 @@ class TransactionService(
         val pspAuthorizeRequest = PspPaymentRequestModel(
             aliasId = authorizeInfo.aliasId,
             paymentData = authorizeInfo.paymentData,
-            lastName = getAliasExtra(alias).personalData?.lastName,
-            city = getAliasExtra(alias).personalData?.city,
-            country = getAliasExtra(alias).personalData?.country,
-            paymentMethod = getAliasExtra(alias).paymentMethod,
-            iban = getAliasExtra(alias).sepaConfig?.iban,
-            bic = getAliasExtra(alias).sepaConfig?.bic,
+            extra = getAliasExtra(alias),
             pspAlias = alias.pspAlias,
             pspConfig = getPspConfig(alias)
         )
@@ -114,12 +109,7 @@ class TransactionService(
         val pspPreauthorizeRequest = PspPaymentRequestModel(
             aliasId = preauthorizeInfo.aliasId,
             paymentData = preauthorizeInfo.paymentData,
-            lastName = getAliasExtra(alias).personalData?.lastName,
-            city = getAliasExtra(alias).personalData?.city,
-            country = getAliasExtra(alias).personalData?.country,
-            paymentMethod = getAliasExtra(alias).paymentMethod,
-            iban = getAliasExtra(alias).sepaConfig?.iban,
-            bic = getAliasExtra(alias).sepaConfig?.bic,
+            extra = getAliasExtra(alias),
             pspAlias = alias.pspAlias,
             pspConfig = getPspConfig(alias)
         )
@@ -393,8 +383,8 @@ class TransactionService(
                     transactionId = transactionId ?: RandomStringUtils.randomAlphanumeric(TransactionService.TRANSACTION_ID_LENGTH),
                     idempotentKey = idempotentKey,
                     currencyId = paymentInfo.paymentData!!.currency,
-                    amount = paymentInfo.paymentData!!.amount,
-                    reason = paymentInfo.paymentData!!.reason,
+                    amount = paymentInfo.paymentData.amount,
+                    reason = paymentInfo.paymentData.reason,
                     status = pspPaymentResponse.status ?: TransactionStatus.FAIL,
                     action = transactionAction,
                     paymentMethod = extra.paymentMethod,

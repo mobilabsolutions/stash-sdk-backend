@@ -13,15 +13,17 @@ import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
+import com.mobilabsolutions.payment.model.AliasExtraModel
+import com.mobilabsolutions.payment.model.PersonalDataModel
+import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
-import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
-import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
 import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
 import com.mobilabsolutions.payment.model.request.ReversalRequestModel
+import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
@@ -78,6 +80,7 @@ class TransactionServiceTest {
     private val pspConfigModel = PspConfigModel(
         PaymentServiceProvider.BS_PAYONE.toString(), "mobilab", "123", "123", "123", null, null, null, null, null, true
     )
+    private val aliasExtra = AliasExtraModel(null, null, null, PersonalDataModel(null, null, "Mustermann", null, null, "Berlin", "DE"), PaymentMethod.CC)
 
     @InjectMocks
     private lateinit var transactionService: TransactionService
@@ -128,13 +131,13 @@ class TransactionServiceTest {
         Mockito.`when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
         Mockito.`when`(
             psp.preauthorize(
-                PspPaymentRequestModel(correctAliasId, correctPaymentData, "Mustermann", "Berlin", "DE", PaymentMethod.CC, null, null, pspAlias, pspConfigModel),
+                PspPaymentRequestModel(correctAliasId, aliasExtra, correctPaymentData, pspAlias, pspConfigModel),
                 test
             )
         ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
         Mockito.`when`(
             psp.authorize(
-                PspPaymentRequestModel(correctAliasId, correctPaymentData, "Mustermann", "Berlin", "DE", PaymentMethod.CC, null, null, pspAlias, pspConfigModel),
+                PspPaymentRequestModel(correctAliasId, aliasExtra, correctPaymentData, pspAlias, pspConfigModel),
                 test
             )
         ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
