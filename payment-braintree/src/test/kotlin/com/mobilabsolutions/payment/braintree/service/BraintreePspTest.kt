@@ -13,8 +13,10 @@ import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PayPalConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
+import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
+import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiException
 import com.mobilabsolutions.server.commons.exception.PaymentError
 import org.junit.jupiter.api.Assertions
@@ -39,6 +41,7 @@ import org.mockito.quality.Strictness
 class BraintreePspTest {
     private val correctAliasId = "correct id"
     private val pspAlias = "pspAlias 1"
+    private val wrongPspAlias = "wrong pspAlias"
     private val merchantId = "123"
     private val publicKey = "1234"
     private val privateKey = "12345"
@@ -76,17 +79,22 @@ class BraintreePspTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
-        Mockito.`when`(braintreeClient.registerPayPal(BraintreeRegisterAliasRequestModel(correctAliasId, nonce, deviceData),
+        Mockito.`when`(braintreeClient.registerPayPalAlias(BraintreeRegisterAliasRequestModel(correctAliasId, nonce, deviceData),
             PspConfigModel(
                 PaymentServiceProvider.BRAINTREE.toString(), null, null, null, null,
                 merchantId, publicKey, privateKey, null, null, true
             ), BraintreeMode.SANDBOX.mode))
             .thenReturn(BraintreeRegisterAliasResponseModel(pspAlias, billingAgreementId))
-
         Mockito.`when`(braintreeClient.authorization(BraintreePaymentRequestModel(goodAmount.toString(), pspAlias, deviceData), pspConfig, mode))
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLING, transactionId = transactionId))
         Mockito.`when`(braintreeClient.authorization(BraintreePaymentRequestModel(declinedAmount.toString(), pspAlias, deviceData), pspConfig, mode))
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLEMENT_DECLINED, transactionId = transactionId, errorCode = BraintreeErrors.SETTLEMENT_DECLINED.code))
+        Mockito.`when`(braintreeClient.deletePayPalAlias(wrongPspAlias, pspConfig, BraintreeMode.SANDBOX.mode))
+            .thenThrow(ApiError.ofMessage("PayPal alias doesn't exist at Braintree").asInternalServerError())
+    }
+
+    @Test
+    fun `calculate PSP config`() {
     }
 
     @Test
@@ -116,8 +124,19 @@ class BraintreePspTest {
     }
 
     @Test
-    fun `calculate PSP config`() {
-        braintreePsp.calculatePspConfig(pspConfig, test)
+    fun `delete alias`() {
+        braintreePsp.deleteAlias(
+            PspDeleteAliasRequestModel(
+                null, pspAlias, null, pspConfig), test)
+    }
+
+    @Test
+    fun `delete non existing alias`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            braintreePsp.deleteAlias(
+                PspDeleteAliasRequestModel(
+                    null, wrongPspAlias, null, pspConfig), test)
+        }
     }
 
     @Test

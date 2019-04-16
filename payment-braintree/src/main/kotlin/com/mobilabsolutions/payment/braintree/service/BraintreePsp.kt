@@ -66,7 +66,7 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
             deviceData = pspRegisterAliasRequestModel.aliasExtra?.payPalConfig!!.deviceData
         )
 
-        val braintreeResponse = braintreeClient.registerPayPal(braintreeRequest, pspRegisterAliasRequestModel.pspConfig!!, getBraintreeMode(pspTestMode))
+        val braintreeResponse = braintreeClient.registerPayPalAlias(braintreeRequest, pspRegisterAliasRequestModel.pspConfig!!, getBraintreeMode(pspTestMode))
         return PspRegisterAliasResponseModel(braintreeResponse.token, braintreeResponse.billingAgreementId)
     }
 
@@ -106,7 +106,12 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
     }
 
     override fun deleteAlias(pspDeleteAliasRequestModel: PspDeleteAliasRequestModel, pspTestMode: Boolean?) {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        logger.info("Deleting PayPal alias {} for {} mode", pspDeleteAliasRequestModel.aliasId, getBraintreeMode(pspTestMode))
+        braintreeClient.deletePayPalAlias(
+            pspDeleteAliasRequestModel.pspAlias!!,
+            pspDeleteAliasRequestModel.pspConfig!!,
+            getBraintreeMode(pspTestMode)
+        )
     }
 
     private fun getBraintreeMode(test: Boolean?): String {
