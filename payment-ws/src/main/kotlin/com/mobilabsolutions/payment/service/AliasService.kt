@@ -124,6 +124,7 @@ class AliasService(
 
         val pspDeleteAliasRequest = PspDeleteAliasRequestModel(
             aliasId = aliasId,
+            pspAlias = alias.pspAlias,
             paymentMethod = aliasExtra.paymentMethod,
             pspConfig = pspConfig
         )

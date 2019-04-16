@@ -12,8 +12,11 @@ import javax.persistence.Enumerated
  */
 @ApiModel(value = "PSP DeleteAliasRequest")
 data class PspDeleteAliasRequestModel(
-    @ApiModelProperty("Alias ID", example = "JipfjLKL6BkTIREaRGyX")
+    @ApiModelProperty(value = "Alias ID", example = "JipfjLKL6BkTIREaRGyX")
     val aliasId: String?,
+
+    @ApiModelProperty(value = "PSP Alias ID", example = "JipfjLKL6BkTIREaRGyX")
+    val pspAlias: String?,
 
     @ApiModelProperty(value = "Payment method", example = "SEPA")
     @field:Enumerated(EnumType.STRING)
