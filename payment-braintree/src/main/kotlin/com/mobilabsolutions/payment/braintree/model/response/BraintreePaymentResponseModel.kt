@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty
  */
 @ApiModel(value = "Braintree Payment Response")
 data class BraintreePaymentResponseModel(
-    @ApiModelProperty(value = "Braintree response status", example = "SUCCESS")
+    @ApiModelProperty(value = "Braintree response status", example = "AUTHORIZED")
     val status: Transaction.Status?,
 
     @ApiModelProperty(value = "Braintree  transaction id", example = "frtdqw7m")
