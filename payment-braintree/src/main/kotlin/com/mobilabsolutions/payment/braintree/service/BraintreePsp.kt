@@ -94,8 +94,8 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
     }
 
     override fun capture(pspCaptureRequestModel: PspCaptureRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
-        logger.info("Braintree capture payment has been called. Test mode is {}", pspTestMode.toString())
         val braintreeMode = getBraintreeMode(pspTestMode)
+        logger.info("Braintree capture payment has been called using {} mode", braintreeMode)
 
         val response = braintreeClient.capture(pspCaptureRequestModel.pspTransactionId!!, pspCaptureRequestModel.pspConfig, braintreeMode)
 
