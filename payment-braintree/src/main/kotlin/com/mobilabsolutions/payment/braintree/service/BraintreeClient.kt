@@ -9,7 +9,6 @@ import com.braintreegateway.Transaction
 import com.braintreegateway.TransactionRequest
 import com.braintreegateway.exceptions.BraintreeException
 import com.braintreegateway.exceptions.NotFoundException
-import com.braintreegateway.exceptions.TimeoutException
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
 import com.mobilabsolutions.payment.braintree.model.request.BraintreePaymentRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRefundRequestModel
@@ -41,9 +40,6 @@ class BraintreeClient {
         try {
             val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
             return braintreeGateway.clientToken().generate()
-        } catch (exception: TimeoutException) {
-            logger.error { exception.message }
-            throw ApiError.ofMessage("Timeout error during Braintree client token generation").asInternalServerError()
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
             throw ApiError.ofMessage("Unexpected error during Braintree client token generation").asInternalServerError()
@@ -84,9 +80,6 @@ class BraintreeClient {
                 paymentMethodResponse.target.token,
                 (paymentMethodResponse.target as PayPalAccount).billingAgreementId
             )
-        } catch (exception: TimeoutException) {
-            logger.error { exception.message }
-            throw ApiError.ofMessage("Timeout error during PayPal registration").asInternalServerError()
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
             throw ApiError.ofMessage("Unexpected error during PayPal registration").asInternalServerError()
@@ -113,12 +106,9 @@ class BraintreeClient {
             val result = braintreeGateway.transaction().sale(transactionRequest)
 
             return parseBraintreeResult(result)
-        } catch (exception: TimeoutException) {
-            logger.error { exception.message }
-            throw ApiError.ofMessage("Timeout error during PayPal registration").asInternalServerError()
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
-            throw ApiError.ofMessage("Unexpected error during PayPal registration").asInternalServerError()
+            throw ApiError.ofMessage("Unexpected error during preauthorization").asInternalServerError()
         }
     }
 
@@ -232,15 +222,13 @@ class BraintreeClient {
                 BraintreePaymentResponseModel(
                     status = result.transaction.status,
                     transactionId = result.transaction.id,
-                    errorCode =
-                    if (result.transaction.processorSettlementResponseCode != null && result.transaction.processorSettlementResponseCode.isNotEmpty())
+                    errorCode = if (!isEmptyOrNull(result.transaction.processorSettlementResponseCode))
                         result.transaction.processorSettlementResponseCode else result.transaction.processorResponseCode,
-                    errorMessage =
-                    if (result.transaction.processorSettlementResponseText != null && result.transaction.processorSettlementResponseText.isNotEmpty())
+                    errorMessage = if (!isEmptyOrNull(result.transaction.processorSettlementResponseText))
                         result.transaction.processorSettlementResponseText else result.transaction.processorResponseText
                 )
             } else {
-                BraintreePaymentResponseModel(
+                return BraintreePaymentResponseModel(
                     status = null,
                     transactionId = null,
                     errorCode = result.errors.allDeepValidationErrors[0].code.code,
@@ -248,5 +236,11 @@ class BraintreeClient {
                 )
             }
         }
+    }
+
+    private fun isEmptyOrNull(value: String?): Boolean {
+        if (value != null && value.isNotEmpty())
+            return false
+        return true
     }
 }
