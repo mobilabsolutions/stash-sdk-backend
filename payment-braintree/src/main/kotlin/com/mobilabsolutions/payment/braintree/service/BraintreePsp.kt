@@ -3,6 +3,7 @@ package com.mobilabsolutions.payment.braintree.service
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
 import com.mobilabsolutions.payment.braintree.exception.BraintreeErrors
 import com.mobilabsolutions.payment.braintree.model.request.BraintreePaymentRequestModel
+import com.mobilabsolutions.payment.braintree.model.request.BraintreeRefundRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
@@ -102,7 +103,22 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
     }
 
     override fun refund(pspRefundRequestModel: PspRefundRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        val braintreeMode = getBraintreeMode(pspTestMode)
+        logger.info("Braintree refund payment has been called using {} mode", braintreeMode)
+
+        val request = BraintreeRefundRequestModel(
+            pspTransactionId = pspRefundRequestModel.pspTransactionId,
+            amount = pspRefundRequestModel.amount.toString()
+        )
+        val response = braintreeClient.refund(request, pspRefundRequestModel.pspConfig, braintreeMode)
+
+        if (response.errorCode != null) {
+            logger.error("Error during Braintree refund. Error code: {}, error message: {}", response.errorCode, response.errorMessage)
+            return PspPaymentResponseModel(response.transactionId, TransactionStatus.FAIL, null,
+                BraintreeErrors.mapResponseCode(response.errorCode), response.errorMessage)
+        }
+
+        return PspPaymentResponseModel(response.transactionId, TransactionStatus.SUCCESS, null, null, null)
     }
 
     override fun deleteAlias(pspDeleteAliasRequestModel: PspDeleteAliasRequestModel, pspTestMode: Boolean?) {
