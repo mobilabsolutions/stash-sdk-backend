@@ -65,7 +65,8 @@ class BsPayonePsp(
             encoding = bsPayoneProperties.encoding,
             mode = getPspMode(pspTestMode),
             publicKey = null,
-            privateKey = null
+            privateKey = null,
+            clientToken = null
         ) else null
     }
 

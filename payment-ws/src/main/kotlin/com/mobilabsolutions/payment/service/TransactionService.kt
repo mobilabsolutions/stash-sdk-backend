@@ -330,7 +330,7 @@ class TransactionService(
         )
         val pspRefundRequest = PspRefundRequestModel(
             pspTransactionId = getPspPaymentResponse(prevTransaction).pspTransactionId,
-            amount = prevTransaction.amount,
+            amount = refundInfo.amount,
             currency = prevTransaction.currencyId,
             action = prevTransaction.action,
             pspConfig = getPspConfig(prevTransaction.alias!!)

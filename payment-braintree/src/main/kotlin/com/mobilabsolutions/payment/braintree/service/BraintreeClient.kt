@@ -24,7 +24,27 @@ class BraintreeClient {
     companion object : KLogging()
 
     /**
-     * Registers PayPal alias at Braintree
+     * Returns Braintree client token.
+     *
+     * @param pspConfigModel Braintree configuration
+     * @param mode sandbox or production mode
+     * @return client token
+     */
+    fun generateClientToken(pspConfigModel: PspConfigModel, mode: String): String {
+        try {
+            val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
+            return braintreeGateway.clientToken().generate()
+        } catch (exception: TimeoutException) {
+            logger.error { exception.message }
+            throw ApiError.ofMessage("Timeout error during Braintree client token generation").asInternalServerError()
+        } catch (exception: BraintreeException) {
+            logger.error { exception.message }
+            throw ApiError.ofMessage("Unexpected error during Braintree client token generation").asInternalServerError()
+        }
+    }
+
+    /**
+     * Registers PayPal payment method at Braintree.
      *
      * @param request Braintree register alias request
      * @param pspConfigModel Braintree configuration
