@@ -72,12 +72,27 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
     }
 
     override fun preauthorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
-        throw ApiError.ofMessage("Preauthorization is not supported for PayPal payment. Please choose another action.").asForbidden()
+        val braintreeMode = getBraintreeMode(pspTestMode)
+        logger.info("PayPal preauthorization for {} mode", braintreeMode)
+        val request = BraintreePaymentRequestModel(
+            amount = pspPaymentRequestModel.paymentData?.amount.toString(),
+            token = pspPaymentRequestModel.pspAlias,
+            deviceData = pspPaymentRequestModel.extra?.payPalConfig?.deviceData
+        )
+
+        val response = braintreeClient.preauthorization(request, pspPaymentRequestModel.pspConfig!!, braintreeMode)
+
+        if (response.errorCode != null) {
+            logger.error("Error during Braintree preauthorization. Error code: {}, error message: {}", response.errorCode, response.errorMessage)
+            return PspPaymentResponseModel(response.transactionId, TransactionStatus.FAIL, null,
+                BraintreeErrors.mapResponseCode(response.errorCode), response.errorMessage)
+        }
+        return PspPaymentResponseModel(response.transactionId, TransactionStatus.SUCCESS, null, null, null)
     }
 
     override fun authorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
-        logger.info("Braintree authorize payment has been called for alias {} for {} mode", pspPaymentRequestModel.aliasId, getBraintreeMode(pspTestMode))
         val braintreeMode = getBraintreeMode(pspTestMode)
+        logger.info("Braintree authorize payment has been called for alias {} for {} mode", pspPaymentRequestModel.aliasId, braintreeMode)
 
         val request = BraintreePaymentRequestModel(
             amount = pspPaymentRequestModel.paymentData?.amount.toString(),

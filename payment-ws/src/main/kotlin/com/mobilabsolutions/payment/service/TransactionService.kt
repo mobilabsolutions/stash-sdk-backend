@@ -103,8 +103,8 @@ class TransactionService(
             ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
         val psp = pspRegistry.find(alias.psp!!)
             ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
-        if (getAliasExtra(alias).paymentMethod != PaymentMethod.CC)
-            throw ApiError.ofMessage("Only credit card is supported for preauthorization").asBadRequest()
+        if (getAliasExtra(alias).paymentMethod == PaymentMethod.SEPA)
+            throw ApiError.ofMessage("Sepa is not supported for preauthorization").asBadRequest()
 
         val pspPreauthorizeRequest = PspPaymentRequestModel(
             aliasId = preauthorizeInfo.aliasId,
