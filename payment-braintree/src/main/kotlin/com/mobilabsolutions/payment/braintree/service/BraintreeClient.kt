@@ -99,7 +99,7 @@ class BraintreeClient {
      * @param request Braintree payment request
      * @param pspConfigModel Braintree configuration
      * @param mode sandbox or production mode
-     * @return Braintree payment method response
+     * @return Braintree payment response
      */
     fun preauthorization(request: BraintreePaymentRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreePaymentResponseModel {
         try {
