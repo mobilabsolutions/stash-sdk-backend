@@ -12,6 +12,7 @@ import com.braintreegateway.exceptions.NotFoundException
 import com.braintreegateway.exceptions.TimeoutException
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
 import com.mobilabsolutions.payment.braintree.model.request.BraintreePaymentRequestModel
+import com.mobilabsolutions.payment.braintree.model.request.BraintreeRefundRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
 import com.mobilabsolutions.payment.braintree.model.response.BraintreePaymentResponseModel
 import com.mobilabsolutions.payment.braintree.model.response.BraintreeRegisterAliasResponseModel
@@ -57,7 +58,11 @@ class BraintreeClient {
      * @param mode sandbox or production mode
      * @return Braintree payment method response
      */
-    fun registerPayPalAlias(request: BraintreeRegisterAliasRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreeRegisterAliasResponseModel {
+    fun registerPayPalAlias(
+        request: BraintreeRegisterAliasRequestModel,
+        pspConfigModel: PspConfigModel,
+        mode: String
+    ): BraintreeRegisterAliasResponseModel {
         try {
             val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
             val customerRequest = CustomerRequest().id(request.customerId)
@@ -135,7 +140,30 @@ class BraintreeClient {
         }
     }
 
-    /** Makes capture request to Braintree
+    /** Makes refund request to Braintree
+    *
+    * @param refundRequest Braintree payment request
+    * @param pspConfigModel Braintree configuration
+    * @param mode Braintree mode
+    * @return Braintree payment response
+    */
+    fun refund(refundRequest: BraintreeRefundRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreePaymentResponseModel {
+        try {
+            val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
+            val result = braintreeGateway.transaction().refund(
+                refundRequest.pspTransactionId,
+                BigDecimal(refundRequest.amount!!).movePointLeft(2)
+            )
+
+            return parseBraintreeResult(result)
+        } catch (exception: BraintreeException) {
+            logger.error { exception.message }
+            throw ApiError.ofMessage("Unexpected error during refund").asInternalServerError()
+        }
+    }
+
+    /**
+     * Makes capture request to Braintree
      *
      * @param pspTransactionId Braintree transaction ID
      * @param pspConfigModel Braintree configuration
