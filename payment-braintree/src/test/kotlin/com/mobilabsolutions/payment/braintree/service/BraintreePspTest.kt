@@ -79,20 +79,19 @@ class BraintreePspTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
-        Mockito.`when`(braintreeClient.registerPayPal(BraintreeRegisterAliasRequestModel(correctAliasId, nonce, deviceData),
+        Mockito.`when`(braintreeClient.registerPayPalAlias(BraintreeRegisterAliasRequestModel(correctAliasId, nonce, deviceData),
             PspConfigModel(
                 PaymentServiceProvider.BRAINTREE.toString(), null, null, null, null,
                 merchantId, publicKey, privateKey, null, null, true
             ), BraintreeMode.SANDBOX.mode))
             .thenReturn(BraintreeRegisterAliasResponseModel(pspAlias, billingAgreementId))
 
-        Mockito.`when`(braintreeClient.deletePayPalAlias(wrongPspAlias, pspConfig, BraintreeMode.SANDBOX.mode))
-            .thenThrow(ApiError.ofMessage("PayPal alias doesn't exist at Braintree").asInternalServerError())
-
         Mockito.`when`(braintreeClient.authorization(BraintreePaymentRequestModel(goodAmount.toString(), pspAlias, deviceData), pspConfig, mode))
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLING, transactionId = transactionId))
         Mockito.`when`(braintreeClient.authorization(BraintreePaymentRequestModel(declinedAmount.toString(), pspAlias, deviceData), pspConfig, mode))
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLEMENT_DECLINED, transactionId = transactionId, errorCode = BraintreeErrors.SETTLEMENT_DECLINED.code))
+        Mockito.`when`(braintreeClient.deletePayPalAlias(wrongPspAlias, pspConfig, BraintreeMode.SANDBOX.mode))
+            .thenThrow(ApiError.ofMessage("PayPal alias doesn't exist at Braintree").asInternalServerError())
     }
 
     @Test
