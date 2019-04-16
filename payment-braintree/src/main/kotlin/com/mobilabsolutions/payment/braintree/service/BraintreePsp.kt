@@ -76,7 +76,7 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
     }
 
     override fun authorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
-        logger.info { "Braintree authorize payment has been called..." }
+        logger.info("Braintree authorize payment has been called for alias {} for {} mode", pspPaymentRequestModel.aliasId, getBraintreeMode(pspTestMode))
         val braintreeMode = getBraintreeMode(pspTestMode)
 
         val request = BraintreePaymentRequestModel(
