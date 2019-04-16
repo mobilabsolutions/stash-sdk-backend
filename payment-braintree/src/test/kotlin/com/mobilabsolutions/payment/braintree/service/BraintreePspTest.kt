@@ -15,9 +15,9 @@ import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PayPalConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
+import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
-import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiException
@@ -90,6 +90,10 @@ class BraintreePspTest {
             ), BraintreeMode.SANDBOX.mode))
             .thenReturn(BraintreeRegisterAliasResponseModel(pspAlias, billingAgreementId))
 
+        Mockito.`when`(braintreeClient.preauthorization(BraintreePaymentRequestModel(correctAmount.toString(), pspAlias, deviceData), pspConfig, mode))
+            .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.AUTHORIZED, transactionId = transactionId))
+        Mockito.`when`(braintreeClient.preauthorization(BraintreePaymentRequestModel(declinedAmount.toString(), pspAlias, deviceData), pspConfig, mode))
+            .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLEMENT_DECLINED, transactionId = transactionId, errorCode = BraintreeErrors.SETTLEMENT_DECLINED.code))
         Mockito.`when`(braintreeClient.authorization(BraintreePaymentRequestModel(correctAmount.toString(), pspAlias, deviceData), pspConfig, mode))
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLING, transactionId = transactionId))
         Mockito.`when`(braintreeClient.authorization(BraintreePaymentRequestModel(declinedAmount.toString(), pspAlias, deviceData), pspConfig, mode))
@@ -145,6 +149,46 @@ class BraintreePspTest {
                 PspDeleteAliasRequestModel(
                     null, wrongPspAlias, null, pspConfig), test)
         }
+    }
+
+    @Test
+    fun `preauthorize successfully`() {
+        val response = braintreePsp.preauthorize(
+            PspPaymentRequestModel(
+                null,
+                AliasExtraModel(
+                    null,
+                    null,
+                    PayPalConfigModel(nonce, billingAgreementId, deviceData),
+                    null,
+                    PaymentMethod.PAY_PAL
+                ),
+                PaymentDataRequestModel(correctAmount, currency, reason),
+                pspAlias,
+                pspConfig
+            ), test
+        )
+        Assertions.assertNull(response.error)
+    }
+
+    @Test
+    fun `preauthorize with declined amount`() {
+        val response = braintreePsp.preauthorize(
+            PspPaymentRequestModel(
+                null,
+                AliasExtraModel(
+                    null,
+                    null,
+                    PayPalConfigModel(nonce, billingAgreementId, deviceData),
+                    null,
+                    PaymentMethod.PAY_PAL
+                ),
+                PaymentDataRequestModel(declinedAmount, currency, reason),
+                pspAlias,
+                pspConfig
+            ), test
+        )
+        Assertions.assertEquals(response.error, PaymentError.PAYMENT_ERROR)
     }
 
     @Test
