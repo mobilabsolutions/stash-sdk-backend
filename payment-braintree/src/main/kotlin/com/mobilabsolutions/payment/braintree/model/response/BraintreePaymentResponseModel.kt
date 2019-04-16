@@ -1,9 +1,8 @@
 package com.mobilabsolutions.payment.braintree.model.response
 
+import com.braintreegateway.Transaction
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-
-import com.braintreegateway.Transaction
 
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>

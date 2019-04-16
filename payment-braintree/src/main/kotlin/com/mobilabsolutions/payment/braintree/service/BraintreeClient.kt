@@ -15,7 +15,6 @@ import com.mobilabsolutions.payment.braintree.model.request.BraintreePaymentRequ
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
 import com.mobilabsolutions.payment.braintree.model.response.BraintreePaymentResponseModel
 import com.mobilabsolutions.payment.braintree.model.response.BraintreeRegisterAliasResponseModel
-import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
@@ -47,41 +46,6 @@ class BraintreeClient {
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
             throw ApiError.ofMessage("Unexpected error during Braintree client token generation").asInternalServerError()
-        }
-    }
-
-    /**
-     * Makes preauthorization request at Braintree.
-     *
-     * @param request Braintree register alias request
-     * @param pspConfigModel Braintree configuration
-     * @param mode sandbox or production mode
-     * @return Braintree payment method response
-     */
-    fun preauthorization(request: BraintreePaymentRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreePaymentResponseModel {
-        try {
-            val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
-            val transactionRequest = TransactionRequest()
-                .amount(BigDecimal(request.amount).movePointLeft(2))
-                .paymentMethodToken(request.token)
-                .deviceData(request.deviceData)
-                .options()
-                .done()
-            val paymentResponse = braintreeGateway.transaction().sale(transactionRequest)
-
-            return BraintreePaymentResponseModel(
-                if (paymentResponse.isSuccess) TransactionStatus.SUCCESS else TransactionStatus.FAIL,
-                getTransactionId(paymentResponse),
-                null,
-                null,
-                null
-            )
-        } catch (exception: TimeoutException) {
-            logger.error { exception.message }
-            throw ApiError.ofMessage("Timeout error during PayPal registration").asInternalServerError()
-        } catch (exception: BraintreeException) {
-            logger.error { exception.message }
-            throw ApiError.ofMessage("Unexpected error during PayPal registration").asInternalServerError()
         }
     }
 
@@ -125,9 +89,38 @@ class BraintreeClient {
     }
 
     /**
+     * Makes preauthorization request to Braintree.
+     *
+     * @param request Braintree payment request
+     * @param pspConfigModel Braintree configuration
+     * @param mode sandbox or production mode
+     * @return Braintree payment method response
+     */
+    fun preauthorization(request: BraintreePaymentRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreePaymentResponseModel {
+        try {
+            val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
+            val transactionRequest = TransactionRequest()
+                .amount(BigDecimal(request.amount).movePointLeft(2))
+                .paymentMethodToken(request.token)
+                .deviceData(request.deviceData)
+                .options()
+                .done()
+            val result = braintreeGateway.transaction().sale(transactionRequest)
+
+            return parseBraintreeResult(result)
+        } catch (exception: TimeoutException) {
+            logger.error { exception.message }
+            throw ApiError.ofMessage("Timeout error during PayPal registration").asInternalServerError()
+        } catch (exception: BraintreeException) {
+            logger.error { exception.message }
+            throw ApiError.ofMessage("Unexpected error during PayPal registration").asInternalServerError()
+        }
+    }
+
+    /**
      * Makes authorization request to Braintree.
      *
-     * @param paymentRequest Braintree payment request
+     * @param request Braintree payment request
      * @param pspConfigModel Braintree configuration
      * @param mode Braintree mode
      * @return Braintree payment response
@@ -195,6 +188,12 @@ class BraintreeClient {
         )
     }
 
+    /**
+     * Parses Braintree transaction result to internal payment response model
+     *
+     * @param result Braintree transaction result
+     * @return Braintree payment response
+     */
     private fun parseBraintreeResult(result: Result<Transaction>): BraintreePaymentResponseModel {
         if (result.errors == null) {
             return BraintreePaymentResponseModel(
@@ -218,13 +217,5 @@ class BraintreeClient {
                 )
             }
         }
-    }
-
-    private fun getTransactionId(paymentResponse: Result<Transaction>): String? {
-        when {
-            paymentResponse.target != null -> return paymentResponse.target.id
-            paymentResponse.transaction != null -> return paymentResponse.transaction.id
-        }
-        return null
     }
 }
