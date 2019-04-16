@@ -10,7 +10,7 @@ data class BraintreeRefundRequestModel(
     @field:NotNull
     val pspTransactionId: String?,
 
-    @ApiModelProperty(value = "Braintree amount in smallest currency unit (e.g. cent)", example = "500")
+    @ApiModelProperty(value = "Braintree amount in decimal format", example = "5.00")
     @field:NotNull
     val amount: String?
 )

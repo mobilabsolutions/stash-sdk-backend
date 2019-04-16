@@ -124,7 +124,7 @@ class BraintreeClient {
     * @param refundRequest Braintree payment request
     * @param pspConfigModel Braintree configuration
     * @param mode Braintree mode
-    * @return Braintree payment method response
+    * @return Braintree payment response
     */
     fun refund(refundRequest: BraintreeRefundRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreePaymentResponseModel {
         try {

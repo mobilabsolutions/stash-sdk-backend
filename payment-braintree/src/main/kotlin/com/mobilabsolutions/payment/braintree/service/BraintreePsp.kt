@@ -103,7 +103,7 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
     }
 
     override fun refund(pspRefundRequestModel: PspRefundRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
-        logger.info { "Braintree refund payment has been called..." }
+        logger.info ( "Braintree refund payment has been called. Test mode is {}", pspTestMode.toString() )
         val braintreeMode = getBraintreeMode(pspTestMode)
 
         val request = BraintreeRefundRequestModel(
