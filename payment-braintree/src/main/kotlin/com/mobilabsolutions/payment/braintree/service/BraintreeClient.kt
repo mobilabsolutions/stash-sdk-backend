@@ -114,7 +114,7 @@ class BraintreeClient {
     }
 
     /**
-     * Makes preauthorization request to Braintree.
+     * Makes preauthorization request to Braintree
      *
      * @param request Braintree payment request
      * @param pspConfigModel Braintree configuration
@@ -143,11 +143,11 @@ class BraintreeClient {
     }
 
     /**
-     * Makes authorization request to Braintree.
+     * Makes authorization request to Braintree
      *
      * @param request Braintree payment request
      * @param pspConfigModel Braintree configuration
-     * @param mode Braintree mode
+     * @param mode sandbox or production mode
      * @return Braintree payment response
      */
     fun authorization(request: BraintreePaymentRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreePaymentResponseModel {
@@ -173,7 +173,7 @@ class BraintreeClient {
     *
     * @param refundRequest Braintree payment request
     * @param pspConfigModel Braintree configuration
-    * @param mode Braintree mode
+    * @param mode sandbox or production mode
     * @return Braintree payment response
     */
     fun refund(refundRequest: BraintreeRefundRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreePaymentResponseModel {
@@ -196,7 +196,7 @@ class BraintreeClient {
      *
      * @param pspTransactionId Braintree transaction ID
      * @param pspConfigModel Braintree configuration
-     * @param mode Braintree mode
+     * @param mode sandbox or production mode
      * @return Braintree payment response
      */
     fun capture(pspTransactionId: String, pspConfigModel: PspConfigModel, mode: String): BraintreePaymentResponseModel {
