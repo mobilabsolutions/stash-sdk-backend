@@ -92,12 +92,12 @@ class BraintreeClient {
     }
 
     /**
-     * Registers PayPal payment method at Braintree.
+     * Makes authorization request to Braintree.
      *
-     * @param request Braintree auth request
+     * @param paymentRequest Braintree payment request
      * @param pspConfigModel Braintree configuration
      * @param mode Braintree mode
-     * @return Braintree payment method response
+     * @return Braintree payment response
      */
     fun authorization(request: BraintreePaymentRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreePaymentResponseModel {
         try {
@@ -136,20 +136,20 @@ class BraintreeClient {
     }
 
     private fun parseBraintreeResult(result: Result<Transaction>): BraintreePaymentResponseModel {
-        if (result.errors == null) { // successful transaction
+        if (result.errors == null) {
             return BraintreePaymentResponseModel(
                 status = result.target.status,
                 transactionId = result.target.id
             )
         } else {
-            return if (result.errors.size() == 0 && result.transaction != null) { // Auth or Preauth errors
+            return if (result.errors.size() == 0 && result.transaction != null) {
                 BraintreePaymentResponseModel(
                     status = result.transaction.status,
                     transactionId = result.transaction.id,
                     errorCode = result.transaction.processorSettlementResponseCode,
                     errorMessage = result.transaction.processorSettlementResponseText
                 )
-            } else { // Validation errors
+            } else {
                 BraintreePaymentResponseModel(
                     status = null,
                     transactionId = null,
