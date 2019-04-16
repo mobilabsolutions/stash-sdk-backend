@@ -5,6 +5,7 @@ import com.braintreegateway.CustomerRequest
 import com.braintreegateway.PayPalAccount
 import com.braintreegateway.PaymentMethodRequest
 import com.braintreegateway.exceptions.BraintreeException
+import com.braintreegateway.exceptions.NotFoundException
 import com.braintreegateway.exceptions.TimeoutException
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
@@ -50,7 +51,7 @@ class BraintreeClient {
      * @param mode sandbox or production mode
      * @return Braintree payment method response
      */
-    fun registerPayPal(request: BraintreeRegisterAliasRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreeRegisterAliasResponseModel {
+    fun registerPayPalAlias(request: BraintreeRegisterAliasRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreeRegisterAliasResponseModel {
         try {
             val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
             val customerRequest = CustomerRequest().id(request.customerId)
@@ -80,6 +81,33 @@ class BraintreeClient {
         }
     }
 
+    /**
+     * Deletes PayPal alias at Braintree
+     *
+     * @param pspAlias Braintree PayPal alias
+     * @param pspConfigModel Braintree configuration
+     * @param mode sandbox or production mode
+     */
+    fun deletePayPalAlias(pspAlias: String, pspConfigModel: PspConfigModel, mode: String) {
+        try {
+            val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
+            braintreeGateway.paymentMethod().delete(pspAlias)
+        } catch (exception: NotFoundException) {
+            logger.error { exception.message }
+            throw ApiError.ofMessage("PayPal alias doesn't exist at Braintree").asInternalServerError()
+        } catch (exception: BraintreeException) {
+            logger.error { exception.message }
+            throw ApiError.ofMessage("Error during PayPal alias deletion").asInternalServerError()
+        }
+    }
+
+    /**
+     * Returns Braintree Gateway based on the mode and Braintree PSP configuration
+     *
+     * @param pspConfigModel Braintree configuration
+     * @param mode sandbox or production mode
+     * @return Braintree Gateway
+     */
     private fun configureBraintreeGateway(pspConfigModel: PspConfigModel, mode: String): BraintreeGateway {
         if (mode == BraintreeMode.PRODUCTION.mode)
             return BraintreeGateway(mode, pspConfigModel.merchantId, pspConfigModel.publicKey, pspConfigModel.privateKey)
