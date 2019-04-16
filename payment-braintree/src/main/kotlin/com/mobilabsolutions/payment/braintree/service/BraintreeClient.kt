@@ -4,16 +4,23 @@ import com.braintreegateway.BraintreeGateway
 import com.braintreegateway.CustomerRequest
 import com.braintreegateway.PayPalAccount
 import com.braintreegateway.PaymentMethodRequest
+import com.braintreegateway.Result
+import com.braintreegateway.Transaction
+import com.braintreegateway.TransactionRequest
 import com.braintreegateway.exceptions.BraintreeException
 import com.braintreegateway.exceptions.NotFoundException
 import com.braintreegateway.exceptions.TimeoutException
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
+import com.mobilabsolutions.payment.braintree.model.request.BraintreePaymentRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
+import com.mobilabsolutions.payment.braintree.model.response.BraintreePaymentResponseModel
 import com.mobilabsolutions.payment.braintree.model.response.BraintreeRegisterAliasResponseModel
+import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import mu.KLogging
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
@@ -40,6 +47,41 @@ class BraintreeClient {
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
             throw ApiError.ofMessage("Unexpected error during Braintree client token generation").asInternalServerError()
+        }
+    }
+
+    /**
+     * Makes preauthorization request at Braintree.
+     *
+     * @param request Braintree register alias request
+     * @param pspConfigModel Braintree configuration
+     * @param mode sandbox or production mode
+     * @return Braintree payment method response
+     */
+    fun preauthorization(request: BraintreePaymentRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreePaymentResponseModel {
+        try {
+            val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
+            val transactionRequest = TransactionRequest()
+                .amount(BigDecimal(request.amount).movePointLeft(2))
+                .paymentMethodToken(request.token)
+                .deviceData(request.deviceData)
+                .options()
+                .done()
+            val paymentResponse = braintreeGateway.transaction().sale(transactionRequest)
+
+            return BraintreePaymentResponseModel(
+                if (paymentResponse.isSuccess) TransactionStatus.SUCCESS else TransactionStatus.FAIL,
+                getTransactionId(paymentResponse),
+                null,
+                null,
+                null
+            )
+        } catch (exception: TimeoutException) {
+            logger.error { exception.message }
+            throw ApiError.ofMessage("Timeout error during PayPal registration").asInternalServerError()
+        } catch (exception: BraintreeException) {
+            logger.error { exception.message }
+            throw ApiError.ofMessage("Unexpected error during PayPal registration").asInternalServerError()
         }
     }
 
@@ -113,5 +155,13 @@ class BraintreeClient {
             return BraintreeGateway(mode, pspConfigModel.merchantId, pspConfigModel.publicKey, pspConfigModel.privateKey)
 
         return BraintreeGateway(mode, pspConfigModel.sandboxMerchantId, pspConfigModel.sandboxPublicKey, pspConfigModel.sandboxPrivateKey)
+    }
+
+    private fun getTransactionId(paymentResponse: Result<Transaction>): String? {
+        when {
+            paymentResponse.target != null -> return paymentResponse.target.id
+            paymentResponse.transaction != null -> return paymentResponse.transaction.id
+        }
+        return null
     }
 }

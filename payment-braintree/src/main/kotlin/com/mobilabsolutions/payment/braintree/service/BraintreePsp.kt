@@ -1,6 +1,7 @@
 package com.mobilabsolutions.payment.braintree.service
 
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
+import com.mobilabsolutions.payment.braintree.model.request.BraintreePaymentRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
@@ -68,7 +69,16 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
     }
 
     override fun preauthorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
-        throw ApiError.ofMessage("Preauthorization is not supported for PayPal payment. Please choose another action.").asForbidden()
+        logger.info("PayPal preauthorization for {} mode", getBraintreeMode(pspTestMode))
+        val braintreePreauthRequest = BraintreePaymentRequestModel(
+            amount = pspPaymentRequestModel.paymentData?.amount.toString(),
+            token = pspPaymentRequestModel.pspAlias,
+            deviceData = pspPaymentRequestModel.extra?.payPalConfig?.deviceData
+        )
+
+        val braintreePreauthResponse = braintreeClient.preauthorization(
+            braintreePreauthRequest, pspPaymentRequestModel.pspConfig!!, getBraintreeMode(pspTestMode))
+        return PspPaymentResponseModel(braintreePreauthResponse.transactionId, braintreePreauthResponse.status, null, null, null)
     }
 
     override fun authorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
@@ -76,7 +86,7 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
     }
 
     override fun capture(pspCaptureRequestModel: PspCaptureRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
-        throw ApiError.ofMessage("Capture is not supported for PayPal payment. Please choose another action.").asForbidden()
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun reverse(pspReversalRequestModel: PspReversalRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
