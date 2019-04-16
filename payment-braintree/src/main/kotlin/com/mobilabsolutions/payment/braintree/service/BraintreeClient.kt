@@ -252,8 +252,12 @@ class BraintreeClient {
                 BraintreePaymentResponseModel(
                     status = result.transaction.status,
                     transactionId = result.transaction.id,
-                    errorCode = result.transaction.processorSettlementResponseCode,
-                    errorMessage = result.transaction.processorSettlementResponseText
+                    errorCode =
+                    if (result.transaction.processorSettlementResponseCode != null && result.transaction.processorSettlementResponseCode.isNotEmpty())
+                        result.transaction.processorSettlementResponseCode else result.transaction.processorResponseCode,
+                    errorMessage =
+                    if (result.transaction.processorSettlementResponseText != null && result.transaction.processorSettlementResponseText.isNotEmpty())
+                        result.transaction.processorSettlementResponseText else result.transaction.processorResponseText
                 )
             } else {
                 BraintreePaymentResponseModel(
