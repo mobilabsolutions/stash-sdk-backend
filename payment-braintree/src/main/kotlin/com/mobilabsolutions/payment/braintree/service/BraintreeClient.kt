@@ -11,6 +11,7 @@ import com.braintreegateway.exceptions.BraintreeException
 import com.braintreegateway.exceptions.TimeoutException
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
 import com.mobilabsolutions.payment.braintree.model.request.BraintreePaymentRequestModel
+import com.mobilabsolutions.payment.braintree.model.request.BraintreeRefundRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
 import com.mobilabsolutions.payment.braintree.model.response.BraintreePaymentResponseModel
 import com.mobilabsolutions.payment.braintree.model.response.BraintreeRegisterAliasResponseModel
@@ -115,6 +116,28 @@ class BraintreeClient {
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
             throw ApiError.ofMessage("Unexpected error during authorization").asInternalServerError()
+        }
+    }
+
+    /** Makes refund request to Braintree
+    *
+    * @param refundRequest Braintree payment request
+    * @param pspConfigModel Braintree configuration
+    * @param mode Braintree mode
+    * @return Braintree payment method response
+    */
+    fun refund(refundRequest: BraintreeRefundRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreePaymentResponseModel {
+        try {
+            val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
+            val result = braintreeGateway.transaction().refund(
+                refundRequest.pspTransactionId,
+                BigDecimal(refundRequest.amount!!).movePointLeft(2)
+            )
+
+            return parseBraintreeResult(result)
+        } catch (exception: BraintreeException) {
+            logger.error { exception.message }
+            throw ApiError.ofMessage("Unexpected error during refund").asInternalServerError()
         }
     }
 
