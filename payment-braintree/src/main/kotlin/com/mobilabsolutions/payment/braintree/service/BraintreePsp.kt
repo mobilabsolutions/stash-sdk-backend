@@ -1,9 +1,12 @@
 package com.mobilabsolutions.payment.braintree.service
 
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
+import com.mobilabsolutions.payment.braintree.exception.BraintreeErrors
+import com.mobilabsolutions.payment.braintree.model.request.BraintreePaymentRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
+import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
@@ -63,7 +66,7 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
             deviceData = pspRegisterAliasRequestModel.aliasExtra?.payPalConfig!!.deviceData
         )
 
-        val braintreeResponse = braintreeClient.registerPayPalAlias(braintreeRequest, pspRegisterAliasRequestModel.pspConfig!!, getBraintreeMode(pspTestMode))
+        val braintreeResponse = braintreeClient.registerPayPal(braintreeRequest, pspRegisterAliasRequestModel.pspConfig!!, getBraintreeMode(pspTestMode))
         return PspRegisterAliasResponseModel(braintreeResponse.token, braintreeResponse.billingAgreementId)
     }
 
@@ -72,11 +75,36 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
     }
 
     override fun authorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        logger.info { "Braintree authorize payment has been called..." }
+        val braintreeMode = getBraintreeMode(pspTestMode)
+
+        val request = BraintreePaymentRequestModel(
+            amount = pspPaymentRequestModel.paymentData?.amount.toString(),
+            token = pspPaymentRequestModel.pspAlias,
+            deviceData = pspPaymentRequestModel.extra?.payPalConfig!!.deviceData
+        )
+        val response = braintreeClient.authorization(request, pspPaymentRequestModel.pspConfig!!, braintreeMode)
+
+        if (response.errorCode != null) {
+            logger.error("Error during Braintree authorization. Error code: {}, error message: {}", response.errorCode, response.errorMessage)
+            return PspPaymentResponseModel(response.transactionId, TransactionStatus.FAIL, null,
+                BraintreeErrors.mapResponseCode(response.errorCode), response.errorMessage)
+        }
+        return PspPaymentResponseModel(response.transactionId, TransactionStatus.SUCCESS, null, null, null)
     }
 
     override fun capture(pspCaptureRequestModel: PspCaptureRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
-        throw ApiError.ofMessage("Capture is not supported for PayPal payment. Please choose another action.").asForbidden()
+        logger.info("Braintree capture payment has been called. Test mode is {}", pspTestMode.toString())
+        val braintreeMode = getBraintreeMode(pspTestMode)
+
+        val response = braintreeClient.capture(pspCaptureRequestModel.pspTransactionId!!, pspCaptureRequestModel.pspConfig, braintreeMode)
+
+        if (response.errorCode != null) {
+            logger.error("Error during Braintree capture. Error code: {}, error message: {}", response.errorCode, response.errorMessage)
+            return PspPaymentResponseModel(response.transactionId, TransactionStatus.FAIL, null,
+                BraintreeErrors.mapResponseCode(response.errorCode), response.errorMessage)
+        }
+        return PspPaymentResponseModel(response.transactionId, TransactionStatus.SUCCESS, null, null, null)
     }
 
     override fun reverse(pspReversalRequestModel: PspReversalRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {

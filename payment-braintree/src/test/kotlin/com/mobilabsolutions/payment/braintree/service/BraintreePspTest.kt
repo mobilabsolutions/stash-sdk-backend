@@ -1,7 +1,11 @@
 package com.mobilabsolutions.payment.braintree.service
 
+import com.braintreegateway.Transaction
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
+import com.mobilabsolutions.payment.braintree.exception.BraintreeErrors
+import com.mobilabsolutions.payment.braintree.model.request.BraintreePaymentRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
+import com.mobilabsolutions.payment.braintree.model.response.BraintreePaymentResponseModel
 import com.mobilabsolutions.payment.braintree.model.response.BraintreeRegisterAliasResponseModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
@@ -9,9 +13,12 @@ import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PayPalConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
+import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
+import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiException
+import com.mobilabsolutions.server.commons.exception.PaymentError
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -55,6 +62,12 @@ class BraintreePspTest {
         null,
         true
     )
+    private val mode = "sandbox"
+    private val goodAmount = 1000
+    private val declinedAmount = 5000
+    private val currency = "EUR"
+    private val reason = "some reason"
+    private val transactionId = "some transaction id"
 
     @InjectMocks
     private lateinit var braintreePsp: BraintreePsp
@@ -66,14 +79,20 @@ class BraintreePspTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
-        Mockito.`when`(braintreeClient.registerPayPalAlias(BraintreeRegisterAliasRequestModel(correctAliasId, nonce, deviceData),
+        Mockito.`when`(braintreeClient.registerPayPal(BraintreeRegisterAliasRequestModel(correctAliasId, nonce, deviceData),
             PspConfigModel(
                 PaymentServiceProvider.BRAINTREE.toString(), null, null, null, null,
                 merchantId, publicKey, privateKey, null, null, true
             ), BraintreeMode.SANDBOX.mode))
             .thenReturn(BraintreeRegisterAliasResponseModel(pspAlias, billingAgreementId))
+
         Mockito.`when`(braintreeClient.deletePayPalAlias(wrongPspAlias, pspConfig, BraintreeMode.SANDBOX.mode))
             .thenThrow(ApiError.ofMessage("PayPal alias doesn't exist at Braintree").asInternalServerError())
+
+        Mockito.`when`(braintreeClient.authorization(BraintreePaymentRequestModel(goodAmount.toString(), pspAlias, deviceData), pspConfig, mode))
+            .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLING, transactionId = transactionId))
+        Mockito.`when`(braintreeClient.authorization(BraintreePaymentRequestModel(declinedAmount.toString(), pspAlias, deviceData), pspConfig, mode))
+            .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLEMENT_DECLINED, transactionId = transactionId, errorCode = BraintreeErrors.SETTLEMENT_DECLINED.code))
     }
 
     @Test
@@ -121,5 +140,45 @@ class BraintreePspTest {
                 PspDeleteAliasRequestModel(
                     null, wrongPspAlias, null, pspConfig), test)
         }
+    }
+
+    @Test
+    fun `authorize successfully`() {
+        val response = braintreePsp.authorize(
+            PspPaymentRequestModel(
+                null,
+                AliasExtraModel(
+                    null,
+                    null,
+                    PayPalConfigModel(nonce, billingAgreementId, deviceData),
+                    null,
+                    PaymentMethod.PAY_PAL
+                ),
+                PaymentDataRequestModel(goodAmount, currency, reason),
+                pspAlias,
+                pspConfig
+            ), test
+        )
+        Assertions.assertNull(response.error)
+    }
+
+    @Test
+    fun `authorize with declined amount`() {
+        val response = braintreePsp.authorize(
+            PspPaymentRequestModel(
+                null,
+                AliasExtraModel(
+                    null,
+                    null,
+                    PayPalConfigModel(nonce, billingAgreementId, deviceData),
+                    null,
+                    PaymentMethod.PAY_PAL
+                ),
+                PaymentDataRequestModel(declinedAmount, currency, reason),
+                pspAlias,
+                pspConfig
+            ), test
+        )
+        Assertions.assertEquals(response.error, PaymentError.PAYMENT_ERROR)
     }
 }
