@@ -210,6 +210,18 @@ class BraintreePspTest {
     }
 
     @Test
+    fun `reverse successfully`() {
+        val response = braintreePsp.reverse(
+            PspReversalRequestModel(
+                pspTransactionId,
+                currency,
+                pspConfig
+            ), test
+        )
+        Assertions.assertNull(response.error)
+    }
+
+    @Test
     fun `reverse unsuccessfully`() {
         val response = braintreePsp.reverse(
             PspReversalRequestModel(
