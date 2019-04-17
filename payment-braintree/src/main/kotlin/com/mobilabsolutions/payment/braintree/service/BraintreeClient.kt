@@ -11,6 +11,7 @@ import com.braintreegateway.exceptions.BraintreeException
 import com.braintreegateway.exceptions.NotFoundException
 import com.braintreegateway.exceptions.TimeoutException
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
+import com.mobilabsolutions.payment.braintree.model.request.BraintreeCaptureRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreePaymentRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRefundRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
@@ -194,15 +195,15 @@ class BraintreeClient {
     /**
      * Makes capture request to Braintree
      *
-     * @param pspTransactionId Braintree transaction ID
+     * @param captureRequest Braintree capture request
      * @param pspConfigModel Braintree configuration
      * @param mode sandbox or production mode
      * @return Braintree payment response
      */
-    fun capture(pspTransactionId: String, pspConfigModel: PspConfigModel, mode: String): BraintreePaymentResponseModel {
+    fun capture(captureRequest: BraintreeCaptureRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreePaymentResponseModel {
         try {
             val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
-            val result = braintreeGateway.transaction().submitForSettlement(pspTransactionId)
+            val result = braintreeGateway.transaction().submitForSettlement(captureRequest.pspTransactionId)
 
             return parseBraintreeResult(result)
         } catch (exception: BraintreeException) {

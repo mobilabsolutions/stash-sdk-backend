@@ -2,6 +2,7 @@ package com.mobilabsolutions.payment.braintree.service
 
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
 import com.mobilabsolutions.payment.braintree.exception.BraintreeErrors
+import com.mobilabsolutions.payment.braintree.model.request.BraintreeCaptureRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreePaymentRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRefundRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
@@ -113,7 +114,11 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
         val braintreeMode = getBraintreeMode(pspTestMode)
         logger.info("Braintree capture payment has been called using {} mode", braintreeMode)
 
-        val response = braintreeClient.capture(pspCaptureRequestModel.pspTransactionId!!, pspCaptureRequestModel.pspConfig, braintreeMode)
+        val request = BraintreeCaptureRequestModel(
+            pspTransactionId = pspCaptureRequestModel.pspTransactionId
+        )
+
+        val response = braintreeClient.capture(request, pspCaptureRequestModel.pspConfig, braintreeMode)
 
         if (response.errorCode != null) {
             logger.error("Error during Braintree capture. Error code: {}, error message: {}", response.errorCode, response.errorMessage)
