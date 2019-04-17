@@ -3,6 +3,7 @@ package com.mobilabsolutions.payment.braintree.service
 import com.braintreegateway.Transaction
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
 import com.mobilabsolutions.payment.braintree.exception.BraintreeErrors
+import com.mobilabsolutions.payment.braintree.model.request.BraintreeCaptureRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreePaymentRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRefundRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
@@ -16,8 +17,9 @@ import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PayPalConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
-import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
+import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
+import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
@@ -98,6 +100,10 @@ class BraintreePspTest {
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.AUTHORIZED, transactionId = transactionId))
         Mockito.`when`(braintreeClient.preauthorization(BraintreePaymentRequestModel(declinedAmount.toString(), pspAlias, deviceData), pspConfig, mode))
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLEMENT_DECLINED, transactionId = transactionId, errorCode = BraintreeErrors.SETTLEMENT_DECLINED.code))
+        Mockito.`when`(braintreeClient.capture(BraintreeCaptureRequestModel(pspTransactionId), pspConfig, mode))
+            .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLING, transactionId = transactionId))
+        Mockito.`when`(braintreeClient.capture(BraintreeCaptureRequestModel(wrongPspTransactionId), pspConfig, mode))
+            .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.FAILED, transactionId = wrongPspTransactionId, errorCode = PaymentError.PAYMENT_ERROR.name, errorMessage = BraintreeErrors.ALREADY_CAPTURED.name))
         Mockito.`when`(braintreeClient.authorization(BraintreePaymentRequestModel(correctAmount.toString(), pspAlias, deviceData), pspConfig, mode))
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLING, transactionId = transactionId))
         Mockito.`when`(braintreeClient.authorization(BraintreePaymentRequestModel(declinedAmount.toString(), pspAlias, deviceData), pspConfig, mode))
@@ -197,6 +203,33 @@ class BraintreePspTest {
             ), test
         )
         Assertions.assertEquals(response.error, PaymentError.PAYMENT_ERROR)
+    }
+
+    @Test
+    fun `capture successfully`() {
+        val response = braintreePsp.capture(
+            PspCaptureRequestModel(
+                pspTransactionId,
+                null,
+                null,
+                pspConfig
+            ), test
+        )
+        Assertions.assertNull(response.error)
+    }
+
+    @Test
+    fun `capture unsuccessfully`() {
+        val response = braintreePsp.capture(
+            PspCaptureRequestModel(
+                wrongPspTransactionId,
+                null,
+                null,
+                pspConfig
+            ), test
+        )
+        Assertions.assertEquals(response.status, TransactionStatus.FAIL)
+        Assertions.assertNotNull(response.error)
     }
 
     @Test

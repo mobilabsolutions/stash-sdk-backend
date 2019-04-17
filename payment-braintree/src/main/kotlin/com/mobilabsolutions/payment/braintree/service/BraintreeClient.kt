@@ -10,6 +10,7 @@ import com.braintreegateway.TransactionRequest
 import com.braintreegateway.exceptions.BraintreeException
 import com.braintreegateway.exceptions.NotFoundException
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
+import com.mobilabsolutions.payment.braintree.model.request.BraintreeCaptureRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreePaymentRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRefundRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
@@ -88,7 +89,27 @@ class BraintreeClient {
     }
 
     /**
-     * Makes preauthorization request to Braintree.
+     * Deletes PayPal alias at Braintree
+     *
+     * @param pspAlias Braintree PayPal alias
+     * @param pspConfigModel Braintree configuration
+     * @param mode sandbox or production mode
+     */
+    fun deletePayPalAlias(pspAlias: String, pspConfigModel: PspConfigModel, mode: String) {
+        try {
+            val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
+            braintreeGateway.paymentMethod().delete(pspAlias)
+        } catch (exception: NotFoundException) {
+            logger.error { exception.message }
+            throw ApiError.ofMessage("PayPal alias doesn't exist at Braintree").asInternalServerError()
+        } catch (exception: BraintreeException) {
+            logger.error { exception.message }
+            throw ApiError.ofMessage("Error during PayPal alias deletion").asInternalServerError()
+        }
+    }
+
+    /**
+     * Makes preauthorization request to Braintree
      *
      * @param request Braintree payment request
      * @param pspConfigModel Braintree configuration
@@ -114,11 +135,11 @@ class BraintreeClient {
     }
 
     /**
-     * Makes authorization request to Braintree.
+     * Makes authorization request to Braintree
      *
      * @param request Braintree payment request
      * @param pspConfigModel Braintree configuration
-     * @param mode Braintree mode
+     * @param mode sandbox or production mode
      * @return Braintree payment response
      */
     fun authorization(request: BraintreePaymentRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreePaymentResponseModel {
@@ -144,7 +165,7 @@ class BraintreeClient {
     *
     * @param refundRequest Braintree refund request
     * @param pspConfigModel Braintree configuration
-    * @param mode Braintree mode
+    * @param mode sandbox or production mode
     * @return Braintree payment response
     */
     fun refund(refundRequest: BraintreeRefundRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreePaymentResponseModel {
@@ -183,22 +204,22 @@ class BraintreeClient {
     }
 
     /**
-     * Deletes PayPal alias at Braintree
+     * Makes capture request to Braintree
      *
-     * @param pspAlias Braintree PayPal alias
+     * @param captureRequest Braintree capture request
      * @param pspConfigModel Braintree configuration
      * @param mode sandbox or production mode
+     * @return Braintree payment response
      */
-    fun deletePayPalAlias(pspAlias: String, pspConfigModel: PspConfigModel, mode: String) {
+    fun capture(captureRequest: BraintreeCaptureRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreePaymentResponseModel {
         try {
             val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
-            braintreeGateway.paymentMethod().delete(pspAlias)
-        } catch (exception: NotFoundException) {
-            logger.error { exception.message }
-            throw ApiError.ofMessage("PayPal alias doesn't exist at Braintree").asInternalServerError()
+            val result = braintreeGateway.transaction().submitForSettlement(captureRequest.pspTransactionId)
+
+            return parseBraintreeResult(result)
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
-            throw ApiError.ofMessage("Error during PayPal alias deletion").asInternalServerError()
+            throw ApiError.ofMessage("Unexpected error during capture").asInternalServerError()
         }
     }
 
