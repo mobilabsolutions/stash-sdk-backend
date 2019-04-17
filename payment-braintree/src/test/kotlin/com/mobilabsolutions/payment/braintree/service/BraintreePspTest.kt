@@ -6,19 +6,22 @@ import com.mobilabsolutions.payment.braintree.exception.BraintreeErrors
 import com.mobilabsolutions.payment.braintree.model.request.BraintreePaymentRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRefundRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
+import com.mobilabsolutions.payment.braintree.model.request.BraintreeReverseRequestModel
 import com.mobilabsolutions.payment.braintree.model.response.BraintreePaymentResponseModel
 import com.mobilabsolutions.payment.braintree.model.response.BraintreeRegisterAliasResponseModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.enum.TransactionAction
+import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PayPalConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
+import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
-import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
+import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiException
 import com.mobilabsolutions.server.commons.exception.PaymentError
@@ -72,6 +75,7 @@ class BraintreePspTest {
     private val reason = "some reason"
     private val transactionId = "some transaction id"
     private val pspTransactionId = "some psp transaction id"
+    private val wrongPspTransactionId = "some wrong psp transaction id"
 
     @InjectMocks
     private lateinit var braintreePsp: BraintreePsp
@@ -98,6 +102,10 @@ class BraintreePspTest {
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLING, transactionId = transactionId))
         Mockito.`when`(braintreeClient.deletePayPalAlias(wrongPspAlias, pspConfig, BraintreeMode.SANDBOX.mode))
             .thenThrow(ApiError.ofMessage("PayPal alias doesn't exist at Braintree").asInternalServerError())
+        Mockito.`when`(braintreeClient.reverse(BraintreeReverseRequestModel(pspTransactionId), pspConfig, mode))
+            .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.VOIDED, transactionId = transactionId))
+        Mockito.`when`(braintreeClient.reverse(BraintreeReverseRequestModel(wrongPspTransactionId), pspConfig, mode))
+            .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.FAILED, transactionId = pspTransactionId, errorCode = PaymentError.PAYMENT_ERROR.name, errorMessage = BraintreeErrors.ALREADY_REVERSED.name))
     }
 
     @Test
@@ -199,5 +207,18 @@ class BraintreePspTest {
             ), test
         )
         Assertions.assertNull(response.error)
+    }
+
+    @Test
+    fun `reverse unsuccessfully`() {
+        val response = braintreePsp.reverse(
+            PspReversalRequestModel(
+                wrongPspTransactionId,
+                currency,
+                pspConfig
+            ), test
+        )
+        Assertions.assertEquals(response.status, TransactionStatus.FAIL)
+        Assertions.assertNotNull(response.error)
     }
 }
