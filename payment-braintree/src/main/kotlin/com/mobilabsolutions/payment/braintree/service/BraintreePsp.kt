@@ -6,6 +6,7 @@ import com.mobilabsolutions.payment.braintree.model.request.BraintreeCaptureRequ
 import com.mobilabsolutions.payment.braintree.model.request.BraintreePaymentRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRefundRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
+import com.mobilabsolutions.payment.braintree.model.request.BraintreeReverseRequestModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
@@ -129,12 +130,25 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
     }
 
     override fun reverse(pspReversalRequestModel: PspReversalRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        val braintreeMode = getBraintreeMode(pspTestMode)
+        logger.info("Braintree reverse payment has been called for psp transaction {} for {} mode", pspReversalRequestModel.pspTransactionId, braintreeMode)
+
+        val request = BraintreeReverseRequestModel(
+            pspTransactionId = pspReversalRequestModel.pspTransactionId
+        )
+
+        val response = braintreeClient.reverse(request, pspReversalRequestModel.pspConfig, braintreeMode)
+        if (response.errorCode != null) {
+            logger.error("Error during Braintree reverse. Error code: {}, error message: {}", response.errorCode, response.errorMessage)
+            return PspPaymentResponseModel(response.transactionId, TransactionStatus.FAIL, null,
+                BraintreeErrors.mapResponseCode(response.errorCode), response.errorMessage)
+        }
+        return PspPaymentResponseModel(response.transactionId, TransactionStatus.SUCCESS, null, null, null)
     }
 
     override fun refund(pspRefundRequestModel: PspRefundRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
         val braintreeMode = getBraintreeMode(pspTestMode)
-        logger.info("Braintree refund payment has been called using {} mode", braintreeMode)
+        logger.info("Braintree refund payment has been called for psp transaction {} for {} mode", pspRefundRequestModel.pspTransactionId, pspTestMode)
 
         val request = BraintreeRefundRequestModel(
             pspTransactionId = pspRefundRequestModel.pspTransactionId,
