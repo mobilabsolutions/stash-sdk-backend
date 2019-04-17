@@ -9,7 +9,6 @@ import com.braintreegateway.Transaction
 import com.braintreegateway.TransactionRequest
 import com.braintreegateway.exceptions.BraintreeException
 import com.braintreegateway.exceptions.NotFoundException
-import com.braintreegateway.exceptions.TimeoutException
 import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
 import com.mobilabsolutions.payment.braintree.model.request.BraintreePaymentRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRefundRequestModel
@@ -42,9 +41,6 @@ class BraintreeClient {
         try {
             val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
             return braintreeGateway.clientToken().generate()
-        } catch (exception: TimeoutException) {
-            logger.error { exception.message }
-            throw ApiError.ofMessage("Timeout error during Braintree client token generation").asInternalServerError()
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
             throw ApiError.ofMessage("Unexpected error during Braintree client token generation").asInternalServerError()
@@ -85,12 +81,35 @@ class BraintreeClient {
                 paymentMethodResponse.target.token,
                 (paymentMethodResponse.target as PayPalAccount).billingAgreementId
             )
-        } catch (exception: TimeoutException) {
-            logger.error { exception.message }
-            throw ApiError.ofMessage("Timeout error during PayPal registration").asInternalServerError()
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
             throw ApiError.ofMessage("Unexpected error during PayPal registration").asInternalServerError()
+        }
+    }
+
+    /**
+     * Makes preauthorization request to Braintree.
+     *
+     * @param request Braintree payment request
+     * @param pspConfigModel Braintree configuration
+     * @param mode sandbox or production mode
+     * @return Braintree payment response
+     */
+    fun preauthorization(request: BraintreePaymentRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreePaymentResponseModel {
+        try {
+            val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
+            val transactionRequest = TransactionRequest()
+                .amount(BigDecimal(request.amount).movePointLeft(2))
+                .paymentMethodToken(request.token)
+                .deviceData(request.deviceData)
+                .options()
+                .done()
+            val result = braintreeGateway.transaction().sale(transactionRequest)
+
+            return parseBraintreeResult(result)
+        } catch (exception: BraintreeException) {
+            logger.error { exception.message }
+            throw ApiError.ofMessage("Unexpected error during preauthorization").asInternalServerError()
         }
     }
 
@@ -207,6 +226,12 @@ class BraintreeClient {
         )
     }
 
+    /**
+     * Parses Braintree transaction result to internal payment response model
+     *
+     * @param result Braintree transaction result
+     * @return Braintree payment response
+     */
     private fun parseBraintreeResult(result: Result<Transaction>): BraintreePaymentResponseModel {
         if (result.errors == null) {
             return BraintreePaymentResponseModel(
@@ -218,11 +243,13 @@ class BraintreeClient {
                 BraintreePaymentResponseModel(
                     status = result.transaction.status,
                     transactionId = result.transaction.id,
-                    errorCode = result.transaction.processorSettlementResponseCode,
-                    errorMessage = result.transaction.processorSettlementResponseText
+                    errorCode = if (isEmptyOrNull(result.transaction.processorSettlementResponseCode))
+                        result.transaction.processorResponseCode else result.transaction.processorSettlementResponseCode,
+                    errorMessage = if (isEmptyOrNull(result.transaction.processorSettlementResponseText))
+                        result.transaction.processorResponseText else result.transaction.processorSettlementResponseText
                 )
             } else {
-                BraintreePaymentResponseModel(
+                return BraintreePaymentResponseModel(
                     status = null,
                     transactionId = null,
                     errorCode = result.errors.allDeepValidationErrors[0].code.code,
@@ -230,5 +257,11 @@ class BraintreeClient {
                 )
             }
         }
+    }
+
+    private fun isEmptyOrNull(value: String?): Boolean {
+        if (value != null && value.isNotEmpty())
+            return false
+        return true
     }
 }
