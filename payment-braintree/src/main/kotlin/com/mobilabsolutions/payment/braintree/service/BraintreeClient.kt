@@ -14,6 +14,7 @@ import com.mobilabsolutions.payment.braintree.data.enum.BraintreeMode
 import com.mobilabsolutions.payment.braintree.model.request.BraintreePaymentRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRefundRequestModel
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAliasRequestModel
+import com.mobilabsolutions.payment.braintree.model.request.BraintreeReverseRequestModel
 import com.mobilabsolutions.payment.braintree.model.response.BraintreePaymentResponseModel
 import com.mobilabsolutions.payment.braintree.model.response.BraintreeRegisterAliasResponseModel
 import com.mobilabsolutions.payment.model.PspConfigModel
@@ -122,7 +123,7 @@ class BraintreeClient {
 
     /** Makes refund request to Braintree
     *
-    * @param refundRequest Braintree payment request
+    * @param refundRequest Braintree refund request
     * @param pspConfigModel Braintree configuration
     * @param mode Braintree mode
     * @return Braintree payment response
@@ -139,6 +140,26 @@ class BraintreeClient {
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
             throw ApiError.ofMessage("Unexpected error during refund").asInternalServerError()
+        }
+    }
+
+    /** Makes reverse request to Braintree
+     *
+     * @param reverseRequest Braintree reverse request
+     * @param pspConfigModel Braintree configuration
+     * @param mode Braintree mode
+     * @return Braintree payment response
+     */
+    fun reverse(reverseRequest: BraintreeReverseRequestModel, pspConfigModel: PspConfigModel, mode: String): BraintreePaymentResponseModel {
+        try {
+            val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
+            val result = braintreeGateway.transaction().voidTransaction(
+                reverseRequest.pspTransactionId
+            )
+            return parseBraintreeResult(result)
+        } catch (exception: BraintreeException) {
+            logger.error { exception.message }
+            throw ApiError.ofMessage("Unexpected error during reverse").asInternalServerError()
         }
     }
 
