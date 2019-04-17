@@ -100,8 +100,8 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
     }
 
     override fun reverse(pspReversalRequestModel: PspReversalRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
-        logger.info("Braintree reverse payment has been called for psp transaction {} for {} mode", pspReversalRequestModel.pspTransactionId, getBraintreeMode(pspTestMode))
         val braintreeMode = getBraintreeMode(pspTestMode)
+        logger.info("Braintree reverse payment has been called for psp transaction {} for {} mode", pspReversalRequestModel.pspTransactionId, braintreeMode)
 
         val request = BraintreeReverseRequestModel(
             pspTransactionId = pspReversalRequestModel.pspTransactionId
