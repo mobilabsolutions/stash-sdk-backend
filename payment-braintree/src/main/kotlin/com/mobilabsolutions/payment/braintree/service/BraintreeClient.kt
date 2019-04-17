@@ -222,10 +222,10 @@ class BraintreeClient {
                 BraintreePaymentResponseModel(
                     status = result.transaction.status,
                     transactionId = result.transaction.id,
-                    errorCode = if (!isEmptyOrNull(result.transaction.processorSettlementResponseCode))
-                        result.transaction.processorSettlementResponseCode else result.transaction.processorResponseCode,
-                    errorMessage = if (!isEmptyOrNull(result.transaction.processorSettlementResponseText))
-                        result.transaction.processorSettlementResponseText else result.transaction.processorResponseText
+                    errorCode = if (isEmptyOrNull(result.transaction.processorSettlementResponseCode))
+                        result.transaction.processorResponseCode else result.transaction.processorSettlementResponseCode,
+                    errorMessage = if (isEmptyOrNull(result.transaction.processorSettlementResponseText))
+                        result.transaction.processorResponseText else result.transaction.processorSettlementResponseText
                 )
             } else {
                 return BraintreePaymentResponseModel(
