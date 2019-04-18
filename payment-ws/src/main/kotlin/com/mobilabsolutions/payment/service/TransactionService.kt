@@ -144,6 +144,9 @@ class TransactionService(
             TransactionStatus.SUCCESS
         )
             ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
+        if (transactionRepository.getByTransactionIdAndAction(transactionId, TransactionAction.REVERSAL, TransactionStatus.SUCCESS) != null)
+            throw ApiError.ofMessage("Transaction was reversed, capture is not possible").asBadRequest()
+
         if (preauthTransaction.merchant.id != apiKey.merchant.id)
             throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
 
