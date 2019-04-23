@@ -199,7 +199,7 @@ class TransactionServiceTest {
         Mockito.`when`(
             transactionRepository.getByTransactionIdAndStatus(
                 correctTransactionId,
-                TransactionStatus.SUCCESS
+                TransactionStatus.SUCCESS.toString()
             )
         ).thenReturn(
             Transaction(
@@ -216,7 +216,7 @@ class TransactionServiceTest {
         Mockito.`when`(
             transactionRepository.getByTransactionIdAndStatus(
                 correctTransactionIdAlreadyCaptured,
-                TransactionStatus.SUCCESS
+                TransactionStatus.SUCCESS.toString()
             )
         ).thenReturn(
             Transaction(
@@ -233,7 +233,7 @@ class TransactionServiceTest {
         Mockito.`when`(
             transactionRepository.getByTransactionIdAndStatus(
                 correctTransactionIdAlreadyReversed,
-                TransactionStatus.SUCCESS
+                TransactionStatus.SUCCESS.toString()
             )
         ).thenReturn(
             Transaction(

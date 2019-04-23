@@ -140,11 +140,11 @@ class TransactionService(
             ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
         val lastTransaction = transactionRepository.getByTransactionIdAndStatus(
             transactionId,
-            TransactionStatus.SUCCESS
+            TransactionStatus.SUCCESS.toString()
         )
             ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
-        if (lastTransaction.action == TransactionAction.REVERSAL)
-            throw ApiError.ofMessage("Transaction was reversed, capture is not possible").asBadRequest()
+        if (lastTransaction.action != TransactionAction.PREAUTH && lastTransaction.action != TransactionAction.CAPTURE)
+            throw ApiError.ofMessage("${lastTransaction.action} transaction cannot be captured").asBadRequest()
 
         if (lastTransaction.merchant.id != apiKey.merchant.id)
             throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
@@ -222,11 +222,11 @@ class TransactionService(
             ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
         val lastTransaction = transactionRepository.getByTransactionIdAndStatus(
             transactionId,
-            TransactionStatus.SUCCESS
+            TransactionStatus.SUCCESS.toString()
         )
             ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
-        if (lastTransaction.action == TransactionAction.CAPTURE)
-            throw ApiError.ofMessage("Transaction was already captured, please try the refund instead").asBadRequest()
+        if (lastTransaction.action != TransactionAction.PREAUTH && lastTransaction.action != TransactionAction.REVERSAL)
+            throw ApiError.ofMessage("${lastTransaction.action} transaction cannot be reversed").asBadRequest()
 
         if (lastTransaction.merchant.id != apiKey.merchant.id)
             throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
