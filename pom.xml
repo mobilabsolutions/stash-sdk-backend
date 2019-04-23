@@ -18,6 +18,7 @@
         <module>payment-commons</module>
         <module>payment-bs-one</module>
         <module>payment-braintree</module>
+        <module>payment-adyen</module>
     </modules>
 
     <properties>
