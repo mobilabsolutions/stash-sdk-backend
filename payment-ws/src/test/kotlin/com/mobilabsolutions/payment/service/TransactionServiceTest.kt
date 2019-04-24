@@ -197,54 +197,15 @@ class TransactionServiceTest {
                 pspResponse = pspResponse)
             )
         Mockito.`when`(
-            transactionRepository.getByTransactionIdAndAction(
+            transactionRepository.getByTransactionIdAndStatus(
                 correctTransactionId,
-                preauthAction,
-                TransactionStatus.SUCCESS
+                TransactionStatus.SUCCESS.toString()
             )
         ).thenReturn(
             Transaction(
                 amount = 1,
                 currencyId = "EUR",
                 transactionId = correctTransactionId,
-                pspTestMode = test,
-                merchant = Merchant("1", pspConfig = pspConfig),
-                alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
-                pspResponse = pspResponse
-            )
-        )
-        Mockito.`when`(
-            transactionRepository.getByTransactionIdAndAction(
-                correctTransactionIdWithoutAuth,
-                preauthAction
-            )
-        ).thenReturn(null)
-        Mockito.`when`(
-            transactionRepository.getByTransactionIdAndAction(
-                correctTransactionIdAlreadyCaptured,
-                captureAction
-            )
-        )
-            .thenReturn(Transaction(
-                amount = 1,
-                currencyId = "EUR",
-                transactionId = correctTransactionId,
-                pspTestMode = test,
-                action = TransactionAction.CAPTURE,
-                merchant = Merchant("1", pspConfig = pspConfig),
-                alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
-                pspResponse = pspResponse)
-            )
-        Mockito.`when`(
-            transactionRepository.getByTransactionIdAndAction(
-                correctTransactionIdAlreadyCaptured,
-                preauthAction,
-                TransactionStatus.SUCCESS
-            )
-        ).thenReturn(
-            Transaction(
-                amount = 1,
-                currencyId = "EUR",
                 pspTestMode = test,
                 action = TransactionAction.PREAUTH,
                 merchant = Merchant("1", pspConfig = pspConfig),
@@ -253,48 +214,34 @@ class TransactionServiceTest {
             )
         )
         Mockito.`when`(
-            transactionRepository.getByTransactionIdAndAction(
-                correctTransactionIdAlreadyReversed,
-                reverseAction
-            )
-        )
-            .thenReturn(Transaction(
-                amount = 1,
-                currencyId = "EUR",
-                transactionId = correctTransactionId,
-                pspTestMode = test,
-                action = TransactionAction.REVERSAL,
-                merchant = Merchant("1", pspConfig = pspConfig),
-                alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
-                pspResponse = pspResponse)
-            )
-        Mockito.`when`(
-            transactionRepository.getByTransactionIdAndAction(
-                correctTransactionIdAlreadyReversed,
-                preauthAction,
-                TransactionStatus.SUCCESS
+            transactionRepository.getByTransactionIdAndStatus(
+                correctTransactionIdAlreadyCaptured,
+                TransactionStatus.SUCCESS.toString()
             )
         ).thenReturn(
             Transaction(
                 amount = 1,
                 currencyId = "EUR",
+                transactionId = correctTransactionId,
                 pspTestMode = test,
+                action = TransactionAction.CAPTURE,
                 merchant = Merchant("1", pspConfig = pspConfig),
                 alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
                 pspResponse = pspResponse
             )
         )
         Mockito.`when`(
-            transactionRepository.getByTransactionIdAndAction(
-                correctTransactionIdWrongTestMode,
-                preauthAction,
-                TransactionStatus.SUCCESS
+            transactionRepository.getByTransactionIdAndStatus(
+                correctTransactionIdAlreadyReversed,
+                TransactionStatus.SUCCESS.toString()
             )
         ).thenReturn(
             Transaction(
                 amount = 1,
                 currencyId = "EUR",
-                pspTestMode = false,
+                transactionId = correctTransactionId,
+                pspTestMode = test,
+                action = TransactionAction.REVERSAL,
                 merchant = Merchant("1", pspConfig = pspConfig),
                 alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
                 pspResponse = pspResponse

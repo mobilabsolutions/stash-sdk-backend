@@ -138,60 +138,59 @@ class TransactionService(
     ): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
             ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
-        val preauthTransaction = transactionRepository.getByTransactionIdAndAction(
+        val lastTransaction = transactionRepository.getByTransactionIdAndStatus(
             transactionId,
-            TransactionAction.PREAUTH,
-            TransactionStatus.SUCCESS
+            TransactionStatus.SUCCESS.toString()
         )
             ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
-        if (preauthTransaction.merchant.id != apiKey.merchant.id)
+        if (lastTransaction.action != TransactionAction.PREAUTH && lastTransaction.action != TransactionAction.CAPTURE)
+            throw ApiError.ofMessage("${lastTransaction.action} transaction cannot be captured").asBadRequest()
+
+        if (lastTransaction.merchant.id != apiKey.merchant.id)
             throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
 
         val testMode = pspTestMode ?: false
-        if (testMode != preauthTransaction.pspTestMode)
+        if (testMode != lastTransaction.pspTestMode)
             throw ApiError.ofMessage("PSP test mode for this transaction is different than the mode for preauthorization transaction. Please, check your header").asBadRequest()
 
-        val captureTransaction =
-            transactionRepository.getByTransactionIdAndAction(transactionId, TransactionAction.CAPTURE)
-
         when {
-            captureTransaction != null -> return PaymentResponseModel(
-                captureTransaction.transactionId,
-                captureTransaction.amount,
-                captureTransaction.currencyId,
-                captureTransaction.status,
-                captureTransaction.action,
+            lastTransaction.action == TransactionAction.CAPTURE -> return PaymentResponseModel(
+                lastTransaction.transactionId,
+                lastTransaction.amount,
+                lastTransaction.currencyId,
+                lastTransaction.status,
+                lastTransaction.action,
                 objectMapper.readValue(
-                    captureTransaction.pspResponse,
+                    lastTransaction.pspResponse,
                     PspPaymentResponseModel::class.java
                 )?.errorMessage
             )
             else -> {
-                val psp = pspRegistry.find(preauthTransaction.alias?.psp!!)
-                    ?: throw ApiError.ofMessage("PSP implementation '${preauthTransaction.alias?.psp}' cannot be found").asBadRequest()
+                val psp = pspRegistry.find(lastTransaction.alias?.psp!!)
+                    ?: throw ApiError.ofMessage("PSP implementation '${lastTransaction.alias?.psp}' cannot be found").asBadRequest()
                 val pspCaptureRequest = PspCaptureRequestModel(
-                    pspTransactionId = getPspPaymentResponse(preauthTransaction).pspTransactionId,
-                    amount = preauthTransaction.amount,
-                    currency = preauthTransaction.currencyId,
-                    pspConfig = getPspConfig(preauthTransaction.alias!!)
+                    pspTransactionId = getPspPaymentResponse(lastTransaction).pspTransactionId,
+                    amount = lastTransaction.amount,
+                    currency = lastTransaction.currencyId,
+                    pspConfig = getPspConfig(lastTransaction.alias!!)
                 )
                 val pspPaymentResponse = psp.capture(pspCaptureRequest, pspTestMode)
                 val newTransaction = Transaction(
                     transactionId = transactionId,
-                    idempotentKey = preauthTransaction.idempotentKey,
-                    currencyId = preauthTransaction.currencyId,
-                    amount = preauthTransaction.amount,
-                    reason = preauthTransaction.reason,
+                    idempotentKey = lastTransaction.idempotentKey,
+                    currencyId = lastTransaction.currencyId,
+                    amount = lastTransaction.amount,
+                    reason = lastTransaction.reason,
                     status = pspPaymentResponse.status,
                     action = TransactionAction.CAPTURE,
-                    paymentMethod = preauthTransaction.paymentMethod,
-                    paymentInfo = objectMapper.writeValueAsString(readPaymentInfo(preauthTransaction, apiKey)),
+                    paymentMethod = lastTransaction.paymentMethod,
+                    paymentInfo = objectMapper.writeValueAsString(readPaymentInfo(lastTransaction, apiKey)),
                     pspResponse = objectMapper.writeValueAsString(pspPaymentResponse),
-                    merchantTransactionId = preauthTransaction.merchantTransactionId,
-                    merchantCustomerId = preauthTransaction.merchantCustomerId,
-                    pspTestMode = pspTestMode ?: preauthTransaction.pspTestMode,
-                    merchant = preauthTransaction.merchant,
-                    alias = preauthTransaction.alias
+                    merchantTransactionId = lastTransaction.merchantTransactionId,
+                    merchantCustomerId = lastTransaction.merchantCustomerId,
+                    pspTestMode = pspTestMode ?: lastTransaction.pspTestMode,
+                    merchant = lastTransaction.merchant,
+                    alias = lastTransaction.alias
                 )
                 transactionRepository.save(newTransaction)
 
@@ -221,62 +220,58 @@ class TransactionService(
     ): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
             ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
-        val preauthTransaction = transactionRepository.getByTransactionIdAndAction(
+        val lastTransaction = transactionRepository.getByTransactionIdAndStatus(
             transactionId,
-            TransactionAction.PREAUTH,
-            TransactionStatus.SUCCESS
+            TransactionStatus.SUCCESS.toString()
         )
             ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
-        if (transactionRepository.getByTransactionIdAndAction(transactionId, TransactionAction.CAPTURE, TransactionStatus.SUCCESS) != null)
-            throw ApiError.ofMessage("Transaction was already captured, please try the refund instead").asBadRequest()
+        if (lastTransaction.action != TransactionAction.PREAUTH && lastTransaction.action != TransactionAction.REVERSAL)
+            throw ApiError.ofMessage("${lastTransaction.action} transaction cannot be reversed").asBadRequest()
 
-        if (preauthTransaction.merchant.id != apiKey.merchant.id)
+        if (lastTransaction.merchant.id != apiKey.merchant.id)
             throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
 
         val testMode = pspTestMode ?: false
-        if (testMode != preauthTransaction.pspTestMode)
+        if (testMode != lastTransaction.pspTestMode)
             throw ApiError.ofMessage("PSP test mode for this transaction is different than the mode for preauthorization transaction. Please, check your header").asBadRequest()
 
-        val reversalTransaction =
-            transactionRepository.getByTransactionIdAndAction(transactionId, TransactionAction.REVERSAL)
-
         when {
-            reversalTransaction != null -> return PaymentResponseModel(
-                reversalTransaction.transactionId,
-                reversalTransaction.amount,
-                reversalTransaction.currencyId,
-                reversalTransaction.status,
-                reversalTransaction.action,
+            lastTransaction.action == TransactionAction.REVERSAL -> return PaymentResponseModel(
+                lastTransaction.transactionId,
+                lastTransaction.amount,
+                lastTransaction.currencyId,
+                lastTransaction.status,
+                lastTransaction.action,
                 objectMapper.readValue(
-                    reversalTransaction.pspResponse,
+                    lastTransaction.pspResponse,
                     PspPaymentResponseModel::class.java
                 )?.errorMessage
             )
             else -> {
-                val psp = pspRegistry.find(preauthTransaction.alias?.psp!!)
-                    ?: throw ApiError.ofMessage("PSP implementation '${preauthTransaction.alias?.psp}' cannot be found").asBadRequest()
+                val psp = pspRegistry.find(lastTransaction.alias?.psp!!)
+                    ?: throw ApiError.ofMessage("PSP implementation '${lastTransaction.alias?.psp}' cannot be found").asBadRequest()
                 val pspReversalRequest = PspReversalRequestModel(
-                    pspTransactionId = getPspPaymentResponse(preauthTransaction).pspTransactionId,
-                    currency = preauthTransaction.currencyId,
-                    pspConfig = getPspConfig(preauthTransaction.alias!!)
+                    pspTransactionId = getPspPaymentResponse(lastTransaction).pspTransactionId,
+                    currency = lastTransaction.currencyId,
+                    pspConfig = getPspConfig(lastTransaction.alias!!)
                 )
                 val pspReversalResponse = psp.reverse(pspReversalRequest, pspTestMode)
                 val newTransaction = Transaction(
                     transactionId = transactionId,
-                    idempotentKey = preauthTransaction.idempotentKey,
-                    currencyId = preauthTransaction.currencyId,
-                    amount = preauthTransaction.amount,
+                    idempotentKey = lastTransaction.idempotentKey,
+                    currencyId = lastTransaction.currencyId,
+                    amount = lastTransaction.amount,
                     reason = reverseInfo.reason,
                     status = pspReversalResponse.status,
                     action = TransactionAction.REVERSAL,
-                    paymentMethod = preauthTransaction.paymentMethod,
-                    paymentInfo = objectMapper.writeValueAsString(readPaymentInfo(preauthTransaction, apiKey)),
+                    paymentMethod = lastTransaction.paymentMethod,
+                    paymentInfo = objectMapper.writeValueAsString(readPaymentInfo(lastTransaction, apiKey)),
                     pspResponse = objectMapper.writeValueAsString(pspReversalResponse),
-                    merchantTransactionId = preauthTransaction.merchantTransactionId,
-                    merchantCustomerId = preauthTransaction.merchantCustomerId,
-                    pspTestMode = pspTestMode ?: preauthTransaction.pspTestMode,
-                    merchant = preauthTransaction.merchant,
-                    alias = preauthTransaction.alias
+                    merchantTransactionId = lastTransaction.merchantTransactionId,
+                    merchantCustomerId = lastTransaction.merchantCustomerId,
+                    pspTestMode = pspTestMode ?: lastTransaction.pspTestMode,
+                    merchant = lastTransaction.merchant,
+                    alias = lastTransaction.alias
                 )
                 transactionRepository.save(newTransaction)
 
