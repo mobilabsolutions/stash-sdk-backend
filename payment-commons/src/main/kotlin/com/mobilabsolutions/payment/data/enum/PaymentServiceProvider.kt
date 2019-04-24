@@ -5,5 +5,6 @@ package com.mobilabsolutions.payment.data.enum
  */
 enum class PaymentServiceProvider {
     BS_PAYONE,
-    BRAINTREE
+    BRAINTREE,
+    ADYEN
 }

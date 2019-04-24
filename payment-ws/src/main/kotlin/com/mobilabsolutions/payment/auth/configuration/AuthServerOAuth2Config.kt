@@ -7,11 +7,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer
@@ -46,6 +43,9 @@ class AuthServerOAuth2Config : AuthorizationServerConfigurerAdapter() {
     @Autowired
     private lateinit var oauthClientPasswordEncoder: PasswordEncoder
 
+    @Autowired
+    private lateinit var exceptionTranslator: CustomWebResponseExceptionTranslator
+
     lateinit var signingKey: String
 
     @Bean
@@ -78,10 +78,6 @@ class AuthServerOAuth2Config : AuthorizationServerConfigurerAdapter() {
         endpoints!!.tokenStore(tokenStore()).tokenEnhancer(jwtTokenEnhancer())
             .authenticationManager(authenticationManager)
             .userDetailsService(userDetailsService)
-            .exceptionTranslator { exception ->
-                ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(OAuth2Exception(exception.message))
-            }
+            .exceptionTranslator(exceptionTranslator)
     }
 }

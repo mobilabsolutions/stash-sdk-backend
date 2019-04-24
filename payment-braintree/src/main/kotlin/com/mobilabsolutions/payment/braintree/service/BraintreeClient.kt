@@ -19,6 +19,7 @@ import com.mobilabsolutions.payment.braintree.model.response.BraintreePaymentRes
 import com.mobilabsolutions.payment.braintree.model.response.BraintreeRegisterAliasResponseModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.server.commons.exception.ApiError
+import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import mu.KLogging
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -44,7 +45,7 @@ class BraintreeClient {
             return braintreeGateway.clientToken().generate()
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
-            throw ApiError.ofMessage("Unexpected error during Braintree client token generation").asInternalServerError()
+            throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected error during Braintree client token generation").asInternalServerError()
         }
     }
 
@@ -84,7 +85,7 @@ class BraintreeClient {
             )
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
-            throw ApiError.ofMessage("Unexpected error during PayPal registration").asInternalServerError()
+            throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected error during PayPal registration").asInternalServerError()
         }
     }
 
@@ -101,10 +102,10 @@ class BraintreeClient {
             braintreeGateway.paymentMethod().delete(pspAlias)
         } catch (exception: NotFoundException) {
             logger.error { exception.message }
-            throw ApiError.ofMessage("PayPal alias doesn't exist at Braintree").asInternalServerError()
+            throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "PayPal alias doesn't exist at Braintree").asInternalServerError()
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
-            throw ApiError.ofMessage("Error during PayPal alias deletion").asInternalServerError()
+            throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Error during PayPal alias deletion").asInternalServerError()
         }
     }
 
@@ -130,7 +131,7 @@ class BraintreeClient {
             return parseBraintreeResult(result)
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
-            throw ApiError.ofMessage("Unexpected error during preauthorization").asInternalServerError()
+            throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected error during preauthorization").asInternalServerError()
         }
     }
 
@@ -157,7 +158,7 @@ class BraintreeClient {
             return parseBraintreeResult(result)
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
-            throw ApiError.ofMessage("Unexpected error during authorization").asInternalServerError()
+            throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected error during authorization").asInternalServerError()
         }
     }
 
@@ -179,7 +180,7 @@ class BraintreeClient {
             return parseBraintreeResult(result)
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
-            throw ApiError.ofMessage("Unexpected error during refund").asInternalServerError()
+            throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected error during refund").asInternalServerError()
         }
     }
 
@@ -199,7 +200,7 @@ class BraintreeClient {
             return parseBraintreeResult(result)
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
-            throw ApiError.ofMessage("Unexpected error during reverse").asInternalServerError()
+            throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected error during reverse").asInternalServerError()
         }
     }
 
@@ -219,7 +220,7 @@ class BraintreeClient {
             return parseBraintreeResult(result)
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
-            throw ApiError.ofMessage("Unexpected error during capture").asInternalServerError()
+            throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected error during capture").asInternalServerError()
         }
     }
 

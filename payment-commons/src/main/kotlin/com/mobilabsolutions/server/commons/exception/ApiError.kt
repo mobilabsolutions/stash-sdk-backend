@@ -6,6 +6,7 @@ import com.google.common.base.MoreObjects
 import com.google.common.base.Preconditions.checkNotNull
 import com.google.common.collect.ImmutableMap
 import org.springframework.http.HttpStatus
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception
 import java.util.Objects
 import java.util.Optional
 
@@ -19,12 +20,16 @@ class ApiError private constructor(details: Map<String, Any>) {
 
     companion object {
 
-        private const val MESSAGE_PROPERTY = "message"
-        private const val DETAILS_PROPERTY = "details"
+        private const val MESSAGE_PROPERTY = "error_description"
+        private const val CODE_PROPERTY = "error_code"
+        private const val DETAILS_PROPERTY = "error_details"
 
-        @JvmStatic
         fun ofMessage(message: String): ApiError {
             return ApiError(ImmutableMap.of<String, Any>(MESSAGE_PROPERTY, message))
+        }
+
+        fun ofErrorCode(errorCode: ApiErrorCode, message: String? = null): ApiError {
+            return ApiError(ImmutableMap.of<String, Any>(CODE_PROPERTY, errorCode.code, MESSAGE_PROPERTY, message ?: errorCode.message))
         }
 
         fun ofDetails(details: Map<String, Any>): ApiError {
@@ -38,6 +43,10 @@ class ApiError private constructor(details: Map<String, Any>) {
 
     fun asBadRequest(): ApiException {
         return ApiException(HttpStatus.BAD_REQUEST, this)
+    }
+
+    fun asBadConfiguration(): ApiException {
+        return ApiException(HttpStatus.UNPROCESSABLE_ENTITY, this)
     }
 
     fun asUnauthorized(): ApiException {
@@ -92,6 +101,10 @@ class ApiError private constructor(details: Map<String, Any>) {
         return ApiException(cause, status, this)
     }
 
+    fun asOAuth2Exception(): OAuth2Exception {
+        return OAuth2Exception(this.toString())
+    }
+
     @JsonAnyGetter
     fun details(): Map<String, Any> {
         return details
@@ -130,6 +143,11 @@ class ApiError private constructor(details: Map<String, Any>) {
 
         fun withMessage(message: String): Builder {
             builder.put(MESSAGE_PROPERTY, message)
+            return this
+        }
+
+        fun withErrorCode(errorCode: ApiErrorCode): Builder {
+            builder.put(CODE_PROPERTY, errorCode)
             return this
         }
 

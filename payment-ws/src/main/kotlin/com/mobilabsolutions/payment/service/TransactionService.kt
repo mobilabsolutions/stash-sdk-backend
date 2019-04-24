@@ -25,6 +25,7 @@ import com.mobilabsolutions.payment.model.request.ReversalRequestModel
 import com.mobilabsolutions.payment.model.response.PaymentResponseModel
 import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
+import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.stereotype.Service
@@ -59,11 +60,11 @@ class TransactionService(
         authorizeInfo: PaymentRequestModel
     ): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
-                ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
+                ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asBadRequest()
         val alias = aliasRepository.getFirstByIdAndActive(authorizeInfo.aliasId!!, true)
-                ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+                ?: throw ApiError.ofErrorCode(ApiErrorCode.ALIAS_NOT_FOUND).asBadRequest()
         val psp = pspRegistry.find(alias.psp!!)
-                ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
+                ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_IMPL_NOT_FOUND, "PSP implementation '${alias.psp}' cannot be found").asInternalServerError()
 
         val pspAuthorizeRequest = PspPaymentRequestModel(
             aliasId = authorizeInfo.aliasId,
@@ -98,13 +99,13 @@ class TransactionService(
         preauthorizeInfo: PaymentRequestModel
     ): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
-            ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asBadRequest()
         val alias = aliasRepository.getFirstByIdAndActive(preauthorizeInfo.aliasId!!, true)
-            ?: throw ApiError.ofMessage("Alias ID cannot be found").asBadRequest()
+            ?: throw throw ApiError.ofErrorCode(ApiErrorCode.ALIAS_NOT_FOUND).asBadRequest()
         val psp = pspRegistry.find(alias.psp!!)
-            ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_IMPL_NOT_FOUND, "PSP implementation '${alias.psp}' cannot be found").asInternalServerError()
         if (getAliasExtra(alias).paymentMethod == PaymentMethod.SEPA)
-            throw ApiError.ofMessage("Sepa is not supported for preauthorization").asBadRequest()
+            throw ApiError.ofErrorCode(ApiErrorCode.SEPA_NOT_ALLOWED).asBadRequest()
 
         val pspPreauthorizeRequest = PspPaymentRequestModel(
             aliasId = preauthorizeInfo.aliasId,
@@ -137,21 +138,21 @@ class TransactionService(
         transactionId: String
     ): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
-            ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asBadRequest()
         val lastTransaction = transactionRepository.getByTransactionIdAndStatus(
             transactionId,
             TransactionStatus.SUCCESS.toString()
         )
-            ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_FOUND).asBadRequest()
         if (lastTransaction.action != TransactionAction.PREAUTH && lastTransaction.action != TransactionAction.CAPTURE)
-            throw ApiError.ofMessage("${lastTransaction.action} transaction cannot be captured").asBadRequest()
+            throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_ALLOWED, "${lastTransaction.action} transaction cannot be captured").asBadRequest()
 
         if (lastTransaction.merchant.id != apiKey.merchant.id)
-            throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
+            throw ApiError.ofErrorCode(ApiErrorCode.WRONG_ALIAS_MERCHANT_MAPPING).asBadRequest()
 
         val testMode = pspTestMode ?: false
         if (testMode != lastTransaction.pspTestMode)
-            throw ApiError.ofMessage("PSP test mode for this transaction is different than the mode for preauthorization transaction. Please, check your header").asBadRequest()
+            throw ApiError.ofErrorCode(ApiErrorCode.PSP_TEST_MODE_INCONSISTENT).asBadRequest()
 
         when {
             lastTransaction.action == TransactionAction.CAPTURE -> return PaymentResponseModel(
@@ -167,7 +168,7 @@ class TransactionService(
             )
             else -> {
                 val psp = pspRegistry.find(lastTransaction.alias?.psp!!)
-                    ?: throw ApiError.ofMessage("PSP implementation '${lastTransaction.alias?.psp}' cannot be found").asBadRequest()
+                    ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_IMPL_NOT_FOUND, "PSP implementation '${lastTransaction.alias?.psp}' cannot be found").asInternalServerError()
                 val pspCaptureRequest = PspCaptureRequestModel(
                     pspTransactionId = getPspPaymentResponse(lastTransaction).pspTransactionId,
                     amount = lastTransaction.amount,
@@ -219,21 +220,21 @@ class TransactionService(
         reverseInfo: ReversalRequestModel
     ): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
-            ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asBadRequest()
         val lastTransaction = transactionRepository.getByTransactionIdAndStatus(
             transactionId,
             TransactionStatus.SUCCESS.toString()
         )
-            ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_FOUND).asBadRequest()
         if (lastTransaction.action != TransactionAction.PREAUTH && lastTransaction.action != TransactionAction.REVERSAL)
-            throw ApiError.ofMessage("${lastTransaction.action} transaction cannot be reversed").asBadRequest()
+            throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_ALLOWED, "${lastTransaction.action} transaction cannot be reversed").asBadRequest()
 
         if (lastTransaction.merchant.id != apiKey.merchant.id)
-            throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
+            throw ApiError.ofErrorCode(ApiErrorCode.WRONG_ALIAS_MERCHANT_MAPPING).asBadRequest()
 
         val testMode = pspTestMode ?: false
         if (testMode != lastTransaction.pspTestMode)
-            throw ApiError.ofMessage("PSP test mode for this transaction is different than the mode for preauthorization transaction. Please, check your header").asBadRequest()
+            throw ApiError.ofErrorCode(ApiErrorCode.PSP_TEST_MODE_INCONSISTENT).asBadRequest()
 
         when {
             lastTransaction.action == TransactionAction.REVERSAL -> return PaymentResponseModel(
@@ -249,7 +250,7 @@ class TransactionService(
             )
             else -> {
                 val psp = pspRegistry.find(lastTransaction.alias?.psp!!)
-                    ?: throw ApiError.ofMessage("PSP implementation '${lastTransaction.alias?.psp}' cannot be found").asBadRequest()
+                    ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_IMPL_NOT_FOUND, "PSP implementation '${lastTransaction.alias?.psp}' cannot be found").asInternalServerError()
                 val pspReversalRequest = PspReversalRequestModel(
                     pspTransactionId = getPspPaymentResponse(lastTransaction).pspTransactionId,
                     currency = lastTransaction.currencyId,
@@ -302,20 +303,20 @@ class TransactionService(
         refundInfo: PaymentDataRequestModel
     ): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
-            ?: throw ApiError.ofMessage("Merchant api key cannot be found").asBadRequest()
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asBadRequest()
         val prevTransaction = transactionRepository.getByTransactionIdAndActions(
             transactionId,
             TransactionAction.CAPTURE,
             TransactionAction.AUTH,
             TransactionStatus.SUCCESS
-        ) ?: throw ApiError.ofMessage("Transaction cannot be found").asBadRequest()
+        ) ?: throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_FOUND).asBadRequest()
 
         val alias = prevTransaction.alias
         val psp = pspRegistry.find(alias!!.psp!!)
-            ?: throw ApiError.ofMessage("PSP implementation '${alias.psp}' cannot be found").asBadRequest()
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_IMPL_NOT_FOUND, "PSP implementation '${alias.psp}' cannot be found").asInternalServerError()
 
         if (prevTransaction.merchant.id != apiKey.merchant.id)
-            throw ApiError.ofMessage("Api key is correct but does not map to correct merchant").asBadRequest()
+            throw ApiError.ofErrorCode(ApiErrorCode.WRONG_ALIAS_MERCHANT_MAPPING).asBadRequest()
 
         val paymentRequestModel = PaymentRequestModel(
             alias.id,
@@ -404,7 +405,7 @@ class TransactionService(
 
     private fun getAliasExtra(alias: Alias): AliasExtraModel {
         return objectMapper.readValue(alias.extra
-                ?: throw ApiError.ofMessage("Used alias is incomplete, please define a payment configuration on related alias").asBadRequest(),
+                ?: throw ApiError.ofErrorCode(ApiErrorCode.INCOMPLETE_ALIAS).asBadRequest(),
             AliasExtraModel::class.java
         )
     }
@@ -423,7 +424,7 @@ class TransactionService(
     private fun getPspConfig(alias: Alias): PspConfigModel {
         val result = objectMapper.readValue(alias.merchant?.pspConfig, PspConfigListModel::class.java)
         return result.psp.firstOrNull { it.type == alias.psp!!.toString() }
-            ?: throw ApiError.ofMessage("PSP configuration for '${alias.psp}' cannot be found from used merchant").asBadRequest()
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_NOT_FOUND, "PSP configuration for '${alias.psp}' cannot be found from used merchant").asBadRequest()
     }
 
     companion object : KLogging() {

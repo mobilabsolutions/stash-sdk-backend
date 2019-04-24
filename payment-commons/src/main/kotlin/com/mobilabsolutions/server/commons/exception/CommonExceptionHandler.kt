@@ -42,7 +42,7 @@ class CommonExceptionHandler {
     @ResponseStatus(FORBIDDEN)
     @ExceptionHandler(AccessDeniedException::class)
     fun accessDeniedException(): ApiError {
-        return ApiError.ofMessage("Authenticated user doesn't have the required rights for this operation")
+        return ApiError.ofErrorCode(ApiErrorCode.INSUFFICIENT_RIGHTS)
     }
 
     @ResponseStatus(NOT_FOUND)
