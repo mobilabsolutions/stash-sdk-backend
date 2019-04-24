@@ -66,7 +66,8 @@ class BsPayonePsp(
             mode = getPspMode(pspTestMode),
             publicKey = null,
             privateKey = null,
-            clientToken = null
+            clientToken = null,
+            paymentSession = null
         ) else null
     }
 

@@ -1,5 +1,6 @@
 package com.mobilabsolutions.payment.model
 
+import com.mobilabsolutions.payment.model.request.DynamicPspConfigModel
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import javax.validation.constraints.NotNull
@@ -41,5 +42,8 @@ data class PspConfigModel(
     val privateKey: String?,
 
     @ApiModelProperty(value = "Default flag", example = "true")
-    val default: Boolean = true
+    val default: Boolean = true,
+
+    @ApiModelProperty(value = "PSP Dynamic Config")
+    var dynamicPspConfig: DynamicPspConfigModel?
 )

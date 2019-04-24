@@ -12,6 +12,7 @@ import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.payment.model.request.AliasRequestModel
+import com.mobilabsolutions.payment.model.request.DynamicPspConfigModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.payment.model.response.AliasResponseModel
@@ -43,15 +44,17 @@ class AliasService(
      * @param publishableKey Publishable Key
      * @param pspType PSP Type
      * @param idempotentKey Idempotent key
+     * @param dynamicPspConfig Dynamic PSP config
      * @param pspTestMode indicator whether is the test mode or not
      * @return alias method response
      */
-    fun createAlias(publishableKey: String, pspType: String, idempotentKey: String, pspTestMode: Boolean?): AliasResponseModel {
+    fun createAlias(publishableKey: String, pspType: String, idempotentKey: String, dynamicPspConfig: DynamicPspConfigModel, pspTestMode: Boolean?): AliasResponseModel {
         logger.info("Creating alias for {} psp", pspType)
         val merchantApiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofMessage("Publishable Key cannot be found").asBadRequest()
 
         val result = objectMapper.readValue(merchantApiKey.merchant.pspConfig ?: throw ApiError.ofMessage("There are no PSP configurations defined for used merchant").asInternalServerError(), PspConfigListModel::class.java)
         val pspConfig = result.psp.firstOrNull { it.type == pspType }
+        pspConfig?.dynamicPspConfig = dynamicPspConfig
         val pspConfigType = PaymentServiceProvider.valueOf(pspConfig?.type ?: throw ApiError.ofMessage("PSP configuration for '$pspType' cannot be found from used merchant").asBadRequest())
         val psp = pspRegistry.find(pspConfigType) ?: throw ApiError.ofMessage("PSP implementation '$pspType' cannot be found").asBadRequest()
         val calculatedConfig = psp.calculatePspConfig(pspConfig, pspTestMode)

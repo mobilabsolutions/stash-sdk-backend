@@ -53,7 +53,8 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
             mode = braintreeMode,
             publicKey = null,
             privateKey = null,
-            clientToken = braintreeClient.generateClientToken(pspConfigModel, braintreeMode)
+            clientToken = braintreeClient.generateClientToken(pspConfigModel, braintreeMode),
+            paymentSession = null
         ) else null
     }
 

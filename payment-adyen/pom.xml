@@ -11,6 +11,10 @@
 
     <artifactId>payment-adyen</artifactId>
 
+    <properties>
+        <adyen-version>2.1.0</adyen-version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -37,6 +41,13 @@
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
+        </dependency>
+
+        <!--Adyen-->
+        <dependency>
+            <groupId>com.adyen</groupId>
+            <artifactId>adyen-java-api-library</artifactId>
+            <version>${adyen-version}</version>
         </dependency>
 
         <!--Util-->
@@ -92,6 +103,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>

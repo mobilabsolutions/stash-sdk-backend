@@ -78,7 +78,7 @@ class TransactionServiceTest {
         "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\", \"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}}"
     private val reverseInfo = ReversalRequestModel("some reason")
     private val pspConfigModel = PspConfigModel(
-        PaymentServiceProvider.BS_PAYONE.toString(), "mobilab", "123", "123", "123", null, null, null, null, null, true
+        PaymentServiceProvider.BS_PAYONE.toString(), "mobilab", "123", "123", "123", null, null, null, null, null, true, null
     )
     private val aliasExtra = AliasExtraModel(null, null, null, PersonalDataModel(null, null, "Mustermann", null, null, "Berlin", "DE"), PaymentMethod.CC)
 

@@ -80,7 +80,8 @@ class BsPayonePspTest {
         null,
         null,
         null,
-        true
+        true,
+        null
     )
 
     @InjectMocks
