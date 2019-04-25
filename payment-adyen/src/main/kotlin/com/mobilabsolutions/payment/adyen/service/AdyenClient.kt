@@ -6,6 +6,8 @@ import com.adyen.enums.Environment
 import com.adyen.model.Amount
 import com.adyen.model.checkout.PaymentSessionRequest
 import com.adyen.service.Checkout
+import com.mobilabsolutions.payment.adyen.data.enum.AdyenChannel
+import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import mu.KLogging
@@ -34,10 +36,10 @@ class AdyenClient(
      */
     fun generateClientToken(pspConfigModel: PspConfigModel, mode: String): String {
         val config = Config()
-        config.apiKey = if (mode == "test") pspConfigModel.sandboxPublicKey else pspConfigModel.publicKey
+        config.apiKey = if (mode == AdyenMode.TEST.mode) pspConfigModel.sandboxPublicKey else pspConfigModel.publicKey
 
         val client = Client(config)
-        if (mode == "test") client.setEnvironment(Environment.TEST, TEST_URL)
+        if (mode == AdyenMode.TEST.mode) client.setEnvironment(Environment.TEST, TEST_URL)
         else client.setEnvironment(Environment.LIVE, LIVE_URL)
 
         val checkout = Checkout(client)
@@ -49,13 +51,13 @@ class AdyenClient(
         val paymentSessionRequest = PaymentSessionRequest()
         paymentSessionRequest.reference = randomStringGenerator.generateRandomAlphanumeric(5)
         paymentSessionRequest.shopperReference = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
-        paymentSessionRequest.channel = if (pspConfigModel.dynamicPspConfig!!.channel == "android") PaymentSessionRequest.ChannelEnum.ANDROID else PaymentSessionRequest.ChannelEnum.IOS
+        paymentSessionRequest.channel = if (pspConfigModel.dynamicPspConfig!!.channel == AdyenChannel.ANDROID.channel) PaymentSessionRequest.ChannelEnum.ANDROID else PaymentSessionRequest.ChannelEnum.IOS
         paymentSessionRequest.token = pspConfigModel.dynamicPspConfig!!.token
         paymentSessionRequest.returnUrl = pspConfigModel.dynamicPspConfig!!.returnUrl
         paymentSessionRequest.countryCode = pspConfigModel.country
         paymentSessionRequest.shopperLocale = pspConfigModel.locale
         paymentSessionRequest.sessionValidity = DateTimeFormatter.ISO_INSTANT.format(Instant.now())
-        paymentSessionRequest.merchantAccount = pspConfigModel.sandboxMerchantId
+        paymentSessionRequest.merchantAccount = if (mode == AdyenMode.TEST.mode) pspConfigModel.sandboxMerchantId else pspConfigModel.merchantId
         paymentSessionRequest.amount = amount
 
         val response = checkout.paymentSession(paymentSessionRequest)

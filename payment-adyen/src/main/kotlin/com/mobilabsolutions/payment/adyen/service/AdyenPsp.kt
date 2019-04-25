@@ -33,7 +33,7 @@ class AdyenPsp(private val adyenClient: AdyenClient) : Psp {
         val adyenMode = getAdyenMode(pspTestMode)
         return if (pspConfigModel != null) PspAliasConfigModel(
             type = PaymentServiceProvider.ADYEN.toString(),
-            merchantId = if (adyenMode == "test") pspConfigModel.sandboxMerchantId else pspConfigModel.merchantId,
+            merchantId = if (adyenMode == AdyenMode.TEST.mode) pspConfigModel.sandboxMerchantId else pspConfigModel.merchantId,
             portalId = null,
             request = null,
             apiVersion = null,
@@ -42,7 +42,7 @@ class AdyenPsp(private val adyenClient: AdyenClient) : Psp {
             accountId = null,
             encoding = null,
             mode = adyenMode,
-            publicKey = if (adyenMode == "test") pspConfigModel.sandboxPublicKey else pspConfigModel.publicKey,
+            publicKey = if (adyenMode == AdyenMode.TEST.mode) pspConfigModel.sandboxPublicKey else pspConfigModel.publicKey,
             privateKey = null,
             clientToken = null,
             paymentSession = adyenClient.generateClientToken(pspConfigModel, adyenMode)
