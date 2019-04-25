@@ -6,9 +6,11 @@ import com.adyen.enums.Environment
 import com.adyen.model.Amount
 import com.adyen.model.checkout.PaymentSessionRequest
 import com.adyen.service.Checkout
+import com.adyen.service.exception.ApiException
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenChannel
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import mu.KLogging
 import org.springframework.stereotype.Service
@@ -60,7 +62,11 @@ class AdyenClient(
         paymentSessionRequest.merchantAccount = if (mode == AdyenMode.TEST.mode) pspConfigModel.sandboxMerchantId else pspConfigModel.merchantId
         paymentSessionRequest.amount = amount
 
-        val response = checkout.paymentSession(paymentSessionRequest)
+        val response = try {
+            checkout.paymentSession(paymentSessionRequest)
+        } catch (exception: ApiException) {
+            throw ApiError.ofMessage("Error during requesting Adyen payment session").asInternalServerError()
+        }
 
         return response.paymentSession.toString()
     }
