@@ -1,5 +1,6 @@
 package com.mobilabsolutions.payment.adyen.service
 
+import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
@@ -29,9 +30,10 @@ class AdyenPsp(private val adyenClient: AdyenClient) : Psp {
 
     override fun calculatePspConfig(pspConfigModel: PspConfigModel?, pspTestMode: Boolean?): PspAliasConfigModel? {
         logger.info { "Adyen config calculation has been called..." }
+        val adyenMode = getAdyenMode(pspTestMode)
         return if (pspConfigModel != null) PspAliasConfigModel(
             type = PaymentServiceProvider.ADYEN.toString(),
-            merchantId = null,
+            merchantId = if (adyenMode == "test") pspConfigModel.sandboxMerchantId else pspConfigModel.merchantId,
             portalId = null,
             request = null,
             apiVersion = null,
@@ -39,11 +41,11 @@ class AdyenPsp(private val adyenClient: AdyenClient) : Psp {
             hash = null,
             accountId = null,
             encoding = null,
-            mode = null,
-            publicKey = null,
+            mode = adyenMode,
+            publicKey = if (adyenMode == "test") pspConfigModel.sandboxPublicKey else pspConfigModel.publicKey,
             privateKey = null,
             clientToken = null,
-            paymentSession = adyenClient.generateClientToken(pspConfigModel)
+            paymentSession = adyenClient.generateClientToken(pspConfigModel, adyenMode)
         ) else null
     }
 
@@ -73,5 +75,16 @@ class AdyenPsp(private val adyenClient: AdyenClient) : Psp {
 
     override fun deleteAlias(pspDeleteAliasRequestModel: PspDeleteAliasRequestModel, pspTestMode: Boolean?) {
         TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+    }
+
+    /**
+     * Resolves PSP mode using passed in boolean
+     *
+     * @param test Boolean representing mode
+     * @return Adyen mode as a string representation
+     */
+    private fun getAdyenMode(test: Boolean?): String {
+        if (test == null || test == false) return AdyenMode.LIVE.mode
+        return AdyenMode.TEST.mode
     }
 }

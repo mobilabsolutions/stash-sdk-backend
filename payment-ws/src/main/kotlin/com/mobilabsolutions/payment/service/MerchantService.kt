@@ -57,6 +57,9 @@ class MerchantService(
                         sandboxPrivateKey = pspConfigRequestModel.pspConfig.sandboxPrivateKey,
                         publicKey = pspConfigRequestModel.pspConfig.publicKey,
                         privateKey = pspConfigRequestModel.pspConfig.privateKey,
+                        currency = pspConfigRequestModel.pspConfig.currency,
+                        country = pspConfigRequestModel.pspConfig.country,
+                        locale = pspConfigRequestModel.pspConfig.locale,
                         dynamicPspConfig = null
                     )
                 )
@@ -122,6 +125,9 @@ class MerchantService(
                         sandboxPrivateKey = pspUpsertConfigRequestModel.sandboxPrivateKey,
                         publicKey = pspUpsertConfigRequestModel.publicKey,
                         privateKey = pspUpsertConfigRequestModel.privateKey,
+                        currency = pspUpsertConfigRequestModel.currency,
+                        country = pspUpsertConfigRequestModel.country,
+                        locale = pspUpsertConfigRequestModel.locale,
                         dynamicPspConfig = null
                     )
                 )
@@ -185,6 +191,9 @@ class MerchantService(
             publicKey,
             privateKey,
             default = default,
+            currency = null,
+            country = null,
+            locale = null,
             dynamicPspConfig = null
         )
 }

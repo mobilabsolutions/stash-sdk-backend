@@ -12,5 +12,8 @@ data class DynamicPspConfigModel(
     val token: String?,
 
     @ApiModelProperty(value = "Return URL", example = "app://")
-    val returnUrl: String?
+    val returnUrl: String?,
+
+    @ApiModelProperty(value = "Channel", example = "Android")
+    val channel: String?
 )

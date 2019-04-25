@@ -36,5 +36,14 @@ data class PspUpsertConfigRequestModel(
     val privateKey: String?,
 
     @ApiModelProperty(value = "Default flag", example = "true")
-    val default: Boolean = true
+    val default: Boolean = true,
+
+    @ApiModelProperty(value = "Currency", example = "EUR")
+    val currency: String?,
+
+    @ApiModelProperty(value = "Country", example = "Germany")
+    val country: String?,
+
+    @ApiModelProperty(value = "Locale of the merchant user", example = "de-DE")
+    val locale: String?
 )

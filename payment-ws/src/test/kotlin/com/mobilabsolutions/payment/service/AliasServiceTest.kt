@@ -114,32 +114,32 @@ class AliasServiceTest {
     @Test
     fun `create alias with wrong header parameters`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(unknownPublishableKey, pspType, usedIdempotentKey, DynamicPspConfigModel(null, null), true)
+            aliasService.createAlias(unknownPublishableKey, pspType, usedIdempotentKey, DynamicPspConfigModel(null, null, null), true)
         }
     }
 
     @Test
     fun `create alias with unknown pspType`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(knownPublishableKey, pspType, usedIdempotentKey, DynamicPspConfigModel(null, null), true)
+            aliasService.createAlias(knownPublishableKey, pspType, usedIdempotentKey, DynamicPspConfigModel(null, null, null), true)
         }
     }
 
     @Test
     fun `create alias with new idempotent key`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(knownPublishableKey, pspType, newIdempotentKey, DynamicPspConfigModel(null, null), true)
+            aliasService.createAlias(knownPublishableKey, pspType, newIdempotentKey, DynamicPspConfigModel(null, null, null), true)
         }
     }
 
     @Test
     fun `create alias with used idempotent key`() {
-        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, DynamicPspConfigModel(null, null), true)
+        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, DynamicPspConfigModel(null, null, null), true)
     }
 
     @Test
     fun `create alias successfully`() {
-        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, DynamicPspConfigModel(null, null), true)
+        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, DynamicPspConfigModel(null, null, null), true)
     }
 
     @Test

@@ -2,11 +2,14 @@ package com.mobilabsolutions.payment.adyen.service
 
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.request.DynamicPspConfigModel
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
@@ -21,6 +24,14 @@ import org.mockito.quality.Strictness
 class AdyenPspTest {
     private val sandboxMerchantId = "some merchant id"
     private val sandboxPublicKey = "some public key"
+    private val currency = "EUR"
+    private val country = "DE"
+    private val locale = "de-DE"
+    private val dynamicPspConfig = DynamicPspConfigModel(
+        "some token",
+        "some url",
+        "some channel"
+    )
     private val pspConfig = PspConfigModel(
         PaymentServiceProvider.ADYEN.toString(),
         null,
@@ -33,8 +44,12 @@ class AdyenPspTest {
         null,
         null,
         true,
-        null
+        currency,
+        country,
+        locale,
+        dynamicPspConfig
     )
+    private val paymentSession = "123"
 
     @InjectMocks
     private lateinit var adyenPsp: AdyenPsp
@@ -45,5 +60,13 @@ class AdyenPspTest {
     @BeforeAll
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
+
+        Mockito.`when`(adyenClient.generateClientToken(pspConfig, "test"))
+            .thenReturn(paymentSession)
+    }
+
+    @Test
+    fun `calculate PSP config`() {
+        adyenPsp.calculatePspConfig(pspConfig, true)
     }
 }

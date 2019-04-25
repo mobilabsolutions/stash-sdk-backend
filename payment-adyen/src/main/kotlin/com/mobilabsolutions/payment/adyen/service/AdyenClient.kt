@@ -22,6 +22,8 @@ class AdyenClient(
 ) {
     companion object : KLogging() {
         const val STRING_LENGTH = 20
+        const val TEST_URL = "https://pal-test.adyen.com"
+        const val LIVE_URL = "https://random-mobilabsolutions-pal-live.adyenpayments.com"
     }
 
     /**
@@ -30,27 +32,28 @@ class AdyenClient(
      * @param pspConfigModel Adyen configuration
      * @return payment session
      */
-    fun generateClientToken(pspConfigModel: PspConfigModel): String {
+    fun generateClientToken(pspConfigModel: PspConfigModel, mode: String): String {
         val config = Config()
-        config.apiKey = pspConfigModel.sandboxPublicKey
+        config.apiKey = if (mode == "test") pspConfigModel.sandboxPublicKey else pspConfigModel.publicKey
 
         val client = Client(config)
-        client.setEnvironment(Environment.TEST, "https://pal-test.adyen.com")
+        if (mode == "test") client.setEnvironment(Environment.TEST, TEST_URL)
+        else client.setEnvironment(Environment.LIVE, LIVE_URL)
 
         val checkout = Checkout(client)
 
         val amount = Amount()
-        amount.currency = "EUR"
+        amount.currency = pspConfigModel.currency
         amount.value = 0
 
         val paymentSessionRequest = PaymentSessionRequest()
         paymentSessionRequest.reference = randomStringGenerator.generateRandomAlphanumeric(5)
         paymentSessionRequest.shopperReference = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
-        paymentSessionRequest.channel = PaymentSessionRequest.ChannelEnum.ANDROID
+        paymentSessionRequest.channel = if (pspConfigModel.dynamicPspConfig!!.channel == "android") PaymentSessionRequest.ChannelEnum.ANDROID else PaymentSessionRequest.ChannelEnum.IOS
         paymentSessionRequest.token = pspConfigModel.dynamicPspConfig!!.token
         paymentSessionRequest.returnUrl = pspConfigModel.dynamicPspConfig!!.returnUrl
-        paymentSessionRequest.countryCode = "DE"
-        paymentSessionRequest.shopperLocale = "de_DE"
+        paymentSessionRequest.countryCode = pspConfigModel.country
+        paymentSessionRequest.shopperLocale = pspConfigModel.locale
         paymentSessionRequest.sessionValidity = DateTimeFormatter.ISO_INSTANT.format(Instant.now())
         paymentSessionRequest.merchantAccount = pspConfigModel.sandboxMerchantId
         paymentSessionRequest.amount = amount
