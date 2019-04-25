@@ -49,9 +49,9 @@ class AdyenClient(
         amount.value = 0
 
         val paymentSessionRequest = PaymentSessionRequest()
-        paymentSessionRequest.reference = randomStringGenerator.generateRandomAlphanumeric(5)
+        paymentSessionRequest.reference = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
         paymentSessionRequest.shopperReference = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
-        paymentSessionRequest.channel = if (pspConfigModel.dynamicPspConfig!!.channel == AdyenChannel.ANDROID.channel) PaymentSessionRequest.ChannelEnum.ANDROID else PaymentSessionRequest.ChannelEnum.IOS
+        paymentSessionRequest.channel = if (pspConfigModel.dynamicPspConfig!!.channel.equals(AdyenChannel.ANDROID.channel, ignoreCase = true)) PaymentSessionRequest.ChannelEnum.ANDROID else PaymentSessionRequest.ChannelEnum.IOS
         paymentSessionRequest.token = pspConfigModel.dynamicPspConfig!!.token
         paymentSessionRequest.returnUrl = pspConfigModel.dynamicPspConfig!!.returnUrl
         paymentSessionRequest.countryCode = pspConfigModel.country

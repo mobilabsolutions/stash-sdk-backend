@@ -47,7 +47,7 @@ data class PspConfigModel(
     @ApiModelProperty(value = "Currency", example = "EUR")
     val currency: String?,
 
-    @ApiModelProperty(value = "Country", example = "Germany")
+    @ApiModelProperty(value = "Country", example = "DE")
     val country: String?,
 
     @ApiModelProperty(value = "Locale of the merchant user", example = "de-DE")
