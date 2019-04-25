@@ -34,7 +34,7 @@ class ApiKeyService(
     fun getMerchantApiKeyInfo(merchantId: String): GetApiKeyResponseModel {
         logger.info("Retrieving merchant {} keys", merchantId)
         val merchantApiKeyList = merchantApiKeyRepository.getAllByMerchantId(merchantId)
-        if (merchantApiKeyList.isEmpty()) throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_EMPTY).asBadRequest()
+        if (merchantApiKeyList.isEmpty()) throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_EMPTY).asException()
         val apiKeyList = merchantApiKeyList.map {
             when (it.keyType) {
                 KeyType.PUBLISHABLE -> ApiKeyReturnInfoModel(
@@ -59,7 +59,7 @@ class ApiKeyService(
     fun createMerchantApiKey(merchantId: String, apiKeyInfo: ApiKeyRequestModel): CreateApiKeyResponseModel {
         logger.info("Creating merchant {} key", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId)
-                ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asBadRequest()
+                ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val generatedKey = merchantId + "-" + RandomStringUtils.randomAlphanumeric(ApiKeyService.STRING_LENGTH)
 
         val merchantApiKey = MerchantApiKey(
@@ -82,7 +82,7 @@ class ApiKeyService(
      */
     fun getMerchantApiKeyInfoById(apiKeyId: Long): ApiKeyReturnInfoModel {
         val merchantApiKey = merchantApiKeyRepository.getFirstById(apiKeyId)
-                ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asBadRequest()
+                ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asException()
 
         return when (merchantApiKey.keyType) {
             KeyType.PUBLISHABLE -> ApiKeyReturnInfoModel(
@@ -108,7 +108,7 @@ class ApiKeyService(
      */
     fun editMerchantApiKeyInfoById(apiKeyId: Long, apiKeyInfo: EditApiKeyRequestModel) {
         if (merchantApiKeyRepository.editApiKey(apiKeyInfo.name, apiKeyId) == 0)
-            throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asBadRequest()
+            throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asException()
     }
 
     /**
@@ -119,7 +119,7 @@ class ApiKeyService(
      */
     fun deleteMerchantApiKeyById(apiKeyId: Long) {
         if (merchantApiKeyRepository.deleteMerchantApiKeyById(apiKeyId) == 0)
-            throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asBadRequest()
+            throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asException()
     }
 
     companion object : KLogging() {

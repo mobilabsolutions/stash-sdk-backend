@@ -193,7 +193,7 @@ class BsPayonePsp(
         return when (paymentMethod) {
             PaymentMethod.CC -> BsPayoneClearingType.CC.type
             PaymentMethod.SEPA -> BsPayoneClearingType.SEPA.type
-            else -> throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Payment method not supported for BS Payone").asBadRequest()
+            else -> throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Payment method not supported for BS Payone").asException()
         }
     }
 

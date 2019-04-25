@@ -13,9 +13,14 @@ import java.util.Optional
 class ApiError private constructor(details: Map<String, Any>) {
 
     private val details: ImmutableMap<String, Any>
+    private lateinit var httpStatus: HttpStatus
 
     init {
         this.details = ImmutableMap.copyOf(checkNotNull(details, DETAILS_PROPERTY))
+    }
+
+    private constructor(details: Map<String, Any>, httpStatus: HttpStatus) : this(details) {
+        this.httpStatus = httpStatus
     }
 
     companion object {
@@ -34,7 +39,7 @@ class ApiError private constructor(details: Map<String, Any>) {
         }
 
         fun ofErrorCode(errorCode: ApiErrorCode, message: String? = null): ApiError {
-            return ApiError(ImmutableMap.of<String, Any>(CODE_PROPERTY, errorCode.code, MESSAGE_PROPERTY, message ?: errorCode.message))
+            return ApiError(ImmutableMap.of<String, Any>(CODE_PROPERTY, errorCode.code, MESSAGE_PROPERTY, message ?: errorCode.message), errorCode.httpStatus)
         }
 
         fun ofDetails(details: Map<String, Any>): ApiError {
@@ -86,6 +91,10 @@ class ApiError private constructor(details: Map<String, Any>) {
         return ApiException(exceptionMessage, HttpStatus.INTERNAL_SERVER_ERROR, this)
     }
 
+    fun asException(): ApiException {
+        return ApiException(this)
+    }
+
     fun asException(status: HttpStatus): ApiException {
         return ApiException(status, this)
     }
@@ -119,6 +128,11 @@ class ApiError private constructor(details: Map<String, Any>) {
     fun message(): Optional<String> {
         val message = details[MESSAGE_PROPERTY]
         return if (message is String) Optional.of(message) else Optional.empty()
+    }
+
+    @JsonIgnore
+    fun httpStatus(): HttpStatus {
+        return httpStatus
     }
 
     override fun equals(other: Any?): Boolean {
