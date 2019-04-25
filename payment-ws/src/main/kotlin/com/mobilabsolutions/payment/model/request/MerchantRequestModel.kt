@@ -2,6 +2,7 @@ package com.mobilabsolutions.payment.model.request
 
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
+import javax.validation.constraints.Email
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
 
@@ -21,8 +22,10 @@ data class MerchantRequestModel(
 
     @ApiModelProperty(value = "Merchant email", example = "merchant@mobilabsolutions.com")
     @field:NotNull
+    @field:Email
     val email: String,
 
     @ApiModelProperty(value = "Merchant default currency", example = "EUR")
+    @field:NotNull
     val currency: String?
 )

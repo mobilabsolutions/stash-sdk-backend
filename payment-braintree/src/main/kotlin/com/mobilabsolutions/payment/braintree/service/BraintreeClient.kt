@@ -74,10 +74,7 @@ class BraintreeClient {
             val paymentMethodResponse = braintreeGateway.paymentMethod().create(paymentMethodRequest)
 
             if (paymentMethodResponse.target == null)
-                throw ApiError.builder()
-                    .withMessage("PayPal registration failed")
-                    .withProperty("braintree.message", paymentMethodResponse.message)
-                    .build().asInternalServerError()
+                throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "PayPal registration failed, braintree.message: " + paymentMethodResponse.message).asInternalServerError()
 
             return BraintreeRegisterAliasResponseModel(
                 paymentMethodResponse.target.token,

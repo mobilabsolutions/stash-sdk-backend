@@ -22,10 +22,15 @@ class ApiError private constructor(details: Map<String, Any>) {
 
         private const val MESSAGE_PROPERTY = "error_description"
         private const val CODE_PROPERTY = "error_code"
-        private const val DETAILS_PROPERTY = "error_details"
+        private const val ERROR_PROPERTY = "error"
+        private const val DETAILS_PROPERTY = "details"
 
         fun ofMessage(message: String): ApiError {
             return ApiError(ImmutableMap.of<String, Any>(MESSAGE_PROPERTY, message))
+        }
+
+        fun ofError(error: String): ApiError {
+            return ApiError(ImmutableMap.of<String, Any>(ERROR_PROPERTY, error))
         }
 
         fun ofErrorCode(errorCode: ApiErrorCode, message: String? = null): ApiError {
@@ -147,7 +152,12 @@ class ApiError private constructor(details: Map<String, Any>) {
         }
 
         fun withErrorCode(errorCode: ApiErrorCode): Builder {
-            builder.put(CODE_PROPERTY, errorCode)
+            builder.put(CODE_PROPERTY, errorCode.code)
+            return this
+        }
+
+        fun withError(error: String): Builder {
+            builder.put(ERROR_PROPERTY, error)
             return this
         }
 

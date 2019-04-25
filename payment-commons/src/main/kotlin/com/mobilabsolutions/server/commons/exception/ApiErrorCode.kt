@@ -10,6 +10,12 @@ enum class ApiErrorCode(val code: String, val message: String) {
     INCORRECT_OLD_PASSWORD("1003", "Old password for given user is incorrect."),
 
     VALIDATION_ERROR("2000", "Validation error"),
+    CONSTRAINT_VALIDATION_FAILED("2001", "Validation error"),
+    MISSING_REQUEST_HEADER("2002", "Validation error"),
+    ARGUMENT_NOT_VALID("2003", "Validation error"),
+    MESSAGE_NOT_READABLE("2004", "Validation error"),
+    MULTIPART_NOT_VALID("2005", "Validation error"),
+    ARGUMENT_TYPE_MISMATCH("2006", "Validation error"),
 
     PUBLISHABLE_KEY_NOT_FOUND("3000", "Publishable Key cannot be found."),
     SECRET_KEY_NOT_FOUND("3001", "Secret Key cannot be found."),
