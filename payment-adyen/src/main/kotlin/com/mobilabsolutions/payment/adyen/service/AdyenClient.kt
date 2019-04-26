@@ -6,7 +6,6 @@ import com.adyen.enums.Environment
 import com.adyen.model.Amount
 import com.adyen.model.checkout.PaymentSessionRequest
 import com.adyen.service.Checkout
-import com.adyen.service.exception.ApiException
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenChannel
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.model.PspConfigModel
@@ -65,7 +64,7 @@ class AdyenClient(
 
         val response = try {
             checkout.paymentSession(paymentSessionRequest)
-        } catch (exception: ApiException) {
+        } catch (exception: Exception) {
             throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Error during requesting Adyen payment session").asException()
         }
 
