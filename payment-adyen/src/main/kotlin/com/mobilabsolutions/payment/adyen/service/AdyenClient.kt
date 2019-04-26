@@ -11,6 +11,7 @@ import com.mobilabsolutions.payment.adyen.data.enum.AdyenChannel
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.server.commons.exception.ApiError
+import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import mu.KLogging
 import org.springframework.stereotype.Service
@@ -65,7 +66,7 @@ class AdyenClient(
         val response = try {
             checkout.paymentSession(paymentSessionRequest)
         } catch (exception: ApiException) {
-            throw ApiError.ofMessage("Error during requesting Adyen payment session").asInternalServerError()
+            throw ApiError.ofErrorCode(ApiErrorCode.AUTHENTICATION_ERROR, "Error during requesting Adyen payment session").asInternalServerError()
         }
 
         return response.paymentSession.toString()
