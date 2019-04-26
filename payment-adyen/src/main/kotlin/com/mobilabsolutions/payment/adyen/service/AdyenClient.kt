@@ -35,7 +35,7 @@ class AdyenClient(
     private val randomStringGenerator: RandomStringGenerator,
     private val restTemplate: RestTemplate,
     private val jsonMapper: ObjectMapper
-    ) {
+) {
     companion object : KLogging() {
         const val STRING_LENGTH = 20
         const val VERIFY_URL = "https://checkout-test.adyen.com/v40/payments/result"

@@ -7,12 +7,8 @@ import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
 import com.mobilabsolutions.payment.model.PspConfigModel
-<<<<<<< HEAD
-import com.mobilabsolutions.payment.model.request.DynamicPspConfigModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
-=======
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
->>>>>>> master
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
