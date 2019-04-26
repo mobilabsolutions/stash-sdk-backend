@@ -5,16 +5,26 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer
+import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler
+import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint
 
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
 @Configuration
 @EnableResourceServer
-class ResourceServerConfiguration : ResourceServerConfigurerAdapter() {
+class ResourceServerConfiguration(private val exceptionTranslator: CustomWebResponseExceptionTranslator) : ResourceServerConfigurerAdapter() {
 
     override fun configure(resources: ResourceServerSecurityConfigurer?) {
-        resources!!.resourceId(RESOURCE_ID)
+        val authenticationEntryPoint = OAuth2AuthenticationEntryPoint()
+        authenticationEntryPoint.setExceptionTranslator(exceptionTranslator)
+        resources!!.authenticationEntryPoint(authenticationEntryPoint)
+
+        val accessDeniedHandler = OAuth2AccessDeniedHandler()
+        accessDeniedHandler.setExceptionTranslator(exceptionTranslator)
+        resources.accessDeniedHandler(accessDeniedHandler)
+
+        resources.resourceId(RESOURCE_ID)
     }
 
     override fun configure(http: HttpSecurity) {

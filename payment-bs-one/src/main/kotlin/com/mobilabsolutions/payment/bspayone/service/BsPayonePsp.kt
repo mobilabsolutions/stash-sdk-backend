@@ -25,6 +25,7 @@ import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
 import com.mobilabsolutions.payment.model.response.PspRegisterAliasResponseModel
 import com.mobilabsolutions.payment.service.Psp
 import com.mobilabsolutions.server.commons.exception.ApiError
+import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import mu.KLogging
 import org.springframework.stereotype.Component
@@ -192,7 +193,7 @@ class BsPayonePsp(
         return when (paymentMethod) {
             PaymentMethod.CC -> BsPayoneClearingType.CC.type
             PaymentMethod.SEPA -> BsPayoneClearingType.SEPA.type
-            else -> throw ApiError.ofMessage("Payment method not supported for BS Payone").asBadRequest()
+            else -> throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Payment method not supported for BS Payone").asException()
         }
     }
 

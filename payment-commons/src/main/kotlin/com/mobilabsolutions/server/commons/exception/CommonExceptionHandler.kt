@@ -42,7 +42,7 @@ class CommonExceptionHandler {
     @ResponseStatus(FORBIDDEN)
     @ExceptionHandler(AccessDeniedException::class)
     fun accessDeniedException(): ApiError {
-        return ApiError.ofMessage("Authenticated user doesn't have the required rights for this operation")
+        return ApiError.ofErrorCode(ApiErrorCode.INSUFFICIENT_RIGHTS)
     }
 
     @ResponseStatus(NOT_FOUND)
@@ -52,7 +52,7 @@ class CommonExceptionHandler {
             "No mapping found for request: " + exception.httpMethod +
                 " " + exception.requestURL
         )
-        return ApiError.ofMessage("nothing.here")
+        return ApiError.builder().withMessage("nothing.here").build()
     }
 
     @ResponseStatus(BAD_REQUEST)
@@ -60,8 +60,9 @@ class CommonExceptionHandler {
     fun handleConstraintViolationException(exception: ConstraintViolationException): ApiError {
         logger.error("Bad request", exception)
         return ApiError.builder()
-            .withMessage("argument.validation.error")
-            .withProperty("errors", exception.message ?: "non readable message")
+            .withMessage(exception.message ?: "non readable message")
+            .withError(ApiErrorCode.CONSTRAINT_VALIDATION_FAILED.name.toLowerCase())
+            .withErrorCode(ApiErrorCode.CONSTRAINT_VALIDATION_FAILED)
             .build()
     }
 
@@ -70,8 +71,9 @@ class CommonExceptionHandler {
     fun handleMissingRequestHeaderException(exception: MissingRequestHeaderException): ApiError {
         logger.error("Bad request", exception)
         return ApiError.builder()
-            .withMessage("argument.validation.error")
-            .withProperty("errors", exception.message)
+            .withMessage(exception.message)
+            .withError(ApiErrorCode.MISSING_REQUEST_HEADER.name.toLowerCase())
+            .withErrorCode(ApiErrorCode.MISSING_REQUEST_HEADER)
             .build()
     }
 
@@ -86,8 +88,53 @@ class CommonExceptionHandler {
             .map { (it as FieldError).field + ": " + it.defaultMessage }
             .collect(Collectors.joining(", "))
         return ApiError.builder()
-            .withMessage("argument.validation.error")
-            .withProperty("errors", errorMessage)
+            .withMessage(errorMessage)
+            .withError(ApiErrorCode.ARGUMENT_NOT_VALID.name.toLowerCase())
+            .withErrorCode(ApiErrorCode.ARGUMENT_NOT_VALID)
+            .build()
+    }
+
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleHttpMessageNotReadableException(exception: HttpMessageNotReadableException): ApiError {
+        logger.error("Bad request", exception)
+        return ApiError.builder()
+            .withMessage("non readable message")
+            .withError(ApiErrorCode.MESSAGE_NOT_READABLE.name.toLowerCase())
+            .withErrorCode(ApiErrorCode.MESSAGE_NOT_READABLE)
+            .build()
+    }
+
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(MultipartException::class)
+    fun handleMultipartException(exception: MultipartException): ApiError {
+        if (exception is MaxUploadSizeExceededException) {
+            logger.error("Multipart request is bigger than max allowed limit", exception)
+            val maxUploadSize = exception.maxUploadSize
+            return ApiError.builder()
+                .withMessage("max.allowed.size.in.bytes: $maxUploadSize")
+                .withError(ApiErrorCode.MULTIPART_NOT_VALID.name.toLowerCase())
+                .withErrorCode(ApiErrorCode.MULTIPART_NOT_VALID)
+                .build()
+        }
+
+        logger.error("Multipart request expected, but not a multipart", exception)
+        return ApiError.builder()
+            .withMessage("request.not.multipart")
+            .withErrorCode(ApiErrorCode.MULTIPART_NOT_VALID)
+            .build()
+    }
+
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentTypeMismatchException::class)
+    fun handleMethodArgumentTypeMismatchExceptionException(
+        exception: MethodArgumentTypeMismatchException
+    ): ApiError {
+        logger.error("Method argument type mismatch", exception)
+        return ApiError.builder()
+            .withMessage("argumentName: " + exception.name + ", requiredType: " + exception.requiredType?.simpleName + ", value: " + exception.value)
+            .withError(ApiErrorCode.ARGUMENT_TYPE_MISMATCH.name.toLowerCase())
+            .withErrorCode(ApiErrorCode.ARGUMENT_TYPE_MISMATCH)
             .build()
     }
 
@@ -100,17 +147,7 @@ class CommonExceptionHandler {
             exception.method + "] " + "Supported methods: " +
             Arrays.toString(exception.supportedMethods))
         logger.error("Method not allowed", message)
-        return ApiError.ofMessage("method.not.allowed")
-    }
-
-    @ResponseStatus(BAD_REQUEST)
-    @ExceptionHandler(HttpMessageNotReadableException::class)
-    fun handleHttpMessageNotReadableException(exception: HttpMessageNotReadableException): ApiError {
-        logger.error("Bad request", exception)
-        return ApiError.builder()
-            .withMessage("argument.validation.error")
-            .withProperty("errors", "non readable message")
-            .build()
+        return ApiError.builder().withMessage(message).withErrorCode(ApiErrorCode.VALIDATION_ERROR).build()
     }
 
     @ResponseStatus(UNSUPPORTED_MEDIA_TYPE)
@@ -120,7 +157,7 @@ class CommonExceptionHandler {
     ): ApiError {
         val message = "Unsupported media type: " + exception.contentType
         logger.error(message, exception)
-        return ApiError.ofMessage("unsupported.media.type")
+        return ApiError.builder().withMessage(message).withErrorCode(ApiErrorCode.VALIDATION_ERROR).build()
     }
 
     /**
@@ -136,7 +173,7 @@ class CommonExceptionHandler {
         exception: UnsatisfiedServletRequestParameterException
     ): ApiError {
         logger.error("Unprocessable entity", exception)
-        return ApiError.ofMessage("missing.request.parameter")
+        return ApiError.builder().withMessage("Missing request parameter").withErrorCode(ApiErrorCode.VALIDATION_ERROR).build()
     }
 
     @ResponseStatus(UNPROCESSABLE_ENTITY)
@@ -145,37 +182,7 @@ class CommonExceptionHandler {
         exception: MissingServletRequestParameterException
     ): ApiError {
         logger.error("Unprocessable entity", exception)
-        return ApiError.ofMessage("missing.request.parameter")
-    }
-
-    @ResponseStatus(BAD_REQUEST)
-    @ExceptionHandler(MultipartException::class)
-    fun handleMultipartException(exception: MultipartException): ApiError {
-        if (exception is MaxUploadSizeExceededException) {
-            logger.error("Multipart request is bigger than max allowed limit", exception)
-            val maxUploadSize = exception.maxUploadSize
-            return ApiError.builder()
-                .withMessage("multipart.too.big")
-                .withProperty("max.allowed.size.in.bytes", maxUploadSize)
-                .build()
-        }
-
-        logger.error("Multipart request expected, but not a multipart", exception)
-        return ApiError.ofMessage("request.not.multipart")
-    }
-
-    @ResponseStatus(BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentTypeMismatchException::class)
-    fun handleMethodArgumentTypeMismatchExceptionException(
-        exception: MethodArgumentTypeMismatchException
-    ): ApiError {
-        logger.error("Method argument type mismatch", exception)
-        return ApiError.builder()
-            .withMessage("invalid.argument.type")
-            .withProperty("requiredType", exception.requiredType?.simpleName ?: "")
-            .withProperty("argumentName", exception.name)
-            .withProperty("value", exception.value ?: "")
-            .build()
+        return ApiError.builder().withMessage("Missing request parameter").withErrorCode(ApiErrorCode.VALIDATION_ERROR).build()
     }
 
     @ExceptionHandler(ApiException::class)
@@ -209,8 +216,7 @@ class CommonExceptionHandler {
     fun handleResourceAccessException(exception: ResourceAccessException): ApiError {
         logger.error("Service unavailable.", exception)
         return ApiError.builder()
-            .withMessage("service.unavailable")
-            .withProperty("errors", exception.message!!)
+            .withMessage(exception.message!!)
             .build()
     }
 }

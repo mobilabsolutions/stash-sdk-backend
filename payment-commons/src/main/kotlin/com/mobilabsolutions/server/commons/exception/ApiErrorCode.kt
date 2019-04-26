@@ -1,0 +1,42 @@
+package com.mobilabsolutions.server.commons.exception
+
+import org.springframework.http.HttpStatus
+
+/**
+ * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
+ */
+enum class ApiErrorCode(val code: String, val message: String, val httpStatus: HttpStatus) {
+    AUTHENTICATION_ERROR("1000", "Authentication error", HttpStatus.UNAUTHORIZED),
+    INSUFFICIENT_RIGHTS("1001", "Authenticated user doesn't have the required rights for this operation.", HttpStatus.FORBIDDEN),
+    NO_RIGHTS("1002", "There are no roles defined for given merchant.", HttpStatus.BAD_REQUEST),
+    INCORRECT_OLD_PASSWORD("1003", "Old password for given user is incorrect.", HttpStatus.BAD_REQUEST),
+
+    VALIDATION_ERROR("2000", "Validation error", HttpStatus.BAD_REQUEST),
+    CONSTRAINT_VALIDATION_FAILED("2001", "Validation error", HttpStatus.BAD_REQUEST),
+    MISSING_REQUEST_HEADER("2002", "Validation error", HttpStatus.BAD_REQUEST),
+    ARGUMENT_NOT_VALID("2003", "Validation error", HttpStatus.BAD_REQUEST),
+    MESSAGE_NOT_READABLE("2004", "Validation error", HttpStatus.BAD_REQUEST),
+    MULTIPART_NOT_VALID("2005", "Validation error", HttpStatus.BAD_REQUEST),
+    ARGUMENT_TYPE_MISMATCH("2006", "Validation error", HttpStatus.BAD_REQUEST),
+
+    PUBLISHABLE_KEY_NOT_FOUND("3000", "Publishable Key cannot be found.", HttpStatus.BAD_REQUEST),
+    SECRET_KEY_NOT_FOUND("3001", "Secret Key cannot be found.", HttpStatus.BAD_REQUEST),
+    PSP_CONF_FOR_MERCHANT_EMPTY("3002", "There are no PSP configurations defined for given merchant.", HttpStatus.BAD_REQUEST),
+    PSP_CONF_FOR_MERCHANT_NOT_FOUND("3003", "PSP configuration for given `PSP-Type` cannot be found from given merchant.", HttpStatus.BAD_REQUEST),
+    PSP_IMPL_NOT_FOUND("3004", "PSP implementation for given `PSP-Type` cannot be found.", HttpStatus.INTERNAL_SERVER_ERROR),
+    ALIAS_NOT_FOUND("3005", "Alias ID cannot be found.", HttpStatus.BAD_REQUEST),
+    WRONG_ALIAS_MERCHANT_MAPPING("3006", "Alias does not map to correct merchant.", HttpStatus.BAD_REQUEST),
+    INCOMPLETE_ALIAS("3007", "Given alias is incomplete, please define a payment configuration on related alias.", HttpStatus.BAD_REQUEST),
+    MERCHANT_NOT_FOUND("3008", "Given merchant id cannot be found.", HttpStatus.BAD_REQUEST),
+    MERCHANT_API_KEY_EMPTY("3009", "There no API KEYS defined for given merchant.", HttpStatus.BAD_REQUEST),
+    MERCHANT_API_KEY_NOT_FOUND("3010", "Given merchant api key id cannot be found.", HttpStatus.BAD_REQUEST),
+    MERCHANT_ALREADY_EXISTS("3011", "Merchant with given id already exists.", HttpStatus.BAD_REQUEST),
+    TRANSACTION_NOT_FOUND("3012", "Given transaction id cannot be found.", HttpStatus.BAD_REQUEST),
+    TRANSACTION_ALREADY_CAPTURED("3013", "Transaction was already captured, please try the refund instead.", HttpStatus.BAD_REQUEST),
+    PSP_TEST_MODE_INCONSISTENT("3014", "`PSP-Test-Mode` for this transaction is different than the mode for previous transaction.", HttpStatus.BAD_REQUEST),
+    ONLY_PAYPAL_ALLOWED("3015", "Only PayPal registration is allowed for given PSP type.", HttpStatus.BAD_REQUEST),
+    TRANSACTION_NOT_ALLOWED("3016", "Transaction operation is not allowed.", HttpStatus.BAD_REQUEST),
+    SEPA_NOT_ALLOWED("3017", "SEPA is not supported for this operation.", HttpStatus.BAD_REQUEST),
+
+    PSP_MODULE_ERROR("4000", "Unexpected PSP operation error.", HttpStatus.INTERNAL_SERVER_ERROR)
+}
