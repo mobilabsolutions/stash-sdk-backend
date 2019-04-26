@@ -1,6 +1,5 @@
 package com.mobilabsolutions.payment.model
 
-import com.mobilabsolutions.payment.model.request.DynamicPspConfigModel
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import javax.validation.constraints.NotNull
@@ -53,6 +52,9 @@ data class PspConfigModel(
     @ApiModelProperty(value = "Locale of the merchant user", example = "de-DE")
     val locale: String?,
 
-    @ApiModelProperty(value = "PSP Dynamic Config")
-    var dynamicPspConfig: DynamicPspConfigModel?
+    @ApiModelProperty(value = "Sandbox (test) server url", example = "https://pal-test.adyen.com")
+    val sandboxServerUrl: String?,
+
+    @ApiModelProperty(value = "Server url", example = "https://[random]-[company-name]-pal-live.adyenpayments.com")
+    val serverUrl: String?
 )

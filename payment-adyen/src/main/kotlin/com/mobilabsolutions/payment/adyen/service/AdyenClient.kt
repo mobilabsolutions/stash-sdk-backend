@@ -6,7 +6,6 @@ import com.adyen.enums.Environment
 import com.adyen.model.Amount
 import com.adyen.model.checkout.PaymentSessionRequest
 import com.adyen.service.Checkout
-import com.adyen.service.exception.ApiException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.collect.Maps
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenChannel
@@ -15,6 +14,7 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentReques
 import com.mobilabsolutions.payment.adyen.model.request.PayloadRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
@@ -33,13 +33,11 @@ import java.time.format.DateTimeFormatter
 @Service
 class AdyenClient(
     private val randomStringGenerator: RandomStringGenerator,
-    private val jsonMapper: ObjectMapper,
-    private val restTemplate: RestTemplate
-) {
+    private val restTemplate: RestTemplate,
+    private val jsonMapper: ObjectMapper
+    ) {
     companion object : KLogging() {
         const val STRING_LENGTH = 20
-        const val TEST_URL = "https://pal-test.adyen.com"
-        const val LIVE_URL = "https://random-mobilabsolutions-pal-live.adyenpayments.com"
         const val VERIFY_URL = "https://checkout-test.adyen.com/v40/payments/result"
     }
 
@@ -47,15 +45,16 @@ class AdyenClient(
      * Requests an Adyen payment session
      *
      * @param pspConfigModel Adyen configuration
+     * @param dynamicPspConfig Dynamic PSP configuration request
      * @return payment session
      */
-    fun requestPaymentSession(pspConfigModel: PspConfigModel, mode: String): String {
+    fun requestPaymentSession(pspConfigModel: PspConfigModel, dynamicPspConfig: DynamicPspConfigRequestModel, mode: String): String {
         val config = Config()
         config.apiKey = if (mode == AdyenMode.TEST.mode) pspConfigModel.sandboxPublicKey else pspConfigModel.publicKey
 
         val client = Client(config)
-        if (mode == AdyenMode.TEST.mode) client.setEnvironment(Environment.TEST, TEST_URL)
-        else client.setEnvironment(Environment.LIVE, LIVE_URL)
+        if (mode == AdyenMode.TEST.mode) client.setEnvironment(Environment.TEST, pspConfigModel.sandboxServerUrl)
+        else client.setEnvironment(Environment.LIVE, pspConfigModel.serverUrl)
 
         val checkout = Checkout(client)
 
@@ -66,9 +65,9 @@ class AdyenClient(
         val paymentSessionRequest = PaymentSessionRequest()
         paymentSessionRequest.reference = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
         paymentSessionRequest.shopperReference = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
-        paymentSessionRequest.channel = if (pspConfigModel.dynamicPspConfig!!.channel.equals(AdyenChannel.ANDROID.channel, ignoreCase = true)) PaymentSessionRequest.ChannelEnum.ANDROID else PaymentSessionRequest.ChannelEnum.IOS
-        paymentSessionRequest.token = pspConfigModel.dynamicPspConfig!!.token
-        paymentSessionRequest.returnUrl = pspConfigModel.dynamicPspConfig!!.returnUrl
+        paymentSessionRequest.channel = if (dynamicPspConfig.channel.equals(AdyenChannel.ANDROID.channel, ignoreCase = true)) PaymentSessionRequest.ChannelEnum.ANDROID else PaymentSessionRequest.ChannelEnum.IOS
+        paymentSessionRequest.token = dynamicPspConfig.token
+        paymentSessionRequest.returnUrl = dynamicPspConfig.returnUrl
         paymentSessionRequest.countryCode = pspConfigModel.country
         paymentSessionRequest.shopperLocale = pspConfigModel.locale
         paymentSessionRequest.sessionValidity = DateTimeFormatter.ISO_INSTANT.format(Instant.now())
@@ -77,7 +76,7 @@ class AdyenClient(
 
         val response = try {
             checkout.paymentSession(paymentSessionRequest)
-        } catch (exception: ApiException) {
+        } catch (exception: Exception) {
             throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Error during requesting Adyen payment session").asException()
         }
 

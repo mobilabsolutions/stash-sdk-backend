@@ -10,7 +10,7 @@ import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.request.AliasRequestModel
-import com.mobilabsolutions.payment.model.request.DynamicPspConfigModel
+import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
@@ -114,32 +114,32 @@ class AliasServiceTest {
     @Test
     fun `create alias with wrong header parameters`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(unknownPublishableKey, pspType, usedIdempotentKey, DynamicPspConfigModel(null, null, null), true)
+            aliasService.createAlias(unknownPublishableKey, pspType, usedIdempotentKey, DynamicPspConfigRequestModel(null, null, null), true)
         }
     }
 
     @Test
     fun `create alias with unknown pspType`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(knownPublishableKey, pspType, usedIdempotentKey, DynamicPspConfigModel(null, null, null), true)
+            aliasService.createAlias(knownPublishableKey, pspType, usedIdempotentKey, DynamicPspConfigRequestModel(null, null, null), true)
         }
     }
 
     @Test
     fun `create alias with new idempotent key`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(knownPublishableKey, pspType, newIdempotentKey, DynamicPspConfigModel(null, null, null), true)
+            aliasService.createAlias(knownPublishableKey, pspType, newIdempotentKey, DynamicPspConfigRequestModel(null, null, null), true)
         }
     }
 
     @Test
     fun `create alias with used idempotent key`() {
-        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, DynamicPspConfigModel(null, null, null), true)
+        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, DynamicPspConfigRequestModel(null, null, null), true)
     }
 
     @Test
     fun `create alias successfully`() {
-        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, DynamicPspConfigModel(null, null, null), true)
+        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, DynamicPspConfigRequestModel(null, null, null), true)
     }
 
     @Test

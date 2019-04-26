@@ -5,6 +5,7 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentReques
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
@@ -15,6 +16,7 @@ import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
 import com.mobilabsolutions.payment.model.response.PspRegisterAliasResponseModel
 import com.mobilabsolutions.payment.service.Psp
 import com.mobilabsolutions.server.commons.exception.ApiError
+import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import mu.KLogging
 import org.springframework.stereotype.Component
 
@@ -30,9 +32,10 @@ class AdyenPsp(private val adyenClient: AdyenClient) : Psp {
         return PaymentServiceProvider.ADYEN
     }
 
-    override fun calculatePspConfig(pspConfigModel: PspConfigModel?, pspTestMode: Boolean?): PspAliasConfigModel? {
+    override fun calculatePspConfig(pspConfigModel: PspConfigModel?, dynamicPspConfig: DynamicPspConfigRequestModel?, pspTestMode: Boolean?): PspAliasConfigModel? {
         logger.info { "Adyen config calculation has been called..." }
         val adyenMode = getAdyenMode(pspTestMode)
+        if (dynamicPspConfig == null) throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Missing dynamic Adyen configuration").asException()
         return if (pspConfigModel != null) PspAliasConfigModel(
             type = PaymentServiceProvider.ADYEN.toString(),
             merchantId = if (adyenMode == AdyenMode.TEST.mode) pspConfigModel.sandboxMerchantId else pspConfigModel.merchantId,
@@ -47,7 +50,7 @@ class AdyenPsp(private val adyenClient: AdyenClient) : Psp {
             publicKey = if (adyenMode == AdyenMode.TEST.mode) pspConfigModel.sandboxPublicKey else pspConfigModel.publicKey,
             privateKey = null,
             clientToken = null,
-            paymentSession = adyenClient.requestPaymentSession(pspConfigModel, adyenMode)
+            paymentSession = adyenClient.requestPaymentSession(pspConfigModel, dynamicPspConfig, adyenMode)
         ) else null
     }
 

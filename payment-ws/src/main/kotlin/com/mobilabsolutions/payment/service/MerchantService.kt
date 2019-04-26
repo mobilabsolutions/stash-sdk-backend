@@ -61,7 +61,8 @@ class MerchantService(
                         currency = pspConfigRequestModel.pspConfig.currency,
                         country = pspConfigRequestModel.pspConfig.country,
                         locale = pspConfigRequestModel.pspConfig.locale,
-                        dynamicPspConfig = null
+                        sandboxServerUrl = pspConfigRequestModel.pspConfig.sandboxServerUrl,
+                        serverUrl = pspConfigRequestModel.pspConfig.serverUrl
                     )
                 )
             )
@@ -129,7 +130,8 @@ class MerchantService(
                         currency = pspUpsertConfigRequestModel.currency,
                         country = pspUpsertConfigRequestModel.country,
                         locale = pspUpsertConfigRequestModel.locale,
-                        dynamicPspConfig = null
+                        sandboxServerUrl = pspUpsertConfigRequestModel.sandboxServerUrl,
+                        serverUrl = pspUpsertConfigRequestModel.serverUrl
                     )
                 )
             )
@@ -195,6 +197,7 @@ class MerchantService(
             currency = null,
             country = null,
             locale = null,
-            dynamicPspConfig = null
+            sandboxServerUrl = null,
+            serverUrl = null
         )
 }

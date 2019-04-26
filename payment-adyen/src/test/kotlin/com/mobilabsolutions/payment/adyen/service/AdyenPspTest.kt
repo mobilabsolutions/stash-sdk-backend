@@ -7,8 +7,12 @@ import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
 import com.mobilabsolutions.payment.model.PspConfigModel
+<<<<<<< HEAD
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
+=======
+import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
+>>>>>>> master
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -33,7 +37,7 @@ class AdyenPspTest {
     private val currency = "EUR"
     private val country = "DE"
     private val locale = "de-DE"
-    private val dynamicPspConfig = DynamicPspConfigModel(
+    private val dynamicPspConfig = DynamicPspConfigRequestModel(
         "some token",
         "some url",
         "some channel"
@@ -53,7 +57,8 @@ class AdyenPspTest {
         currency,
         country,
         locale,
-        dynamicPspConfig
+        null,
+        null
     )
     private val paymentSession = "123"
     private val correctAliasId = "correct id"
@@ -73,7 +78,7 @@ class AdyenPspTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
-        Mockito.`when`(adyenClient.requestPaymentSession(pspConfig, "test"))
+        Mockito.`when`(adyenClient.requestPaymentSession(pspConfig, dynamicPspConfig, "test"))
             .thenReturn(paymentSession)
         Mockito.`when`(adyenClient.verifyPayment(verifyRequest))
             .thenReturn(AdyenVerifyPaymentResponseModel(200, "no error", "message", "error type"))
@@ -81,7 +86,7 @@ class AdyenPspTest {
 
     @Test
     fun `calculate PSP config`() {
-        adyenPsp.calculatePspConfig(pspConfig, true)
+        adyenPsp.calculatePspConfig(pspConfig, dynamicPspConfig, true)
     }
 
     @Test

@@ -3,6 +3,7 @@ package com.mobilabsolutions.payment.service
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
@@ -24,10 +25,11 @@ interface Psp {
      * Calculates the psp alias configuration {@link PspAliasConfigModel} for the given psp configuration {@link PspConfigModel}
      *
      * @param pspConfigModel PSP configuration
+     * @param dynamicPspConfig Dynamic PSP configuration request
      * @param pspTestMode indicator whether is the test mode or not
      * @return PSP alias configuration
      */
-    fun calculatePspConfig(pspConfigModel: PspConfigModel?, pspTestMode: Boolean?): PspAliasConfigModel?
+    fun calculatePspConfig(pspConfigModel: PspConfigModel?, dynamicPspConfig: DynamicPspConfigRequestModel?, pspTestMode: Boolean?): PspAliasConfigModel?
 
     /**
      * Returns psp register alias response {@link PspRegisterAliasResponseModel} for the given psp register alias request {@link PspRegisterAliasRequestModel}
