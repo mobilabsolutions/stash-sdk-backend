@@ -61,7 +61,7 @@ class AdyenPspTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
-        Mockito.`when`(adyenClient.generateClientToken(pspConfig, "test"))
+        Mockito.`when`(adyenClient.requestPaymentSession(pspConfig, "test"))
             .thenReturn(paymentSession)
     }
 

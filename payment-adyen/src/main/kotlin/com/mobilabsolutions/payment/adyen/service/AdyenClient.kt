@@ -37,7 +37,7 @@ class AdyenClient(
      * @param pspConfigModel Adyen configuration
      * @return payment session
      */
-    fun generateClientToken(pspConfigModel: PspConfigModel, mode: String): String {
+    fun requestPaymentSession(pspConfigModel: PspConfigModel, mode: String): String {
         val config = Config()
         config.apiKey = if (mode == AdyenMode.TEST.mode) pspConfigModel.sandboxPublicKey else pspConfigModel.publicKey
 
@@ -66,7 +66,7 @@ class AdyenClient(
         val response = try {
             checkout.paymentSession(paymentSessionRequest)
         } catch (exception: ApiException) {
-            throw ApiError.ofErrorCode(ApiErrorCode.AUTHENTICATION_ERROR, "Error during requesting Adyen payment session").asInternalServerError()
+            throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected error during Adyen client token generation").asException()
         }
 
         return response.paymentSession.toString()

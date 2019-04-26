@@ -45,7 +45,7 @@ class AdyenPsp(private val adyenClient: AdyenClient) : Psp {
             publicKey = if (adyenMode == AdyenMode.TEST.mode) pspConfigModel.sandboxPublicKey else pspConfigModel.publicKey,
             privateKey = null,
             clientToken = null,
-            paymentSession = adyenClient.generateClientToken(pspConfigModel, adyenMode)
+            paymentSession = adyenClient.requestPaymentSession(pspConfigModel, adyenMode)
         ) else null
     }
 
