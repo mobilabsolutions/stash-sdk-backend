@@ -39,7 +39,7 @@ class AliasController(private val aliasService: AliasService) {
         @RequestHeader(value = "PSP-Type") pspType: String,
         @Size(min = 10, max = 40) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
-        @Valid @RequestBody(required = false) dynamicPspConfig: DynamicPspConfigRequestModel
+        @Valid @RequestBody(required = false) dynamicPspConfig: DynamicPspConfigRequestModel?
     ) = aliasService.createAlias(publishableKey, pspType, idempotentKey, dynamicPspConfig, pspTestMode)
 
     @ApiOperation(value = "Update the given Alias for payment operations")

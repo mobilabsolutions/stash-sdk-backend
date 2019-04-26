@@ -49,7 +49,7 @@ class AliasService(
      * @param pspTestMode indicator whether is the test mode or not
      * @return alias method response
      */
-    fun createAlias(publishableKey: String, pspType: String, idempotentKey: String, dynamicPspConfig: DynamicPspConfigRequestModel, pspTestMode: Boolean?): AliasResponseModel {
+    fun createAlias(publishableKey: String, pspType: String, idempotentKey: String, dynamicPspConfig: DynamicPspConfigRequestModel?, pspTestMode: Boolean?): AliasResponseModel {
         logger.info("Creating alias for {} psp", pspType)
         val merchantApiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofErrorCode(ApiErrorCode.PUBLISHABLE_KEY_NOT_FOUND).asException()
 
