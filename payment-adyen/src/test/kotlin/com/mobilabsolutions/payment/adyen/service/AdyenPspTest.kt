@@ -1,8 +1,14 @@
 package com.mobilabsolutions.payment.adyen.service
 
+import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
+import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
+import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
+import com.mobilabsolutions.payment.model.AliasExtraModel
+import com.mobilabsolutions.payment.model.PersonalDataModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigModel
+import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -50,6 +56,12 @@ class AdyenPspTest {
         dynamicPspConfig
     )
     private val paymentSession = "123"
+    private val correctAliasId = "correct id"
+    private val correctPayload = "payload"
+    private val verifyRequest = AdyenVerifyPaymentRequestModel(
+        sandboxPublicKey,
+        correctPayload
+    )
 
     @InjectMocks
     private lateinit var adyenPsp: AdyenPsp
@@ -63,10 +75,33 @@ class AdyenPspTest {
 
         Mockito.`when`(adyenClient.requestPaymentSession(pspConfig, "test"))
             .thenReturn(paymentSession)
+        Mockito.`when`(adyenClient.verifyPayment(verifyRequest))
+            .thenReturn(AdyenVerifyPaymentResponseModel(200, "no error", "message", "error type"))
     }
 
     @Test
     fun `calculate PSP config`() {
         adyenPsp.calculatePspConfig(pspConfig, true)
+    }
+
+    @Test
+    fun `register alias`() {
+        adyenPsp.registerAlias(PspRegisterAliasRequestModel(correctAliasId,
+            AliasExtraModel(
+                null,
+                null,
+                null,
+                PersonalDataModel(
+                    null,
+                    null,
+                    "lastName",
+                    null,
+                    null,
+                    "Berlin",
+                    country
+                ),
+                PaymentMethod.CC,
+                correctPayload
+            ), pspConfig), true)
     }
 }

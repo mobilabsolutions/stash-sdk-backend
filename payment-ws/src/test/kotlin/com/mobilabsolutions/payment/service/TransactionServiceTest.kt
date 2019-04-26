@@ -80,7 +80,7 @@ class TransactionServiceTest {
     private val pspConfigModel = PspConfigModel(
         PaymentServiceProvider.BS_PAYONE.toString(), "mobilab", "123", "123", "123", null, null, null, null, null, true, null, null, null, null
     )
-    private val aliasExtra = AliasExtraModel(null, null, null, PersonalDataModel(null, null, "Mustermann", null, null, "Berlin", "DE"), PaymentMethod.CC)
+    private val aliasExtra = AliasExtraModel(null, null, null, PersonalDataModel(null, null, "Mustermann", null, null, "Berlin", "DE"), PaymentMethod.CC, null)
 
     @InjectMocks
     private lateinit var transactionService: TransactionService

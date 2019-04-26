@@ -7,14 +7,23 @@ import com.adyen.model.Amount
 import com.adyen.model.checkout.PaymentSessionRequest
 import com.adyen.service.Checkout
 import com.adyen.service.exception.ApiException
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.common.collect.Maps
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenChannel
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
+import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.PayloadRequestModel
+import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import mu.KLogging
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestTemplate
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 
@@ -23,12 +32,15 @@ import java.time.format.DateTimeFormatter
  */
 @Service
 class AdyenClient(
-    private val randomStringGenerator: RandomStringGenerator
+    private val randomStringGenerator: RandomStringGenerator,
+    private val jsonMapper: ObjectMapper,
+    private val restTemplate: RestTemplate
 ) {
     companion object : KLogging() {
         const val STRING_LENGTH = 20
         const val TEST_URL = "https://pal-test.adyen.com"
         const val LIVE_URL = "https://random-mobilabsolutions-pal-live.adyenpayments.com"
+        const val VERIFY_URL = "https://checkout-test.adyen.com/v40/payments/result"
     }
 
     /**
@@ -66,9 +78,41 @@ class AdyenClient(
         val response = try {
             checkout.paymentSession(paymentSessionRequest)
         } catch (exception: ApiException) {
-            throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected error during Adyen client token generation").asException()
+            throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Error during requesting Adyen payment session").asException()
         }
 
         return response.paymentSession.toString()
+    }
+
+    /**
+     * Verifies Adyen payment result
+     *
+     * @param verifyRequest Adyen verify payment request
+     * @return Adyen verify payment response
+     */
+    fun verifyPayment(verifyRequest: AdyenVerifyPaymentRequestModel): AdyenVerifyPaymentResponseModel {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers.add("X-API-Key", verifyRequest.apiKey)
+        val request = HttpEntity(PayloadRequestModel(verifyRequest.payload), headers)
+
+        val response = restTemplate.postForEntity(VERIFY_URL, request, String::class.java)
+        return convertToResponse(response.body!!, AdyenVerifyPaymentResponseModel::class.java)
+    }
+
+    /**
+     * Converts Adyen response body to internal response.
+     *
+     * @param body response body
+     * @param response response class
+     * @return internal response
+     */
+    private fun <T> convertToResponse(body: String, response: Class<T>): T {
+        val params = body.split("\\r?\\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        val map = params.map { s ->
+            val parts = s.split("=".toRegex(), 2).toTypedArray()
+            Maps.immutableEntry(parts[0], parts[1])
+        }.map { it.key to it.value }.toMap()
+        return jsonMapper.convertValue(map, response)
     }
 }

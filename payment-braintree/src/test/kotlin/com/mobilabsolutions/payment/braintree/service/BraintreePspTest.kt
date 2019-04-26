@@ -136,7 +136,8 @@ class BraintreePspTest {
                 null,
                 PayPalConfigModel(nonce, billingAgreementId, deviceData),
                 null,
-                PaymentMethod.PAY_PAL
+                PaymentMethod.PAY_PAL,
+                null
             ), pspConfig), test)
     }
 
@@ -149,7 +150,8 @@ class BraintreePspTest {
                     null,
                     PayPalConfigModel(nonce, billingAgreementId, deviceData),
                     null,
-                    PaymentMethod.CC
+                    PaymentMethod.CC,
+                    null
                 ), pspConfig), test)
         }
     }
@@ -180,7 +182,8 @@ class BraintreePspTest {
                     null,
                     PayPalConfigModel(nonce, billingAgreementId, deviceData),
                     null,
-                    PaymentMethod.PAY_PAL
+                    PaymentMethod.PAY_PAL,
+                    null
                 ),
                 PaymentDataRequestModel(correctAmount, currency, reason),
                 pspAlias,
@@ -200,7 +203,8 @@ class BraintreePspTest {
                     null,
                     PayPalConfigModel(nonce, billingAgreementId, deviceData),
                     null,
-                    PaymentMethod.PAY_PAL
+                    PaymentMethod.PAY_PAL,
+                    null
                 ),
                 PaymentDataRequestModel(declinedAmount, currency, reason),
                 pspAlias,
@@ -247,7 +251,8 @@ class BraintreePspTest {
                     null,
                     PayPalConfigModel(nonce, billingAgreementId, deviceData),
                     null,
-                    PaymentMethod.PAY_PAL
+                    PaymentMethod.PAY_PAL,
+                    null
                 ),
                 PaymentDataRequestModel(correctAmount, currency, reason),
                 pspAlias,
@@ -267,7 +272,8 @@ class BraintreePspTest {
                     null,
                     PayPalConfigModel(nonce, billingAgreementId, deviceData),
                     null,
-                    PaymentMethod.PAY_PAL
+                    PaymentMethod.PAY_PAL,
+                    null
                 ),
                 PaymentDataRequestModel(declinedAmount, currency, reason),
                 pspAlias,
