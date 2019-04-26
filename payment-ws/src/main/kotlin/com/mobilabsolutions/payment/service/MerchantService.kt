@@ -57,7 +57,12 @@ class MerchantService(
                         sandboxPublicKey = pspConfigRequestModel.pspConfig.sandboxPublicKey,
                         sandboxPrivateKey = pspConfigRequestModel.pspConfig.sandboxPrivateKey,
                         publicKey = pspConfigRequestModel.pspConfig.publicKey,
-                        privateKey = pspConfigRequestModel.pspConfig.privateKey
+                        privateKey = pspConfigRequestModel.pspConfig.privateKey,
+                        currency = pspConfigRequestModel.pspConfig.currency,
+                        country = pspConfigRequestModel.pspConfig.country,
+                        locale = pspConfigRequestModel.pspConfig.locale,
+                        sandboxServerUrl = pspConfigRequestModel.pspConfig.sandboxServerUrl,
+                        serverUrl = pspConfigRequestModel.pspConfig.serverUrl
                     )
                 )
             )
@@ -121,7 +126,12 @@ class MerchantService(
                         sandboxPublicKey = pspUpsertConfigRequestModel.sandboxPublicKey,
                         sandboxPrivateKey = pspUpsertConfigRequestModel.sandboxPrivateKey,
                         publicKey = pspUpsertConfigRequestModel.publicKey,
-                        privateKey = pspUpsertConfigRequestModel.privateKey
+                        privateKey = pspUpsertConfigRequestModel.privateKey,
+                        currency = pspUpsertConfigRequestModel.currency,
+                        country = pspUpsertConfigRequestModel.country,
+                        locale = pspUpsertConfigRequestModel.locale,
+                        sandboxServerUrl = pspUpsertConfigRequestModel.sandboxServerUrl,
+                        serverUrl = pspUpsertConfigRequestModel.serverUrl
                     )
                 )
             )
@@ -183,6 +193,11 @@ class MerchantService(
             sandboxPrivateKey,
             publicKey,
             privateKey,
-            default = default
+            default = default,
+            currency = null,
+            country = null,
+            locale = null,
+            sandboxServerUrl = null,
+            serverUrl = null
         )
 }

@@ -1,6 +1,7 @@
 package com.mobilabsolutions.payment.controller
 
 import com.mobilabsolutions.payment.model.request.AliasRequestModel
+import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.service.AliasService
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
@@ -37,8 +38,9 @@ class AliasController(private val aliasService: AliasService) {
         @RequestHeader(value = "Publishable-Key") publishableKey: String,
         @RequestHeader(value = "PSP-Type") pspType: String,
         @Size(min = 10, max = 40) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
-        @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?
-    ) = aliasService.createAlias(publishableKey, pspType, idempotentKey, pspTestMode)
+        @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
+        @Valid @RequestBody(required = false) dynamicPspConfig: DynamicPspConfigRequestModel?
+    ) = aliasService.createAlias(publishableKey, pspType, idempotentKey, dynamicPspConfig, pspTestMode)
 
     @ApiOperation(value = "Update the given Alias for payment operations")
     @ApiResponses(

@@ -1,5 +1,6 @@
 package com.mobilabsolutions.payment.model.request
 
+import com.mobilabsolutions.payment.validation.CountryCode
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
@@ -36,5 +37,21 @@ data class PspUpsertConfigRequestModel(
     val privateKey: String?,
 
     @ApiModelProperty(value = "Default flag", example = "true")
-    val default: Boolean = true
+    val default: Boolean = true,
+
+    @ApiModelProperty(value = "Currency", example = "EUR")
+    val currency: String?,
+
+    @ApiModelProperty(value = "Country code of account holder", example = "DE")
+    @field:CountryCode
+    val country: String?,
+
+    @ApiModelProperty(value = "Locale of the merchant user", example = "de-DE")
+    val locale: String?,
+
+    @ApiModelProperty(value = "Sandbox (test) server url", example = "https://pal-test.adyen.com")
+    val sandboxServerUrl: String?,
+
+    @ApiModelProperty(value = "Server url", example = "https://[random]-[company-name]-pal-live.adyenpayments.com")
+    val serverUrl: String?
 )

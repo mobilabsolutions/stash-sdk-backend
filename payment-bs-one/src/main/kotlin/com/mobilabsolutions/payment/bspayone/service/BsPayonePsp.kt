@@ -15,6 +15,7 @@ import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
@@ -52,7 +53,7 @@ class BsPayonePsp(
         return PaymentServiceProvider.BS_PAYONE
     }
 
-    override fun calculatePspConfig(pspConfigModel: PspConfigModel?, pspTestMode: Boolean?): PspAliasConfigModel? {
+    override fun calculatePspConfig(pspConfigModel: PspConfigModel?, dynamicPspConfig: DynamicPspConfigRequestModel?, pspTestMode: Boolean?): PspAliasConfigModel? {
         logger.info { "BS Payone config calculation has been called..." }
         return if (pspConfigModel != null) PspAliasConfigModel(
             type = PaymentServiceProvider.BS_PAYONE.toString(),
@@ -67,7 +68,8 @@ class BsPayonePsp(
             mode = getPspMode(pspTestMode),
             publicKey = null,
             privateKey = null,
-            clientToken = null
+            clientToken = null,
+            paymentSession = null
         ) else null
     }
 

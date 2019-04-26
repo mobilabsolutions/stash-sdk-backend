@@ -41,5 +41,20 @@ data class PspConfigModel(
     val privateKey: String?,
 
     @ApiModelProperty(value = "Default flag", example = "true")
-    val default: Boolean = true
+    val default: Boolean = true,
+
+    @ApiModelProperty(value = "Currency", example = "EUR")
+    val currency: String?,
+
+    @ApiModelProperty(value = "Country", example = "DE")
+    val country: String?,
+
+    @ApiModelProperty(value = "Locale of the merchant user", example = "de-DE")
+    val locale: String?,
+
+    @ApiModelProperty(value = "Sandbox (test) server url", example = "https://pal-test.adyen.com")
+    val sandboxServerUrl: String?,
+
+    @ApiModelProperty(value = "Server url", example = "https://[random]-[company-name]-pal-live.adyenpayments.com")
+    val serverUrl: String?
 )
