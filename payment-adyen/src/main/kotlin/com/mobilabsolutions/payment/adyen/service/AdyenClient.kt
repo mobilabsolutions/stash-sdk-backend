@@ -31,7 +31,7 @@ class AdyenClient(
     }
 
     /**
-     * Returns Adyen client token.
+     * Requests an Adyen payment session
      *
      * @param pspConfigModel Adyen configuration
      * @return payment session
