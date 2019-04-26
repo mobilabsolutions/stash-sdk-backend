@@ -4,6 +4,7 @@ import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
@@ -28,7 +29,7 @@ class AdyenPsp(private val adyenClient: AdyenClient) : Psp {
         return PaymentServiceProvider.ADYEN
     }
 
-    override fun calculatePspConfig(pspConfigModel: PspConfigModel?, pspTestMode: Boolean?): PspAliasConfigModel? {
+    override fun calculatePspConfig(pspConfigModel: PspConfigModel?, dynamicPspConfig: DynamicPspConfigRequestModel?, pspTestMode: Boolean?): PspAliasConfigModel? {
         logger.info { "Adyen config calculation has been called..." }
         val adyenMode = getAdyenMode(pspTestMode)
         return if (pspConfigModel != null) PspAliasConfigModel(
@@ -45,7 +46,7 @@ class AdyenPsp(private val adyenClient: AdyenClient) : Psp {
             publicKey = if (adyenMode == AdyenMode.TEST.mode) pspConfigModel.sandboxPublicKey else pspConfigModel.publicKey,
             privateKey = null,
             clientToken = null,
-            paymentSession = adyenClient.requestPaymentSession(pspConfigModel, adyenMode)
+            paymentSession = adyenClient.requestPaymentSession(pspConfigModel, dynamicPspConfig!!, adyenMode)
         ) else null
     }
 

@@ -84,6 +84,7 @@ class BsPayonePspTest {
         null,
         null,
         null,
+        null,
         null
     )
 
@@ -198,7 +199,7 @@ class BsPayonePspTest {
 
     @Test
     fun `calculate PSP config`() {
-        bsPayonePsp.calculatePspConfig(pspConfig, true)
+        bsPayonePsp.calculatePspConfig(pspConfig, null, true)
     }
 
     @Test
