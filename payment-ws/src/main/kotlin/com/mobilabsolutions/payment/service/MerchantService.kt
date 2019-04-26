@@ -13,6 +13,7 @@ import com.mobilabsolutions.payment.model.request.PspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspUpsertConfigRequestModel
 import com.mobilabsolutions.payment.model.response.PspConfigResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
+import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import mu.KLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -39,7 +40,7 @@ class MerchantService(
      */
     fun addPspConfigForMerchant(merchantId: String, pspConfigRequestModel: PspConfigRequestModel): PspConfigResponseModel {
         logger.info("Adding PSP config for merchant {}", merchantId)
-        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofMessage("Merchant ID cannot be found").asBadRequest()
+        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val configList = if (merchant.pspConfig != null) objectMapper.readValue(merchant.pspConfig, PspConfigListModel::class.java) else PspConfigListModel()
 
         val pspConfig = objectMapper.writeValueAsString(
@@ -77,7 +78,7 @@ class MerchantService(
      */
     fun getMerchantConfiguration(merchantId: String): PspConfigListModel {
         logger.info("Retrieving PSP config for merchant {}", merchantId)
-        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofMessage("Merchant ID cannot be found").asBadRequest()
+        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         return if (merchant.pspConfig != null) objectMapper.readValue(merchant.pspConfig, PspConfigListModel::class.java) else PspConfigListModel()
     }
 
@@ -90,10 +91,10 @@ class MerchantService(
      */
     fun getMerchantPspConfiguration(merchantId: String, pspId: String): PspConfigModel? {
         logger.info("Adding {} PSP config for merchant {}", pspId, merchantId)
-        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofMessage("Merchant ID cannot be found").asBadRequest()
+        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val configList = if (merchant.pspConfig != null) objectMapper.readValue(merchant.pspConfig, PspConfigListModel::class.java) else PspConfigListModel()
         val pspConfig = configList.psp.firstOrNull { it.type == pspId }
-        PaymentServiceProvider.valueOf(pspConfig?.type ?: throw ApiError.ofMessage("PSP configuration for '$pspId' cannot be found from used merchant").asNotFound())
+        PaymentServiceProvider.valueOf(pspConfig?.type ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_NOT_FOUND, "PSP configuration for '$pspId' cannot be found from given merchant").asException())
         return pspConfig
     }
 
@@ -106,9 +107,9 @@ class MerchantService(
      */
     fun updatePspConfig(merchantId: String, pspId: String, pspUpsertConfigRequestModel: PspUpsertConfigRequestModel) {
         logger.info("Updating {} PSP config for merchant {}", pspId, merchantId)
-        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofMessage("Merchant ID cannot be found").asBadRequest()
+        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val configList = if (merchant.pspConfig != null) objectMapper.readValue(merchant.pspConfig, PspConfigListModel::class.java) else PspConfigListModel()
-        PaymentServiceProvider.valueOf(configList.psp.firstOrNull { it.type == pspId }?.type ?: throw ApiError.ofMessage("PSP configuration for '$pspId' cannot be found from used merchant").asBadRequest())
+        PaymentServiceProvider.valueOf(configList.psp.firstOrNull { it.type == pspId }?.type ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_NOT_FOUND, "PSP configuration for '$pspId' cannot be found from given merchant").asException())
 
         val pspConfig = objectMapper.writeValueAsString(
             PspConfigListModel(
@@ -144,7 +145,7 @@ class MerchantService(
      *
      */
     fun createMerchant(merchantInfo: MerchantRequestModel) {
-        if (!checkMerchantAndAuthority(merchantInfo.id)) throw ApiError.ofMessage("Merchant with id '${merchantInfo.id}' already exists").asBadRequest()
+        if (!checkMerchantAndAuthority(merchantInfo.id)) throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_ALREADY_EXISTS, "Merchant with id '${merchantInfo.id}' already exists").asException()
         merchantRepository.save(
             Merchant(
                 id = merchantInfo.id,

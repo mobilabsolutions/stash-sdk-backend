@@ -8,6 +8,7 @@ import com.mobilabsolutions.payment.model.request.EditMerchantUserRequestModel
 import com.mobilabsolutions.payment.model.request.MerchantUserPasswordRequestModel
 import com.mobilabsolutions.payment.model.request.MerchantUserRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
+import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import mu.KLogging
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -40,7 +41,7 @@ class UserDetailsServiceImpl(
     @Transactional(readOnly = true)
     override fun loadUserByUsername(email: String): UserDetails {
         return merchantUserRepository.findByEmail(email)?.toUserDetails()
-            ?: throw ApiError.builder().withMessage("Bad credentials").build().asUnauthorized()
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.AUTHENTICATION_ERROR).asException()
     }
 
     /**
@@ -52,7 +53,7 @@ class UserDetailsServiceImpl(
      */
     @Transactional
     fun updateMerchantUser(userId: String, principal: String, merchantUserModel: EditMerchantUserRequestModel) {
-        if (principal != adminUsername && principal != userId) throw ApiError.ofMessage("Authenticated user doesn't have the required rights for this operation").asForbidden()
+        if (principal != adminUsername && principal != userId) throw ApiError.ofErrorCode(ApiErrorCode.INSUFFICIENT_RIGHTS).asException()
         merchantUserRepository.updateMerchantUser(
             userId,
             merchantUserModel.firstname,
@@ -74,7 +75,7 @@ class UserDetailsServiceImpl(
         principal: String,
         merchantUserChangePasswordModel: MerchantUserPasswordRequestModel
     ) {
-        if (principal != adminUsername && principal != userId) throw ApiError.ofMessage("Authenticated user doesn't have the required rights for this operation").asForbidden()
+        if (principal != adminUsername && principal != userId) throw ApiError.ofErrorCode(ApiErrorCode.INSUFFICIENT_RIGHTS).asException()
 
         val merchantUser = merchantUserRepository.findByEmail(userId)
         val isPasswordMatching =
@@ -82,7 +83,7 @@ class UserDetailsServiceImpl(
         if (isPasswordMatching) merchantUserRepository.updatePasswordMerchantUser(
             userId,
             userPasswordEncoder.encode(merchantUserChangePasswordModel.newPassword)
-        ) else throw ApiError.ofMessage("Old password for user '$userId' is incorrect").asBadRequest()
+        ) else throw ApiError.ofErrorCode(ApiErrorCode.INCORRECT_OLD_PASSWORD, "Old password for user '$userId' is incorrect").asException()
     }
 
     /**
@@ -92,7 +93,7 @@ class UserDetailsServiceImpl(
      */
     @Transactional
     fun createMerchantUser(merchantId: String, merchantUserModel: MerchantUserRequestModel) {
-        val authority = authorityRepository.getAuthorityByName(merchantId) ?: throw ApiError.ofMessage("There is no role defined for merchant '$merchantId'").asBadRequest()
+        val authority = authorityRepository.getAuthorityByName(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.NO_RIGHTS, "There is no role defined for merchant '$merchantId'").asException()
         merchantUserRepository.save(merchantUserModel.toMerchantUser(authority))
     }
 

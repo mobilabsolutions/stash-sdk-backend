@@ -17,14 +17,15 @@ import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PayPalConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
-import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
+import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
+import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import com.mobilabsolutions.server.commons.exception.ApiException
 import com.mobilabsolutions.server.commons.exception.PaymentError
 import org.junit.jupiter.api.Assertions
@@ -115,7 +116,7 @@ class BraintreePspTest {
         Mockito.`when`(braintreeClient.refund(BraintreeRefundRequestModel(pspTransactionId, correctAmount.toString()), pspConfig, mode))
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLING, transactionId = transactionId))
         Mockito.`when`(braintreeClient.deletePayPalAlias(wrongPspAlias, pspConfig, BraintreeMode.SANDBOX.mode))
-            .thenThrow(ApiError.ofMessage("PayPal alias doesn't exist at Braintree").asInternalServerError())
+            .thenThrow(ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "PayPal alias doesn't exist at Braintree").asException())
         Mockito.`when`(braintreeClient.reverse(BraintreeReverseRequestModel(pspTransactionId), pspConfig, mode))
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.VOIDED, transactionId = transactionId))
         Mockito.`when`(braintreeClient.reverse(BraintreeReverseRequestModel(wrongPspTransactionId), pspConfig, mode))
