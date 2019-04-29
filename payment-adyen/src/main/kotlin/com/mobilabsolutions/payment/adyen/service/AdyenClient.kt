@@ -38,7 +38,8 @@ class AdyenClient(
 ) {
     companion object : KLogging() {
         const val STRING_LENGTH = 20
-        const val VERIFY_URL = "https://checkout-test.adyen.com/v40/payments/result"
+        const val VERIFY_URL = "/v40/payments/result"
+        const val API_KEY = "X-API-Key"
     }
 
     /**
@@ -66,6 +67,8 @@ class AdyenClient(
         paymentSessionRequest.reference = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
         paymentSessionRequest.shopperReference = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
         paymentSessionRequest.channel = if (dynamicPspConfig.channel.equals(AdyenChannel.ANDROID.channel, ignoreCase = true)) PaymentSessionRequest.ChannelEnum.ANDROID else PaymentSessionRequest.ChannelEnum.IOS
+        paymentSessionRequest.enableRecurring(true)
+        paymentSessionRequest.enableOneClick(true)
         paymentSessionRequest.token = dynamicPspConfig.token
         paymentSessionRequest.returnUrl = dynamicPspConfig.returnUrl
         paymentSessionRequest.countryCode = pspConfigModel.country
@@ -89,13 +92,14 @@ class AdyenClient(
      * @param verifyRequest Adyen verify payment request
      * @return Adyen verify payment response
      */
-    fun verifyPayment(verifyRequest: AdyenVerifyPaymentRequestModel): AdyenVerifyPaymentResponseModel {
+    fun verifyPayment(verifyRequest: AdyenVerifyPaymentRequestModel, mode: String): AdyenVerifyPaymentResponseModel {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
-        headers.add("X-API-Key", verifyRequest.apiKey)
+        headers.add(API_KEY, verifyRequest.apiKey)
+        val verifyUrl = if (mode == AdyenMode.TEST.mode) verifyRequest.sandboxServerUrl + VERIFY_URL else verifyRequest.serverUrl + VERIFY_URL
         val request = HttpEntity(PayloadRequestModel(verifyRequest.payload), headers)
 
-        val response = restTemplate.postForEntity(VERIFY_URL, request, String::class.java)
+        val response = restTemplate.postForEntity(verifyUrl, request, String::class.java)
         return convertToResponse(response.body!!, AdyenVerifyPaymentResponseModel::class.java)
     }
 

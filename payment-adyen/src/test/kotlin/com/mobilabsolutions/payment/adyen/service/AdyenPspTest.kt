@@ -61,7 +61,9 @@ class AdyenPspTest {
     private val correctPayload = "payload"
     private val verifyRequest = AdyenVerifyPaymentRequestModel(
         sandboxPublicKey,
-        correctPayload
+        correctPayload,
+        sandboxServerUrl = null,
+        serverUrl = null
     )
 
     @InjectMocks
@@ -76,8 +78,8 @@ class AdyenPspTest {
 
         Mockito.`when`(adyenClient.requestPaymentSession(pspConfig, dynamicPspConfig, "test"))
             .thenReturn(paymentSession)
-        Mockito.`when`(adyenClient.verifyPayment(verifyRequest))
-            .thenReturn(AdyenVerifyPaymentResponseModel(200, "no error", "message", "error type"))
+        Mockito.`when`(adyenClient.verifyPayment(verifyRequest, "test"))
+            .thenReturn(AdyenVerifyPaymentResponseModel(200, "no error", "message", "error type", "psp reference"))
     }
 
     @Test

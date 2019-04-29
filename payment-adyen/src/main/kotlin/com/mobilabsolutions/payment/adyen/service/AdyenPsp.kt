@@ -55,14 +55,16 @@ class AdyenPsp(private val adyenClient: AdyenClient) : Psp {
     }
 
     override fun registerAlias(pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, pspTestMode: Boolean?): PspRegisterAliasResponseModel? {
-        if (pspRegisterAliasRequestModel.aliasExtra == null) throw ApiError.ofMessage("Alias extra cannot be found").asInternalServerError()
-
+        if (pspRegisterAliasRequestModel.aliasExtra == null) throw ApiError.ofErrorCode(ApiErrorCode.INCOMPLETE_ALIAS).asException()
+        val adyenMode = getAdyenMode(pspTestMode)
         val request = AdyenVerifyPaymentRequestModel(
-            apiKey = pspRegisterAliasRequestModel.pspConfig!!.sandboxPublicKey,
-            payload = pspRegisterAliasRequestModel.aliasExtra!!.payload
+            apiKey = if (adyenMode == AdyenMode.TEST.mode) pspRegisterAliasRequestModel.pspConfig!!.sandboxPublicKey else pspRegisterAliasRequestModel.pspConfig!!.publicKey,
+            payload = pspRegisterAliasRequestModel.aliasExtra!!.payload,
+            sandboxServerUrl = pspRegisterAliasRequestModel.pspConfig!!.sandboxServerUrl,
+            serverUrl = pspRegisterAliasRequestModel.pspConfig!!.serverUrl
         )
 
-        val response = adyenClient.verifyPayment(request)
+        val response = adyenClient.verifyPayment(request, getAdyenMode(pspTestMode))
 
         // To change what is passed to the response model when we have a correct payload
         return PspRegisterAliasResponseModel(response.message, response.message)
