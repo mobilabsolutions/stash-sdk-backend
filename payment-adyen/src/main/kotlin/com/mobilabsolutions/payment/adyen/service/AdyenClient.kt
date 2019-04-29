@@ -90,13 +90,14 @@ class AdyenClient(
      * Verifies Adyen payment result
      *
      * @param verifyRequest Adyen verify payment request
+     * @param mode test or live mode
      * @return Adyen verify payment response
      */
     fun verifyPayment(verifyRequest: AdyenVerifyPaymentRequestModel, mode: String): AdyenVerifyPaymentResponseModel {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
-        headers.add(API_KEY, verifyRequest.apiKey)
-        val verifyUrl = if (mode == AdyenMode.TEST.mode) verifyRequest.sandboxServerUrl + VERIFY_URL else verifyRequest.serverUrl + VERIFY_URL
+        headers.set(API_KEY, verifyRequest.apiKey)
+        val verifyUrl = if (mode == AdyenMode.TEST.mode) verifyRequest.sandboxCheckoutUrl + VERIFY_URL else verifyRequest.checkoutUrl + VERIFY_URL
         val request = HttpEntity(PayloadRequestModel(verifyRequest.payload), headers)
 
         val response = restTemplate.postForEntity(verifyUrl, request, String::class.java)

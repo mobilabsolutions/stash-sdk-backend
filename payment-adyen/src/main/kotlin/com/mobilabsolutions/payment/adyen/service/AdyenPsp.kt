@@ -60,8 +60,8 @@ class AdyenPsp(private val adyenClient: AdyenClient) : Psp {
         val request = AdyenVerifyPaymentRequestModel(
             apiKey = if (adyenMode == AdyenMode.TEST.mode) pspRegisterAliasRequestModel.pspConfig!!.sandboxPublicKey else pspRegisterAliasRequestModel.pspConfig!!.publicKey,
             payload = pspRegisterAliasRequestModel.aliasExtra!!.payload,
-            sandboxServerUrl = pspRegisterAliasRequestModel.pspConfig!!.sandboxServerUrl,
-            serverUrl = pspRegisterAliasRequestModel.pspConfig!!.serverUrl
+            sandboxCheckoutUrl = pspRegisterAliasRequestModel.pspConfig!!.sandboxServerUrl,
+            checkoutUrl = pspRegisterAliasRequestModel.pspConfig!!.serverUrl
         )
 
         val response = adyenClient.verifyPayment(request, getAdyenMode(pspTestMode))

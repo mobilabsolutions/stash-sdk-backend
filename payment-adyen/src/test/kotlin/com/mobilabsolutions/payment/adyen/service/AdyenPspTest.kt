@@ -62,8 +62,8 @@ class AdyenPspTest {
     private val verifyRequest = AdyenVerifyPaymentRequestModel(
         sandboxPublicKey,
         correctPayload,
-        sandboxServerUrl = null,
-        serverUrl = null
+        sandboxCheckoutUrl = null,
+        checkoutUrl = null
     )
 
     @InjectMocks
