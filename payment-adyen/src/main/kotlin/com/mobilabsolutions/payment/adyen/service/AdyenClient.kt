@@ -16,9 +16,7 @@ import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import mu.KLogging
 import org.springframework.stereotype.Service
 import java.text.SimpleDateFormat
-import java.time.Instant
-import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Calendar
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
@@ -60,7 +58,10 @@ class AdyenClient(
         paymentSessionRequest.returnUrl = dynamicPspConfig.returnUrl
         paymentSessionRequest.countryCode = pspConfigModel.country
         paymentSessionRequest.shopperLocale = pspConfigModel.locale
-        paymentSessionRequest.sessionValidity = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(Date())
+        paymentSessionRequest.sessionValidity = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(Calendar.getInstance().run {
+            add(Calendar.MINUTE, 5)
+            time
+        }.time)
         paymentSessionRequest.merchantAccount = if (mode == AdyenMode.TEST.mode) pspConfigModel.sandboxMerchantId else pspConfigModel.merchantId
         paymentSessionRequest.amount = amount
 
