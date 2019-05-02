@@ -61,8 +61,11 @@ class MerchantService(
                         currency = pspConfigRequestModel.pspConfig.currency,
                         country = pspConfigRequestModel.pspConfig.country,
                         locale = pspConfigRequestModel.pspConfig.locale,
-                        sandboxServerUrl = pspConfigRequestModel.pspConfig.sandboxServerUrl,
-                        serverUrl = pspConfigRequestModel.pspConfig.serverUrl
+                        urlPrefix = pspConfigRequestModel.pspConfig.urlPrefix,
+                        sandboxUsername = pspConfigRequestModel.pspConfig.sandboxUsername,
+                        username = pspConfigRequestModel.pspConfig.username,
+                        sandboxPassword = pspConfigRequestModel.pspConfig.sandboxPassword,
+                        password = pspConfigRequestModel.pspConfig.password
                     )
                 )
             )
@@ -130,8 +133,11 @@ class MerchantService(
                         currency = pspUpsertConfigRequestModel.currency,
                         country = pspUpsertConfigRequestModel.country,
                         locale = pspUpsertConfigRequestModel.locale,
-                        sandboxServerUrl = pspUpsertConfigRequestModel.sandboxServerUrl,
-                        serverUrl = pspUpsertConfigRequestModel.serverUrl
+                        urlPrefix = pspUpsertConfigRequestModel.urlPrefix,
+                        sandboxUsername = pspUpsertConfigRequestModel.sandboxUsername,
+                        username = pspUpsertConfigRequestModel.username,
+                        sandboxPassword = pspUpsertConfigRequestModel.sandboxPassword,
+                        password = pspUpsertConfigRequestModel.password
                     )
                 )
             )
@@ -197,7 +203,10 @@ class MerchantService(
             currency = null,
             country = null,
             locale = null,
-            sandboxServerUrl = null,
-            serverUrl = null
+            urlPrefix = null,
+            sandboxUsername = null,
+            username = null,
+            sandboxPassword = null,
+            password = null
         )
 }

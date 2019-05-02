@@ -1,5 +1,6 @@
 package com.mobilabsolutions.payment.adyen.service
 
+import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
@@ -48,6 +49,9 @@ class AdyenPspTest {
         country,
         locale,
         null,
+        null,
+        null,
+        null,
         null
     )
     private val paymentSession = "123"
@@ -57,6 +61,9 @@ class AdyenPspTest {
 
     @Mock
     private lateinit var adyenClient: AdyenClient
+
+    @Mock
+    private lateinit var adyenProperties: AdyenProperties
 
     @BeforeAll
     fun beforeAll() {

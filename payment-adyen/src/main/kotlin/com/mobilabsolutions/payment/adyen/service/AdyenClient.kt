@@ -6,6 +6,7 @@ import com.adyen.enums.Environment
 import com.adyen.model.Amount
 import com.adyen.model.checkout.PaymentSessionRequest
 import com.adyen.service.Checkout
+import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenChannel
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.model.PspConfigModel
@@ -23,10 +24,12 @@ import java.util.Calendar
  */
 @Service
 class AdyenClient(
+    private val adyenProperties: AdyenProperties,
     private val randomStringGenerator: RandomStringGenerator
 ) {
     companion object : KLogging() {
         const val STRING_LENGTH = 20
+        const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'"
     }
 
     /**
@@ -41,11 +44,10 @@ class AdyenClient(
         config.apiKey = if (mode == AdyenMode.TEST.mode) pspConfigModel.sandboxPublicKey else pspConfigModel.publicKey
 
         val client = Client(config)
-        if (mode == AdyenMode.TEST.mode) client.setEnvironment(Environment.TEST, pspConfigModel.sandboxServerUrl)
-        else client.setEnvironment(Environment.LIVE, pspConfigModel.serverUrl)
+        if (mode == AdyenMode.TEST.mode) client.setEnvironment(Environment.TEST, null)
+            else client.setEnvironment(Environment.LIVE, pspConfigModel.urlPrefix)
 
         val checkout = Checkout(client)
-
         val amount = Amount()
         amount.currency = pspConfigModel.currency
         amount.value = 0
@@ -53,12 +55,13 @@ class AdyenClient(
         val paymentSessionRequest = PaymentSessionRequest()
         paymentSessionRequest.reference = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
         paymentSessionRequest.shopperReference = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
-        paymentSessionRequest.channel = if (dynamicPspConfig.channel.equals(AdyenChannel.ANDROID.channel, ignoreCase = true)) PaymentSessionRequest.ChannelEnum.ANDROID else PaymentSessionRequest.ChannelEnum.IOS
+        paymentSessionRequest.channel = if (dynamicPspConfig.channel.equals(AdyenChannel.ANDROID.channel, ignoreCase = true))
+            PaymentSessionRequest.ChannelEnum.ANDROID else PaymentSessionRequest.ChannelEnum.IOS
         paymentSessionRequest.token = dynamicPspConfig.token
         paymentSessionRequest.returnUrl = dynamicPspConfig.returnUrl
         paymentSessionRequest.countryCode = pspConfigModel.country
         paymentSessionRequest.shopperLocale = pspConfigModel.locale
-        paymentSessionRequest.sessionValidity = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(Calendar.getInstance().run {
+        paymentSessionRequest.sessionValidity = SimpleDateFormat(DATE_FORMAT).format(Calendar.getInstance().run {
             add(Calendar.MINUTE, 5)
             time
         }.time)
