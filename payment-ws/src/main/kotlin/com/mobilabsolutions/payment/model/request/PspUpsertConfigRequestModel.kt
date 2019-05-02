@@ -49,9 +49,18 @@ data class PspUpsertConfigRequestModel(
     @ApiModelProperty(value = "Locale of the merchant user", example = "de-DE")
     val locale: String?,
 
-    @ApiModelProperty(value = "Sandbox (test) server url", example = "https://pal-test.adyen.com")
-    val sandboxServerUrl: String?,
+    @ApiModelProperty(value = "Live URL prefix", example = "[random]-[company-name]")
+    val urlPrefix: String?,
 
-    @ApiModelProperty(value = "Server url", example = "https://[random]-[company-name]-pal-live.adyenpayments.com")
-    val serverUrl: String?
+    @ApiModelProperty(value = "Sandbox (test) username", example = "ws@company.yourcompany")
+    val sandboxUsername: String?,
+
+    @ApiModelProperty(value = "Live username", example = "ws@company.yourcompany")
+    val username: String?,
+
+    @ApiModelProperty(value = "Sandbox (test) password", example = "ncbcjdheufhdhfjh")
+    val sandboxPassword: String?,
+
+    @ApiModelProperty(value = "Live password", example = "ncbcjdheufhdhfjh")
+    val password: String?
 )
