@@ -111,8 +111,9 @@ class AdyenPspTest {
             .thenReturn(paymentSession)
         Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(20)).thenReturn(reference)
         Mockito.`when`(adyenClient.authorization(
-            AdyenPaymentRequestModel(amount, email, customerIP, aliasId, adyenProperties.selectedRecurringDetailReference,
-                AdyenRecurringRequestModel(adyenProperties.contract), adyenProperties.shopperInteraction, reference, sandboxMerchantId, 0), pspConfig, AdyenMode.TEST.mode))
+            AdyenPaymentRequestModel(amount, email, customerIP, aliasId, pspAlias,
+                AdyenRecurringRequestModel(adyenProperties.contract), adyenProperties.shopperInteraction, reference, sandboxMerchantId, 0),
+            pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
         Mockito.`when`(adyenClient.verifyPayment(verifyRequest, urlPrefix, "test"))
             .thenReturn(AdyenVerifyPaymentResponseModel(200, "no error", "message", "error type", "psp reference"))

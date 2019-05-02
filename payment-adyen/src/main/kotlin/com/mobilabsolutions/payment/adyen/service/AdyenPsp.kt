@@ -97,7 +97,7 @@ class AdyenPsp(
             shopperEmail = pspPaymentRequestModel.extra?.personalData?.email,
             shopperIP = pspPaymentRequestModel.extra?.personalData?.customerIP,
             shopperReference = pspPaymentRequestModel.aliasId,
-            selectedRecurringDetailReference = adyenProperties.selectedRecurringDetailReference,
+            selectedRecurringDetailReference = pspPaymentRequestModel.pspAlias,
             recurring = AdyenRecurringRequestModel(
                 contract = adyenProperties.contract
             ),
