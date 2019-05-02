@@ -1,8 +1,14 @@
 package com.mobilabsolutions.payment.adyen.service
 
+import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
+import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
+import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
+import com.mobilabsolutions.payment.model.AliasExtraModel
+import com.mobilabsolutions.payment.model.PersonalDataModel
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -28,6 +34,7 @@ class AdyenPspTest {
     private val currency = "EUR"
     private val country = "DE"
     private val locale = "de-DE"
+    private val urlPrefix = "random-mobilab"
     private val dynamicPspConfig = DynamicPspConfigRequestModel(
         "some token",
         "some url",
@@ -48,13 +55,19 @@ class AdyenPspTest {
         currency,
         country,
         locale,
-        null,
+        urlPrefix,
         null,
         null,
         null,
         null
     )
     private val paymentSession = "123"
+    private val correctAliasId = "correct id"
+    private val correctPayload = "payload"
+    private val verifyRequest = AdyenVerifyPaymentRequestModel(
+        sandboxPublicKey,
+        correctPayload
+    )
 
     @InjectMocks
     private lateinit var adyenPsp: AdyenPsp
@@ -71,10 +84,33 @@ class AdyenPspTest {
 
         Mockito.`when`(adyenClient.requestPaymentSession(pspConfig, dynamicPspConfig, "test"))
             .thenReturn(paymentSession)
+        Mockito.`when`(adyenClient.verifyPayment(verifyRequest, urlPrefix, "test"))
+            .thenReturn(AdyenVerifyPaymentResponseModel(200, "no error", "message", "error type", "psp reference"))
     }
 
     @Test
     fun `calculate PSP config`() {
         adyenPsp.calculatePspConfig(pspConfig, dynamicPspConfig, true)
+    }
+
+    @Test
+    fun `register alias`() {
+        adyenPsp.registerAlias(PspRegisterAliasRequestModel(correctAliasId,
+            AliasExtraModel(
+                null,
+                null,
+                null,
+                PersonalDataModel(
+                    null,
+                    null,
+                    "lastName",
+                    null,
+                    null,
+                    "Berlin",
+                    country
+                ),
+                PaymentMethod.CC,
+                correctPayload
+            ), pspConfig), true)
     }
 }

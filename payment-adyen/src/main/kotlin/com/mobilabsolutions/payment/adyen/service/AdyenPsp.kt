@@ -1,6 +1,7 @@
 package com.mobilabsolutions.payment.adyen.service
 
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
+import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
@@ -54,7 +55,18 @@ class AdyenPsp(private val adyenClient: AdyenClient) : Psp {
     }
 
     override fun registerAlias(pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, pspTestMode: Boolean?): PspRegisterAliasResponseModel? {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        if (pspRegisterAliasRequestModel.aliasExtra == null) throw ApiError.ofErrorCode(ApiErrorCode.INCOMPLETE_ALIAS).asException()
+        val adyenMode = getAdyenMode(pspTestMode)
+        val pspConfig = pspRegisterAliasRequestModel.pspConfig
+        val request = AdyenVerifyPaymentRequestModel(
+            apiKey = if (adyenMode == AdyenMode.TEST.mode) pspConfig!!.sandboxPublicKey else pspConfig!!.publicKey,
+            payload = pspRegisterAliasRequestModel.aliasExtra!!.payload
+        )
+
+        val response = adyenClient.verifyPayment(request, pspConfig.urlPrefix!!, getAdyenMode(pspTestMode))
+
+        // To change what is passed to the response model when we have a correct payload
+        return PspRegisterAliasResponseModel(response?.message, response?.message)
     }
 
     override fun preauthorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
