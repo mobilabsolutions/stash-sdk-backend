@@ -1,6 +1,7 @@
 package com.mobilabsolutions.payment.adyen.service
 
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
+import com.mobilabsolutions.payment.adyen.data.enum.AdyenResultCode
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
@@ -65,8 +66,13 @@ class AdyenPsp(private val adyenClient: AdyenClient) : Psp {
 
         val response = adyenClient.verifyPayment(request, pspConfig.urlPrefix!!, getAdyenMode(pspTestMode))
 
-        // To change what is passed to the response model when we have a correct payload
-        return PspRegisterAliasResponseModel(response?.message, response?.message)
+        if (response?.resultCode == AdyenResultCode.REFUSED.result ||
+            response?.resultCode == AdyenResultCode.ERROR.result ||
+            response?.resultCode == AdyenResultCode.CANCELLED.result) {
+            throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR,
+                "Error during Adyen alias registration. Adyen message: {}" + response.refusalReason).asException()
+        }
+        return PspRegisterAliasResponseModel(response?.pspReference, null)
     }
 
     override fun preauthorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {

@@ -1,15 +1,18 @@
 package com.mobilabsolutions.payment.adyen.service
 
+import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
+import com.mobilabsolutions.payment.adyen.data.enum.AdyenResultCode
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
-import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
 import com.mobilabsolutions.payment.model.PspConfigModel
-import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
+import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
+import com.mobilabsolutions.server.commons.exception.ApiException
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -64,10 +67,16 @@ class AdyenPspTest {
     private val paymentSession = "123"
     private val correctAliasId = "correct id"
     private val correctPayload = "payload"
+    private val wrongPayload = "wrong payload"
     private val verifyRequest = AdyenVerifyPaymentRequestModel(
         sandboxPublicKey,
         correctPayload
     )
+    private val wrongVerifyRequest = AdyenVerifyPaymentRequestModel(
+        sandboxPublicKey,
+        wrongPayload
+    )
+    private val pspAlias = "psp alias"
 
     @InjectMocks
     private lateinit var adyenPsp: AdyenPsp
@@ -85,7 +94,9 @@ class AdyenPspTest {
         Mockito.`when`(adyenClient.requestPaymentSession(pspConfig, dynamicPspConfig, "test"))
             .thenReturn(paymentSession)
         Mockito.`when`(adyenClient.verifyPayment(verifyRequest, urlPrefix, "test"))
-            .thenReturn(AdyenVerifyPaymentResponseModel(200, "no error", "message", "error type", "psp reference"))
+            .thenReturn(AdyenVerifyPaymentResponseModel(pspAlias, AdyenResultCode.AUTHORISED.result, null))
+        Mockito.`when`(adyenClient.verifyPayment(wrongVerifyRequest, urlPrefix, "test"))
+            .thenReturn(AdyenVerifyPaymentResponseModel(pspAlias, AdyenResultCode.REFUSED.result, null))
     }
 
     @Test
@@ -112,5 +123,28 @@ class AdyenPspTest {
                 PaymentMethod.CC,
                 correctPayload
             ), pspConfig), true)
+    }
+
+    @Test
+    fun `register alias with wrong payload`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            adyenPsp.registerAlias(PspRegisterAliasRequestModel(correctAliasId,
+                AliasExtraModel(
+                    null,
+                    null,
+                    null,
+                    PersonalDataModel(
+                        null,
+                        null,
+                        "lastName",
+                        null,
+                        null,
+                        "Berlin",
+                        country
+                    ),
+                    PaymentMethod.CC,
+                    wrongPayload
+                ), pspConfig), true)
+        }
     }
 }
