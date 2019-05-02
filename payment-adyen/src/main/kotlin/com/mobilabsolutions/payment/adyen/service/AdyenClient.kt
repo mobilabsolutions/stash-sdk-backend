@@ -9,27 +9,34 @@ import com.adyen.service.Checkout
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenChannel
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
+import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
+import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import mu.KLogging
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import java.text.SimpleDateFormat
 import java.util.Calendar
-
+import org.springframework.web.client.RestTemplate
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
 @Service
 class AdyenClient(
     private val adyenProperties: AdyenProperties,
-    private val randomStringGenerator: RandomStringGenerator
+    private val randomStringGenerator: RandomStringGenerator,
+    private val restTemplate: RestTemplate
 ) {
     companion object : KLogging() {
         const val STRING_LENGTH = 20
         const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        const val PREAUTH_URL = "/authorise"
     }
 
     /**
@@ -75,5 +82,41 @@ class AdyenClient(
         }
 
         return response.paymentSession.toString()
+    }
+
+    /**
+     * Makes preauthorization request to Adyen
+     *
+     * @param request Adyen payment request
+     * @param pspConfig Adyen configuration
+     * @param mode test or live mode
+     * @return Adyen payment response
+     */
+    fun preauthorize(request: AdyenPaymentRequestModel, pspConfig: PspConfigModel, mode: String): AdyenPaymentResponseModel? {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+
+        if (mode == AdyenMode.TEST.mode) {
+            headers.setBasicAuth(pspConfig.sandboxUsername!!, pspConfig.sandboxPassword!!)
+            return executeRestCall(
+                adyenProperties.testPaymentBaseUrl + PREAUTH_URL,
+                request, headers, AdyenPaymentResponseModel::class.java
+            )
+        }
+        headers.setBasicAuth(pspConfig.username!!, pspConfig.sandboxPassword!!)
+        return executeRestCall(
+            adyenProperties.livePaymentBaseUrl.format(pspConfig.urlPrefix) + PREAUTH_URL,
+            request, headers, AdyenPaymentResponseModel::class.java
+        )
+    }
+
+    private fun <T, R> executeRestCall(
+        url: String,
+        requestBody: T,
+        httpHeaders: HttpHeaders,
+        responseClass: Class<R>
+    ): R? {
+        val httpEntity = HttpEntity(requestBody, httpHeaders)
+        return restTemplate.postForEntity(url, httpEntity, responseClass).body
     }
 }

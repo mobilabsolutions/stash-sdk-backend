@@ -64,6 +64,6 @@ data class PspConfigModel(
     @ApiModelProperty(value = "Sandbox (test) password", example = "ncbcjdheufhdhfjh")
     val sandboxPassword: String?,
 
-    @ApiModelProperty(value = "Live password", example = "ncbcjdheufhdhfjh")
+    @ApiModelProperty(value = "Password", example = "mypassword123")
     val password: String?
 )

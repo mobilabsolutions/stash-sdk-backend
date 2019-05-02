@@ -14,6 +14,9 @@ data class PersonalDataModel(
     @field:Email
     val email: String?,
 
+    @ApiModelProperty(value = "Customer's IP", example = "61.294.12.12")
+    val customerIP: String?,
+
     @ApiModelProperty(value = "First name of user", example = "Max")
     val firstName: String?,
 

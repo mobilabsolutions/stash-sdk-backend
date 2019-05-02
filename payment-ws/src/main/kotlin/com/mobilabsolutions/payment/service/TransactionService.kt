@@ -87,7 +87,6 @@ class TransactionService(
      * Preauthorize transaction
      *
      * @param secretKey Secret key
-
      * @param pspTestMode indicator whether is the test mode or not
      * @param preauthorizeInfo Payment information
      * @return Payment response model
