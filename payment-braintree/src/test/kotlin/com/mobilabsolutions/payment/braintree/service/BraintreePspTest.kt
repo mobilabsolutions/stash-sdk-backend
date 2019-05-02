@@ -74,6 +74,9 @@ class BraintreePspTest {
         null,
         null,
         null,
+        null,
+        null,
+        null,
         null
     )
     private val mode = "sandbox"
@@ -98,7 +101,7 @@ class BraintreePspTest {
         Mockito.`when`(braintreeClient.registerPayPalAlias(BraintreeRegisterAliasRequestModel(correctAliasId, nonce, deviceData),
             PspConfigModel(
                 PaymentServiceProvider.BRAINTREE.toString(), null, null, null, null,
-                merchantId, publicKey, privateKey, null, null, true, null, null, null, null, null
+                merchantId, publicKey, privateKey, null, null, true, null, null, null, null, null, null, null, null
             ), BraintreeMode.SANDBOX.mode))
             .thenReturn(BraintreeRegisterAliasResponseModel(pspAlias, billingAgreementId))
 

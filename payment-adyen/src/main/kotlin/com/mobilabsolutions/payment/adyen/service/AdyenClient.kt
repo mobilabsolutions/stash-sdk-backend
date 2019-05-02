@@ -8,6 +8,7 @@ import com.adyen.model.checkout.PaymentSessionRequest
 import com.adyen.service.Checkout
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.collect.Maps
+import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenChannel
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
@@ -24,8 +25,8 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
-import java.time.Instant
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
+import java.util.Calendar
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
@@ -34,12 +35,14 @@ import java.time.format.DateTimeFormatter
 class AdyenClient(
     private val randomStringGenerator: RandomStringGenerator,
     private val restTemplate: RestTemplate,
-    private val jsonMapper: ObjectMapper
+    private val jsonMapper: ObjectMapper,
+    private val adyenProperties: AdyenProperties
 ) {
     companion object : KLogging() {
         const val STRING_LENGTH = 20
-        const val VERIFY_URL = "/v40/payments/result"
+        const val VERIFY_URL = "/payments/result"
         const val API_KEY = "X-API-Key"
+        const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'"
     }
 
     /**
@@ -54,11 +57,10 @@ class AdyenClient(
         config.apiKey = if (mode == AdyenMode.TEST.mode) pspConfigModel.sandboxPublicKey else pspConfigModel.publicKey
 
         val client = Client(config)
-        if (mode == AdyenMode.TEST.mode) client.setEnvironment(Environment.TEST, pspConfigModel.sandboxServerUrl)
-        else client.setEnvironment(Environment.LIVE, pspConfigModel.serverUrl)
+        if (mode == AdyenMode.TEST.mode) client.setEnvironment(Environment.TEST, null)
+            else client.setEnvironment(Environment.LIVE, pspConfigModel.urlPrefix)
 
         val checkout = Checkout(client)
-
         val amount = Amount()
         amount.currency = pspConfigModel.currency
         amount.value = 0
@@ -66,14 +68,18 @@ class AdyenClient(
         val paymentSessionRequest = PaymentSessionRequest()
         paymentSessionRequest.reference = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
         paymentSessionRequest.shopperReference = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
-        paymentSessionRequest.channel = if (dynamicPspConfig.channel.equals(AdyenChannel.ANDROID.channel, ignoreCase = true)) PaymentSessionRequest.ChannelEnum.ANDROID else PaymentSessionRequest.ChannelEnum.IOS
+        paymentSessionRequest.channel = if (dynamicPspConfig.channel.equals(AdyenChannel.ANDROID.channel, ignoreCase = true))
+            PaymentSessionRequest.ChannelEnum.ANDROID else PaymentSessionRequest.ChannelEnum.IOS
         paymentSessionRequest.enableRecurring(true)
         paymentSessionRequest.enableOneClick(true)
         paymentSessionRequest.token = dynamicPspConfig.token
         paymentSessionRequest.returnUrl = dynamicPspConfig.returnUrl
         paymentSessionRequest.countryCode = pspConfigModel.country
         paymentSessionRequest.shopperLocale = pspConfigModel.locale
-        paymentSessionRequest.sessionValidity = DateTimeFormatter.ISO_INSTANT.format(Instant.now())
+        paymentSessionRequest.sessionValidity = SimpleDateFormat(DATE_FORMAT).format(Calendar.getInstance().run {
+            add(Calendar.MINUTE, 5)
+            time
+        }.time)
         paymentSessionRequest.merchantAccount = if (mode == AdyenMode.TEST.mode) pspConfigModel.sandboxMerchantId else pspConfigModel.merchantId
         paymentSessionRequest.amount = amount
 
@@ -93,11 +99,11 @@ class AdyenClient(
      * @param mode test or live mode
      * @return Adyen verify payment response
      */
-    fun verifyPayment(verifyRequest: AdyenVerifyPaymentRequestModel, mode: String): AdyenVerifyPaymentResponseModel {
+    fun verifyPayment(verifyRequest: AdyenVerifyPaymentRequestModel, urlPrefix: String, mode: String): AdyenVerifyPaymentResponseModel {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.set(API_KEY, verifyRequest.apiKey)
-        val verifyUrl = if (mode == AdyenMode.TEST.mode) verifyRequest.sandboxCheckoutUrl + VERIFY_URL else verifyRequest.checkoutUrl + VERIFY_URL
+        val verifyUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testCheckoutBaseUrl + VERIFY_URL else adyenProperties.liveCheckoutBaseUrl.format(urlPrefix) + VERIFY_URL
         val request = HttpEntity(PayloadRequestModel(verifyRequest.payload), headers)
 
         val response = restTemplate.postForEntity(verifyUrl, request, String::class.java)

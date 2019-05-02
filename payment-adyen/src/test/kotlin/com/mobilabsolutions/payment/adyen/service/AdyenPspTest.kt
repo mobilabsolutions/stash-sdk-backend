@@ -3,6 +3,7 @@ package com.mobilabsolutions.payment.adyen.service
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
+import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
@@ -33,6 +34,7 @@ class AdyenPspTest {
     private val currency = "EUR"
     private val country = "DE"
     private val locale = "de-DE"
+    private val urlPrefix = "random-mobilab"
     private val dynamicPspConfig = DynamicPspConfigRequestModel(
         "some token",
         "some url",
@@ -53,6 +55,9 @@ class AdyenPspTest {
         currency,
         country,
         locale,
+        urlPrefix,
+        null,
+        null,
         null,
         null
     )
@@ -61,9 +66,7 @@ class AdyenPspTest {
     private val correctPayload = "payload"
     private val verifyRequest = AdyenVerifyPaymentRequestModel(
         sandboxPublicKey,
-        correctPayload,
-        sandboxCheckoutUrl = null,
-        checkoutUrl = null
+        correctPayload
     )
 
     @InjectMocks
@@ -72,13 +75,16 @@ class AdyenPspTest {
     @Mock
     private lateinit var adyenClient: AdyenClient
 
+    @Mock
+    private lateinit var adyenProperties: AdyenProperties
+
     @BeforeAll
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
         Mockito.`when`(adyenClient.requestPaymentSession(pspConfig, dynamicPspConfig, "test"))
             .thenReturn(paymentSession)
-        Mockito.`when`(adyenClient.verifyPayment(verifyRequest, "test"))
+        Mockito.`when`(adyenClient.verifyPayment(verifyRequest, urlPrefix, "test"))
             .thenReturn(AdyenVerifyPaymentResponseModel(200, "no error", "message", "error type", "psp reference"))
     }
 

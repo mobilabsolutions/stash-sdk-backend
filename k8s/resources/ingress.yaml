@@ -21,3 +21,7 @@ spec:
             backend:
               serviceName: payment-sdk-backend
               servicePort: 80
+          - path: /merchant/*
+            backend:
+              serviceName: payment-merchant-backend
+              servicePort: 80

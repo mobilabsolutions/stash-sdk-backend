@@ -12,11 +12,5 @@ data class AdyenVerifyPaymentRequestModel(
     val apiKey: String?,
 
     @ApiModelProperty(value = "Adyen Payload")
-    val payload: String?,
-
-    @ApiModelProperty(value = "Sandbox (test) checkout url", example = "https://checkout-test.adyen.com")
-    val sandboxCheckoutUrl: String?,
-
-    @ApiModelProperty(value = "Checkout url", example = "https://[random]-[company-name]-checkout-live.adyenpayments.com")
-    val checkoutUrl: String?
+    val payload: String?
 )
