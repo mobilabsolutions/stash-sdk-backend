@@ -95,12 +95,12 @@ class AdyenClient(
     }
 
     /**
-    * Verifies Adyen payment result
-    *
-    * @param verifyRequest Adyen verify payment request
-    * @param urlPrefix URL prefix
-    * @param mode test or live mode
-    * @return Adyen verify payment response
+     * Verifies Adyen payment result
+     *
+     * @param verifyRequest Adyen verify payment request
+     * @param urlPrefix URL prefix
+     * @param mode test or live mode
+     * @return Adyen verify payment response
     */
     fun verifyPayment(verifyRequest: AdyenVerifyPaymentRequestModel, urlPrefix: String, mode: String): AdyenVerifyPaymentResponseModel? {
         val headers = HttpHeaders()
@@ -112,7 +112,7 @@ class AdyenClient(
         return executeRestCall(verifyUrl, request, headers, AdyenVerifyPaymentResponseModel::class.java)
     }
 
-        /**
+    /**
      * Makes authorization request to Adyen
      *
      * @param request Adyen payment request
