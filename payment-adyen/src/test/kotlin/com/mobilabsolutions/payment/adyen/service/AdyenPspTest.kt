@@ -1,5 +1,8 @@
 package com.mobilabsolutions.payment.adyen.service
 
+import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
+import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
+import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenResultCode
@@ -7,11 +10,11 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
-import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
@@ -40,6 +43,7 @@ class AdyenPspTest {
     private val currency = "EUR"
     private val country = "DE"
     private val locale = "de-DE"
+    private val urlPrefix = "random-mobilab"
     private val dynamicPspConfig = DynamicPspConfigRequestModel(
         "some token",
         "some url",
@@ -69,9 +73,9 @@ class AdyenPspTest {
         locale,
         null,
         username,
+        urlPrefix,
         null,
-        password,
-        null
+        password
     )
     private val paymentSession = "123"
     private val email = "test@test.com"
@@ -80,6 +84,12 @@ class AdyenPspTest {
     private val reference = "reference"
     private val pspReference = "1234567890"
     private val pspAlias = "psp alias"
+    private val correctAliasId = "correct id"
+    private val correctPayload = "payload"
+    private val verifyRequest = AdyenVerifyPaymentRequestModel(
+        sandboxPublicKey,
+        correctPayload
+    )
 
     @InjectMocks
     private lateinit var adyenPsp: AdyenPsp
@@ -104,6 +114,8 @@ class AdyenPspTest {
             AdyenPaymentRequestModel(amount, email, customerIP, aliasId, adyenProperties.selectedRecurringDetailReference,
                 AdyenRecurringRequestModel(adyenProperties.contract), adyenProperties.shopperInteraction, reference, sandboxMerchantId, 0), pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
+        Mockito.`when`(adyenClient.verifyPayment(verifyRequest, urlPrefix, "test"))
+            .thenReturn(AdyenVerifyPaymentResponseModel(200, "no error", "message", "error type", "psp reference"))
     }
 
     @Test
@@ -114,7 +126,30 @@ class AdyenPspTest {
     @Test
     fun `authorize successfully`() {
         adyenPsp.authorize(PspPaymentRequestModel(
-            aliasId, AliasExtraModel(null, null, null, PersonalDataModel(email, customerIP, null, null, null, null, null, null), PaymentMethod.CC),
+            aliasId,
+            AliasExtraModel(null, null, null, PersonalDataModel(email, customerIP, null, null, null, null, null, null), PaymentMethod.CC, null),
             PaymentDataRequestModel(amountValue, currency, "Book"), pspAlias, pspConfig), true)
+    }
+
+    @Test
+    fun `register alias`() {
+        adyenPsp.registerAlias(PspRegisterAliasRequestModel(correctAliasId,
+            AliasExtraModel(
+                null,
+                null,
+                null,
+                PersonalDataModel(
+                    null,
+                    null,
+                    null,
+                    "lastName",
+                    null,
+                    null,
+                    "Berlin",
+                    country
+                ),
+                PaymentMethod.CC,
+                correctPayload
+            ), pspConfig), true)
     }
 }

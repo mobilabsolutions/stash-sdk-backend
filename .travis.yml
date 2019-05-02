@@ -3,6 +3,8 @@ services:
 
 language: java
 
+dist: xenial
+
 jdk:
   - openjdk11
 
