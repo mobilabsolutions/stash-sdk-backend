@@ -11,4 +11,7 @@ class AdyenProperties {
     val testCheckoutBaseUrl = "https://checkout-test.adyen.com/v41"
     val livePaymentBaseUrl = "https://%s-pal-live.adyen.com/pal/servlet/Payment/v40"
     val liveCheckoutBaseUrl = "https://%s-checkout-live.adyen.com/v41"
+    val contract = "RECURRING"
+    val shopperInteraction = "ContAuth"
+    val selectedRecurringDetailReference = "LATEST"
 }

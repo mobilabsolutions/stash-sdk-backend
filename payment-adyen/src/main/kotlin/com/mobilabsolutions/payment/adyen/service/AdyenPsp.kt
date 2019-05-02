@@ -1,7 +1,13 @@
 package com.mobilabsolutions.payment.adyen.service
 
+import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
+import com.mobilabsolutions.payment.adyen.data.enum.AdyenResultCode
+import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
+import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
@@ -16,6 +22,7 @@ import com.mobilabsolutions.payment.model.response.PspRegisterAliasResponseModel
 import com.mobilabsolutions.payment.service.Psp
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
+import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import mu.KLogging
 import org.springframework.stereotype.Component
 
@@ -23,9 +30,15 @@ import org.springframework.stereotype.Component
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
 @Component
-class AdyenPsp(private val adyenClient: AdyenClient) : Psp {
+class AdyenPsp(
+    private val adyenClient: AdyenClient,
+    private val adyenProperties: AdyenProperties,
+    private val randomStringGenerator: RandomStringGenerator
+) : Psp {
 
-    companion object : KLogging()
+    companion object : KLogging() {
+        const val REFERENCE_LENGTH = 20
+    }
 
     override fun getProvider(): PaymentServiceProvider {
         return PaymentServiceProvider.ADYEN
@@ -62,7 +75,36 @@ class AdyenPsp(private val adyenClient: AdyenClient) : Psp {
     }
 
     override fun authorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        val adyenMode = getAdyenMode(pspTestMode)
+        logger.info("Adyen authorize payment has been called for alias {} for {} mode", pspPaymentRequestModel.aliasId, adyenMode)
+        val request = AdyenPaymentRequestModel(
+            amount = AdyenAmountRequestModel(
+                value = pspPaymentRequestModel.paymentData?.amount,
+                currency = pspPaymentRequestModel.paymentData?.currency
+            ),
+            shopperEmail = pspPaymentRequestModel.extra?.personalData?.email,
+            shopperIP = pspPaymentRequestModel.extra?.personalData?.customerIP,
+            shopperReference = pspPaymentRequestModel.aliasId,
+            selectedRecurringDetailReference = adyenProperties.selectedRecurringDetailReference,
+            recurring = AdyenRecurringRequestModel(
+                contract = adyenProperties.contract
+            ),
+            shopperInteraction = adyenProperties.shopperInteraction,
+            reference = randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
+            merchantAccount = if (adyenMode == AdyenMode.TEST.mode)
+                pspPaymentRequestModel.pspConfig?.sandboxMerchantId else pspPaymentRequestModel.pspConfig?.merchantId,
+            captureDelayHours = 0
+        )
+
+        val response = adyenClient.authorization(request, pspPaymentRequestModel.pspConfig!!, adyenMode)
+        if (response?.resultCode == AdyenResultCode.ERROR.result ||
+            response?.resultCode == AdyenResultCode.REFUSED.result ||
+            response?.resultCode == AdyenResultCode.CANCELLED.result) {
+            logger.error("Adyen authorization failed, reason {}", response.refusalReason)
+            return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.refusalReason)
+        }
+
+        return PspPaymentResponseModel(response?.pspReference, TransactionStatus.SUCCESS, null, null, null)
     }
 
     override fun capture(pspCaptureRequestModel: PspCaptureRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
