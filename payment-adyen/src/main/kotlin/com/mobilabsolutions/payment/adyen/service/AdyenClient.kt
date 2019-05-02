@@ -7,7 +7,6 @@ import com.adyen.model.Amount
 import com.adyen.model.checkout.PaymentSessionRequest
 import com.adyen.service.Checkout
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.common.collect.Maps
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenChannel
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
@@ -100,30 +99,23 @@ class AdyenClient(
      * @param mode test or live mode
      * @return Adyen verify payment response
      */
-    fun verifyPayment(verifyRequest: AdyenVerifyPaymentRequestModel, urlPrefix: String, mode: String): AdyenVerifyPaymentResponseModel {
+    fun verifyPayment(verifyRequest: AdyenVerifyPaymentRequestModel, urlPrefix: String, mode: String): AdyenVerifyPaymentResponseModel? {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.set(API_KEY, verifyRequest.apiKey)
         val verifyUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testCheckoutBaseUrl + VERIFY_URL else adyenProperties.liveCheckoutBaseUrl.format(urlPrefix) + VERIFY_URL
         val request = HttpEntity(PayloadRequestModel(verifyRequest.payload), headers)
 
-        val response = restTemplate.postForEntity(verifyUrl, request, String::class.java)
-        return convertToResponse(response.body!!, AdyenVerifyPaymentResponseModel::class.java)
+        return executeRestCall(verifyUrl, request, headers, AdyenVerifyPaymentResponseModel::class.java)
     }
 
-    /**
-     * Converts Adyen response body to internal response.
-     *
-     * @param body response body
-     * @param response response class
-     * @return internal response
-     */
-    private fun <T> convertToResponse(body: String, response: Class<T>): T {
-        val params = body.split("\\r?\\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        val map = params.map { s ->
-            val parts = s.split("=".toRegex(), 2).toTypedArray()
-            Maps.immutableEntry(parts[0], parts[1])
-        }.map { it.key to it.value }.toMap()
-        return jsonMapper.convertValue(map, response)
+    private fun <T, R> executeRestCall(
+        url: String,
+        requestBody: T,
+        httpHeaders: HttpHeaders,
+        responseClass: Class<R>
+    ): R? {
+        val httpEntity = HttpEntity(requestBody, httpHeaders)
+        return restTemplate.postForEntity(url, httpEntity, responseClass).body
     }
 }
