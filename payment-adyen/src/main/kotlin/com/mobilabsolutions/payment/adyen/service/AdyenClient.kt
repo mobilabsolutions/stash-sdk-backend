@@ -96,6 +96,7 @@ class AdyenClient(
      * Verifies Adyen payment result
      *
      * @param verifyRequest Adyen verify payment request
+     * @param urlPrefix URL prefix
      * @param mode test or live mode
      * @return Adyen verify payment response
      */
