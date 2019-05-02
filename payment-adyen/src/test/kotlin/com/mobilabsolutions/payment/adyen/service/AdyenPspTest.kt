@@ -1,23 +1,23 @@
 package com.mobilabsolutions.payment.adyen.service
 
-import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
-import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
-import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenResultCode
 import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
+import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
+import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
 import com.mobilabsolutions.payment.model.PspConfigModel
-import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
+import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -71,9 +71,9 @@ class AdyenPspTest {
         currency,
         country,
         locale,
-        null,
-        username,
         urlPrefix,
+        username,
+        null,
         null,
         password
     )
