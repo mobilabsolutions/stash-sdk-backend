@@ -43,14 +43,11 @@ class AdyenPspTest {
     private val customerIP = "61.294.12.12"
     private val correctAliasId = "correct id"
     private val amount = 2000
-    private val reason = "some reason"
     private val pspAlias = "some psp alias"
     private val selectedRecurringDetailReference = "LATEST"
     private val contract = "RECURRING"
     private val shopperInteraction = "ContAuth"
     private val reference = "some reference"
-    private val sandboxUsername = "some username"
-    private val sandboxPassword = "some password"
     private val urlPrefix = "random-mobilab"
     private val dynamicPspConfig = DynamicPspConfigRequestModel(
         "some token",
