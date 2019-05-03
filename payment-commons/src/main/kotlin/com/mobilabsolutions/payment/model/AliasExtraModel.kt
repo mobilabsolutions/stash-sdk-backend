@@ -31,5 +31,8 @@ data class AliasExtraModel(
     @ApiModelProperty(value = "Payment method", example = "SEPA")
     @field:Enumerated(EnumType.STRING)
     @field:NotNull
-    val paymentMethod: PaymentMethod?
+    val paymentMethod: PaymentMethod?,
+
+    @ApiModelProperty(value = "Payload")
+    val payload: String?
 )

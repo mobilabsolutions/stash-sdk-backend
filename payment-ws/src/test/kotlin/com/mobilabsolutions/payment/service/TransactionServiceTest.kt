@@ -84,7 +84,7 @@ class TransactionServiceTest {
     )
     private val aliasExtra = AliasExtraModel(null, null, null,
         PersonalDataModel(null, null, null, "Mustermann", null,
-            null, "Berlin", "DE"), PaymentMethod.CC)
+            null, "Berlin", "DE"), PaymentMethod.CC, null)
 
     @InjectMocks
     private lateinit var transactionService: TransactionService

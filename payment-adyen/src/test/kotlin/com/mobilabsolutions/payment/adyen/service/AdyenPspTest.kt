@@ -1,19 +1,20 @@
 package com.mobilabsolutions.payment.adyen.service
 
+import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
+import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
+import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenCredentialsRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
-import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
-import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
-import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -75,9 +76,9 @@ class AdyenPspTest {
         country,
         locale,
         urlPrefix,
-        sandboxUsername,
         null,
-        sandboxPassword,
+        null,
+        null,
         null
     )
     private val paymentRequest = AdyenPaymentRequestModel(
@@ -109,6 +110,11 @@ class AdyenPspTest {
         "result code"
     )
     private val paymentSession = "123"
+    private val correctPayload = "payload"
+    private val verifyRequest = AdyenVerifyPaymentRequestModel(
+        sandboxPublicKey,
+        correctPayload
+    )
 
     @InjectMocks
     private lateinit var adyenPsp: AdyenPsp
@@ -132,8 +138,8 @@ class AdyenPspTest {
         Mockito.`when`(adyenProperties.shopperInteraction).thenReturn(shopperInteraction)
         Mockito.`when`(adyenClient.requestPaymentSession(pspConfig, dynamicPspConfig, "test"))
             .thenReturn(paymentSession)
-        Mockito.`when`(adyenClient.preauthorize(paymentRequest, pspConfig, "test"))
-            .thenReturn(paymentResponse)
+        Mockito.`when`(adyenClient.verifyPayment(verifyRequest, urlPrefix, "test"))
+            .thenReturn(AdyenVerifyPaymentResponseModel(200, "no error", "message", "error type", "psp reference"))
     }
 
     @Test
@@ -142,16 +148,15 @@ class AdyenPspTest {
     }
 
     @Test
-    fun `preauthorize successfully`() {
-        adyenPsp.preauthorize(PspPaymentRequestModel(
-            correctAliasId,
+    fun `register alias`() {
+        adyenPsp.registerAlias(PspRegisterAliasRequestModel(correctAliasId,
             AliasExtraModel(
                 null,
                 null,
                 null,
                 PersonalDataModel(
-                    email,
-                    customerIP,
+                    null,
+                    null,
                     null,
                     "lastName",
                     null,
@@ -159,15 +164,8 @@ class AdyenPspTest {
                     "Berlin",
                     country
                 ),
-                PaymentMethod.CC
-            ),
-            PaymentDataRequestModel(
-                amount,
-                currency,
-                reason
-            ),
-            pspAlias,
-            pspConfig
-        ), true)
+                PaymentMethod.CC,
+                correctPayload
+            ), pspConfig), true)
     }
 }
