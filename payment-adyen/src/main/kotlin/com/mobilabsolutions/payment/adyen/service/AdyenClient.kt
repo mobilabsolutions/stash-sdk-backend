@@ -6,7 +6,6 @@ import com.adyen.enums.Environment
 import com.adyen.model.Amount
 import com.adyen.model.checkout.PaymentSessionRequest
 import com.adyen.service.Checkout
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenChannel
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
@@ -35,7 +34,6 @@ import org.springframework.web.client.RestTemplate
 class AdyenClient(
     private val randomStringGenerator: RandomStringGenerator,
     private val restTemplate: RestTemplate,
-    private val jsonMapper: ObjectMapper,
     private val adyenProperties: AdyenProperties
 ) {
     companion object : KLogging() {

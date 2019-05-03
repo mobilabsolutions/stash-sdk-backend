@@ -5,7 +5,6 @@ import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentRespo
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
-import com.mobilabsolutions.payment.adyen.model.request.AdyenCredentialsRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
@@ -27,13 +26,11 @@ import org.mockito.MockitoAnnotations
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
-import org.springframework.test.context.ContextConfiguration
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
 @ExtendWith(MockitoExtension::class)
-@ContextConfiguration(classes = [AdyenProperties::class])
 @MockitoSettings(strictness = Strictness.STRICT_STUBS)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AdyenPspTest {
@@ -81,28 +78,6 @@ class AdyenPspTest {
         null,
         null
     )
-    private val paymentRequest = AdyenPaymentRequestModel(
-        AdyenAmountRequestModel(
-            amount,
-            currency
-        ),
-        email,
-        customerIP,
-        pspAlias,
-        selectedRecurringDetailReference,
-        AdyenRecurringRequestModel(
-            contract
-        ),
-        shopperInteraction,
-        reference,
-        sandboxMerchantId,
-        null
-    )
-    private val credentials = AdyenCredentialsRequestModel(
-        sandboxUsername,
-        sandboxPassword,
-        urlPrefix
-    )
     private val paymentResponse = AdyenPaymentResponseModel(
         "code",
         "psp ref",
@@ -140,6 +115,24 @@ class AdyenPspTest {
             .thenReturn(paymentSession)
         Mockito.`when`(adyenClient.verifyPayment(verifyRequest, urlPrefix, "test"))
             .thenReturn(AdyenVerifyPaymentResponseModel(200, "no error", "message", "error type", "psp reference"))
+        Mockito.`when`(adyenClient.preauthorize(AdyenPaymentRequestModel(
+            AdyenAmountRequestModel(
+                amount,
+                currency
+            ),
+            email,
+            customerIP,
+            pspAlias,
+            adyenProperties.selectedRecurringDetailReference,
+            AdyenRecurringRequestModel(
+                adyenProperties.contract
+            ),
+            adyenProperties.shopperInteraction,
+            reference,
+            sandboxMerchantId,
+            null
+        ), pspConfig, "test"))
+            .thenReturn(paymentResponse)
     }
 
     @Test
