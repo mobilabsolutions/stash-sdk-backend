@@ -11,6 +11,6 @@ data class PspRegisterAliasResponseModel(
     @ApiModelProperty(value = "Payment service provider alias", example = "jdklaoa")
     val pspAlias: String?,
 
-    @ApiModelProperty(value = "Braintree's billing agreement id")
+    @ApiModelProperty(value = "Billing agreement id")
     val billingAgreementId: String?
 )

@@ -159,6 +159,7 @@ class ApiError private constructor(details: Map<String, Any>) {
     class Builder {
 
         private val builder = ImmutableMap.builder<String, Any>()
+        private var errorCode = ApiErrorCode.SDK_GENERAL_ERROR
 
         fun withMessage(message: String): Builder {
             builder.put(MESSAGE_PROPERTY, message)
@@ -167,6 +168,7 @@ class ApiError private constructor(details: Map<String, Any>) {
 
         fun withErrorCode(errorCode: ApiErrorCode): Builder {
             builder.put(CODE_PROPERTY, errorCode.code)
+            this.errorCode = errorCode
             return this
         }
 
@@ -181,7 +183,7 @@ class ApiError private constructor(details: Map<String, Any>) {
         }
 
         fun build(): ApiError {
-            return ApiError(builder.build())
+            return ApiError(builder.build(), errorCode.httpStatus)
         }
     }
 }

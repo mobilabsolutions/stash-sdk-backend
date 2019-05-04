@@ -208,7 +208,9 @@ class CommonExceptionHandler {
             exception.message,
             exception
         )
-        return ApiError.ofMessage("internal.error")
+        return ApiError.builder()
+            .withMessage(exception.message!!)
+            .build()
     }
 
     @ResponseStatus(SERVICE_UNAVAILABLE)

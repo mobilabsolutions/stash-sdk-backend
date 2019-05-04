@@ -62,11 +62,9 @@ class AdyenPsp(private val adyenClient: AdyenClient) : Psp {
             apiKey = if (adyenMode == AdyenMode.TEST.mode) pspConfig!!.sandboxPublicKey else pspConfig!!.publicKey,
             payload = pspRegisterAliasRequestModel.aliasExtra!!.payload
         )
-
         val response = adyenClient.verifyPayment(request, pspConfig.urlPrefix!!, getAdyenMode(pspTestMode))
 
-        // To change what is passed to the response model when we have a correct payload
-        return PspRegisterAliasResponseModel(response?.message, response?.message)
+        return PspRegisterAliasResponseModel(response?.recurringDetailReference, null)
     }
 
     override fun preauthorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
