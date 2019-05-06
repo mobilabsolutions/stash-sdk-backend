@@ -1,9 +1,9 @@
 package com.mobilabsolutions.payment.adyen.service
 
+import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
-import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
@@ -12,9 +12,9 @@ import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
 import com.mobilabsolutions.payment.model.PspConfigModel
-import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
+import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -76,10 +76,9 @@ class AdyenPspTest {
         null
     )
     private val paymentResponse = AdyenPaymentResponseModel(
-        "code",
-        "psp ref",
-        "reason",
-        "result code"
+        "psp ref"
+        //"reason",
+        //"result code"
     )
     private val paymentSession = "123"
     private val correctPayload = "payload"
@@ -111,7 +110,7 @@ class AdyenPspTest {
         Mockito.`when`(adyenClient.requestPaymentSession(pspConfig, dynamicPspConfig, "test"))
             .thenReturn(paymentSession)
         Mockito.`when`(adyenClient.verifyPayment(verifyRequest, urlPrefix, "test"))
-            .thenReturn(AdyenVerifyPaymentResponseModel(200, "no error", "message", "error type", "psp reference"))
+        .thenReturn(AdyenVerifyPaymentResponseModel("8415568838266087", "Authorised", "sje324andls"))
         Mockito.`when`(adyenClient.preauthorize(AdyenPaymentRequestModel(
             AdyenAmountRequestModel(
                 amount,

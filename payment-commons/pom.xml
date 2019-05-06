@@ -12,7 +12,7 @@
     <artifactId>payment-commons</artifactId>
 
     <properties>
-        <braintree-version>2.93.0</braintree-version>
+        <khttp.version>0.1.0</khttp.version>
     </properties>
 
     <dependencies>
@@ -49,6 +49,12 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>khttp</groupId>
+            <artifactId>khttp</artifactId>
+            <version>${khttp.version}</version>
         </dependency>
 
         <!--Util-->

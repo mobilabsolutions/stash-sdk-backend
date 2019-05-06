@@ -75,11 +75,9 @@ class AdyenPsp(
             apiKey = if (adyenMode == AdyenMode.TEST.mode) pspConfig!!.sandboxPublicKey else pspConfig!!.publicKey,
             payload = pspRegisterAliasRequestModel.aliasExtra!!.payload
         )
-
         val response = adyenClient.verifyPayment(request, pspConfig.urlPrefix!!, getAdyenMode(pspTestMode))
 
-        // To change what is passed to the response model when we have a correct payload
-        return PspRegisterAliasResponseModel(response?.message, response?.message)
+        return PspRegisterAliasResponseModel(response?.recurringDetailReference, null)
     }
 
     override fun preauthorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
@@ -106,12 +104,12 @@ class AdyenPsp(
         )
 
         val response = adyenClient.preauthorize(request, pspConfig, adyenMode)
-        if (response?.resultCode == AdyenResultCode.ERROR.result ||
-            response?.resultCode == AdyenResultCode.REFUSED.result ||
-            response?.resultCode == AdyenResultCode.CANCELLED.result) {
-            logger.error("Adyen preauthorization failed, reason {}", response.refusalReason)
-            return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.refusalReason)
-        }
+//        if (response?.resultCode == AdyenResultCode.ERROR.result ||
+//            response?.resultCode == AdyenResultCode.REFUSED.result ||
+//            response?.resultCode == AdyenResultCode.CANCELLED.result) {
+//            logger.error("Adyen preauthorization failed, reason {}", response.refusalReason)
+//            return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.refusalReason)
+//        }
 
         return PspPaymentResponseModel(response?.pspReference, TransactionStatus.SUCCESS, null, null, null)
     }
