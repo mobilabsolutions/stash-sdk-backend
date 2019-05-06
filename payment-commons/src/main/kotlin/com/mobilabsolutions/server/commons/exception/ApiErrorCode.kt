@@ -38,5 +38,7 @@ enum class ApiErrorCode(val code: String, val message: String, val httpStatus: H
     TRANSACTION_NOT_ALLOWED("3016", "Transaction operation is not allowed.", HttpStatus.BAD_REQUEST),
     SEPA_NOT_ALLOWED("3017", "SEPA is not supported for this operation.", HttpStatus.BAD_REQUEST),
 
-    PSP_MODULE_ERROR("4000", "Unexpected PSP operation error.", HttpStatus.INTERNAL_SERVER_ERROR)
+    PSP_MODULE_ERROR("4000", "Unexpected PSP operation error.", HttpStatus.INTERNAL_SERVER_ERROR),
+
+    SDK_GENERAL_ERROR("5000", "Unexpected SDK error.", HttpStatus.INTERNAL_SERVER_ERROR)
 }

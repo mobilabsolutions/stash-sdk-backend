@@ -52,7 +52,7 @@ data class PspConfigModel(
     @ApiModelProperty(value = "Locale of the merchant user", example = "de-DE")
     val locale: String?,
 
-    @ApiModelProperty(value = "Live URL prefix", example = "[random]-[company-name]")
+    @ApiModelProperty(value = "Live URL prefix", example = "`[random]-[company-name]`")
     val urlPrefix: String?,
 
     @ApiModelProperty(value = "Sandbox (test) username", example = "ws@company.yourcompany")

@@ -116,7 +116,7 @@ class AdyenPspTest {
             pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
         Mockito.`when`(adyenClient.verifyPayment(verifyRequest, urlPrefix, "test"))
-            .thenReturn(AdyenVerifyPaymentResponseModel(200, "no error", "message", "error type", "psp reference"))
+            .thenReturn(AdyenVerifyPaymentResponseModel("8415568838266087", "Authorised", "sje324andls", "oIXHpTAfEPSleWXT6Khe"))
     }
 
     @Test
@@ -128,7 +128,7 @@ class AdyenPspTest {
     fun `authorize successfully`() {
         adyenPsp.authorize(PspPaymentRequestModel(
             aliasId,
-            AliasExtraModel(null, null, null, PersonalDataModel(email, customerIP, null, null, null, null, null, null), PaymentMethod.CC, null),
+            AliasExtraModel(null, null, null, PersonalDataModel(email, customerIP, null, null, null, null, null, null, null), PaymentMethod.CC, null),
             PaymentDataRequestModel(amountValue, currency, "Book"), pspAlias, pspConfig), true)
     }
 
@@ -147,7 +147,8 @@ class AdyenPspTest {
                     null,
                     null,
                     "Berlin",
-                    country
+                    country,
+                    null
                 ),
                 PaymentMethod.CC,
                 correctPayload
