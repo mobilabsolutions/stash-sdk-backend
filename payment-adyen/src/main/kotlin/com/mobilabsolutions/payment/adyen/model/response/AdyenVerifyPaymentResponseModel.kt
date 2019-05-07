@@ -1,5 +1,7 @@
 package com.mobilabsolutions.payment.adyen.model.response
 
+import com.mobilabsolutions.payment.adyen.configuration.getJsonObjectSafe
+import com.mobilabsolutions.payment.adyen.configuration.getStringSafe
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import org.json.JSONObject
@@ -27,9 +29,9 @@ data class AdyenVerifyPaymentResponseModel(
     }
 
     constructor(jsonObject: JSONObject) : this(
-        jsonObject.getJSONObject(ADDITIONAL_DATA).getString(RECURRING_REFERENCE),
-        jsonObject.getString(RESULT_CODE),
-        jsonObject.getString(PSP_REFERENCE),
-        jsonObject.getJSONObject(ADDITIONAL_DATA).getString(SHOPPER_REFERENCE)
+        jsonObject.getJsonObjectSafe(ADDITIONAL_DATA)?.getStringSafe(RECURRING_REFERENCE),
+        jsonObject.getStringSafe(RESULT_CODE),
+        jsonObject.getStringSafe(PSP_REFERENCE),
+        jsonObject.getJsonObjectSafe(ADDITIONAL_DATA)?.getStringSafe(SHOPPER_REFERENCE)
     )
 }

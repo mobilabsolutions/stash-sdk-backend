@@ -100,7 +100,7 @@ class AdyenPsp(
                 contract = adyenProperties.contract
             ),
             shopperInteraction = adyenProperties.shopperInteraction,
-            reference = randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
+            reference = pspPaymentRequestModel.purchaseId ?: randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
             merchantAccount = if (adyenMode == AdyenMode.TEST.mode)
                 pspPaymentRequestModel.pspConfig?.sandboxMerchantId else pspPaymentRequestModel.pspConfig?.merchantId,
             captureDelayHours = 0

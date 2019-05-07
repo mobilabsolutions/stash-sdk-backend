@@ -191,7 +191,8 @@ class BraintreePspTest {
                 ),
                 PaymentDataRequestModel(correctAmount, currency, reason),
                 pspAlias,
-                pspConfig
+                pspConfig,
+                null
             ), test
         )
         Assertions.assertNull(response.error)
@@ -212,7 +213,8 @@ class BraintreePspTest {
                 ),
                 PaymentDataRequestModel(declinedAmount, currency, reason),
                 pspAlias,
-                pspConfig
+                pspConfig,
+                null
             ), test
         )
         Assertions.assertEquals(response.error, PaymentError.PAYMENT_ERROR)
@@ -260,7 +262,8 @@ class BraintreePspTest {
                 ),
                 PaymentDataRequestModel(correctAmount, currency, reason),
                 pspAlias,
-                pspConfig
+                pspConfig,
+                null
             ), test
         )
         Assertions.assertNull(response.error)
@@ -281,7 +284,8 @@ class BraintreePspTest {
                 ),
                 PaymentDataRequestModel(declinedAmount, currency, reason),
                 pspAlias,
-                pspConfig
+                pspConfig,
+                null
             ), test
         )
         Assertions.assertEquals(response.error, PaymentError.PAYMENT_ERROR)

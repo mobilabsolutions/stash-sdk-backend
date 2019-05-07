@@ -1,8 +1,8 @@
 package com.mobilabsolutions.payment.adyen.model.response
 
+import com.mobilabsolutions.payment.adyen.configuration.getStringSafe
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import org.json.JSONException
 import org.json.JSONObject
 
 /**
@@ -30,8 +30,4 @@ data class AdyenPaymentResponseModel(
         jsonObject.getStringSafe(RESULT_CODE),
         jsonObject.getStringSafe(REFUSAL_REASON)
     )
-}
-
-private fun JSONObject.getStringSafe(key: String): String? {
-    return try { this.getString(key) } catch (e: JSONException) { null }
 }

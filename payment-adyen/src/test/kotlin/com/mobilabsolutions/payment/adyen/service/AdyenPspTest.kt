@@ -129,7 +129,7 @@ class AdyenPspTest {
         adyenPsp.authorize(PspPaymentRequestModel(
             aliasId,
             AliasExtraModel(null, null, null, PersonalDataModel(email, customerIP, null, null, null, null, null, null, null), PaymentMethod.CC, null),
-            PaymentDataRequestModel(amountValue, currency, "Book"), pspAlias, pspConfig), true)
+            PaymentDataRequestModel(amountValue, currency, "Book"), pspAlias, pspConfig, null), true)
     }
 
     @Test

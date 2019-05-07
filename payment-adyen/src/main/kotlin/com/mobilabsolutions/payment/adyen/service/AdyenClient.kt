@@ -92,7 +92,9 @@ class AdyenClient(
         val response = try {
             checkout.paymentSession(paymentSessionRequest)
         } catch (exception: ApiException) {
-            throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR).withError(exception.error.message).withMessage("Error during requesting Adyen payment session").build().asException()
+            throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
+                .withError(exception.error.message)
+                .withMessage("Error during requesting Adyen payment session").build().asException()
         }
 
         return response.paymentSession.toString()
