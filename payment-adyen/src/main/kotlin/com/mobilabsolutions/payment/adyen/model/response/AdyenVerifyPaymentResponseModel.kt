@@ -18,7 +18,10 @@ data class AdyenVerifyPaymentResponseModel(
     val pspReference: String?,
 
     @ApiModelProperty(value = "Shopper reference", example = "oIXHpTAfEPSleWXT6Khe")
-    val shopperReference: String?
+    val shopperReference: String?,
+
+    @ApiModelProperty(value = "Adyen reason of refused payment", example = "Bad amount")
+    val refusalReason: String?
 ) {
     companion object {
         const val ADDITIONAL_DATA = "additionalData"
@@ -26,12 +29,14 @@ data class AdyenVerifyPaymentResponseModel(
         const val SHOPPER_REFERENCE = "recurring.shopperReference"
         const val PSP_REFERENCE = "pspReference"
         const val RESULT_CODE = "resultCode"
+        const val REFUSAL_REASON = "refusalReason"
     }
 
     constructor(jsonObject: JSONObject) : this(
         jsonObject.getJsonObjectSafe(ADDITIONAL_DATA)?.getStringSafe(RECURRING_REFERENCE),
         jsonObject.getStringSafe(RESULT_CODE),
         jsonObject.getStringSafe(PSP_REFERENCE),
-        jsonObject.getJsonObjectSafe(ADDITIONAL_DATA)?.getStringSafe(SHOPPER_REFERENCE)
+        jsonObject.getJsonObjectSafe(ADDITIONAL_DATA)?.getStringSafe(SHOPPER_REFERENCE),
+        jsonObject.getStringSafe(REFUSAL_REASON)
     )
 }

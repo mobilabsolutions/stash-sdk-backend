@@ -77,6 +77,15 @@ class AdyenPsp(
         )
         val response = adyenClient.verifyPayment(request, pspConfig.urlPrefix!!, getAdyenMode(pspTestMode))
 
+        if (response?.resultCode == AdyenResultCode.ERROR.result ||
+            response?.resultCode == AdyenResultCode.REFUSED.result ||
+            response?.resultCode == AdyenResultCode.CANCELLED.result) {
+            logger.error("Adyen payment session verification is failed, reason {}", response.refusalReason)
+            throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
+                .withMessage("Error during verifying Adyen payment session")
+                .withError(response.refusalReason!!).build().asException()
+        }
+
         return PspRegisterAliasResponseModel(pspAlias = response?.recurringDetailReference, registrationReference = response?.shopperReference, billingAgreementId = null)
     }
 

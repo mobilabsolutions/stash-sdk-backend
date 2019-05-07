@@ -116,7 +116,7 @@ class AdyenPspTest {
             pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
         Mockito.`when`(adyenClient.verifyPayment(verifyRequest, urlPrefix, "test"))
-            .thenReturn(AdyenVerifyPaymentResponseModel("8415568838266087", "Authorised", "sje324andls", "oIXHpTAfEPSleWXT6Khe"))
+            .thenReturn(AdyenVerifyPaymentResponseModel("8415568838266087", "Authorised", "sje324andls", "oIXHpTAfEPSleWXT6Khe", null))
     }
 
     @Test
