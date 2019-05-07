@@ -4,6 +4,7 @@ import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenResultCode
 import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentMethodRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
@@ -14,6 +15,7 @@ import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.SepaConfigModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
@@ -50,8 +52,6 @@ class AdyenPspTest {
         "some channel"
     )
     private val amountValue = 300
-    private val username = "username"
-    private val password = "password"
     private val amount = AdyenAmountRequestModel(
         value = amountValue,
         currency = currency
@@ -71,11 +71,7 @@ class AdyenPspTest {
         currency,
         country,
         locale,
-        urlPrefix,
-        username,
-        null,
-        null,
-        password
+        urlPrefix
     )
     private val paymentSession = "123"
     private val email = "test@test.com"
@@ -83,13 +79,16 @@ class AdyenPspTest {
     private val aliasId = "alias id"
     private val reference = "reference"
     private val pspReference = "1234567890"
-    private val pspAlias = "psp alias"
+    private val pspAlias = "sje324andls"
     private val correctAliasId = "correct id"
     private val correctPayload = "payload"
+    private val customerReference = "oIXHpTAfEPSleWXT6Khe"
     private val verifyRequest = AdyenVerifyPaymentRequestModel(
         sandboxPublicKey,
         correctPayload
     )
+    private val holderName = "Max Mustermann"
+    private val iban = "DE87123456781234567890"
 
     @InjectMocks
     private lateinit var adyenPsp: AdyenPsp
@@ -109,14 +108,20 @@ class AdyenPspTest {
 
         Mockito.`when`(adyenClient.requestPaymentSession(pspConfig, dynamicPspConfig, "test"))
             .thenReturn(paymentSession)
+        Mockito.`when`(adyenClient.verifyPayment(verifyRequest, urlPrefix, "test"))
+            .thenReturn(AdyenVerifyPaymentResponseModel("8415568838266087", AdyenResultCode.AUTHORISED.result, pspAlias, customerReference, null))
         Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(20)).thenReturn(reference)
         Mockito.`when`(adyenClient.authorization(
-            AdyenPaymentRequestModel(amount, email, customerIP, aliasId, pspAlias,
-                AdyenRecurringRequestModel(adyenProperties.contract), adyenProperties.shopperInteraction, reference, sandboxMerchantId, 0),
+            AdyenPaymentRequestModel(amount, email, customerIP, customerReference, pspAlias,
+                AdyenRecurringRequestModel(adyenProperties.contract), adyenProperties.shopperInteraction, reference, sandboxMerchantId, 0, null),
             pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
-        Mockito.`when`(adyenClient.verifyPayment(verifyRequest, urlPrefix, "test"))
-            .thenReturn(AdyenVerifyPaymentResponseModel("8415568838266087", "Authorised", "sje324andls", "oIXHpTAfEPSleWXT6Khe", null))
+        Mockito.`when`(adyenClient.sepaPayment(
+            AdyenPaymentRequestModel(amount, null, null, null, null,
+                null, null, reference, sandboxMerchantId, null,
+                AdyenPaymentMethodRequestModel(adyenProperties.sepaPaymentMethod, holderName, iban)),
+            pspConfig, AdyenMode.TEST.mode))
+            .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
     }
 
     @Test
@@ -125,11 +130,19 @@ class AdyenPspTest {
     }
 
     @Test
-    fun `authorize successfully`() {
+    fun `authorize credit card successfully`() {
         adyenPsp.authorize(PspPaymentRequestModel(
             aliasId,
-            AliasExtraModel(null, null, null, PersonalDataModel(email, customerIP, null, null, null, null, null, null, null), PaymentMethod.CC, null),
+            AliasExtraModel(null, null, null, PersonalDataModel(email, customerIP, null, null, null, null, null, null, customerReference), PaymentMethod.CC, null),
             PaymentDataRequestModel(amountValue, currency, "Book"), pspAlias, pspConfig, null), true)
+    }
+
+    @Test
+    fun `make sepa payment successfully`() {
+        adyenPsp.authorize(PspPaymentRequestModel(
+            aliasId,
+            AliasExtraModel(null, SepaConfigModel(iban, null), null, PersonalDataModel(null, null, "Max", "Mustermann", null, null, null, null, null), PaymentMethod.SEPA, null),
+            PaymentDataRequestModel(amountValue, currency, "Book"), null, pspConfig, null), true)
     }
 
     @Test

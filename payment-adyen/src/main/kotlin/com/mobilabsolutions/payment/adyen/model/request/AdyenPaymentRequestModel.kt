@@ -36,5 +36,8 @@ data class AdyenPaymentRequestModel(
     val merchantAccount: String?,
 
     @ApiModelProperty(value = "Time between authorization and auto-capture, will be used for authorization", example = "0")
-    val captureDelayHours: Int?
+    val captureDelayHours: Int?,
+
+    @ApiModelProperty(value = "Adyen payment method")
+    val paymentMethod: AdyenPaymentMethodRequestModel?
 )
