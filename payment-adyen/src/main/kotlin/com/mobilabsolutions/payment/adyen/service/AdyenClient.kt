@@ -12,6 +12,7 @@ import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenChannel
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
@@ -45,6 +46,7 @@ class AdyenClient(
         const val PREAUTH_URL = "/authorise"
         const val AUTHORIZATION_URL = "/authorise"
         const val SEPA_PAYMENT_URL = "/payments"
+        const val REVERSE_URL = "/cancel"
     }
 
     /**
@@ -190,6 +192,37 @@ class AdyenClient(
         if (HttpStatus.OK.value() != response.statusCode) {
             throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
                 .withMessage("Error during preauthorizing Adyen payment")
+                .withError(response.jsonObject.getString("message")).build().asException()
+        }
+
+        return AdyenPaymentResponseModel(response.jsonObject)
+    }
+
+    /**
+     * Makes reversal request to Adyen
+     *
+     * @param request Adyen reverse request
+     * @param pspConfig Adyen configuration
+     * @param mode test or live mode
+     * @return Adyen payment response
+     */
+    fun reverse(
+        request: AdyenReverseRequestModel,
+        pspConfig: PspConfigModel,
+        mode: String
+    ): AdyenPaymentResponseModel {
+        val apiKey = if (mode == AdyenMode.TEST.mode) pspConfig.sandboxPublicKey else pspConfig.publicKey
+        val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testPaymentBaseUrl + REVERSE_URL else adyenProperties.livePaymentBaseUrl.format(pspConfig.urlPrefix) + REVERSE_URL
+
+        val response = khttp.post(
+            url = paymentUrl,
+            headers = mapOf(API_KEY to apiKey!!),
+            json = JSONObject(objectMapper.writeValueAsString(request))
+        )
+
+        if (HttpStatus.OK.value() != response.statusCode) {
+            throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
+                .withMessage("Error during reversing Adyen payment")
                 .withError(response.jsonObject.getString("message")).build().asException()
         }
 

@@ -6,6 +6,7 @@ package com.mobilabsolutions.payment.adyen.data.enum
 enum class AdyenResultCode(val result: String) {
     AUTHORISED("Authorised"),
     REFUSED("Refused"),
+    REVERSED("Reversed"),
     REDIRECT_SHOPPER("RedirectShopper"),
     RECEIVED("Received"),
     CANCELLED("Cancelled"),

@@ -7,6 +7,7 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentMethodRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
@@ -20,6 +21,7 @@ import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
+import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiException
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import org.junit.jupiter.api.Assertions
@@ -91,6 +93,7 @@ class AdyenPspTest {
     )
     private val holderName = "Max Mustermann"
     private val iban = "DE87123456781234567890"
+    private val pspTransactionId = "12345"
 
     @InjectMocks
     private lateinit var adyenPsp: AdyenPsp
@@ -130,6 +133,9 @@ class AdyenPspTest {
                 AdyenPaymentMethodRequestModel(adyenProperties.sepaPaymentMethod, holderName, iban)),
             pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
+        Mockito.`when`(adyenClient.reverse(
+            AdyenReverseRequestModel(pspTransactionId, reference, sandboxMerchantId), pspConfig, "test"))
+            .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.REVERSED.result, null))
     }
 
     @Test
@@ -235,5 +241,14 @@ class AdyenPspTest {
             aliasId,
             AliasExtraModel(null, null, null, PersonalDataModel(email, customerIP, null, null, null, null, null, null, null), PaymentMethod.CC, null),
             PaymentDataRequestModel(amountValue, currency, "Book"), pspAlias, pspConfig, null), true)
+    }
+
+    @Test
+    fun `reverse successfully`() {
+        adyenPsp.reverse(PspReversalRequestModel(
+            pspTransactionId,
+            currency,
+            pspConfig
+        ), true)
     }
 }

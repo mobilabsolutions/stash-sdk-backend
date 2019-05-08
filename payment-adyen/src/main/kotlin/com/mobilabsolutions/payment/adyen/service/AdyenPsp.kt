@@ -7,6 +7,7 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentMethodRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
@@ -137,7 +138,25 @@ class AdyenPsp(
     }
 
     override fun reverse(pspReversalRequestModel: PspReversalRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        val adyenMode = getAdyenMode(pspTestMode)
+        logger.info("Adyen reverse payment has been called using {} mode", adyenMode)
+
+        val request = AdyenReverseRequestModel(
+            originalReference = pspReversalRequestModel.pspTransactionId,
+            reference = randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
+            merchantAccount = if (adyenMode == AdyenMode.TEST.mode)
+                pspReversalRequestModel.pspConfig.sandboxMerchantId else pspReversalRequestModel.pspConfig.merchantId
+        )
+
+        val response = adyenClient.reverse(request, pspReversalRequestModel.pspConfig, adyenMode)
+        if (response.resultCode == AdyenResultCode.ERROR.result ||
+            response.resultCode == AdyenResultCode.REFUSED.result ||
+            response.resultCode == AdyenResultCode.CANCELLED.result) {
+            logger.error("Adyen reversal failed, reason {}", response.refusalReason)
+            return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.refusalReason)
+        }
+
+        return PspPaymentResponseModel(response.pspReference, TransactionStatus.SUCCESS, null, null, null)
     }
 
     override fun refund(pspRefundRequestModel: PspRefundRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
