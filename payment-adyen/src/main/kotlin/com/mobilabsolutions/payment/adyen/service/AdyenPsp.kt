@@ -98,31 +98,14 @@ class AdyenPsp(
     override fun preauthorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
         val adyenMode = getAdyenMode(pspTestMode)
         logger.info("Adyen preauthorization payment has been called for alias {} for {} mode", pspPaymentRequestModel.aliasId, adyenMode)
-        val pspConfig = pspPaymentRequestModel.pspConfig!!
 
-        val request = AdyenPaymentRequestModel(
-            amount = AdyenAmountRequestModel(
-                value = pspPaymentRequestModel.paymentData?.amount,
-                currency = pspPaymentRequestModel.paymentData?.currency
-            ),
-            shopperEmail = pspPaymentRequestModel.extra?.personalData?.email,
-            shopperIP = pspPaymentRequestModel.extra?.personalData?.customerIP,
-            shopperReference = pspPaymentRequestModel.extra?.personalData?.customerReference,
-            selectedRecurringDetailReference = pspPaymentRequestModel.pspAlias,
-            recurring = AdyenRecurringRequestModel(
-                contract = adyenProperties.contract
-            ),
-            shopperInteraction = adyenProperties.shopperInteraction,
-            reference = pspPaymentRequestModel.purchaseId ?: randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
-            merchantAccount = if (adyenMode == AdyenMode.TEST.mode) pspConfig.sandboxMerchantId else pspPaymentRequestModel.pspConfig!!.merchantId,
-            captureDelayHours = null,
-            paymentMethod = null
-        )
-
-        val response = adyenClient.preauthorization(request, pspConfig, adyenMode)
-        if (response?.resultCode == AdyenResultCode.ERROR.result ||
-            response?.resultCode == AdyenResultCode.REFUSED.result ||
-            response?.resultCode == AdyenResultCode.CANCELLED.result) {
+        val response = when {
+            pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.CC -> makeCreditCardPayment(pspPaymentRequestModel, adyenMode, false)
+            else -> throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected payment method").asException()
+        }
+        if (response.resultCode == AdyenResultCode.ERROR.result ||
+            response.resultCode == AdyenResultCode.REFUSED.result ||
+            response.resultCode == AdyenResultCode.CANCELLED.result) {
             logger.error("Adyen preauthorization failed, reason {}", response.refusalReason)
             return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.refusalReason)
         }
@@ -135,7 +118,7 @@ class AdyenPsp(
         logger.info("Adyen authorize payment has been called for alias {} for {} mode", pspPaymentRequestModel.aliasId, adyenMode)
 
         val response = when {
-            pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.CC -> makeCreditCardAuthorization(pspPaymentRequestModel, adyenMode)
+            pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.CC -> makeCreditCardPayment(pspPaymentRequestModel, adyenMode)
             pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.SEPA -> makeSepaPayment(pspPaymentRequestModel, adyenMode)
             else -> throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected payment method").asException()
         }
@@ -183,7 +166,7 @@ class AdyenPsp(
      * @param adyenMode test or live
      * @return Adyen payment response
      */
-    private fun makeCreditCardAuthorization(pspPaymentRequestModel: PspPaymentRequestModel, adyenMode: String): AdyenPaymentResponseModel {
+    private fun makeCreditCardPayment(pspPaymentRequestModel: PspPaymentRequestModel, adyenMode: String, executeCapture: Boolean = true): AdyenPaymentResponseModel {
         val request = AdyenPaymentRequestModel(
             amount = AdyenAmountRequestModel(
                 value = pspPaymentRequestModel.paymentData?.amount,
@@ -200,9 +183,9 @@ class AdyenPsp(
             reference = pspPaymentRequestModel.purchaseId ?: randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
             merchantAccount = if (adyenMode == AdyenMode.TEST.mode)
                 pspPaymentRequestModel.pspConfig?.sandboxMerchantId else pspPaymentRequestModel.pspConfig?.merchantId,
-            captureDelayHours = 0,
+            captureDelayHours = if (executeCapture) 0 else null,
             paymentMethod = null)
-        return adyenClient.authorization(request, pspPaymentRequestModel.pspConfig!!, adyenMode)
+        return if (executeCapture) adyenClient.authorization(request, pspPaymentRequestModel.pspConfig!!, adyenMode) else adyenClient.preauthorization(request, pspPaymentRequestModel.pspConfig!!, adyenMode)
     }
 
     /**
