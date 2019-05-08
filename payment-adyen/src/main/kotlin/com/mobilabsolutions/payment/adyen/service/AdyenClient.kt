@@ -42,6 +42,7 @@ class AdyenClient(
         const val API_KEY = "X-API-Key"
         const val PAYLOAD = "payload"
         const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        const val PREAUTH_URL = "/authorise"
         const val AUTHORIZATION_URL = "/authorise"
         const val SEPA_PAYMENT_URL = "/payments"
     }
@@ -101,8 +102,7 @@ class AdyenClient(
         return response.paymentSession.toString()
     }
 
-    /**
-     * Verifies Adyen payment result
+    /** Verifies Adyen payment result
      *
      * @param verifyRequest Adyen verify payment request
      * @param urlPrefix URL prefix
@@ -159,6 +159,37 @@ class AdyenClient(
         if (HttpStatus.OK.value() != response.statusCode) {
             throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
                 .withMessage("Error during authorizing Adyen payment")
+                .withError(response.jsonObject.getString("message")).build().asException()
+        }
+
+        return AdyenPaymentResponseModel(response.jsonObject)
+    }
+
+    /**
+     * Makes preauthorization request to Adyen
+     *
+     * @param request Adyen payment request
+     * @param pspConfig Adyen configuration
+     * @param mode test or live mode
+     * @return Adyen payment response
+     */
+    fun preauthorization(
+        request: AdyenPaymentRequestModel,
+        pspConfig: PspConfigModel,
+        mode: String
+    ): AdyenPaymentResponseModel {
+        val apiKey = if (mode == AdyenMode.TEST.mode) pspConfig.sandboxPublicKey else pspConfig.publicKey
+        val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testPaymentBaseUrl + PREAUTH_URL else adyenProperties.livePaymentBaseUrl.format(pspConfig.urlPrefix) + PREAUTH_URL
+
+        val response = khttp.post(
+            url = paymentUrl,
+            headers = mapOf(API_KEY to apiKey!!),
+            json = JSONObject(objectMapper.writeValueAsString(request))
+        )
+
+        if (HttpStatus.OK.value() != response.statusCode) {
+            throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
+                .withMessage("Error during preauthorizing Adyen payment")
                 .withError(response.jsonObject.getString("message")).build().asException()
         }
 

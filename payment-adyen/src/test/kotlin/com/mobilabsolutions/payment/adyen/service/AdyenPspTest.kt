@@ -110,6 +110,12 @@ class AdyenPspTest {
 
         Mockito.`when`(adyenClient.requestPaymentSession(pspConfig, dynamicPspConfig, "test"))
             .thenReturn(paymentSession)
+        Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(20)).thenReturn(reference)
+        Mockito.`when`(adyenClient.preauthorization(
+            AdyenPaymentRequestModel(amount, email, customerIP, null, pspAlias,
+                AdyenRecurringRequestModel(adyenProperties.contract), adyenProperties.shopperInteraction, reference, sandboxMerchantId, null, null),
+            pspConfig, AdyenMode.TEST.mode))
+            .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
         Mockito.`when`(adyenClient.verifyPayment(verifyRequest, urlPrefix, "test"))
             .thenReturn(AdyenVerifyPaymentResponseModel("8415568838266087", AdyenResultCode.AUTHORISED.result, pspAlias, customerReference, null))
         Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(20)).thenReturn(reference)
@@ -221,5 +227,13 @@ class AdyenPspTest {
                     null
                 ),
                 PaymentMethod.CC, correctPayload), pspConfig), true)
+    }
+
+    @Test
+    fun `preauthorize successfully`() {
+        adyenPsp.preauthorize(PspPaymentRequestModel(
+            aliasId,
+            AliasExtraModel(null, null, null, PersonalDataModel(email, customerIP, null, null, null, null, null, null, null), PaymentMethod.CC, null),
+            PaymentDataRequestModel(amountValue, currency, "Book"), pspAlias, pspConfig, null), true)
     }
 }
