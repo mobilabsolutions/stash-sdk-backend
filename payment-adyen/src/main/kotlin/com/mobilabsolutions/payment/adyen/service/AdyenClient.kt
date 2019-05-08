@@ -139,7 +139,7 @@ class AdyenClient(
     /**
      * Makes authorization request to Adyen
      *
-     * @param request Adyen payment request
+     * @param request Adyen capture request
      * @param pspConfig Adyen configuration
      * @param mode test or live mode
      * @return Adyen payment response

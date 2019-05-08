@@ -138,7 +138,7 @@ class AdyenPsp(
         if (response.resultCode == AdyenResultCode.ERROR.result ||
             response.resultCode == AdyenResultCode.REFUSED.result ||
             response.resultCode == AdyenResultCode.CANCELLED.result) {
-            logger.error("Adyen authorization failed, reason {}", response.refusalReason)
+            logger.error("Adyen capture failed, reason {}", response.refusalReason)
             return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.refusalReason)
         }
 

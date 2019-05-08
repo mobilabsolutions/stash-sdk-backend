@@ -230,7 +230,7 @@ class AdyenPspTest {
     }
 
     @Test
-    fun `preauthorize successfully`() {
+    fun `capture successfully`() {
         adyenPsp.capture(PspCaptureRequestModel(
             pspTransactionId,
             amountValue,
