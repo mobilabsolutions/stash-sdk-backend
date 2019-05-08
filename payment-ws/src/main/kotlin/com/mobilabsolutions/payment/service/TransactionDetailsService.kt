@@ -26,7 +26,7 @@ class TransactionDetailsService(
      * @return transaction details by id response
      */
     fun getTransaction(transactionId: String): TransactionDetailsByIdResponseModel {
-        val transaction = transactionRepository.getById(transactionId)
+        val transaction = transactionRepository.getByTransactionId(transactionId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_FOUND).asException()
 
         return TransactionDetailsByIdResponseModel(

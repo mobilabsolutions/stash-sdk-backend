@@ -51,7 +51,7 @@ class TransactionDetailsServiceTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
-        Mockito.`when`(transactionRepository.getById(correctTransactionId)).thenReturn(
+        Mockito.`when`(transactionRepository.getByTransactionId(correctTransactionId)).thenReturn(
             Transaction(
                 amount = 1,
                 currencyId = "EUR",
@@ -63,7 +63,7 @@ class TransactionDetailsServiceTest {
                 alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
                 pspResponse = pspResponse)
         )
-        Mockito.`when`(transactionRepository.getById(wrongTransactionId)).thenReturn(null)
+        Mockito.`when`(transactionRepository.getByTransactionId(wrongTransactionId)).thenReturn(null)
     }
 
     @Test

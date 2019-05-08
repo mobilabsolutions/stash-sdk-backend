@@ -25,5 +25,5 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
     fun getByTransactionIdAndStatus(@Param("transactionId") transactionId: String, @Param("status") status: String): Transaction?
 
     @Query(value = "SELECT * FROM transaction_record tr WHERE tr.transaction_id = :transactionId GROUP BY :transactionId, tr.id ORDER BY tr.created_date DESC LIMIT 1", nativeQuery = true)
-    fun getById(@Param("transactionId") transactionId: String): Transaction?
+    fun getByTransactionId(@Param("transactionId") transactionId: String): Transaction?
 }
