@@ -20,7 +20,9 @@ import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
+import com.mobilabsolutions.server.commons.exception.ApiException
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -133,16 +135,71 @@ class AdyenPspTest {
     fun `authorize credit card successfully`() {
         adyenPsp.authorize(PspPaymentRequestModel(
             aliasId,
-            AliasExtraModel(null, null, null, PersonalDataModel(email, customerIP, null, null, null, null, null, null, customerReference), PaymentMethod.CC, null),
-            PaymentDataRequestModel(amountValue, currency, "Book"), pspAlias, pspConfig, null), true)
+            AliasExtraModel(
+                null,
+                null,
+                null,
+                PersonalDataModel(
+                    email,
+                    customerIP,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    customerReference),
+                PaymentMethod.CC, null),
+            PaymentDataRequestModel(amountValue, currency, "Book"),
+            pspAlias, pspConfig, null), true)
     }
 
     @Test
     fun `make sepa payment successfully`() {
         adyenPsp.authorize(PspPaymentRequestModel(
             aliasId,
-            AliasExtraModel(null, SepaConfigModel(iban, null), null, PersonalDataModel(null, null, "Max", "Mustermann", null, null, null, null, null), PaymentMethod.SEPA, null),
-            PaymentDataRequestModel(amountValue, currency, "Book"), null, pspConfig, null), true)
+            AliasExtraModel(
+                null,
+                SepaConfigModel(iban, null),
+                null,
+                PersonalDataModel(
+                    null,
+                    null,
+                    "Max",
+                    "Mustermann",
+                    null,
+                    null,
+                    null,
+                    null,
+                    null),
+                PaymentMethod.SEPA, null),
+            PaymentDataRequestModel(amountValue, currency, "Book"),
+            null, pspConfig, null), true)
+    }
+
+    @Test
+    fun `authorization with wrong payment method`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            adyenPsp.authorize(PspPaymentRequestModel(
+                aliasId,
+                AliasExtraModel(
+                    null,
+                    null,
+                    null,
+                    PersonalDataModel(
+                        email,
+                        customerIP,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        customerReference),
+                    PaymentMethod.PAY_PAL, null),
+                PaymentDataRequestModel(amountValue, currency, "Book"),
+                pspAlias, pspConfig, null), true)
+        }
     }
 
     @Test
@@ -163,8 +220,6 @@ class AdyenPspTest {
                     country,
                     null
                 ),
-                PaymentMethod.CC,
-                correctPayload
-            ), pspConfig), true)
+                PaymentMethod.CC, correctPayload), pspConfig), true)
     }
 }

@@ -103,8 +103,11 @@ class AdyenPsp(
         val adyenMode = getAdyenMode(pspTestMode)
         logger.info("Adyen authorize payment has been called for alias {} for {} mode", pspPaymentRequestModel.aliasId, adyenMode)
 
-        val response = if (pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.CC)
-            makeCreditCardAuthorization(pspPaymentRequestModel, adyenMode) else makeSepaPayment(pspPaymentRequestModel, adyenMode)
+        val response = when {
+            pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.CC -> makeCreditCardAuthorization(pspPaymentRequestModel, adyenMode)
+            pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.SEPA -> makeSepaPayment(pspPaymentRequestModel, adyenMode)
+            else -> throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected payment method").asException()
+        }
         if (response.resultCode == AdyenResultCode.ERROR.result ||
             response.resultCode == AdyenResultCode.REFUSED.result ||
             response.resultCode == AdyenResultCode.CANCELLED.result) {
