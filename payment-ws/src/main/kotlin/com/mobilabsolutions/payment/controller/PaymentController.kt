@@ -31,7 +31,7 @@ class PaymentController(private val transactionService: TransactionService) {
     @ApiOperation(value = "Preauthorize transaction")
     @ApiResponses(
         ApiResponse(code = 201, message = "Successfully preauthorized transaction"),
-        ApiResponse(code = 400, message = "Failed to preauthorize transaction"),
+        ApiResponse(code = 400, message = "Failed to preauthorization transaction"),
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 404, message = "Not found")
     )
