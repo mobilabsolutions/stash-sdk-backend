@@ -16,6 +16,7 @@ class AdyenProperties {
     val liveCheckoutBaseUrl = "https://%s-checkout-live.adyen.com/v41"
     val contract = "RECURRING"
     val shopperInteraction = "ContAuth"
+    val sepaPaymentMethod = "sepadirectdebit"
 }
 
 internal fun JSONObject.getStringSafe(key: String): String? {

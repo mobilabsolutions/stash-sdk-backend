@@ -53,17 +53,5 @@ data class PspConfigModel(
     val locale: String?,
 
     @ApiModelProperty(value = "Live URL prefix", example = "`[random]-[company-name]`")
-    val urlPrefix: String?,
-
-    @ApiModelProperty(value = "Sandbox (test) username", example = "ws@company.yourcompany")
-    val sandboxUsername: String?,
-
-    @ApiModelProperty(value = "Live username", example = "ws@company.yourcompany")
-    val username: String?,
-
-    @ApiModelProperty(value = "Sandbox (test) password", example = "ncbcjdheufhdhfjh")
-    val sandboxPassword: String?,
-
-    @ApiModelProperty(value = "Password", example = "mypassword123")
-    val password: String?
+    val urlPrefix: String?
 )

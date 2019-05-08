@@ -42,6 +42,8 @@ class AdyenClient(
         const val PAYLOAD = "payload"
         const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'"
         const val PREAUTH_URL = "/authorise"
+        const val AUTHORIZATION_URL = "/authorise"
+        const val SEPA_PAYMENT_URL = "/payments"
     }
 
     /**
@@ -53,7 +55,7 @@ class AdyenClient(
      */
     fun requestPaymentSession(
         pspConfigModel: PspConfigModel,
-        dynamicPspConfig: DynamicPspConfigRequestModel,
+        dynamicPspConfig: DynamicPspConfigRequestModel?,
         mode: String
     ): String {
         val config = Config()
@@ -72,12 +74,12 @@ class AdyenClient(
         paymentSessionRequest.reference = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
         paymentSessionRequest.shopperReference = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
         paymentSessionRequest.channel =
-            if (dynamicPspConfig.channel.equals(AdyenChannel.ANDROID.channel, ignoreCase = true))
+            if (dynamicPspConfig?.channel.equals(AdyenChannel.ANDROID.channel, ignoreCase = true))
                 PaymentSessionRequest.ChannelEnum.ANDROID else PaymentSessionRequest.ChannelEnum.IOS
         paymentSessionRequest.enableRecurring(true)
         paymentSessionRequest.enableOneClick(true)
-        paymentSessionRequest.token = dynamicPspConfig.token
-        paymentSessionRequest.returnUrl = dynamicPspConfig.returnUrl
+        paymentSessionRequest.token = dynamicPspConfig?.token
+        paymentSessionRequest.returnUrl = dynamicPspConfig?.returnUrl
         paymentSessionRequest.countryCode = pspConfigModel.country
         paymentSessionRequest.shopperLocale = pspConfigModel.locale
         paymentSessionRequest.sessionValidity = SimpleDateFormat(DATE_FORMAT).format(Calendar.getInstance().run {
@@ -110,7 +112,7 @@ class AdyenClient(
         verifyRequest: AdyenVerifyPaymentRequestModel,
         urlPrefix: String,
         mode: String
-    ): AdyenVerifyPaymentResponseModel? {
+    ): AdyenVerifyPaymentResponseModel {
         val verifyUrl =
             if (mode == AdyenMode.TEST.mode) adyenProperties.testCheckoutBaseUrl + VERIFY_URL else adyenProperties.liveCheckoutBaseUrl.format(
                 urlPrefix
@@ -132,6 +134,37 @@ class AdyenClient(
     }
 
     /**
+     * Makes authorization request to Adyen
+     *
+     * @param request Adyen payment request
+     * @param pspConfig Adyen configuration
+     * @param mode test or live mode
+     * @return Adyen payment response
+     */
+    fun authorization(
+        request: AdyenPaymentRequestModel,
+        pspConfig: PspConfigModel,
+        mode: String
+    ): AdyenPaymentResponseModel {
+        val apiKey = if (mode == AdyenMode.TEST.mode) pspConfig.sandboxPublicKey else pspConfig.publicKey
+        val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testPaymentBaseUrl + AUTHORIZATION_URL else adyenProperties.livePaymentBaseUrl.format(pspConfig.urlPrefix) + AUTHORIZATION_URL
+
+        val response = khttp.post(
+            url = paymentUrl,
+            headers = mapOf(API_KEY to apiKey!!),
+            json = JSONObject(objectMapper.writeValueAsString(request))
+        )
+
+        if (HttpStatus.OK.value() != response.statusCode) {
+            throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
+                .withMessage("Error during authorizing Adyen payment")
+                .withError(response.jsonObject.getString("message")).build().asException()
+        }
+
+        return AdyenPaymentResponseModel(response.jsonObject)
+    }
+
+    /**
      * Makes preauthorization request to Adyen
      *
      * @param request Adyen payment request
@@ -139,7 +172,11 @@ class AdyenClient(
      * @param mode test or live mode
      * @return Adyen payment response
      */
-    fun preauthorization(request: AdyenPaymentRequestModel, pspConfig: PspConfigModel, mode: String): AdyenPaymentResponseModel? {
+    fun preauthorization(
+        request: AdyenPaymentRequestModel,
+        pspConfig: PspConfigModel,
+        mode: String
+    ): AdyenPaymentResponseModel? {
         val apiKey = if (mode == AdyenMode.TEST.mode) pspConfig.sandboxPublicKey else pspConfig.publicKey
         val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testPaymentBaseUrl + PREAUTH_URL else adyenProperties.livePaymentBaseUrl.format(pspConfig.urlPrefix) + PREAUTH_URL
 
@@ -154,6 +191,38 @@ class AdyenClient(
                 .withMessage("Error during preauthorizing Adyen payment")
                 .withError(response.jsonObject.getString("message")).build().asException()
         }
+
+        return AdyenPaymentResponseModel(response.jsonObject)
+    }
+
+    /**
+     * Makes SEPA payment request to Adyen
+     *
+     * @param request Adyen payment request
+     * @param pspConfig Adyen configuration
+     * @param mode test or live mode
+     * @return Adyen payment response
+     */
+    fun sepaPayment(
+        request: AdyenPaymentRequestModel,
+        pspConfig: PspConfigModel,
+        mode: String
+    ): AdyenPaymentResponseModel {
+        val apiKey = if (mode == AdyenMode.TEST.mode) pspConfig.sandboxPublicKey else pspConfig.publicKey
+        val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testCheckoutBaseUrl + SEPA_PAYMENT_URL else adyenProperties.liveCheckoutBaseUrl.format(pspConfig.urlPrefix) + SEPA_PAYMENT_URL
+
+        val response = khttp.post(
+            url = paymentUrl,
+            headers = mapOf(API_KEY to apiKey!!),
+            json = JSONObject(objectMapper.writeValueAsString(request))
+        )
+
+        if (HttpStatus.OK.value() != response.statusCode) {
+            throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
+                .withMessage("Error during authorizing Adyen payment")
+                .withError(response.jsonObject.getString("message")).build().asException()
+        }
+
         return AdyenPaymentResponseModel(response.jsonObject)
     }
 }
