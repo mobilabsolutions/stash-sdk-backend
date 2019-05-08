@@ -54,8 +54,6 @@ class AdyenPspTest {
         "some channel"
     )
     private val amountValue = 300
-    private val username = "username"
-    private val password = "password"
     private val amount = AdyenAmountRequestModel(
         value = amountValue,
         currency = currency

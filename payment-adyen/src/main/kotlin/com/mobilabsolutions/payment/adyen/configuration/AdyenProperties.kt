@@ -1,4 +1,3 @@
-
 package com.mobilabsolutions.payment.adyen.configuration
 
 import org.json.JSONException
