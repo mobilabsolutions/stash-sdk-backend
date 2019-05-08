@@ -330,7 +330,9 @@ class TransactionService(
             amount = refundInfo.amount,
             currency = prevTransaction.currencyId,
             action = prevTransaction.action,
-            pspConfig = getPspConfig(prevTransaction.alias!!)
+            pspConfig = getPspConfig(prevTransaction.alias!!),
+            purchaseId = prevTransaction.merchantTransactionId,
+            paymentMethod = prevTransaction.paymentMethod
         )
 
         return executeIdempotentTransactionOperation(

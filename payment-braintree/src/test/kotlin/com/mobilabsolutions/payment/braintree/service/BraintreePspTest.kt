@@ -295,7 +295,9 @@ class BraintreePspTest {
                 correctAmount,
                 currency,
                 TransactionAction.REFUND,
-                pspConfig
+                pspConfig,
+                null,
+                PaymentMethod.PAY_PAL
             ), test
         )
         Assertions.assertNull(response.error)
