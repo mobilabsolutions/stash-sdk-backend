@@ -4,6 +4,7 @@ import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenResultCode
 import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenCaptureRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentMethodRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
@@ -18,6 +19,7 @@ import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.SepaConfigModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
+import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiException
@@ -91,6 +93,7 @@ class AdyenPspTest {
     )
     private val holderName = "Max Mustermann"
     private val iban = "DE87123456781234567890"
+    private val pspTransactionId = "12345"
 
     @InjectMocks
     private lateinit var adyenPsp: AdyenPsp
@@ -124,6 +127,9 @@ class AdyenPspTest {
                 AdyenPaymentMethodRequestModel(adyenProperties.sepaPaymentMethod, holderName, iban)),
             pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
+        Mockito.`when`(adyenClient.capture(
+            AdyenCaptureRequestModel(pspTransactionId, amount, reference, sandboxMerchantId), pspConfig, "test"))
+            .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.CAPTURED.result, null))
     }
 
     @Test
@@ -221,5 +227,15 @@ class AdyenPspTest {
                     null
                 ),
                 PaymentMethod.CC, correctPayload), pspConfig), true)
+    }
+
+    @Test
+    fun `preauthorize successfully`() {
+        adyenPsp.capture(PspCaptureRequestModel(
+            pspTransactionId,
+            amountValue,
+            currency,
+            pspConfig
+        ), true)
     }
 }

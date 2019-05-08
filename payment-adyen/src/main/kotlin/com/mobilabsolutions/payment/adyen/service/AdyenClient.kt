@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenChannel
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
+import com.mobilabsolutions.payment.adyen.model.request.AdyenCaptureRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
@@ -44,6 +45,7 @@ class AdyenClient(
         const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'"
         const val AUTHORIZATION_URL = "/authorise"
         const val SEPA_PAYMENT_URL = "/payments"
+        const val CAPTURE_URL = "/capture"
     }
 
     /**
@@ -159,6 +161,37 @@ class AdyenClient(
         if (HttpStatus.OK.value() != response.statusCode) {
             throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
                 .withMessage("Error during authorizing Adyen payment")
+                .withError(response.jsonObject.getString("message")).build().asException()
+        }
+
+        return AdyenPaymentResponseModel(response.jsonObject)
+    }
+
+    /**
+     * Makes capture request to Adyen
+     *
+     * @param request Adyen payment request
+     * @param pspConfig Adyen configuration
+     * @param mode test or live mode
+     * @return Adyen payment response
+     */
+    fun capture(
+        request: AdyenCaptureRequestModel,
+        pspConfig: PspConfigModel,
+        mode: String
+    ): AdyenPaymentResponseModel {
+        val apiKey = if (mode == AdyenMode.TEST.mode) pspConfig.sandboxPublicKey else pspConfig.publicKey
+        val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testPaymentBaseUrl + CAPTURE_URL else adyenProperties.livePaymentBaseUrl.format(pspConfig.urlPrefix) + CAPTURE_URL
+
+        val response = khttp.post(
+            url = paymentUrl,
+            headers = mapOf(API_KEY to apiKey!!),
+            json = JSONObject(objectMapper.writeValueAsString(request))
+        )
+
+        if (HttpStatus.OK.value() != response.statusCode) {
+            throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
+                .withMessage("Error during capturing Adyen payment")
                 .withError(response.jsonObject.getString("message")).build().asException()
         }
 
