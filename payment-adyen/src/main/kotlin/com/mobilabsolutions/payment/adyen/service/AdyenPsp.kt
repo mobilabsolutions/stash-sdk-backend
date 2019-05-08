@@ -7,6 +7,7 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentMethodRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenRefundRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
@@ -141,7 +142,22 @@ class AdyenPsp(
     }
 
     override fun refund(pspRefundRequestModel: PspRefundRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        val adyenMode = getAdyenMode(pspTestMode)
+        logger.info("Adyen refund payment has been called for {} mode", adyenMode)
+
+        val response = when {
+            pspRefundRequestModel.paymentMethod == PaymentMethod.CC -> makeCreditCardRefund(pspRefundRequestModel, adyenMode)
+            pspRefundRequestModel.paymentMethod == PaymentMethod.SEPA -> makeSepaRefund(pspRefundRequestModel, adyenMode)
+            else -> throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected payment method").asException()
+        }
+        if (response.resultCode == AdyenResultCode.ERROR.result ||
+            response.resultCode == AdyenResultCode.REFUSED.result ||
+            response.resultCode == AdyenResultCode.CANCELLED.result) {
+            logger.error("Adyen authorization failed, reason {}", response.refusalReason)
+            return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.refusalReason)
+        }
+
+        return PspPaymentResponseModel(response.pspReference, TransactionStatus.SUCCESS, null, null, null)
     }
 
     override fun deleteAlias(pspDeleteAliasRequestModel: PspDeleteAliasRequestModel, pspTestMode: Boolean?) {
@@ -219,5 +235,44 @@ class AdyenPsp(
             )
         )
         return adyenClient.sepaPayment(request, pspPaymentRequestModel.pspConfig!!, adyenMode)
+    }
+
+    /**
+     * Makes credit card refund at Adyen
+     *
+     * @param pspRefundRequestModel PSP refund request
+     * @param adyenMode test or live
+     * @return Adyen payment response
+     */
+    private fun makeCreditCardRefund(pspRefundRequestModel: PspRefundRequestModel, adyenMode: String): AdyenPaymentResponseModel {
+        val request = AdyenRefundRequestModel(
+            originalReference = pspRefundRequestModel.pspTransactionId,
+            modificationAmount = AdyenAmountRequestModel(
+                value = pspRefundRequestModel.amount,
+                currency = pspRefundRequestModel.currency
+            ),
+            reference = pspRefundRequestModel.purchaseId ?: randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
+            merchantAccount = if (adyenMode == AdyenMode.TEST.mode)
+                pspRefundRequestModel.pspConfig?.sandboxMerchantId else pspRefundRequestModel.pspConfig?.merchantId
+        )
+        return adyenClient.refund(request, pspRefundRequestModel.pspConfig!!, adyenMode)
+    }
+
+    /**
+     * Makes SEPA refund at Adyen
+     *
+     * @param pspRefundRequestModel PSP refund request
+     * @param adyenMode test or live
+     * @return Adyen payment response
+     */
+    private fun makeSepaRefund(pspRefundRequestModel: PspRefundRequestModel, adyenMode: String): AdyenPaymentResponseModel {
+        val request = AdyenRefundRequestModel(
+            originalReference = pspRefundRequestModel.pspTransactionId,
+            modificationAmount = null,
+            reference = pspRefundRequestModel.purchaseId ?: randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
+            merchantAccount = if (adyenMode == AdyenMode.TEST.mode)
+                pspRefundRequestModel.pspConfig?.sandboxMerchantId else pspRefundRequestModel.pspConfig?.merchantId
+        )
+        return adyenClient.sepaRefund(request, pspRefundRequestModel.pspConfig!!, adyenMode)
     }
 }

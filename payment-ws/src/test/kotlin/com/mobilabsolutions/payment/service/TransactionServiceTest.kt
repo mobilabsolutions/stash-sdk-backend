@@ -68,7 +68,6 @@ class TransactionServiceTest {
     private val preauthAction = TransactionAction.PREAUTH
     private val authAction = TransactionAction.AUTH
     private val captureAction = TransactionAction.CAPTURE
-    private val reverseAction = TransactionAction.REVERSAL
     private val correctPaymentData = PaymentDataRequestModel(1, "EUR", "reason")
     private val wrongPaymentData = PaymentDataRequestModel(2, "EUR", "reason")
     private val pspResponse = "{\"pspTransactionId\":\"325105132\",\"status\":\"SUCCESS\",\"customerId\":\"160624370\"}"
@@ -150,7 +149,7 @@ class TransactionServiceTest {
             )
         ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
         Mockito.`when`(
-            psp.refund(PspRefundRequestModel(pspTransactionId, 1, "EUR", TransactionAction.AUTH, pspConfigModel), test
+            psp.refund(PspRefundRequestModel(pspTransactionId, 1, "EUR", TransactionAction.AUTH, pspConfigModel, null, PaymentMethod.CC), test
             )
         ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
         Mockito.`when`(
@@ -172,6 +171,7 @@ class TransactionServiceTest {
                 pspTestMode = test,
                 action = TransactionAction.PREAUTH,
                 merchant = Merchant("1", pspConfig = pspConfig),
+                paymentMethod = PaymentMethod.CC,
                 alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
                 pspResponse = pspResponse)
             )
@@ -192,6 +192,7 @@ class TransactionServiceTest {
                 transactionId = correctTransactionId,
                 pspTestMode = test,
                 action = TransactionAction.AUTH,
+                paymentMethod = PaymentMethod.CC,
                 merchant = Merchant("1", pspConfig = pspConfig),
                 alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
                 pspResponse = pspResponse)
@@ -208,6 +209,7 @@ class TransactionServiceTest {
                 transactionId = correctTransactionId,
                 pspTestMode = test,
                 action = TransactionAction.PREAUTH,
+                paymentMethod = PaymentMethod.CC,
                 merchant = Merchant("1", pspConfig = pspConfig),
                 alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
                 pspResponse = pspResponse
@@ -225,6 +227,7 @@ class TransactionServiceTest {
                 transactionId = correctTransactionId,
                 pspTestMode = test,
                 action = TransactionAction.CAPTURE,
+                paymentMethod = PaymentMethod.CC,
                 merchant = Merchant("1", pspConfig = pspConfig),
                 alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
                 pspResponse = pspResponse
@@ -242,6 +245,7 @@ class TransactionServiceTest {
                 transactionId = correctTransactionId,
                 pspTestMode = test,
                 action = TransactionAction.REVERSAL,
+                paymentMethod = PaymentMethod.CC,
                 merchant = Merchant("1", pspConfig = pspConfig),
                 alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
                 pspResponse = pspResponse
@@ -260,6 +264,7 @@ class TransactionServiceTest {
                 currencyId = "EUR",
                 pspTestMode = test,
                 action = TransactionAction.AUTH,
+                paymentMethod = PaymentMethod.CC,
                 merchant = Merchant("1", pspConfig = pspConfig),
                 alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
                 pspResponse = pspResponse)
