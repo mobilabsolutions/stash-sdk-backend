@@ -62,7 +62,7 @@ class AdyenPsp(
             accountId = null,
             encoding = null,
             mode = adyenMode,
-            publicKey = if (adyenMode == AdyenMode.TEST.mode) pspConfigModel.sandboxPublicKey else pspConfigModel.publicKey,
+            publicKey = null,
             privateKey = null,
             clientToken = null,
             paymentSession = if (dynamicPspConfig != null)
@@ -110,7 +110,7 @@ class AdyenPsp(
             return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.refusalReason)
         }
 
-        return PspPaymentResponseModel(response?.pspReference, TransactionStatus.SUCCESS, null, null, null)
+        return PspPaymentResponseModel(response.pspReference, TransactionStatus.SUCCESS, null, null, null)
     }
 
     override fun authorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
