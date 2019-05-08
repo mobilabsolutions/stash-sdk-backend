@@ -95,7 +95,8 @@ class AliasService(
         )
         val pspRegisterAliasResponse = psp.registerAlias(pspRegisterAliasRequest, pspTestMode)
         val paypalConfig = aliasRequestModel.extra?.payPalConfig?.copy(billingAgreementId = pspRegisterAliasResponse?.billingAgreementId)
-        val aliasExtraModel = aliasRequestModel.extra?.copy(payPalConfig = paypalConfig)
+        val personalConfig = aliasRequestModel.extra?.personalData?.copy(customerReference = pspRegisterAliasResponse?.registrationReference)
+        val aliasExtraModel = aliasRequestModel.extra?.copy(payPalConfig = paypalConfig, personalData = personalConfig)
 
         val pspAlias = aliasRequestModel.pspAlias ?: pspRegisterAliasResponse?.pspAlias
         val extra = if (aliasExtraModel != null) objectMapper.writeValueAsString(aliasExtraModel) else null

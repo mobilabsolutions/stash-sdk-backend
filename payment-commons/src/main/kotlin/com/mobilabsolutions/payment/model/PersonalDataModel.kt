@@ -14,6 +14,9 @@ data class PersonalDataModel(
     @field:Email
     val email: String?,
 
+    @ApiModelProperty(value = "Customer's IP", example = "61.294.12.12")
+    val customerIP: String?,
+
     @ApiModelProperty(value = "First name of user", example = "Max")
     val firstName: String?,
 
@@ -31,5 +34,8 @@ data class PersonalDataModel(
 
     @ApiModelProperty(value = "Country code of account holder", example = "DE")
     @field:CountryCode
-    val country: String?
+    val country: String?,
+
+    @ApiModelProperty(value = "Customer reference", example = "oIXHpTAfEPSleWXT6Khe")
+    val customerReference: String?
 )
