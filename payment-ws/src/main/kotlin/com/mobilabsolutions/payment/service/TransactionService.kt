@@ -71,7 +71,8 @@ class TransactionService(
             paymentData = authorizeInfo.paymentData,
             extra = getAliasExtra(alias),
             pspAlias = alias.pspAlias,
-            pspConfig = getPspConfig(alias)
+            pspConfig = getPspConfig(alias),
+            purchaseId = authorizeInfo.purchaseId
         )
         return executeIdempotentTransactionOperation(
             alias = alias,
@@ -111,7 +112,8 @@ class TransactionService(
             paymentData = preauthorizeInfo.paymentData,
             extra = getAliasExtra(alias),
             pspAlias = alias.pspAlias,
-            pspConfig = getPspConfig(alias)
+            pspConfig = getPspConfig(alias),
+            purchaseId = preauthorizeInfo.purchaseId
         )
         return executeIdempotentTransactionOperation(
             alias = alias,

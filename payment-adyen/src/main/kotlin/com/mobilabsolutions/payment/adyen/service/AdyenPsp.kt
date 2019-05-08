@@ -38,7 +38,7 @@ class AdyenPsp(
 ) : Psp {
 
     companion object : KLogging() {
-        const val STRING_LENGTH = 20
+        const val REFERENCE_LENGTH = 20
     }
 
     override fun getProvider(): PaymentServiceProvider {
@@ -77,12 +77,12 @@ class AdyenPsp(
         )
         val response = adyenClient.verifyPayment(request, pspConfig.urlPrefix!!, getAdyenMode(pspTestMode))
 
-        return PspRegisterAliasResponseModel(response?.recurringDetailReference, null)
+        return PspRegisterAliasResponseModel(pspAlias = response?.recurringDetailReference, registrationReference = response?.shopperReference, billingAgreementId = null)
     }
 
     override fun preauthorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
         val adyenMode = getAdyenMode(pspTestMode)
-        logger.info("Adyen preauthorize payment has been called for alias {} for {} mode", pspPaymentRequestModel.aliasId, adyenMode)
+        logger.info("Adyen preauthorization payment has been called for alias {} for {} mode", pspPaymentRequestModel.aliasId, adyenMode)
         val pspConfig = pspPaymentRequestModel.pspConfig!!
 
         val request = AdyenPaymentRequestModel(
@@ -92,24 +92,24 @@ class AdyenPsp(
             ),
             shopperEmail = pspPaymentRequestModel.extra?.personalData?.email,
             shopperIP = pspPaymentRequestModel.extra?.personalData?.customerIP,
-            shopperReference = pspPaymentRequestModel.aliasId,
+            shopperReference = pspPaymentRequestModel.extra?.personalData?.customerReference,
             selectedRecurringDetailReference = pspPaymentRequestModel.pspAlias,
             recurring = AdyenRecurringRequestModel(
                 contract = adyenProperties.contract
             ),
             shopperInteraction = adyenProperties.shopperInteraction,
-            reference = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH),
+            reference = pspPaymentRequestModel.purchaseId ?: randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
             merchantAccount = if (adyenMode == AdyenMode.TEST.mode) pspConfig.sandboxMerchantId else pspPaymentRequestModel.pspConfig!!.merchantId,
             captureDelayHours = null
         )
 
-        val response = adyenClient.preauthorize(request, pspConfig, adyenMode)
-//        if (response?.resultCode == AdyenResultCode.ERROR.result ||
-//            response?.resultCode == AdyenResultCode.REFUSED.result ||
-//            response?.resultCode == AdyenResultCode.CANCELLED.result) {
-//            logger.error("Adyen preauthorization failed, reason {}", response.refusalReason)
-//            return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.refusalReason)
-//        }
+        val response = adyenClient.preauthorization(request, pspConfig, adyenMode)
+        if (response?.resultCode == AdyenResultCode.ERROR.result ||
+            response?.resultCode == AdyenResultCode.REFUSED.result ||
+            response?.resultCode == AdyenResultCode.CANCELLED.result) {
+            logger.error("Adyen preauthorization failed, reason {}", response.refusalReason)
+            return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.refusalReason)
+        }
 
         return PspPaymentResponseModel(response?.pspReference, TransactionStatus.SUCCESS, null, null, null)
     }

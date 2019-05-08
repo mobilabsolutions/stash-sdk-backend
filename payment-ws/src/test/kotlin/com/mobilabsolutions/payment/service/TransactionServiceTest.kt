@@ -84,7 +84,7 @@ class TransactionServiceTest {
     )
     private val aliasExtra = AliasExtraModel(null, null, null,
         PersonalDataModel(null, null, null, "Mustermann", null,
-            null, "Berlin", "DE"), PaymentMethod.CC, null)
+            null, "Berlin", "DE", null), PaymentMethod.CC, null)
 
     @InjectMocks
     private lateinit var transactionService: TransactionService
@@ -135,13 +135,13 @@ class TransactionServiceTest {
         Mockito.`when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
         Mockito.`when`(
             psp.preauthorize(
-                PspPaymentRequestModel(correctAliasId, aliasExtra, correctPaymentData, pspAlias, pspConfigModel),
+                PspPaymentRequestModel(correctAliasId, aliasExtra, correctPaymentData, pspAlias, pspConfigModel, purchaseId),
                 test
             )
         ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
         Mockito.`when`(
             psp.authorize(
-                PspPaymentRequestModel(correctAliasId, aliasExtra, correctPaymentData, pspAlias, pspConfigModel),
+                PspPaymentRequestModel(correctAliasId, aliasExtra, correctPaymentData, pspAlias, pspConfigModel, purchaseId),
                 test
             )
         ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))

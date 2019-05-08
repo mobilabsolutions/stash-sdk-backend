@@ -34,5 +34,8 @@ data class PersonalDataModel(
 
     @ApiModelProperty(value = "Country code of account holder", example = "DE")
     @field:CountryCode
-    val country: String?
+    val country: String?,
+
+    @ApiModelProperty(value = "Customer reference", example = "oIXHpTAfEPSleWXT6Khe")
+    val customerReference: String?
 )

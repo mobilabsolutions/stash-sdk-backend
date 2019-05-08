@@ -1,6 +1,8 @@
 package com.mobilabsolutions.payment.adyen.service
 
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
+import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
+import com.mobilabsolutions.payment.adyen.data.enum.AdyenResultCode
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
@@ -13,6 +15,8 @@ import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
+import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
+import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import org.junit.jupiter.api.BeforeAll
@@ -39,20 +43,18 @@ class AdyenPspTest {
     private val currency = "EUR"
     private val country = "DE"
     private val locale = "de-DE"
-    private val email = "test@test.com"
-    private val customerIP = "61.294.12.12"
-    private val correctAliasId = "correct id"
-    private val amount = 2000
-    private val pspAlias = "some psp alias"
-    private val selectedRecurringDetailReference = "LATEST"
-    private val contract = "RECURRING"
-    private val shopperInteraction = "ContAuth"
-    private val reference = "some reference"
     private val urlPrefix = "random-mobilab"
     private val dynamicPspConfig = DynamicPspConfigRequestModel(
         "some token",
         "some url",
         "some channel"
+    )
+    private val amountValue = 300
+    private val username = "username"
+    private val password = "password"
+    private val amount = AdyenAmountRequestModel(
+        value = amountValue,
+        currency = currency
     )
     private val pspConfig = PspConfigModel(
         PaymentServiceProvider.ADYEN.toString(),
@@ -70,17 +72,19 @@ class AdyenPspTest {
         country,
         locale,
         urlPrefix,
+        username,
         null,
         null,
-        null,
-        null
-    )
-    private val paymentResponse = AdyenPaymentResponseModel(
-        "psp ref"
-        //"reason",
-        //"result code"
+        password
     )
     private val paymentSession = "123"
+    private val email = "test@test.com"
+    private val customerIP = "61.294.12.12"
+    private val aliasId = "alias id"
+    private val reference = "reference"
+    private val pspReference = "1234567890"
+    private val pspAlias = "psp alias"
+    private val correctAliasId = "correct id"
     private val correctPayload = "payload"
     private val verifyRequest = AdyenVerifyPaymentRequestModel(
         sandboxPublicKey,
@@ -94,41 +98,25 @@ class AdyenPspTest {
     private lateinit var adyenClient: AdyenClient
 
     @Mock
-    private lateinit var randomStringGenerator: RandomStringGenerator
+    private lateinit var adyenProperties: AdyenProperties
 
     @Mock
-    private lateinit var adyenProperties: AdyenProperties
+    private lateinit var randomStringGenerator: RandomStringGenerator
 
     @BeforeAll
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
-        Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(20)).thenReturn(reference)
-        Mockito.`when`(adyenProperties.contract).thenReturn(contract)
-        Mockito.`when`(adyenProperties.selectedRecurringDetailReference).thenReturn(selectedRecurringDetailReference)
-        Mockito.`when`(adyenProperties.shopperInteraction).thenReturn(shopperInteraction)
         Mockito.`when`(adyenClient.requestPaymentSession(pspConfig, dynamicPspConfig, "test"))
             .thenReturn(paymentSession)
+        Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(20)).thenReturn(reference)
+        Mockito.`when`(adyenClient.preauthorization(
+            AdyenPaymentRequestModel(amount, email, customerIP, aliasId, pspAlias,
+                AdyenRecurringRequestModel(adyenProperties.contract), adyenProperties.shopperInteraction, reference, sandboxMerchantId, 0),
+            pspConfig, AdyenMode.TEST.mode))
+            .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
         Mockito.`when`(adyenClient.verifyPayment(verifyRequest, urlPrefix, "test"))
-        .thenReturn(AdyenVerifyPaymentResponseModel("8415568838266087", "Authorised", "sje324andls"))
-        Mockito.`when`(adyenClient.preauthorize(AdyenPaymentRequestModel(
-            AdyenAmountRequestModel(
-                amount,
-                currency
-            ),
-            email,
-            customerIP,
-            pspAlias,
-            adyenProperties.selectedRecurringDetailReference,
-            AdyenRecurringRequestModel(
-                adyenProperties.contract
-            ),
-            adyenProperties.shopperInteraction,
-            reference,
-            sandboxMerchantId,
-            null
-        ), pspConfig, "test"))
-            .thenReturn(paymentResponse)
+            .thenReturn(AdyenVerifyPaymentResponseModel("8415568838266087", "Authorised", "sje324andls", "oIXHpTAfEPSleWXT6Khe", null))
     }
 
     @Test
@@ -151,10 +139,19 @@ class AdyenPspTest {
                     null,
                     null,
                     "Berlin",
-                    country
+                    country,
+                    null
                 ),
                 PaymentMethod.CC,
                 correctPayload
             ), pspConfig), true)
+    }
+
+    @Test
+    fun `preauthorize successfully`() {
+        adyenPsp.preauthorize(PspPaymentRequestModel(
+            aliasId,
+            AliasExtraModel(null, null, null, PersonalDataModel(email, customerIP, null, null, null, null, null, null, null), PaymentMethod.CC, null),
+            PaymentDataRequestModel(amountValue, currency, "Book"), pspAlias, pspConfig, null), true)
     }
 }
