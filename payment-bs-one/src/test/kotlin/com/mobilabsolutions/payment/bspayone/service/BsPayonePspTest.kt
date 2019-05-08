@@ -193,7 +193,7 @@ class BsPayonePspTest {
 
     @Test
     fun `refund transaction with correct transaction id`() {
-        bsPayonePsp.refund(PspRefundRequestModel(pspTransactionId, amount, currency, TransactionAction.CAPTURE, pspConfig), test)
+        bsPayonePsp.refund(PspRefundRequestModel(pspTransactionId, amount, currency, TransactionAction.CAPTURE, pspConfig, null, PaymentMethod.CC), test)
     }
 
     @Test

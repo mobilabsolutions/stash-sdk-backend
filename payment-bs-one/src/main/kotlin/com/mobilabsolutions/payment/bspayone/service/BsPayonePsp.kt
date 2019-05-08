@@ -162,7 +162,7 @@ class BsPayonePsp(
             currency = pspRefundRequestModel.currency
         )
 
-        val response = bsPayoneClient.refund(bsPayoneRefundRequest, pspRefundRequestModel.pspConfig, getPspMode(pspTestMode))
+        val response = bsPayoneClient.refund(bsPayoneRefundRequest, pspRefundRequestModel.pspConfig!!, getPspMode(pspTestMode))
 
         if (response.hasError()) {
             logger.error("Error during BS Payone refund. Error code: {}, error message: {}", response.errorCode, response.errorMessage)
