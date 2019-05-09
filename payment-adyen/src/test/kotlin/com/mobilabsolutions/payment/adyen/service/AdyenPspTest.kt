@@ -135,7 +135,7 @@ class AdyenPspTest {
             .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
         Mockito.`when`(adyenClient.capture(
             AdyenCaptureRequestModel(pspTransactionId, amount, reference, sandboxMerchantId), pspConfig, "test"))
-            .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.CAPTURED.result, null))
+            .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
     }
 
     @Test
