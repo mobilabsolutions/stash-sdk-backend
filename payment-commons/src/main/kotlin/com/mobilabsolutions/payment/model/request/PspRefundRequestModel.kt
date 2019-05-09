@@ -1,5 +1,6 @@
 package com.mobilabsolutions.payment.model.request
 
+import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.model.PspConfigModel
 import io.swagger.annotations.ApiModel
@@ -26,5 +27,12 @@ data class PspRefundRequestModel(
     val action: TransactionAction?,
 
     @ApiModelProperty(value = "PSP config")
-    val pspConfig: PspConfigModel
+    val pspConfig: PspConfigModel?,
+
+    @ApiModelProperty("Purchase ID", example = "132")
+    val purchaseId: String?,
+
+    @ApiModelProperty(value = "Payment method", example = "SEPA")
+    @field:Enumerated(EnumType.STRING)
+    val paymentMethod: PaymentMethod?
 )

@@ -157,7 +157,7 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
             pspTransactionId = pspRefundRequestModel.pspTransactionId,
             amount = pspRefundRequestModel.amount.toString()
         )
-        val response = braintreeClient.refund(request, pspRefundRequestModel.pspConfig, braintreeMode)
+        val response = braintreeClient.refund(request, pspRefundRequestModel.pspConfig!!, braintreeMode)
 
         if (response.errorCode != null) {
             logger.error("Error during Braintree refund. Error code: {}, error message: {}", response.errorCode, response.errorMessage)
