@@ -23,4 +23,7 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
 
     @Query(value = "SELECT * FROM transaction_record tr WHERE tr.transaction_id = :transactionId AND tr.status = :status GROUP BY :transactionId, tr.id ORDER BY tr.created_date DESC LIMIT 1", nativeQuery = true)
     fun getByTransactionIdAndStatus(@Param("transactionId") transactionId: String, @Param("status") status: String): Transaction?
+
+    @Query(value = "SELECT * FROM transaction_record tr WHERE tr.transaction_id = :transactionId GROUP BY :transactionId, tr.id ORDER BY tr.created_date DESC LIMIT 1", nativeQuery = true)
+    fun getByTransactionId(@Param("transactionId") transactionId: String): Transaction?
 }
