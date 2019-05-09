@@ -144,7 +144,7 @@ class AdyenPsp(
                 value = pspCaptureRequestModel.amount,
                 currency = pspCaptureRequestModel.currency
             ),
-            reference = pspCaptureRequestModel.merchantTransactionId ?: randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
+            reference = pspCaptureRequestModel.purchaseId ?: randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
             merchantAccount = if (adyenMode == AdyenMode.TEST.mode)
                 pspCaptureRequestModel.pspConfig.sandboxMerchantId else pspCaptureRequestModel.pspConfig.merchantId
         )
