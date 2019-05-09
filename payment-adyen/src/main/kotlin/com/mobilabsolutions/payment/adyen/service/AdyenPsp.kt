@@ -4,6 +4,7 @@ import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenResultCode
 import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenCaptureRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentMethodRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
@@ -135,7 +136,29 @@ class AdyenPsp(
     }
 
     override fun capture(pspCaptureRequestModel: PspCaptureRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        val adyenMode = getAdyenMode(pspTestMode)
+        logger.info("Adyen capture payment has been called using {} mode", adyenMode)
+
+        val request = AdyenCaptureRequestModel(
+            originalReference = pspCaptureRequestModel.pspTransactionId,
+            modificationAmount = AdyenAmountRequestModel(
+                value = pspCaptureRequestModel.amount,
+                currency = pspCaptureRequestModel.currency
+            ),
+            reference = pspCaptureRequestModel.purchaseId ?: randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
+            merchantAccount = if (adyenMode == AdyenMode.TEST.mode)
+                pspCaptureRequestModel.pspConfig.sandboxMerchantId else pspCaptureRequestModel.pspConfig.merchantId
+        )
+
+        val response = adyenClient.capture(request, pspCaptureRequestModel.pspConfig, adyenMode)
+        if (response.resultCode == AdyenResultCode.ERROR.result ||
+            response.resultCode == AdyenResultCode.REFUSED.result ||
+            response.resultCode == AdyenResultCode.CANCELLED.result) {
+            logger.error("Adyen capture failed, reason {}", response.refusalReason)
+            return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.refusalReason)
+        }
+
+        return PspPaymentResponseModel(response.pspReference, TransactionStatus.SUCCESS, null, null, null)
     }
 
     override fun reverse(pspReversalRequestModel: PspReversalRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
@@ -144,7 +167,7 @@ class AdyenPsp(
 
         val request = AdyenReverseRequestModel(
             originalReference = pspReversalRequestModel.pspTransactionId,
-            reference = pspReversalRequestModel.merchantTransactionId ?: randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
+            reference = pspReversalRequestModel.purchaseId ?: randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
             merchantAccount = if (adyenMode == AdyenMode.TEST.mode)
                 pspReversalRequestModel.pspConfig.sandboxMerchantId else pspReversalRequestModel.pspConfig.merchantId
         )

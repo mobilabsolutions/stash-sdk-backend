@@ -174,7 +174,8 @@ class TransactionService(
                     pspTransactionId = getPspPaymentResponse(lastTransaction).pspTransactionId,
                     amount = lastTransaction.amount,
                     currency = lastTransaction.currencyId,
-                    pspConfig = getPspConfig(lastTransaction.alias!!)
+                    pspConfig = getPspConfig(lastTransaction.alias!!),
+                    purchaseId = lastTransaction.merchantTransactionId
                 )
                 val pspPaymentResponse = psp.capture(pspCaptureRequest, pspTestMode)
                 val newTransaction = Transaction(
@@ -256,7 +257,7 @@ class TransactionService(
                     pspTransactionId = getPspPaymentResponse(lastTransaction).pspTransactionId,
                     currency = lastTransaction.currencyId,
                     pspConfig = getPspConfig(lastTransaction.alias!!),
-                    merchantTransactionId = lastTransaction.merchantTransactionId
+                    purchaseId = lastTransaction.merchantTransactionId
                 )
                 val pspReversalResponse = psp.reverse(pspReversalRequest, pspTestMode)
                 val newTransaction = Transaction(
