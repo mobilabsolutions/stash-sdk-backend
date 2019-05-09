@@ -4,6 +4,7 @@ import com.mobilabsolutions.payment.model.request.MerchantRequestModel
 import com.mobilabsolutions.payment.model.request.PspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspUpsertConfigRequestModel
 import com.mobilabsolutions.payment.service.MerchantService
+import com.mobilabsolutions.payment.service.TransactionDetailsService
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
@@ -23,11 +24,15 @@ import javax.validation.Valid
  */
 @RestController
 @RequestMapping(MerchantController.BASE_MERCHANT_URL)
-class MerchantController(private val merchantService: MerchantService) {
+class MerchantController(
+    private val merchantService: MerchantService,
+    private val transactionDetailsService: TransactionDetailsService
+) {
     companion object {
         const val BASE_MERCHANT_URL = "merchant"
         const val MERCHANT_CONFIG_URL = "/{Merchant-Id}/psp"
         const val MERCHANT_PSP_CONFIG_URL = "/{Merchant-Id}/psp/{Psp-Id}"
+        const val TRANSACTION_ID_URL = "/{Merchant-Id}/transactions/{Transaction-Id}"
     }
 
     @ApiOperation(value = "Create merchant")
@@ -110,4 +115,22 @@ class MerchantController(private val merchantService: MerchantService) {
         @PathVariable("Psp-Id") pspId: String,
         @Valid @RequestBody pspUpsertConfigRequestModel: PspUpsertConfigRequestModel
     ) = merchantService.updatePspConfig(merchantId, pspId, pspUpsertConfigRequestModel)
+
+    @ApiOperation(value = "Get transaction by transaction ID")
+    @ApiResponses(
+        ApiResponse(code = 200, message = "Successfully queried transaction"),
+        ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 403, message = "Forbidden access"),
+        ApiResponse(code = 404, message = "Resource not found")
+    )
+    @RequestMapping(
+        MerchantController.TRANSACTION_ID_URL,
+        method = [RequestMethod.GET],
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
+    fun getTransaction(
+        @PathVariable("Merchant-Id") merchantId: String,
+        @PathVariable(value = "Transaction-Id") transactionId: String
+    ) = transactionDetailsService.getTransaction(merchantId, transactionId)
 }

@@ -1,6 +1,7 @@
 package com.mobilabsolutions.payment.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.PaymentInfoModel
 import com.mobilabsolutions.payment.model.response.TransactionDetailsResponseModel
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class TransactionDetailsService(
     private val transactionRepository: TransactionRepository,
+    private val merchantRepository: MerchantRepository,
     private val objectMapper: ObjectMapper
 ) {
 
@@ -25,7 +27,9 @@ class TransactionDetailsService(
      * @param transactionId Transaction ID
      * @return transaction details by id response
      */
-    fun getTransaction(transactionId: String): TransactionDetailsResponseModel {
+    fun getTransaction(merchantId: String, transactionId: String): TransactionDetailsResponseModel {
+        merchantRepository.getMerchantById(merchantId)
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transaction = transactionRepository.getByTransactionId(transactionId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_FOUND).asException()
 

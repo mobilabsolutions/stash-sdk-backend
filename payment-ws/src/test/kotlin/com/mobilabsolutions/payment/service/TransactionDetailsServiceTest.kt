@@ -6,6 +6,7 @@ import com.mobilabsolutions.payment.data.domain.Merchant
 import com.mobilabsolutions.payment.data.domain.Transaction
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.enum.TransactionAction
+import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
@@ -31,6 +32,7 @@ class TransactionDetailsServiceTest {
     private val wrongTransactionId = "11111"
     private val correctAliasId = "correct alias id"
     private val pspAlias = "psp alias"
+    private val merchantId = "mobilab"
     private val pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"123\", \"key\" : \"123\"," +
         " \"merchantId\" : \"mobilab\", \"accountId\" : \"123\", \"default\" : \"true\"}]}"
     private val pspResponse = "{\"pspTransactionId\":\"325105132\",\"status\":\"SUCCESS\",\"customerId\":\"160624370\"}"
@@ -47,10 +49,16 @@ class TransactionDetailsServiceTest {
     @Mock
     private lateinit var transactionRepository: TransactionRepository
 
+    @Mock
+    private lateinit var merchantRepository: MerchantRepository
+
     @BeforeAll
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
+        Mockito.`when`(merchantRepository.getMerchantById(merchantId)).thenReturn(
+            Merchant(merchantId, pspConfig = pspConfig)
+        )
         Mockito.`when`(transactionRepository.getByTransactionId(correctTransactionId)).thenReturn(
             Transaction(
                 amount = 1,
@@ -59,7 +67,7 @@ class TransactionDetailsServiceTest {
                 paymentInfo = paymentInfo,
                 pspTestMode = true,
                 action = TransactionAction.PREAUTH,
-                merchant = Merchant("1", pspConfig = pspConfig),
+                merchant = Merchant(merchantId, pspConfig = pspConfig),
                 alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
                 pspResponse = pspResponse)
         )
@@ -68,13 +76,13 @@ class TransactionDetailsServiceTest {
 
     @Test
     fun `get transaction by id successfully`() {
-        transactionDetailsService.getTransaction(correctTransactionId)
+        transactionDetailsService.getTransaction(merchantId, correctTransactionId)
     }
 
     @Test
     fun `get transaction by id unsuccessfully`() {
         Assertions.assertThrows(ApiException::class.java) {
-            transactionDetailsService.getTransaction(wrongTransactionId)
+            transactionDetailsService.getTransaction(merchantId, wrongTransactionId)
         }
     }
 }
