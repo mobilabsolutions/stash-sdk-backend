@@ -3,7 +3,7 @@ package com.mobilabsolutions.payment.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.PaymentInfoModel
-import com.mobilabsolutions.payment.model.response.TransactionDetailsByIdResponseModel
+import com.mobilabsolutions.payment.model.response.TransactionDetailsResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import org.springframework.stereotype.Service
@@ -25,11 +25,11 @@ class TransactionDetailsService(
      * @param transactionId Transaction ID
      * @return transaction details by id response
      */
-    fun getTransaction(transactionId: String): TransactionDetailsByIdResponseModel {
+    fun getTransaction(transactionId: String): TransactionDetailsResponseModel {
         val transaction = transactionRepository.getByTransactionId(transactionId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_FOUND).asException()
 
-        return TransactionDetailsByIdResponseModel(
+        return TransactionDetailsResponseModel(
             transaction.transactionId,
             transaction.currencyId,
             transaction.amount.toString(),

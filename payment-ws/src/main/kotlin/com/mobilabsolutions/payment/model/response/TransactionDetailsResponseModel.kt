@@ -13,7 +13,7 @@ import javax.persistence.Enumerated
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
 @ApiModel(value = "Transaction Details By Id Response")
-data class TransactionDetailsByIdResponseModel(
+data class TransactionDetailsResponseModel(
     @ApiModelProperty(value = "Transaction id", example = "frtdqw7m")
     val transactionId: String?,
 
