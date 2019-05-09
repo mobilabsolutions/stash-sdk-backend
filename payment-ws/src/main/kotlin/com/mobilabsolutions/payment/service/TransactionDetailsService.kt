@@ -24,6 +24,7 @@ class TransactionDetailsService(
     /**
      * Get transaction by ID
      *
+     * @param merchantId Merchant ID
      * @param transactionId Transaction ID
      * @return transaction details by id response
      */
