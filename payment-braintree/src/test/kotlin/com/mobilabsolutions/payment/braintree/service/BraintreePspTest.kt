@@ -309,7 +309,8 @@ class BraintreePspTest {
             PspReversalRequestModel(
                 pspTransactionId,
                 currency,
-                pspConfig
+                pspConfig,
+                null
             ), test
         )
         Assertions.assertNull(response.error)
@@ -321,7 +322,8 @@ class BraintreePspTest {
             PspReversalRequestModel(
                 wrongPspTransactionId,
                 currency,
-                pspConfig
+                pspConfig,
+                null
             ), test
         )
         Assertions.assertEquals(response.status, TransactionStatus.FAIL)

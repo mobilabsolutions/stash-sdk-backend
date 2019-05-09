@@ -255,7 +255,8 @@ class TransactionService(
                 val pspReversalRequest = PspReversalRequestModel(
                     pspTransactionId = getPspPaymentResponse(lastTransaction).pspTransactionId,
                     currency = lastTransaction.currencyId,
-                    pspConfig = getPspConfig(lastTransaction.alias!!)
+                    pspConfig = getPspConfig(lastTransaction.alias!!),
+                    merchantTransactionId = lastTransaction.merchantTransactionId
                 )
                 val pspReversalResponse = psp.reverse(pspReversalRequest, pspTestMode)
                 val newTransaction = Transaction(

@@ -144,7 +144,7 @@ class AdyenPsp(
 
         val request = AdyenReverseRequestModel(
             originalReference = pspReversalRequestModel.pspTransactionId,
-            reference = randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
+            reference = pspReversalRequestModel.merchantTransactionId ?: randomStringGenerator.generateRandomAlphanumeric(REFERENCE_LENGTH),
             merchantAccount = if (adyenMode == AdyenMode.TEST.mode)
                 pspReversalRequestModel.pspConfig.sandboxMerchantId else pspReversalRequestModel.pspConfig.merchantId
         )
