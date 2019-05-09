@@ -8,11 +8,13 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentMethodReques
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenRefundRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
+import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
 import com.mobilabsolutions.payment.model.PspConfigModel
@@ -20,6 +22,7 @@ import com.mobilabsolutions.payment.model.SepaConfigModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
+import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiException
@@ -94,6 +97,7 @@ class AdyenPspTest {
     private val holderName = "Max Mustermann"
     private val iban = "DE87123456781234567890"
     private val pspTransactionId = "12345"
+    private val recurringDetailReference = "8415568838266087"
 
     @InjectMocks
     private lateinit var adyenPsp: AdyenPsp
@@ -111,7 +115,7 @@ class AdyenPspTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
-        Mockito.`when`(adyenClient.requestPaymentSession(pspConfig, dynamicPspConfig, "test"))
+        Mockito.`when`(adyenClient.requestPaymentSession(pspConfig, dynamicPspConfig, AdyenMode.TEST.mode))
             .thenReturn(paymentSession)
         Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(20)).thenReturn(reference)
         Mockito.`when`(adyenClient.preauthorization(
@@ -119,8 +123,8 @@ class AdyenPspTest {
                 AdyenRecurringRequestModel(adyenProperties.contract), adyenProperties.shopperInteraction, reference, sandboxMerchantId, null, null),
             pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
-        Mockito.`when`(adyenClient.verifyPayment(verifyRequest, urlPrefix, "test"))
-            .thenReturn(AdyenVerifyPaymentResponseModel("8415568838266087", AdyenResultCode.AUTHORISED.result, pspAlias, customerReference, null))
+        Mockito.`when`(adyenClient.verifyPayment(verifyRequest, urlPrefix, AdyenMode.TEST.mode))
+            .thenReturn(AdyenVerifyPaymentResponseModel(recurringDetailReference, AdyenResultCode.AUTHORISED.result, pspAlias, customerReference, null))
         Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(20)).thenReturn(reference)
         Mockito.`when`(adyenClient.authorization(
             AdyenPaymentRequestModel(amount, email, customerIP, customerReference, pspAlias,
@@ -133,9 +137,12 @@ class AdyenPspTest {
                 AdyenPaymentMethodRequestModel(adyenProperties.sepaPaymentMethod, holderName, iban)),
             pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
-        Mockito.`when`(adyenClient.reverse(
-            AdyenReverseRequestModel(pspTransactionId, reference, sandboxMerchantId), pspConfig, "test"))
-            .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.REVERSED.result, null))
+        Mockito.`when`(adyenClient.reverse(AdyenReverseRequestModel(pspTransactionId, reference, sandboxMerchantId), pspConfig, "test"))
+            .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.CANCELLED.result, null))
+        Mockito.`when`(adyenClient.refund(AdyenRefundRequestModel(pspReference, AdyenAmountRequestModel(amountValue, currency), reference, sandboxMerchantId), pspConfig, AdyenMode.TEST.mode))
+            .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
+        Mockito.`when`(adyenClient.sepaRefund(AdyenRefundRequestModel(pspReference, null, reference, sandboxMerchantId), pspConfig, AdyenMode.TEST.mode))
+            .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
     }
 
     @Test
@@ -239,8 +246,70 @@ class AdyenPspTest {
     fun `preauthorize successfully`() {
         adyenPsp.preauthorize(PspPaymentRequestModel(
             aliasId,
-            AliasExtraModel(null, null, null, PersonalDataModel(email, customerIP, null, null, null, null, null, null, null), PaymentMethod.CC, null),
-            PaymentDataRequestModel(amountValue, currency, "Book"), pspAlias, pspConfig, null), true)
+            AliasExtraModel(
+                null,
+                null,
+                null,
+                PersonalDataModel(
+                    email,
+                    customerIP,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null),
+                PaymentMethod.CC, null),
+            PaymentDataRequestModel(amountValue, currency, "Book"),
+            pspAlias, pspConfig, null), true)
+    }
+
+    @Test
+    fun `refund cc payment successfully`() {
+        adyenPsp.refund(
+            PspRefundRequestModel(
+                pspReference,
+                amountValue,
+                currency,
+                TransactionAction.AUTH,
+                pspConfig,
+                null,
+                PaymentMethod.CC
+            ), true
+        )
+    }
+
+    @Test
+    fun `refund sepa payment successfully`() {
+        adyenPsp.refund(
+            PspRefundRequestModel(
+                pspReference,
+                null,
+                null,
+                TransactionAction.AUTH,
+                pspConfig,
+                null,
+                PaymentMethod.SEPA
+            ), true
+        )
+    }
+
+    @Test
+    fun `refund with wrong payment method`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            adyenPsp.refund(
+                PspRefundRequestModel(
+                    pspReference,
+                    amountValue,
+                    currency,
+                    TransactionAction.AUTH,
+                    pspConfig,
+                    null,
+                    PaymentMethod.PAY_PAL
+                ), true
+            )
+        }
     }
 
     @Test
