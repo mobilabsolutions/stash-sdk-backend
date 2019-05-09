@@ -8,6 +8,7 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenCaptureRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentMethodRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRefundRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
@@ -25,6 +26,7 @@ import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
+import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiException
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import org.junit.jupiter.api.Assertions
@@ -138,6 +140,8 @@ class AdyenPspTest {
                 AdyenPaymentMethodRequestModel(adyenProperties.sepaPaymentMethod, holderName, iban)),
             pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
+        Mockito.`when`(adyenClient.reverse(AdyenReverseRequestModel(pspTransactionId, purchaseId, sandboxMerchantId), pspConfig, "test"))
+            .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.CANCELLED.result, null))
         Mockito.`when`(adyenClient.capture(AdyenCaptureRequestModel(pspTransactionId, amount, purchaseId, sandboxMerchantId), pspConfig, "test"))
             .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
         Mockito.`when`(adyenClient.refund(AdyenRefundRequestModel(pspReference, AdyenAmountRequestModel(amountValue, currency), reference, sandboxMerchantId), pspConfig, AdyenMode.TEST.mode))
@@ -322,5 +326,15 @@ class AdyenPspTest {
                 ), true
             )
         }
+    }
+
+    @Test
+    fun `reverse successfully`() {
+        adyenPsp.reverse(PspReversalRequestModel(
+            pspTransactionId,
+            currency,
+            pspConfig,
+            purchaseId
+        ), true)
     }
 }

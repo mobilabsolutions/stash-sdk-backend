@@ -188,7 +188,7 @@ class BsPayonePspTest {
 
     @Test
     fun `reverse transaction with correct transaction id`() {
-        bsPayonePsp.reverse(PspReversalRequestModel(pspTransactionId, currency, pspConfig), test)
+        bsPayonePsp.reverse(PspReversalRequestModel(pspTransactionId, currency, pspConfig, null), test)
     }
 
     @Test

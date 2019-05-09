@@ -146,7 +146,7 @@ class TransactionServiceTest {
             )
         ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
         Mockito.`when`(
-            psp.reverse(PspReversalRequestModel(pspTransactionId, "EUR", pspConfigModel), test
+            psp.reverse(PspReversalRequestModel(pspTransactionId, "EUR", pspConfigModel, merchantTransactionId), test
             )
         ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
         Mockito.`when`(
@@ -251,7 +251,8 @@ class TransactionServiceTest {
                 paymentMethod = PaymentMethod.CC,
                 merchant = Merchant("1", pspConfig = pspConfig),
                 alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
-                pspResponse = pspResponse
+                pspResponse = pspResponse,
+                merchantTransactionId = merchantTransactionId
             )
         )
         Mockito.`when`(

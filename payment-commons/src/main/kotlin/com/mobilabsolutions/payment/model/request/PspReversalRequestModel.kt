@@ -16,5 +16,8 @@ data class PspReversalRequestModel(
     val currency: String?,
 
     @ApiModelProperty(value = "PSP config")
-    val pspConfig: PspConfigModel
+    val pspConfig: PspConfigModel,
+
+    @ApiModelProperty(value = "Purchase ID", example = "12345")
+    val purchaseId: String?
 )
