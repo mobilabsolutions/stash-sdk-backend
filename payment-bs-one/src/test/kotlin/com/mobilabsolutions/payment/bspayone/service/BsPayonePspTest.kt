@@ -183,7 +183,7 @@ class BsPayonePspTest {
 
     @Test
     fun `capture transaction with correct transaction id`() {
-        bsPayonePsp.capture(PspCaptureRequestModel(pspTransactionId, amount, currency, pspConfig), test)
+        bsPayonePsp.capture(PspCaptureRequestModel(pspTransactionId, amount, currency, pspConfig, null), test)
     }
 
     @Test

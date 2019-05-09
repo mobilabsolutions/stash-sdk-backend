@@ -223,7 +223,8 @@ class BraintreePspTest {
                 pspTransactionId,
                 null,
                 null,
-                pspConfig
+                pspConfig,
+                null
             ), test
         )
         Assertions.assertNull(response.error)
@@ -236,7 +237,8 @@ class BraintreePspTest {
                 wrongPspTransactionId,
                 null,
                 null,
-                pspConfig
+                pspConfig,
+                null
             ), test
         )
         Assertions.assertEquals(response.status, TransactionStatus.FAIL)

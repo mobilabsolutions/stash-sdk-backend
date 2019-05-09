@@ -19,5 +19,8 @@ data class PspCaptureRequestModel(
     val currency: String?,
 
     @ApiModelProperty(value = "PSP config")
-    val pspConfig: PspConfigModel
+    val pspConfig: PspConfigModel,
+
+    @ApiModelProperty(value = "Merchant Transaction ID", example = "12345")
+    val merchantTransactionId: String?
 )

@@ -98,6 +98,7 @@ class AdyenPspTest {
     private val iban = "DE87123456781234567890"
     private val pspTransactionId = "12345"
     private val recurringDetailReference = "8415568838266087"
+    private val merchantTransactionId = "37293728"
 
     @InjectMocks
     private lateinit var adyenPsp: AdyenPsp
@@ -137,7 +138,7 @@ class AdyenPspTest {
                 AdyenPaymentMethodRequestModel(adyenProperties.sepaPaymentMethod, holderName, iban)),
             pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
-        Mockito.`when`(adyenClient.capture(AdyenCaptureRequestModel(pspTransactionId, amount, reference, sandboxMerchantId), pspConfig, "test"))
+        Mockito.`when`(adyenClient.capture(AdyenCaptureRequestModel(pspTransactionId, amount, merchantTransactionId, sandboxMerchantId), pspConfig, "test"))
             .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
         Mockito.`when`(adyenClient.refund(AdyenRefundRequestModel(pspReference, AdyenAmountRequestModel(amountValue, currency), reference, sandboxMerchantId), pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
@@ -248,7 +249,8 @@ class AdyenPspTest {
             pspTransactionId,
             amountValue,
             currency,
-            pspConfig
+            pspConfig,
+            merchantTransactionId
         ), true)
     }
 
