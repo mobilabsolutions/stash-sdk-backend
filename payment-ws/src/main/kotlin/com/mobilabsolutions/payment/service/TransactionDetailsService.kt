@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.PaymentInfoModel
+import com.mobilabsolutions.payment.model.TransactionModel
 import com.mobilabsolutions.payment.model.response.TransactionDetailsResponseModel
+import com.mobilabsolutions.payment.model.response.TransactionListResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import org.springframework.stereotype.Service
@@ -49,5 +51,21 @@ class TransactionDetailsService(
             transaction.merchant.id,
             transaction.alias!!.id
         )
+    }
+
+    /**
+     * Get transactions by limit and offset
+     *
+     * @param merchantId Merchant ID
+     * @param limit limit
+     * @param offset offset
+     * @return transaction list
+     */
+    fun getTransactions(merchantId: String, limit: Int?, offset: Int?): TransactionListResponseModel {
+        merchantRepository.getMerchantById(merchantId)
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        val transactions = transactionRepository.getTransactionsByLimitAndOffset(merchantId, limit ?: 10, offset ?: 0)
+
+        return TransactionListResponseModel(transactions.asSequence().map { TransactionModel(it) }.toMutableList())
     }
 }

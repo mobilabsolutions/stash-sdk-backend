@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import javax.validation.Valid
@@ -33,6 +34,7 @@ class MerchantController(
         const val MERCHANT_CONFIG_URL = "/{Merchant-Id}/psp"
         const val MERCHANT_PSP_CONFIG_URL = "/{Merchant-Id}/psp/{Psp-Id}"
         const val TRANSACTION_ID_URL = "/{Merchant-Id}/transactions/{Transaction-Id}"
+        const val TRANSACTION_URL = "/{Merchant-Id}/transactions"
     }
 
     @ApiOperation(value = "Create merchant")
@@ -56,8 +58,10 @@ class MerchantController(
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 403, message = "Forbidden access")
     )
-    @RequestMapping(MERCHANT_CONFIG_URL, method = [RequestMethod.POST],
-        produces = [MediaType.APPLICATION_JSON_VALUE])
+    @RequestMapping(
+        MERCHANT_CONFIG_URL, method = [RequestMethod.POST],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun createPspConfigToMerchant(
@@ -72,8 +76,10 @@ class MerchantController(
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 403, message = "Forbidden access")
     )
-    @RequestMapping(MERCHANT_CONFIG_URL, method = [RequestMethod.GET],
-        produces = [MediaType.APPLICATION_JSON_VALUE])
+    @RequestMapping(
+        MERCHANT_CONFIG_URL, method = [RequestMethod.GET],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun getMerchantConfiguration(
@@ -88,8 +94,10 @@ class MerchantController(
         ApiResponse(code = 403, message = "Forbidden access"),
         ApiResponse(code = 404, message = "Resource not found")
     )
-    @RequestMapping(MERCHANT_PSP_CONFIG_URL, method = [RequestMethod.GET],
-        produces = [MediaType.APPLICATION_JSON_VALUE])
+    @RequestMapping(
+        MERCHANT_PSP_CONFIG_URL, method = [RequestMethod.GET],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun getMerchantConfiguration(
@@ -105,9 +113,11 @@ class MerchantController(
         ApiResponse(code = 403, message = "Forbidden access"),
         ApiResponse(code = 404, message = "Resource not found")
     )
-    @RequestMapping(MERCHANT_PSP_CONFIG_URL, method = [RequestMethod.PUT],
+    @RequestMapping(
+        MERCHANT_PSP_CONFIG_URL, method = [RequestMethod.PUT],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
-        produces = [MediaType.APPLICATION_JSON_VALUE])
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun updateMerchantPspConfiguration(
@@ -126,11 +136,32 @@ class MerchantController(
     @RequestMapping(
         MerchantController.TRANSACTION_ID_URL,
         method = [RequestMethod.GET],
-        produces = [MediaType.APPLICATION_JSON_VALUE])
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun getTransaction(
         @PathVariable("Merchant-Id") merchantId: String,
         @PathVariable(value = "Transaction-Id") transactionId: String
     ) = transactionDetailsService.getTransaction(merchantId, transactionId)
+
+    @ApiOperation(value = "Get transactions")
+    @ApiResponses(
+        ApiResponse(code = 200, message = "Successfully queried transactions"),
+        ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 403, message = "Forbidden access"),
+        ApiResponse(code = 404, message = "Resource not found")
+    )
+    @RequestMapping(
+        MerchantController.TRANSACTION_URL,
+        method = [RequestMethod.GET],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
+    fun getTransactions(
+        @PathVariable("Merchant-Id") merchantId: String,
+        @RequestParam(required = false) limit: Int?,
+        @RequestParam(required = false) offset: Int?
+    ) = transactionDetailsService.getTransactions(merchantId, limit, offset)
 }

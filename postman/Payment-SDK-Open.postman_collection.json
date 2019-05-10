@@ -982,6 +982,92 @@
                     "response": []
                 }
 			]
-		}
+		},
+        {
+            "name": "Transactions",
+            "item": [
+                {
+                    "name": "Get Transaction Details",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": ""
+                        },
+                        "url": {
+                            "raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/transactions/{Transaction-Id}",
+                            "host": [
+                                "{{wsEndpoint}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "merchant",
+                                "{Merchant-Id}",
+                                "transactions",
+                                "{Transaction-Id}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Transactions",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": ""
+                        },
+                        "url": {
+                            "raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/transactions?limit={Limit}&offset={Offset}",
+                            "host": [
+                                "{{wsEndpoint}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "merchant",
+                                "{Merchant-Id}",
+                                "transactions"
+                            ],
+                            "query": [
+                                {
+                                    "key": "limit",
+                                    "value": "{Limit}"
+                                },
+                                {
+                                    "key": "offset",
+                                    "value": "{Offset}"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
 	]
 }

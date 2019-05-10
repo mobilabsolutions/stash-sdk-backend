@@ -26,4 +26,7 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
 
     @Query(value = "SELECT * FROM transaction_record tr WHERE tr.transaction_id = :transactionId GROUP BY :transactionId, tr.id ORDER BY tr.created_date DESC LIMIT 1", nativeQuery = true)
     fun getByTransactionId(@Param("transactionId") transactionId: String): Transaction?
+
+    @Query("SELECT tr.transaction_id, tr.amount, tr.currency_id, tr.status, tr.action, tr.reason, tr.merchant_customer_id, tr.payment_method, tr.created_date FROM transaction_record tr WHERE tr.merchant_id = :merchantId ORDER BY tr.created_date LIMIT :limit OFFSET :offset", nativeQuery = true)
+    fun getTransactionsByLimitAndOffset(@Param("merchantId") merchantId: String, @Param("limit") limit: Int, @Param("offset") offset: Int): List<Array<Any>>
 }
