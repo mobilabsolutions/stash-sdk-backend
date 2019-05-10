@@ -3,6 +3,7 @@ package com.mobilabsolutions.payment.model
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import java.sql.Timestamp
+import java.text.SimpleDateFormat
 
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
@@ -33,8 +34,8 @@ data class TransactionModel(
     @ApiModelProperty(value = "Payment method", example = "SEPA")
     val paymentMethod: String?,
 
-    @ApiModelProperty(value = "Creation Date")
-    val createdDate: Timestamp?
+    @ApiModelProperty(value = "Creation Date", example = "2018-12-31 23:59:59.999 +0100")
+    val createdDate: String?
 ) {
     constructor(transaction: Array<Any>) : this(
         transaction[0] as String?,
@@ -45,6 +46,6 @@ data class TransactionModel(
         transaction[5] as String?,
         transaction[6] as String?,
         transaction[7] as String?,
-        transaction[8] as Timestamp?
+        SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z").format(transaction[8] as Timestamp)
     )
 }
