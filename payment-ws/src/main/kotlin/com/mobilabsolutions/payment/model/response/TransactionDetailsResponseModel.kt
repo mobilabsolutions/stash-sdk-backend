@@ -6,13 +6,11 @@ import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.PaymentInfoModel
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel(value = "Transaction Details By Id Response")
+@ApiModel(value = "Transaction Details Response")
 data class TransactionDetailsResponseModel(
     @ApiModelProperty(value = "Transaction id", example = "frtdqw7m")
     val transactionId: String?,
@@ -33,7 +31,6 @@ data class TransactionDetailsResponseModel(
     val status: TransactionStatus?,
 
     @ApiModelProperty(value = "Payment method", example = "SEPA")
-    @field:Enumerated(EnumType.STRING)
     val paymentMethod: PaymentMethod?,
 
     @ApiModelProperty(value = "Payment information")
