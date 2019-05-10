@@ -5,6 +5,7 @@ import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenResultCode
 import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenCaptureRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenDeleteAliasRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentMethodRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
@@ -27,6 +28,9 @@ import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
+import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
+import com.mobilabsolutions.server.commons.exception.ApiError
+import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import com.mobilabsolutions.server.commons.exception.ApiException
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import org.junit.jupiter.api.Assertions
@@ -92,6 +96,7 @@ class AdyenPspTest {
     private val correctAliasId = "correct id"
     private val correctPayload = "payload"
     private val customerReference = "oIXHpTAfEPSleWXT6Khe"
+    private val deletedCustomerReference = "dddddssss"
     private val verifyRequest = AdyenVerifyPaymentRequestModel(
         sandboxPublicKey,
         correctPayload
@@ -148,6 +153,8 @@ class AdyenPspTest {
             .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
         Mockito.`when`(adyenClient.sepaRefund(AdyenRefundRequestModel(pspReference, null, reference, sandboxMerchantId), pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
+        Mockito.`when`(adyenClient.deleteAlias(AdyenDeleteAliasRequestModel(deletedCustomerReference, pspAlias, sandboxMerchantId), pspConfig, "true"))
+            .thenThrow(ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Alias doesn't exist at Adyen").asException())
     }
 
     @Test
@@ -336,5 +343,61 @@ class AdyenPspTest {
             pspConfig,
             purchaseId
         ), true)
+    }
+
+    @Test
+    fun `delete alias successfully`() {
+        adyenPsp.deleteAlias(
+            PspDeleteAliasRequestModel(
+                aliasId,
+                pspAlias,
+                PaymentMethod.CC,
+                pspConfig,
+                AliasExtraModel(
+                    null,
+                    null,
+                    null,
+                    PersonalDataModel(
+                        email,
+                        customerIP,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        customerReference),
+                    PaymentMethod.CC, null
+                )
+            ), true
+        )
+    }
+
+    @Test
+    fun `delete non existing alias`() {
+        adyenPsp.deleteAlias(
+            PspDeleteAliasRequestModel(
+                aliasId,
+                pspAlias,
+                PaymentMethod.CC,
+                pspConfig,
+                AliasExtraModel(
+                    null,
+                    null,
+                    null,
+                    PersonalDataModel(
+                        email,
+                        customerIP,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        deletedCustomerReference),
+                    PaymentMethod.CC, null
+                )
+            ), true
+        )
     }
 }

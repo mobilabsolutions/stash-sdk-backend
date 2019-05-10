@@ -203,6 +203,6 @@ class BsPayonePspTest {
 
     @Test
     fun `delete alias`() {
-        bsPayonePsp.deleteAlias(PspDeleteAliasRequestModel(correctCcAliasId, null, PaymentMethod.CC, pspConfig), test)
+        bsPayonePsp.deleteAlias(PspDeleteAliasRequestModel(correctCcAliasId, null, PaymentMethod.CC, pspConfig, null), test)
     }
 }
