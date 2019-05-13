@@ -353,22 +353,7 @@ class AdyenPspTest {
                 pspAlias,
                 PaymentMethod.CC,
                 pspConfig,
-                AliasExtraModel(
-                    null,
-                    null,
-                    null,
-                    PersonalDataModel(
-                        email,
-                        customerIP,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        customerReference),
-                    PaymentMethod.CC, null
-                )
+                customerReference
             ), true
         )
     }
@@ -381,22 +366,7 @@ class AdyenPspTest {
                 pspAlias,
                 PaymentMethod.CC,
                 pspConfig,
-                AliasExtraModel(
-                    null,
-                    null,
-                    null,
-                    PersonalDataModel(
-                        email,
-                        customerIP,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        deletedCustomerReference),
-                    PaymentMethod.CC, null
-                )
+                customerReference
             ), true
         )
     }

@@ -1,7 +1,6 @@
 package com.mobilabsolutions.payment.model.request
 
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
-import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
@@ -26,6 +25,6 @@ data class PspDeleteAliasRequestModel(
     @ApiModelProperty(value = "PSP config")
     val pspConfig: PspConfigModel?,
 
-    @ApiModelProperty(value = "Alias extra")
-    val aliasExtra: AliasExtraModel?
+    @ApiModelProperty(value = "Customer reference", example = "oIXHpTAfEPSleWXT6Khe")
+    val customerReference: String?
 )

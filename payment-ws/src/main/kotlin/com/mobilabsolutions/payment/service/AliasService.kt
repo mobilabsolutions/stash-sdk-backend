@@ -131,7 +131,7 @@ class AliasService(
             pspAlias = alias.pspAlias,
             paymentMethod = aliasExtra.paymentMethod,
             pspConfig = pspConfig,
-            aliasExtra = aliasExtra
+            customerReference = aliasExtra.personalData?.customerReference
         )
         psp.deleteAlias(pspDeleteAliasRequest, pspTestMode)
 
