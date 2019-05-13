@@ -12,5 +12,5 @@ data class PaymentInfoModel(
     val extra: AliasExtraModel?,
 
     @ApiModelProperty("Psp configuration")
-    val pspConfig: PspConfigListModel?
+    val pspConfig: PspConfigModel?
 )

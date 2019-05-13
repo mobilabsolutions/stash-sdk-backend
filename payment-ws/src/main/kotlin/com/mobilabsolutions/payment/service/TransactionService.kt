@@ -187,7 +187,7 @@ class TransactionService(
                     status = pspPaymentResponse.status,
                     action = TransactionAction.CAPTURE,
                     paymentMethod = lastTransaction.paymentMethod,
-                    paymentInfo = objectMapper.writeValueAsString(readPaymentInfo(lastTransaction, apiKey)),
+                    paymentInfo = objectMapper.writeValueAsString(readPaymentInfo(lastTransaction)),
                     pspResponse = objectMapper.writeValueAsString(pspPaymentResponse),
                     merchantTransactionId = lastTransaction.merchantTransactionId,
                     merchantCustomerId = lastTransaction.merchantCustomerId,
@@ -269,7 +269,7 @@ class TransactionService(
                     status = pspReversalResponse.status,
                     action = TransactionAction.REVERSAL,
                     paymentMethod = lastTransaction.paymentMethod,
-                    paymentInfo = objectMapper.writeValueAsString(readPaymentInfo(lastTransaction, apiKey)),
+                    paymentInfo = objectMapper.writeValueAsString(readPaymentInfo(lastTransaction)),
                     pspResponse = objectMapper.writeValueAsString(pspReversalResponse),
                     merchantTransactionId = lastTransaction.merchantTransactionId,
                     merchantCustomerId = lastTransaction.merchantCustomerId,
@@ -363,7 +363,7 @@ class TransactionService(
         val paymentInfoModel =
             PaymentInfoModel(
                 extra,
-                objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java)
+                getPspConfig(alias)
             )
 
         val transaction = transactionRepository.getByIdempotentKeyAndActionAndMerchantAndAlias(idempotentKey, transactionAction, apiKey.merchant, alias)
@@ -415,10 +415,10 @@ class TransactionService(
         )
     }
 
-    private fun readPaymentInfo(transaction: Transaction, apiKey: MerchantApiKey): PaymentInfoModel {
+    private fun readPaymentInfo(transaction: Transaction): PaymentInfoModel {
         return PaymentInfoModel(
             objectMapper.readValue(transaction.alias?.extra, AliasExtraModel::class.java),
-            objectMapper.readValue(apiKey.merchant.pspConfig, PspConfigListModel::class.java)
+            getPspConfig(transaction.alias!!)
         )
     }
 
