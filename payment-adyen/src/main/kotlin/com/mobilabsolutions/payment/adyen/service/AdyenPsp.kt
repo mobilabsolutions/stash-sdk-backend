@@ -2,7 +2,6 @@ package com.mobilabsolutions.payment.adyen.service
 
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
-import com.mobilabsolutions.payment.adyen.data.enum.AdyenResultCode
 import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenCaptureRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenDeleteAliasRequestModel
@@ -85,13 +84,11 @@ class AdyenPsp(
             )
             val response = adyenClient.verifyPayment(request, pspConfig.urlPrefix!!, getAdyenMode(pspTestMode))
 
-            if (response.resultCode == AdyenResultCode.ERROR.result ||
-                response.resultCode == AdyenResultCode.REFUSED.result ||
-                response.resultCode == AdyenResultCode.CANCELLED.result) {
-                logger.error("Adyen payment session verification is failed, reason {}", response.refusalReason)
+            if (response.errorMessage != null) {
+                logger.error("Adyen payment session verification is failed, reason {}", response.errorMessage)
                 throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
                     .withMessage("Error during verifying Adyen payment session")
-                    .withError(response.refusalReason!!).build().asException()
+                    .withError(response.errorMessage).build().asException()
             }
 
             return PspRegisterAliasResponseModel(pspAlias = response.recurringDetailReference, registrationReference = response.shopperReference, billingAgreementId = null)
@@ -107,9 +104,9 @@ class AdyenPsp(
             pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.CC -> makeCreditCardPayment(pspPaymentRequestModel, adyenMode, false)
             else -> throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected payment method").asException()
         }
-        if (response.resultCode == AdyenResultCode.REFUSED.result) {
-            logger.error("Adyen preauthorization failed, reason {}", response.refusalReason)
-            return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.refusalReason)
+        if (response.errorMessage != null) {
+            logger.error("Adyen preauthorization failed, reason {}", response.errorMessage)
+            return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.errorMessage)
         }
 
         return PspPaymentResponseModel(response.pspReference, TransactionStatus.SUCCESS, null, null, null)
@@ -124,9 +121,9 @@ class AdyenPsp(
             pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.SEPA -> makeSepaPayment(pspPaymentRequestModel, adyenMode)
             else -> throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected payment method").asException()
         }
-        if (response.resultCode == AdyenResultCode.REFUSED.result) {
-            logger.error("Adyen authorization failed, reason {}", response.refusalReason)
-            return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.refusalReason)
+        if (response.errorMessage != null) {
+            logger.error("Adyen authorization failed, reason {}", response.errorMessage)
+            return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.errorMessage)
         }
 
         return PspPaymentResponseModel(response.pspReference, TransactionStatus.SUCCESS, null, null, null)
@@ -148,9 +145,9 @@ class AdyenPsp(
         )
 
         val response = adyenClient.capture(request, pspCaptureRequestModel.pspConfig, adyenMode)
-        if (response.resultCode == AdyenResultCode.REFUSED.result) {
-            logger.error("Adyen capture failed, reason {}", response.refusalReason)
-            return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.refusalReason)
+        if (response.errorMessage != null) {
+            logger.error("Adyen capture failed, reason {}", response.errorMessage)
+            return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.errorMessage)
         }
 
         return PspPaymentResponseModel(response.pspReference, TransactionStatus.SUCCESS, null, null, null)
@@ -168,9 +165,9 @@ class AdyenPsp(
         )
 
         val response = adyenClient.reverse(request, pspReversalRequestModel.pspConfig, adyenMode)
-        if (response.resultCode == AdyenResultCode.REFUSED.result) {
-            logger.error("Adyen reversal failed, reason {}", response.refusalReason)
-            return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.refusalReason)
+        if (response.errorMessage != null) {
+            logger.error("Adyen reversal failed, reason {}", response.errorMessage)
+            return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.errorMessage)
         }
 
         return PspPaymentResponseModel(response.pspReference, TransactionStatus.SUCCESS, null, null, null)
@@ -185,9 +182,9 @@ class AdyenPsp(
             pspRefundRequestModel.paymentMethod == PaymentMethod.SEPA -> makeSepaRefund(pspRefundRequestModel, adyenMode)
             else -> throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected payment method").asException()
         }
-        if (response.resultCode == AdyenResultCode.REFUSED.result) {
-            logger.error("Adyen authorization failed, reason {}", response.refusalReason)
-            return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.refusalReason)
+        if (response.errorMessage != null) {
+            logger.error("Adyen authorization failed, reason {}", response.errorMessage)
+            return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.errorMessage)
         }
 
         return PspPaymentResponseModel(response.pspReference, TransactionStatus.SUCCESS, null, null, null)
