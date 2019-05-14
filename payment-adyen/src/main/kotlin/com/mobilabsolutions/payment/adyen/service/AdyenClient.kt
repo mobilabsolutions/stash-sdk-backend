@@ -14,8 +14,8 @@ import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.adyen.model.request.AdyenCaptureRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenDeleteAliasRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
-import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRefundRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
@@ -120,7 +120,7 @@ class AdyenClient(
      */
     fun verifyPayment(
         verifyRequest: AdyenVerifyPaymentRequestModel,
-        urlPrefix: String,
+        urlPrefix: String?,
         mode: String
     ): AdyenVerifyPaymentResponseModel {
         val verifyUrl =
@@ -252,7 +252,8 @@ class AdyenClient(
         mode: String
     ): AdyenPaymentResponseModel {
         val apiKey = if (mode == AdyenMode.TEST.mode) pspConfig.sandboxPublicKey else pspConfig.publicKey
-        val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testPaymentBaseUrl + REVERSE_URL else adyenProperties.livePaymentBaseUrl.format(pspConfig.urlPrefix) + REVERSE_URL
+        val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testPaymentBaseUrl + REVERSE_URL
+        else adyenProperties.livePaymentBaseUrl.format(pspConfig.urlPrefix) + REVERSE_URL
 
         val response = khttp.post(
             url = paymentUrl,
