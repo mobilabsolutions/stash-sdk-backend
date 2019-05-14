@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenChannel
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
+import com.mobilabsolutions.payment.adyen.data.enum.AdyenResultCode
 import com.mobilabsolutions.payment.adyen.model.request.AdyenCaptureRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
@@ -164,9 +165,10 @@ class AdyenClient(
         )
 
         if (HttpStatus.OK.value() != response.statusCode) {
-            throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
-                .withMessage("Error during authorizing Adyen payment")
-                .withError(response.jsonObject.getString("message")).build().asException()
+            return AdyenPaymentResponseModel(
+                response.jsonObject,
+                AdyenResultCode.REFUSED.result,
+                response.jsonObject.getString("message"))
         }
 
         return AdyenPaymentResponseModel(response.jsonObject)
@@ -196,9 +198,10 @@ class AdyenClient(
         )
 
         if (HttpStatus.OK.value() != response.statusCode) {
-            throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
-                .withMessage("Error during preauthorizing Adyen payment")
-                .withError(response.jsonObject.getString("message")).build().asException()
+            return AdyenPaymentResponseModel(
+                response.jsonObject,
+                AdyenResultCode.REFUSED.result,
+                response.jsonObject.getString("message"))
         }
 
         return AdyenPaymentResponseModel(response.jsonObject)
@@ -228,9 +231,10 @@ class AdyenClient(
         )
 
         if (HttpStatus.OK.value() != response.statusCode) {
-            throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
-                .withMessage("Error during capturing Adyen payment")
-                .withError(response.jsonObject.getString("message")).build().asException()
+            return AdyenPaymentResponseModel(
+                response.jsonObject,
+                AdyenResultCode.REFUSED.result,
+                response.jsonObject.getString("message"))
         }
 
         return AdyenPaymentResponseModel(response.jsonObject)
@@ -259,9 +263,10 @@ class AdyenClient(
         )
 
         if (HttpStatus.OK.value() != response.statusCode) {
-            throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
-                .withMessage("Error during reversing Adyen payment")
-                .withError(response.jsonObject.getString("message")).build().asException()
+            return AdyenPaymentResponseModel(
+                response.jsonObject,
+                AdyenResultCode.REFUSED.result,
+                response.jsonObject.getString("message"))
         }
 
         return AdyenPaymentResponseModel(response.jsonObject)
@@ -323,9 +328,10 @@ class AdyenClient(
         )
 
         if (HttpStatus.OK.value() != response.statusCode) {
-            throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
-                .withMessage("Error during refunding Adyen payment")
-                .withError(response.jsonObject.getString("message")).build().asException()
+            return AdyenPaymentResponseModel(
+                response.jsonObject,
+                AdyenResultCode.REFUSED.result,
+                response.jsonObject.getString("message"))
         }
 
         return AdyenPaymentResponseModel(response.jsonObject)
@@ -355,9 +361,10 @@ class AdyenClient(
         )
 
         if (HttpStatus.OK.value() != response.statusCode) {
-            throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
-                .withMessage("Error during refunding Adyen payment")
-                .withError(response.jsonObject.getString("message")).build().asException()
+            return AdyenPaymentResponseModel(
+                response.jsonObject,
+                AdyenResultCode.REFUSED.result,
+                response.jsonObject.getString("message"))
         }
 
         return AdyenPaymentResponseModel(response.jsonObject)

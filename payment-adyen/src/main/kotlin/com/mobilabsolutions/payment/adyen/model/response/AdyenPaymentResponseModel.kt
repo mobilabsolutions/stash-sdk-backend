@@ -30,4 +30,10 @@ data class AdyenPaymentResponseModel(
         jsonObject.getStringSafe(RESULT_CODE),
         jsonObject.getStringSafe(REFUSAL_REASON)
     )
+
+    constructor(jsonObject: JSONObject, resultCode: String, refusalReason: String) : this(
+        jsonObject.getStringSafe(PSP_REFERENCE),
+        resultCode,
+        refusalReason
+    )
 }
