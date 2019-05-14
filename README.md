@@ -1,5 +1,5 @@
 # Payment SDK Backend
-[![Travis CI build status](https://travis-ci.com/mobilabsolutions/payment-sdk-backend-open.svg?branch=master)](https://travis-ci.com/mobilabsolutions/payment-sdk-backend-open)
+[![Build Status](https://travis-ci.com/mobilabsolutions/payment-sdk-backend-open.svg?branch=master)](https://travis-ci.com/mobilabsolutions/payment-sdk-backend-open)
 
 This repository contains code and documentation related to the backend component of the Payment SDK system. 
 
@@ -59,17 +59,17 @@ You can now access Payment SDK here: http://localhost:8080/
 
 In Payment SDK there are `secret` and `publishable` keys, which should be generated for merchants. Those keys will later be used for requests authentication.
 
-Publishable key is used for authentication of alias related requests:
+Publishable key is used for authentication of registering alias requests:
 - Create alias
 - Exchange alias
-- Delete alias
 
-Secret key is used for authentication of transaction related requests:
+Secret key is used for authentication of transaction related requests and alias deletion:
 - Preauthorization
 - Capture
 - Authorization
 - Reversal
 - Refund
+- Delete alias
 
 ## Idempotency
 
