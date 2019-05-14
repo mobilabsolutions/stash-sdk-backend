@@ -13,6 +13,7 @@ import com.mobilabsolutions.payment.adyen.data.enum.AdyenChannel
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenResultCode
 import com.mobilabsolutions.payment.adyen.model.request.AdyenCaptureRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenDeleteAliasRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRefundRequestModel
@@ -53,6 +54,7 @@ class AdyenClient(
         const val CAPTURE_URL = "/capture"
         const val REFUND_URL = "/refund"
         const val SEPA_REFUND_URL = "/cancelOrRefund"
+        const val DELETE_ALIAS_URL = "/disable"
     }
 
     /**
@@ -368,5 +370,34 @@ class AdyenClient(
         }
 
         return AdyenPaymentResponseModel(response.jsonObject)
+    }
+
+    /**
+     * Deletes Alias at Adyen
+     *
+     * @param request Adyen delete alias request
+     * @param pspConfig Adyen configuration
+     * @param mode test or live mode
+     */
+    fun deleteAlias(
+        request: AdyenDeleteAliasRequestModel,
+        pspConfig: PspConfigModel,
+        mode: String
+    ) {
+        val apiKey = if (mode == AdyenMode.TEST.mode) pspConfig.sandboxPublicKey else pspConfig.publicKey
+        val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testRecurringBaseUrl + DELETE_ALIAS_URL
+        else adyenProperties.liveRecurringBaseUrl.format(pspConfig.urlPrefix) + DELETE_ALIAS_URL
+
+        val response = khttp.post(
+            url = paymentUrl,
+            headers = mapOf(API_KEY to apiKey!!),
+            json = JSONObject(objectMapper.writeValueAsString(request))
+        )
+
+        if (HttpStatus.OK.value() != response.statusCode) {
+            throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
+                .withMessage("Error during deleting Adyen alias")
+                .withError(response.jsonObject.getString("message")).build().asException()
+        }
     }
 }

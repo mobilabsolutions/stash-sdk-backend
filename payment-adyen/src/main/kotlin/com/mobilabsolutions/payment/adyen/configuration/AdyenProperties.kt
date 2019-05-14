@@ -11,8 +11,10 @@ import org.springframework.context.annotation.Configuration
 class AdyenProperties {
     val testPaymentBaseUrl = "https://pal-test.adyen.com/pal/servlet/Payment/v40"
     val testCheckoutBaseUrl = "https://checkout-test.adyen.com/v41"
+    val testRecurringBaseUrl = "https://pal-test.adyen.com/pal/servlet/Recurring/v25"
     val livePaymentBaseUrl = "https://%s-pal-live.adyen.com/pal/servlet/Payment/v40"
     val liveCheckoutBaseUrl = "https://%s-checkout-live.adyen.com/v41"
+    val liveRecurringBaseUrl = "https://%s-pal-live.adyen.com/pal/servlet/Recurring/v25"
     val contract = "RECURRING"
     val shopperInteraction = "ContAuth"
     val sepaPaymentMethod = "sepadirectdebit"

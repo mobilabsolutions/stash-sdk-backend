@@ -5,6 +5,7 @@ import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenResultCode
 import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenCaptureRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenDeleteAliasRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentMethodRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
@@ -193,7 +194,17 @@ class AdyenPsp(
     }
 
     override fun deleteAlias(pspDeleteAliasRequestModel: PspDeleteAliasRequestModel, pspTestMode: Boolean?) {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        val adyenMode = getAdyenMode(pspTestMode)
+        logger.info("Deleting alias {} for {} mode", pspDeleteAliasRequestModel.aliasId, adyenMode)
+
+        val request = AdyenDeleteAliasRequestModel(
+            shopperReference = pspDeleteAliasRequestModel.customerReference,
+            recurringDetailReference = pspDeleteAliasRequestModel.pspAlias,
+            merchantAccount = if (adyenMode == AdyenMode.TEST.mode)
+                pspDeleteAliasRequestModel.pspConfig?.sandboxMerchantId else pspDeleteAliasRequestModel.pspConfig?.merchantId
+        )
+
+        adyenClient.deleteAlias(request, pspDeleteAliasRequestModel.pspConfig!!, adyenMode)
     }
 
     /**
