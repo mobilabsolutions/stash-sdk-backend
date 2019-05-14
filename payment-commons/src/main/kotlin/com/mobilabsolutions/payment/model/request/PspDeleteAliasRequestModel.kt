@@ -23,5 +23,8 @@ data class PspDeleteAliasRequestModel(
     val paymentMethod: PaymentMethod?,
 
     @ApiModelProperty(value = "PSP config")
-    val pspConfig: PspConfigModel?
+    val pspConfig: PspConfigModel?,
+
+    @ApiModelProperty(value = "Customer reference", example = "oIXHpTAfEPSleWXT6Khe")
+    val customerReference: String?
 )

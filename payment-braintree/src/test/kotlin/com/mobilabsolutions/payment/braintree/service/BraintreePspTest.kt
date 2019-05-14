@@ -160,7 +160,7 @@ class BraintreePspTest {
     fun `delete alias`() {
         braintreePsp.deleteAlias(
             PspDeleteAliasRequestModel(
-                null, pspAlias, null, pspConfig), test)
+                null, pspAlias, null, pspConfig, null), test)
     }
 
     @Test
@@ -168,7 +168,7 @@ class BraintreePspTest {
         Assertions.assertThrows(ApiException::class.java) {
             braintreePsp.deleteAlias(
                 PspDeleteAliasRequestModel(
-                    null, wrongPspAlias, null, pspConfig), test)
+                    null, wrongPspAlias, null, pspConfig, null), test)
         }
     }
 
