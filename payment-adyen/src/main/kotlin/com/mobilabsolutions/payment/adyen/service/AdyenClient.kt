@@ -54,6 +54,7 @@ class AdyenClient(
         const val REFUND_URL = "/refund"
         const val SEPA_REFUND_URL = "/cancelOrRefund"
         const val DELETE_ALIAS_URL = "/disable"
+        const val ERROR_MESSAGE = "message"
     }
 
     /**
@@ -137,7 +138,7 @@ class AdyenClient(
             return AdyenVerifyPaymentResponseModel(
                 null,
                 null,
-                response.jsonObject.getString("message")
+                response.jsonObject.getString(ERROR_MESSAGE)
             )
         }
 
@@ -170,7 +171,7 @@ class AdyenClient(
         if (HttpStatus.OK.value() != response.statusCode) {
             return AdyenPaymentResponseModel(
                 response.jsonObject,
-                response.jsonObject.getString("message")
+                response.jsonObject.getString(ERROR_MESSAGE)
             )
         }
 
@@ -203,7 +204,7 @@ class AdyenClient(
         if (HttpStatus.OK.value() != response.statusCode) {
             return AdyenPaymentResponseModel(
                 response.jsonObject,
-                response.jsonObject.getString("message")
+                response.jsonObject.getString(ERROR_MESSAGE)
             )
         }
 
@@ -236,7 +237,7 @@ class AdyenClient(
         if (HttpStatus.OK.value() != response.statusCode) {
             return AdyenPaymentResponseModel(
                 response.jsonObject,
-                response.jsonObject.getString("message")
+                response.jsonObject.getString(ERROR_MESSAGE)
             )
         }
 
@@ -268,7 +269,7 @@ class AdyenClient(
         if (HttpStatus.OK.value() != response.statusCode) {
             return AdyenPaymentResponseModel(
                 response.jsonObject,
-                response.jsonObject.getString("message")
+                response.jsonObject.getString(ERROR_MESSAGE)
             )
         }
 
@@ -301,7 +302,7 @@ class AdyenClient(
         if (HttpStatus.OK.value() != response.statusCode) {
             throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
                 .withMessage("Error during authorizing Adyen payment")
-                .withError(response.jsonObject.getString("message")).build().asException()
+                .withError(response.jsonObject.getString(ERROR_MESSAGE)).build().asException()
         }
 
         return AdyenPaymentResponseModel(response.jsonObject)
@@ -333,7 +334,7 @@ class AdyenClient(
         if (HttpStatus.OK.value() != response.statusCode) {
             return AdyenPaymentResponseModel(
                 response.jsonObject,
-                response.jsonObject.getString("message")
+                response.jsonObject.getString(ERROR_MESSAGE)
             )
         }
 
@@ -366,7 +367,7 @@ class AdyenClient(
         if (HttpStatus.OK.value() != response.statusCode) {
             return AdyenPaymentResponseModel(
                 response.jsonObject,
-                response.jsonObject.getString("message")
+                response.jsonObject.getString(ERROR_MESSAGE)
             )
         }
 
@@ -398,7 +399,7 @@ class AdyenClient(
         if (HttpStatus.OK.value() != response.statusCode) {
             throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
                 .withMessage("Error during deleting Adyen alias")
-                .withError(response.jsonObject.getString("message")).build().asException()
+                .withError(response.jsonObject.getString(ERROR_MESSAGE)).build().asException()
         }
     }
 }
