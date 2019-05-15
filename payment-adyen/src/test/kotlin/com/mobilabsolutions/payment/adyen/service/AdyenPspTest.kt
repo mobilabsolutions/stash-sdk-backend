@@ -2,7 +2,6 @@ package com.mobilabsolutions.payment.adyen.service
 
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
-import com.mobilabsolutions.payment.adyen.data.enum.AdyenResultCode
 import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenCaptureRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenDeleteAliasRequestModel
@@ -130,29 +129,29 @@ class AdyenPspTest {
             AdyenPaymentRequestModel(amount, email, customerIP, null, pspAlias,
                 AdyenRecurringRequestModel(adyenProperties.contract), adyenProperties.shopperInteraction, reference, sandboxMerchantId, null, null),
             pspConfig, AdyenMode.TEST.mode))
-            .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
+            .thenReturn(AdyenPaymentResponseModel(pspReference, null, null))
         Mockito.`when`(adyenClient.verifyPayment(verifyRequest, urlPrefix, AdyenMode.TEST.mode))
-            .thenReturn(AdyenVerifyPaymentResponseModel(recurringDetailReference, AdyenResultCode.AUTHORISED.result, pspAlias, customerReference, null))
+            .thenReturn(AdyenVerifyPaymentResponseModel(recurringDetailReference, pspAlias, null, null))
         Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(20)).thenReturn(reference)
         Mockito.`when`(adyenClient.authorization(
             AdyenPaymentRequestModel(amount, email, customerIP, customerReference, pspAlias,
                 AdyenRecurringRequestModel(adyenProperties.contract), adyenProperties.shopperInteraction, reference, sandboxMerchantId, 0, null),
             pspConfig, AdyenMode.TEST.mode))
-            .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
+            .thenReturn(AdyenPaymentResponseModel(pspReference, null, null))
         Mockito.`when`(adyenClient.sepaPayment(
             AdyenPaymentRequestModel(amount, null, null, null, null,
                 null, null, reference, sandboxMerchantId, null,
                 AdyenPaymentMethodRequestModel(adyenProperties.sepaPaymentMethod, holderName, iban)),
             pspConfig, AdyenMode.TEST.mode))
-            .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
+            .thenReturn(AdyenPaymentResponseModel(pspReference, null, null))
         Mockito.`when`(adyenClient.reverse(AdyenReverseRequestModel(pspTransactionId, purchaseId, sandboxMerchantId), pspConfig, "test"))
-            .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.CANCELLED.result, null))
+            .thenReturn(AdyenPaymentResponseModel(pspReference, null, null))
         Mockito.`when`(adyenClient.capture(AdyenCaptureRequestModel(pspTransactionId, amount, purchaseId, sandboxMerchantId), pspConfig, "test"))
-            .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
+            .thenReturn(AdyenPaymentResponseModel(pspReference, null, null))
         Mockito.`when`(adyenClient.refund(AdyenRefundRequestModel(pspReference, AdyenAmountRequestModel(amountValue, currency), reference, sandboxMerchantId), pspConfig, AdyenMode.TEST.mode))
-            .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
+            .thenReturn(AdyenPaymentResponseModel(pspReference, null, null))
         Mockito.`when`(adyenClient.sepaRefund(AdyenRefundRequestModel(pspReference, null, reference, sandboxMerchantId), pspConfig, AdyenMode.TEST.mode))
-            .thenReturn(AdyenPaymentResponseModel(pspReference, AdyenResultCode.AUTHORISED.result, null))
+            .thenReturn(AdyenPaymentResponseModel(pspReference, null, null))
         Mockito.`when`(adyenClient.deleteAlias(AdyenDeleteAliasRequestModel(deletedCustomerReference, pspAlias, sandboxMerchantId), pspConfig, "true"))
             .thenThrow(ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Alias doesn't exist at Adyen").asException())
     }
