@@ -10,6 +10,7 @@ enum class ApiErrorCode(val code: String, val message: String, val httpStatus: H
     INSUFFICIENT_RIGHTS("1001", "Authenticated user doesn't have the required rights for this operation.", HttpStatus.FORBIDDEN),
     NO_RIGHTS("1002", "There are no roles defined for given merchant.", HttpStatus.BAD_REQUEST),
     INCORRECT_OLD_PASSWORD("1003", "Old password for given user is incorrect.", HttpStatus.BAD_REQUEST),
+    MERCHANT_USER_ALREADY_EXISTS("1004", "Merchant user with given id already exists.", HttpStatus.BAD_REQUEST),
 
     VALIDATION_ERROR("2000", "Validation error", HttpStatus.BAD_REQUEST),
     CONSTRAINT_VALIDATION_FAILED("2001", "Validation error", HttpStatus.BAD_REQUEST),
