@@ -158,4 +158,14 @@ class UserDetailsServiceTest {
             )
         }
     }
+
+    @Test
+    fun `create already existing merchant user`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            userDetailsService.createMerchantUser(
+                knownMerchant,
+                MerchantUserRequestModel(knownEmail, userPassword, "test name", "test lastname", "test locale")
+            )
+        }
+    }
 }
