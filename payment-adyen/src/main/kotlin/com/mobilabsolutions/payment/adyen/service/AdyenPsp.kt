@@ -9,8 +9,8 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenDeleteAliasRequestM
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentMethodRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
-import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRefundRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
@@ -83,7 +83,7 @@ class AdyenPsp(
                 apiKey = if (adyenMode == AdyenMode.TEST.mode) pspConfig!!.sandboxPublicKey else pspConfig!!.publicKey,
                 payload = pspRegisterAliasRequestModel.aliasExtra!!.payload
             )
-            val response = adyenClient.verifyPayment(request, pspConfig.urlPrefix!!, getAdyenMode(pspTestMode))
+            val response = adyenClient.verifyPayment(request, pspConfig.urlPrefix, getAdyenMode(pspTestMode))
 
             if (response.resultCode == AdyenResultCode.ERROR.result ||
                 response.resultCode == AdyenResultCode.REFUSED.result ||
