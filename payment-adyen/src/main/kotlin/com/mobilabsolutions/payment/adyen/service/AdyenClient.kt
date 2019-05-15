@@ -134,14 +134,6 @@ class AdyenClient(
             json = mapOf(PAYLOAD to verifyRequest.payload)
         )
 
-        if (HttpStatus.OK.value() != response.statusCode) {
-            return AdyenVerifyPaymentResponseModel(
-                null,
-                null,
-                response.jsonObject.getString(ERROR_MESSAGE)
-            )
-        }
-
         return AdyenVerifyPaymentResponseModel(response.jsonObject)
     }
 
@@ -167,13 +159,6 @@ class AdyenClient(
             headers = mapOf(API_KEY to apiKey!!),
             json = JSONObject(objectMapper.writeValueAsString(request))
         )
-
-        if (HttpStatus.OK.value() != response.statusCode) {
-            return AdyenPaymentResponseModel(
-                response.jsonObject,
-                response.jsonObject.getString(ERROR_MESSAGE)
-            )
-        }
 
         return AdyenPaymentResponseModel(response.jsonObject)
     }
@@ -201,13 +186,6 @@ class AdyenClient(
             json = JSONObject(objectMapper.writeValueAsString(request))
         )
 
-        if (HttpStatus.OK.value() != response.statusCode) {
-            return AdyenPaymentResponseModel(
-                response.jsonObject,
-                response.jsonObject.getString(ERROR_MESSAGE)
-            )
-        }
-
         return AdyenPaymentResponseModel(response.jsonObject)
     }
 
@@ -234,13 +212,6 @@ class AdyenClient(
             json = JSONObject(objectMapper.writeValueAsString(request))
         )
 
-        if (HttpStatus.OK.value() != response.statusCode) {
-            return AdyenPaymentResponseModel(
-                response.jsonObject,
-                response.jsonObject.getString(ERROR_MESSAGE)
-            )
-        }
-
         return AdyenPaymentResponseModel(response.jsonObject)
     }
 
@@ -265,13 +236,6 @@ class AdyenClient(
             headers = mapOf(API_KEY to apiKey!!),
             json = JSONObject(objectMapper.writeValueAsString(request))
         )
-
-        if (HttpStatus.OK.value() != response.statusCode) {
-            return AdyenPaymentResponseModel(
-                response.jsonObject,
-                response.jsonObject.getString(ERROR_MESSAGE)
-            )
-        }
 
         return AdyenPaymentResponseModel(response.jsonObject)
     }
@@ -331,13 +295,6 @@ class AdyenClient(
             json = JSONObject(objectMapper.writeValueAsString(request))
         )
 
-        if (HttpStatus.OK.value() != response.statusCode) {
-            return AdyenPaymentResponseModel(
-                response.jsonObject,
-                response.jsonObject.getString(ERROR_MESSAGE)
-            )
-        }
-
         return AdyenPaymentResponseModel(response.jsonObject)
     }
 
@@ -363,13 +320,6 @@ class AdyenClient(
             headers = mapOf(API_KEY to apiKey!!),
             json = JSONObject(objectMapper.writeValueAsString(request))
         )
-
-        if (HttpStatus.OK.value() != response.statusCode) {
-            return AdyenPaymentResponseModel(
-                response.jsonObject,
-                response.jsonObject.getString(ERROR_MESSAGE)
-            )
-        }
 
         return AdyenPaymentResponseModel(response.jsonObject)
     }

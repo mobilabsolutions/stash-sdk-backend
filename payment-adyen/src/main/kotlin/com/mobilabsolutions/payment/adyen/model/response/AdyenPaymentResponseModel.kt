@@ -13,21 +13,21 @@ data class AdyenPaymentResponseModel(
     @ApiModelProperty(value = "PSP reference", example = "kdcnvbfkhbvka")
     val pspReference: String?,
 
+    @ApiModelProperty(value = "Adyen reason of refused payment", example = "Bad amount")
+    val refusalReason: String?,
+
     @ApiModelProperty(value = "Adyen error message", example = "Bad amount")
     val errorMessage: String?
 ) {
     companion object {
-        const val ERROR_MESSAGE = "message"
         const val PSP_REFERENCE = "pspReference"
+        const val REFUSAL_REASON = "refusalReason"
+        const val ERROR_MESSAGE = "message"
     }
 
     constructor(jsonObject: JSONObject) : this(
         jsonObject.getStringSafe(PSP_REFERENCE),
+        jsonObject.getStringSafe(REFUSAL_REASON),
         jsonObject.getStringSafe(ERROR_MESSAGE)
-    )
-
-    constructor(jsonObject: JSONObject, errorMessage: String) : this(
-        jsonObject.getStringSafe(PSP_REFERENCE),
-        errorMessage
     )
 }
