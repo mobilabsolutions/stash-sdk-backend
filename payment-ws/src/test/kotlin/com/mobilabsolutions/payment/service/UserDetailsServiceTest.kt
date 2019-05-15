@@ -145,7 +145,7 @@ class UserDetailsServiceTest {
     fun `create merchant user successfully`() {
         userDetailsService.createMerchantUser(
             knownMerchant,
-            MerchantUserRequestModel(knownEmail, userPassword, "test name", "test lastname", "test locale")
+            MerchantUserRequestModel(unknownEmail, userPassword, "test name", "test lastname", "test locale")
         )
     }
 
