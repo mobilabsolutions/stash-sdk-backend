@@ -206,6 +206,7 @@ class CommonExceptionHandler {
             exception
         )
         return ApiError.builder()
+            .withErrorCode(ApiErrorCode.SDK_GENERAL_ERROR)
             .withMessage(exception.message!!)
             .build()
     }
@@ -224,6 +225,7 @@ class CommonExceptionHandler {
     fun handleUnknownHostException(exception: UnknownHostException): ApiError {
         logger.error("Unknown host exception.", exception)
         return ApiError.builder()
+            .withErrorCode(ApiErrorCode.SDK_GENERAL_ERROR)
             .withMessage(exception.message!!)
             .build()
     }
