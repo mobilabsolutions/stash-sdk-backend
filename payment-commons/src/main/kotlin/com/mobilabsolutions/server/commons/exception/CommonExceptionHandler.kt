@@ -57,7 +57,7 @@ class CommonExceptionHandler {
     @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(ConstraintViolationException::class)
     fun handleConstraintViolationException(exception: ConstraintViolationException): ApiError {
-        logger.error("Bad request: {}", exception)
+        logger.error("Bad request.", exception)
         return ApiError.builder()
             .withMessage(exception.message ?: "non readable message")
             .withError(ApiErrorCode.CONSTRAINT_VALIDATION_FAILED.name.toLowerCase())
@@ -68,7 +68,7 @@ class CommonExceptionHandler {
     @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(MissingRequestHeaderException::class)
     fun handleMissingRequestHeaderException(exception: MissingRequestHeaderException): ApiError {
-        logger.error("Bad request: {}", exception)
+        logger.error("Bad request.", exception)
         return ApiError.builder()
             .withMessage(exception.message)
             .withError(ApiErrorCode.MISSING_REQUEST_HEADER.name.toLowerCase())
@@ -79,7 +79,7 @@ class CommonExceptionHandler {
     @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleMethodArgumentNotValidException(exception: MethodArgumentNotValidException): ApiError {
-        logger.error("Bad request: {}", exception)
+        logger.error("Bad request.", exception)
         val bindingResult = exception.bindingResult
         val errorMessage = bindingResult
             .allErrors
@@ -96,7 +96,7 @@ class CommonExceptionHandler {
     @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleHttpMessageNotReadableException(exception: HttpMessageNotReadableException): ApiError {
-        logger.error("Bad request: {}", exception)
+        logger.error("Bad request.", exception)
         return ApiError.builder()
             .withMessage("non readable message")
             .withError(ApiErrorCode.MESSAGE_NOT_READABLE.name.toLowerCase())
@@ -108,7 +108,7 @@ class CommonExceptionHandler {
     @ExceptionHandler(MultipartException::class)
     fun handleMultipartException(exception: MultipartException): ApiError {
         if (exception is MaxUploadSizeExceededException) {
-            logger.error("Multipart request is bigger than max allowed limit. {}", exception)
+            logger.error("Multipart request is bigger than max allowed limit.", exception)
             val maxUploadSize = exception.maxUploadSize
             return ApiError.builder()
                 .withMessage("max.allowed.size.in.bytes: $maxUploadSize")
@@ -117,7 +117,7 @@ class CommonExceptionHandler {
                 .build()
         }
 
-        logger.error("Multipart request expected, but not a multipart. {}", exception)
+        logger.error("Multipart request expected, but not a multipart.", exception)
         return ApiError.builder()
             .withMessage("request.not.multipart")
             .withErrorCode(ApiErrorCode.MULTIPART_NOT_VALID)
@@ -129,9 +129,9 @@ class CommonExceptionHandler {
     fun handleMethodArgumentTypeMismatchExceptionException(
         exception: MethodArgumentTypeMismatchException
     ): ApiError {
-        logger.error("Method argument type mismatch. {}", exception)
+        logger.error("Method argument type mismatch.", exception)
         return ApiError.builder()
-            .withMessage("argumentName: '{$exception.name}', requiredType: '{$exception.requiredType?.simpleName}' value: '{$exception.value}'")
+            .withMessage("argumentName: '${exception.name}', requiredType: '${exception.requiredType?.simpleName}' value: '${exception.value}'")
             .withError(ApiErrorCode.ARGUMENT_TYPE_MISMATCH.name.toLowerCase())
             .withErrorCode(ApiErrorCode.ARGUMENT_TYPE_MISMATCH)
             .build()
@@ -142,9 +142,7 @@ class CommonExceptionHandler {
     fun handleHttpRequestMethodNotSupportedException(
         exception: HttpRequestMethodNotSupportedException
     ): ApiError {
-        val message = ("Used method: [" +
-            exception.method + "] " + "Supported methods: " +
-            Arrays.toString(exception.supportedMethods))
+        val message = "Used method: ['${exception.method}'] Supported methods: '${Arrays.toString(exception.supportedMethods)}'"
         logger.error("Method not allowed. {}", message)
         return ApiError.builder().withMessage(message).withErrorCode(ApiErrorCode.VALIDATION_ERROR).build()
     }
@@ -154,7 +152,7 @@ class CommonExceptionHandler {
     fun handleHttpMediaTypeNotSupportedException(
         exception: HttpMediaTypeNotSupportedException
     ): ApiError {
-        val message = "Unsupported media type: '{$exception.contentType}'"
+        val message = "Unsupported media type: '${exception.contentType}'"
         logger.error(message, exception)
         return ApiError.builder().withMessage(message).withErrorCode(ApiErrorCode.VALIDATION_ERROR).build()
     }
@@ -171,7 +169,7 @@ class CommonExceptionHandler {
     fun handleUnsatisfiedServletRequestParameterException(
         exception: UnsatisfiedServletRequestParameterException
     ): ApiError {
-        logger.error("Unprocessable entity: {}", exception)
+        logger.error("Unprocessable entity.", exception)
         return ApiError.builder().withMessage("Missing request parameter").withErrorCode(ApiErrorCode.VALIDATION_ERROR).build()
     }
 
@@ -180,7 +178,7 @@ class CommonExceptionHandler {
     fun handleMissingServletRequestParameterException(
         exception: MissingServletRequestParameterException
     ): ApiError {
-        logger.error("Unprocessable entity: {}", exception)
+        logger.error("Unprocessable entity.", exception)
         return ApiError.builder().withMessage("Missing request parameter").withErrorCode(ApiErrorCode.VALIDATION_ERROR).build()
     }
 
@@ -188,10 +186,10 @@ class CommonExceptionHandler {
     fun handleApiException(apiException: ApiException): ResponseEntity<ApiError> {
         val status = apiException.status()
         when {
-            status.is4xxClientError -> logger.error("Api error: {}", apiException)
-            status.is5xxServerError -> logger.error("Api error: {}", apiException)
+            status.is4xxClientError -> logger.error("Api error", apiException)
+            status.is5xxServerError -> logger.error("Api error", apiException)
             else -> logger.warn(
-                "Api exception with non-error http status code. Should never happen! {}", apiException
+                "Api exception with non-error http status code. Should never happen!", apiException
             )
         }
         return ResponseEntity(apiException.apiError(), status)
@@ -215,7 +213,7 @@ class CommonExceptionHandler {
     @ResponseStatus(SERVICE_UNAVAILABLE)
     @ExceptionHandler(ResourceAccessException::class)
     fun handleResourceAccessException(exception: ResourceAccessException): ApiError {
-        logger.error("Service unavailable: {}", exception)
+        logger.error("Service unavailable.", exception)
         return ApiError.builder()
             .withMessage(exception.message!!)
             .build()
@@ -224,7 +222,7 @@ class CommonExceptionHandler {
     @ResponseStatus(INTERNAL_SERVER_ERROR)
     @ExceptionHandler(UnknownHostException::class)
     fun handleUnknownHostException(exception: UnknownHostException): ApiError {
-        logger.error("Unknown host exception: {}", exception)
+        logger.error("Unknown host exception.", exception)
         return ApiError.builder()
             .withMessage(exception.message!!)
             .build()
