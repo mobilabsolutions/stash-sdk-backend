@@ -145,7 +145,7 @@ class UserDetailsServiceTest {
     fun `create merchant user successfully`() {
         userDetailsService.createMerchantUser(
             knownMerchant,
-            MerchantUserRequestModel(knownEmail, userPassword, "test name", "test lastname", "test locale")
+            MerchantUserRequestModel(unknownEmail, userPassword, "test name", "test lastname", "test locale")
         )
     }
 
@@ -155,6 +155,16 @@ class UserDetailsServiceTest {
             userDetailsService.createMerchantUser(
                 unKnownMerchant,
                 Mockito.mock(MerchantUserRequestModel::class.java)
+            )
+        }
+    }
+
+    @Test
+    fun `create already existing merchant user`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            userDetailsService.createMerchantUser(
+                knownMerchant,
+                MerchantUserRequestModel(knownEmail, userPassword, "test name", "test lastname", "test locale")
             )
         }
     }

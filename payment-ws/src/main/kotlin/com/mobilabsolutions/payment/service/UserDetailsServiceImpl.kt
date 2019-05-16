@@ -89,11 +89,13 @@ class UserDetailsServiceImpl(
     /**
      * Create a merchant user by given data
      *
+     * @param merchantId Merchant ID
      * @param merchantUserModel Merchant user model
      */
     @Transactional
     fun createMerchantUser(merchantId: String, merchantUserModel: MerchantUserRequestModel) {
         val authority = authorityRepository.getAuthorityByName(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.NO_RIGHTS, "There is no role defined for merchant '$merchantId'").asException()
+        if (merchantUserRepository.findByEmail(merchantUserModel.email) != null) throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_USER_ALREADY_EXISTS, "Merchant user with given email already exists").asException()
         merchantUserRepository.save(merchantUserModel.toMerchantUser(authority))
     }
 
