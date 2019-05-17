@@ -1,12 +1,10 @@
 package com.mobilabsolutions.payment.model
 
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
+import com.mobilabsolutions.payment.validation.PaymentMethodEnumValidator
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
 import javax.validation.Valid
-import javax.validation.constraints.NotNull
 
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
@@ -29,9 +27,8 @@ data class AliasExtraModel(
     val personalData: PersonalDataModel?,
 
     @ApiModelProperty(value = "Payment method", example = "SEPA")
-    @field:Enumerated(EnumType.STRING)
-    @field:NotNull
-    val paymentMethod: PaymentMethod?,
+    @PaymentMethodEnumValidator(PaymentMethod = PaymentMethod::class)
+    val paymentMethod: String?,
 
     @ApiModelProperty(value = "Payload")
     val payload: String?

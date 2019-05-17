@@ -136,7 +136,7 @@ class BraintreePspTest {
                 null,
                 PayPalConfigModel(nonce, billingAgreementId, deviceData),
                 null,
-                PaymentMethod.PAY_PAL,
+                PaymentMethod.PAY_PAL.toString(),
                 null
             ), pspConfig), test)
     }
@@ -150,7 +150,7 @@ class BraintreePspTest {
                     null,
                     PayPalConfigModel(nonce, billingAgreementId, deviceData),
                     null,
-                    PaymentMethod.CC,
+                    PaymentMethod.CC.toString(),
                     null
                 ), pspConfig), test)
         }
@@ -182,7 +182,7 @@ class BraintreePspTest {
                     null,
                     PayPalConfigModel(nonce, billingAgreementId, deviceData),
                     null,
-                    PaymentMethod.PAY_PAL,
+                    PaymentMethod.PAY_PAL.toString(),
                     null
                 ),
                 PaymentDataRequestModel(correctAmount, currency, reason),
@@ -204,7 +204,7 @@ class BraintreePspTest {
                     null,
                     PayPalConfigModel(nonce, billingAgreementId, deviceData),
                     null,
-                    PaymentMethod.PAY_PAL,
+                    PaymentMethod.PAY_PAL.toString(),
                     null
                 ),
                 PaymentDataRequestModel(declinedAmount, currency, reason),
@@ -255,7 +255,7 @@ class BraintreePspTest {
                     null,
                     PayPalConfigModel(nonce, billingAgreementId, deviceData),
                     null,
-                    PaymentMethod.PAY_PAL,
+                    PaymentMethod.PAY_PAL.toString(),
                     null
                 ),
                 PaymentDataRequestModel(correctAmount, currency, reason),
@@ -277,7 +277,7 @@ class BraintreePspTest {
                     null,
                     PayPalConfigModel(nonce, billingAgreementId, deviceData),
                     null,
-                    PaymentMethod.PAY_PAL,
+                    PaymentMethod.PAY_PAL.toString(),
                     null
                 ),
                 PaymentDataRequestModel(declinedAmount, currency, reason),
@@ -299,7 +299,7 @@ class BraintreePspTest {
                 TransactionAction.REFUND,
                 pspConfig,
                 null,
-                PaymentMethod.PAY_PAL
+                PaymentMethod.PAY_PAL.toString()
             ), test
         )
         Assertions.assertNull(response.error)

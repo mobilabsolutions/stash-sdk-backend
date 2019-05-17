@@ -117,9 +117,9 @@ class BsPayonePsp(
             lastName = pspPaymentRequestModel.extra?.personalData?.lastName,
             country = pspPaymentRequestModel.extra?.personalData?.country,
             city = pspPaymentRequestModel.extra?.personalData?.city,
-            pspAlias = if (pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.CC) pspPaymentRequestModel.pspAlias else null,
-            iban = if (pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.SEPA) pspPaymentRequestModel.extra?.sepaConfig?.iban else null,
-            bic = if (pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.SEPA) pspPaymentRequestModel.extra?.sepaConfig?.bic else null
+            pspAlias = if (pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.CC.toString()) pspPaymentRequestModel.pspAlias else null,
+            iban = if (pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.SEPA.toString()) pspPaymentRequestModel.extra?.sepaConfig?.iban else null,
+            bic = if (pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.SEPA.toString()) pspPaymentRequestModel.extra?.sepaConfig?.bic else null
         )
 
         val response = bsPayoneClient.authorization(bsPayoneAuthorizeRequest, pspPaymentRequestModel.pspConfig!!, getPspMode(pspTestMode))
@@ -177,8 +177,8 @@ class BsPayonePsp(
         logger.info("BS Payone alias deletion for {} mode", getPspMode(pspTestMode))
         val deleteAliasRequest = BsPayoneDeleteAliasRequestModel(
             customerId = pspDeleteAliasRequestModel.aliasId,
-            deleteCardData = if (pspDeleteAliasRequestModel.paymentMethod == PaymentMethod.CC) DELETE else DO_NOT_DELETE,
-            deleteBankAccountData = if (pspDeleteAliasRequestModel.paymentMethod == PaymentMethod.SEPA) DELETE else DO_NOT_DELETE
+            deleteCardData = if (pspDeleteAliasRequestModel.paymentMethod == PaymentMethod.CC.toString()) DELETE else DO_NOT_DELETE,
+            deleteBankAccountData = if (pspDeleteAliasRequestModel.paymentMethod == PaymentMethod.SEPA.toString()) DELETE else DO_NOT_DELETE
         )
         val response = bsPayoneClient.deleteAlias(deleteAliasRequest, pspDeleteAliasRequestModel.pspConfig!!, getPspMode(pspTestMode))
         if (response.hasError()) {
@@ -191,8 +191,8 @@ class BsPayonePsp(
         return BsPayoneMode.TEST.mode
     }
 
-    private fun getBsPayoneClearingType(paymentMethod: PaymentMethod): String {
-        return when (paymentMethod) {
+    private fun getBsPayoneClearingType(paymentMethod: String): String {
+        return when (PaymentMethod.valueOf(paymentMethod)) {
             PaymentMethod.CC -> BsPayoneClearingType.CC.type
             PaymentMethod.SEPA -> BsPayoneClearingType.SEPA.type
             else -> throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Payment method not supported for BS Payone").asException()

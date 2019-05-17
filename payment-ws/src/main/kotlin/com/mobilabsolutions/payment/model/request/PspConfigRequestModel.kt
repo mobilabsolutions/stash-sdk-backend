@@ -1,10 +1,9 @@
 package com.mobilabsolutions.payment.model.request
 
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
+import com.mobilabsolutions.payment.validation.PaymentServiceProviderEnumValidator
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
 
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
@@ -12,8 +11,8 @@ import javax.persistence.Enumerated
 @ApiModel(value = "PSP Config Request")
 data class PspConfigRequestModel(
     @ApiModelProperty(value = "Payment service provider type", example = "BS_PAYONE")
-    @field:Enumerated(EnumType.STRING)
-    val pspId: PaymentServiceProvider,
+    @PaymentServiceProviderEnumValidator(PaymentServiceProvider = PaymentServiceProvider::class)
+    val pspId: String?,
 
     @ApiModelProperty(value = "PSP configuration model")
     val pspConfig: PspUpsertConfigRequestModel

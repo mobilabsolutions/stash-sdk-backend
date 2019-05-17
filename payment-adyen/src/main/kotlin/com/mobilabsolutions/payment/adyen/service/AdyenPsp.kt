@@ -76,7 +76,7 @@ class AdyenPsp(
 
     override fun registerAlias(pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, pspTestMode: Boolean?): PspRegisterAliasResponseModel? {
         if (pspRegisterAliasRequestModel.aliasExtra == null) throw ApiError.ofErrorCode(ApiErrorCode.INCOMPLETE_ALIAS).asException()
-        if (pspRegisterAliasRequestModel.aliasExtra?.paymentMethod == PaymentMethod.CC) {
+        if (pspRegisterAliasRequestModel.aliasExtra?.paymentMethod == PaymentMethod.CC.toString()) {
             val adyenMode = getAdyenMode(pspTestMode)
             val pspConfig = pspRegisterAliasRequestModel.pspConfig
             val request = AdyenVerifyPaymentRequestModel(
@@ -104,7 +104,7 @@ class AdyenPsp(
         logger.info("Adyen preauthorization payment has been called for alias {} for {} mode", pspPaymentRequestModel.aliasId, adyenMode)
 
         val response = when {
-            pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.CC -> makeCreditCardPayment(pspPaymentRequestModel, adyenMode, false)
+            pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.CC.toString() -> makeCreditCardPayment(pspPaymentRequestModel, adyenMode, false)
             else -> throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected payment method").asException()
         }
         if (response.resultCode == AdyenResultCode.ERROR.result ||
@@ -122,8 +122,8 @@ class AdyenPsp(
         logger.info("Adyen authorize payment has been called for alias {} for {} mode", pspPaymentRequestModel.aliasId, adyenMode)
 
         val response = when {
-            pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.CC -> makeCreditCardPayment(pspPaymentRequestModel, adyenMode)
-            pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.SEPA -> makeSepaPayment(pspPaymentRequestModel, adyenMode)
+            pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.CC.toString() -> makeCreditCardPayment(pspPaymentRequestModel, adyenMode)
+            pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.SEPA.toString() -> makeSepaPayment(pspPaymentRequestModel, adyenMode)
             else -> throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected payment method").asException()
         }
         if (response.resultCode == AdyenResultCode.ERROR.result ||
@@ -189,8 +189,8 @@ class AdyenPsp(
         logger.info("Adyen refund payment has been called for {} mode", adyenMode)
 
         val response = when {
-            pspRefundRequestModel.paymentMethod == PaymentMethod.CC -> makeCreditCardRefund(pspRefundRequestModel, adyenMode)
-            pspRefundRequestModel.paymentMethod == PaymentMethod.SEPA -> makeSepaRefund(pspRefundRequestModel, adyenMode)
+            pspRefundRequestModel.paymentMethod == PaymentMethod.CC.toString() -> makeCreditCardRefund(pspRefundRequestModel, adyenMode)
+            pspRefundRequestModel.paymentMethod == PaymentMethod.SEPA.toString() -> makeSepaRefund(pspRefundRequestModel, adyenMode)
             else -> throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected payment method").asException()
         }
         if (response.resultCode == AdyenResultCode.ERROR.result ||

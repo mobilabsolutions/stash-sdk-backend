@@ -79,7 +79,7 @@ class TransactionServiceTest {
     private val pspConfigModel = PspConfigModel(
         PaymentServiceProvider.BS_PAYONE.toString(), "mobilab", "123", "123", "123", null, null, null, null, null, true, null, null, null, null
     )
-    private val aliasExtra = AliasExtraModel(null, null, null, PersonalDataModel(null, null, null, "Mustermann", null, null, "Berlin", "DE", null), PaymentMethod.CC, null)
+    private val aliasExtra = AliasExtraModel(null, null, null, PersonalDataModel(null, null, null, "Mustermann", null, null, "Berlin", "DE", null), PaymentMethod.CC.toString(), null)
     private val merchantTransactionId = "12345"
 
     @InjectMocks
@@ -150,7 +150,7 @@ class TransactionServiceTest {
             )
         ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
         Mockito.`when`(
-            psp.refund(PspRefundRequestModel(pspTransactionId, 1, "EUR", TransactionAction.AUTH, pspConfigModel, null, PaymentMethod.CC), test
+            psp.refund(PspRefundRequestModel(pspTransactionId, 1, "EUR", TransactionAction.AUTH, pspConfigModel, null, PaymentMethod.CC.toString()), test
             )
         ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
         Mockito.`when`(

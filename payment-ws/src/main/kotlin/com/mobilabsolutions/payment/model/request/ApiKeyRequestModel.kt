@@ -1,10 +1,9 @@
 package com.mobilabsolutions.payment.model.request
 
 import com.mobilabsolutions.payment.data.enum.KeyType
+import com.mobilabsolutions.payment.validation.KeyTypeEnumValidator
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
@@ -12,8 +11,8 @@ import javax.persistence.Enumerated
 @ApiModel(value = "Api Key Request")
 data class ApiKeyRequestModel(
     @ApiModelProperty(value = "Api key type", example = "PUBLISHABLE")
-    @field:Enumerated(EnumType.STRING)
-    val type: KeyType?,
+    @KeyTypeEnumValidator(KeyType = KeyType::class)
+    val type: String?,
 
     @ApiModelProperty(value = "Api key name", example = "Test key")
     val name: String?

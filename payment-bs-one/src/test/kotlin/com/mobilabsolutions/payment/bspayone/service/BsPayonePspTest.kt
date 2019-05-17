@@ -156,28 +156,28 @@ class BsPayonePspTest {
     fun `preauthorize transaction with correct alias id`() {
         bsPayonePsp.preauthorize(PspPaymentRequestModel(correctCcAliasId,
             AliasExtraModel(null, null, null,
-                PersonalDataModel(null, null, null, lastName, null, null, city, country, null), PaymentMethod.CC, null),
+                PersonalDataModel(null, null, null, lastName, null, null, city, country, null), PaymentMethod.CC.toString(), null),
             PaymentDataRequestModel(amount, currency, reason), pspAlias, pspConfig, null), test)
     }
 
     @Test
     fun `authorize transaction with correct alias id`() {
         bsPayonePsp.authorize(PspPaymentRequestModel(correctSepaAliasId,
-            AliasExtraModel(null, SepaConfigModel(iban, bic), null, PersonalDataModel(null, null, null, lastName, null, null, city, country, null), PaymentMethod.SEPA, null),
+            AliasExtraModel(null, SepaConfigModel(iban, bic), null, PersonalDataModel(null, null, null, lastName, null, null, city, country, null), PaymentMethod.SEPA.toString(), null),
             PaymentDataRequestModel(amount, currency, reason), null, pspConfig, null), test)
     }
 
     @Test
     fun `preauthorize with wrong payment method`() {
         Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.preauthorize(PspPaymentRequestModel(correctCcAliasId, AliasExtraModel(null, null, null, PersonalDataModel(null, null, null, lastName, null, null, city, country, null), PaymentMethod.PAY_PAL, null), PaymentDataRequestModel(amount, currency, reason), pspAlias, pspConfig, null), test)
+            bsPayonePsp.preauthorize(PspPaymentRequestModel(correctCcAliasId, AliasExtraModel(null, null, null, PersonalDataModel(null, null, null, lastName, null, null, city, country, null), PaymentMethod.PAY_PAL.toString(), null), PaymentDataRequestModel(amount, currency, reason), pspAlias, pspConfig, null), test)
         }
     }
 
     @Test
     fun `authorize with wrong payment method`() {
         Assertions.assertThrows(ApiException::class.java) {
-            bsPayonePsp.authorize(PspPaymentRequestModel(correctCcAliasId, AliasExtraModel(null, null, null, PersonalDataModel(null, null, null, lastName, null, null, city, country, null), PaymentMethod.PAY_PAL, null), PaymentDataRequestModel(amount, currency, reason), pspAlias, pspConfig, null), test)
+            bsPayonePsp.authorize(PspPaymentRequestModel(correctCcAliasId, AliasExtraModel(null, null, null, PersonalDataModel(null, null, null, lastName, null, null, city, country, null), PaymentMethod.PAY_PAL.toString(), null), PaymentDataRequestModel(amount, currency, reason), pspAlias, pspConfig, null), test)
         }
     }
 
@@ -193,7 +193,7 @@ class BsPayonePspTest {
 
     @Test
     fun `refund transaction with correct transaction id`() {
-        bsPayonePsp.refund(PspRefundRequestModel(pspTransactionId, amount, currency, TransactionAction.CAPTURE, pspConfig, null, PaymentMethod.CC), test)
+        bsPayonePsp.refund(PspRefundRequestModel(pspTransactionId, amount, currency, TransactionAction.CAPTURE, pspConfig, null, PaymentMethod.CC.toString()), test)
     }
 
     @Test
@@ -203,6 +203,6 @@ class BsPayonePspTest {
 
     @Test
     fun `delete alias`() {
-        bsPayonePsp.deleteAlias(PspDeleteAliasRequestModel(correctCcAliasId, null, PaymentMethod.CC, pspConfig, null), test)
+        bsPayonePsp.deleteAlias(PspDeleteAliasRequestModel(correctCcAliasId, null, PaymentMethod.CC.toString(), pspConfig, null), test)
     }
 }

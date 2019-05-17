@@ -180,7 +180,7 @@ class AdyenPspTest {
                     null,
                     null,
                     customerReference),
-                PaymentMethod.CC, null),
+                PaymentMethod.CC.toString(), null),
             PaymentDataRequestModel(amountValue, currency, "Book"),
             pspAlias, pspConfig, null), true)
     }
@@ -203,7 +203,7 @@ class AdyenPspTest {
                     null,
                     null,
                     null),
-                PaymentMethod.SEPA, null),
+                PaymentMethod.SEPA.toString(), null),
             PaymentDataRequestModel(amountValue, currency, "Book"),
             null, pspConfig, null), true)
     }
@@ -227,7 +227,7 @@ class AdyenPspTest {
                         null,
                         null,
                         customerReference),
-                    PaymentMethod.PAY_PAL, null),
+                    PaymentMethod.PAY_PAL.toString(), null),
                 PaymentDataRequestModel(amountValue, currency, "Book"),
                 pspAlias, pspConfig, null), true)
         }
@@ -251,7 +251,7 @@ class AdyenPspTest {
                     country,
                     null
                 ),
-                PaymentMethod.CC, correctPayload), pspConfig), true)
+                PaymentMethod.CC.toString(), correctPayload), pspConfig), true)
     }
 
     @Test
@@ -283,7 +283,7 @@ class AdyenPspTest {
                     null,
                     null,
                     null),
-                PaymentMethod.CC, null),
+                PaymentMethod.CC.toString(), null),
             PaymentDataRequestModel(amountValue, currency, "Book"),
             pspAlias, pspConfig, null), true)
     }
@@ -298,7 +298,7 @@ class AdyenPspTest {
                 TransactionAction.AUTH,
                 pspConfig,
                 null,
-                PaymentMethod.CC
+                PaymentMethod.CC.toString()
             ), true
         )
     }
@@ -313,7 +313,7 @@ class AdyenPspTest {
                 TransactionAction.AUTH,
                 pspConfig,
                 null,
-                PaymentMethod.SEPA
+                PaymentMethod.SEPA.toString()
             ), true
         )
     }
@@ -329,7 +329,7 @@ class AdyenPspTest {
                     TransactionAction.AUTH,
                     pspConfig,
                     null,
-                    PaymentMethod.PAY_PAL
+                    PaymentMethod.PAY_PAL.toString()
                 ), true
             )
         }
@@ -351,7 +351,7 @@ class AdyenPspTest {
             PspDeleteAliasRequestModel(
                 aliasId,
                 pspAlias,
-                PaymentMethod.CC,
+                PaymentMethod.CC.toString(),
                 pspConfig,
                 customerReference
             ), true
@@ -364,7 +364,7 @@ class AdyenPspTest {
             PspDeleteAliasRequestModel(
                 aliasId,
                 pspAlias,
-                PaymentMethod.CC,
+                PaymentMethod.CC.toString(),
                 pspConfig,
                 customerReference
             ), true
