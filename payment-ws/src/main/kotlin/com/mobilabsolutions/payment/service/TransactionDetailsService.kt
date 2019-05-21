@@ -5,6 +5,7 @@ import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.PaymentInfoModel
 import com.mobilabsolutions.payment.model.TransactionModel
+import com.mobilabsolutions.payment.model.response.TransactionDetailListResponseModel
 import com.mobilabsolutions.payment.model.response.TransactionDetailsResponseModel
 import com.mobilabsolutions.payment.model.response.TransactionListResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
@@ -39,12 +40,12 @@ class TransactionDetailsService(
         return TransactionDetailsResponseModel(
             transaction.transactionId,
             transaction.currencyId,
-            transaction.amount.toString(),
+            transaction.amount,
             transaction.reason,
-            transaction.action,
-            transaction.status,
-            transaction.paymentMethod,
-            objectMapper.readValue(transaction.paymentInfo, PaymentInfoModel::class.java),
+            transaction.action!!.name,
+            transaction.status!!.name,
+            transaction.paymentMethod!!.name,
+            transaction.paymentInfo,
             transaction.merchantTransactionId,
             transaction.merchantCustomerId,
             transaction.pspTestMode,
@@ -73,14 +74,14 @@ class TransactionDetailsService(
      * Get transactions by transaction ID
      *
      * @param merchantId Merchant ID
-     * @param transactionId Trasanction ID
+     * @param transactionId Transanction ID
      * @return transaction list
      */
-    fun getTransactionDetails(merchantId: String, transactionId: String): TransactionListResponseModel {
+    fun getTransactionDetails(merchantId: String, transactionId: String): TransactionDetailListResponseModel {
         merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transactions = transactionRepository.getTransactionsByTransactionId(transactionId)
 
-        return TransactionListResponseModel(transactions.asSequence().map { TransactionModel(it) }.toMutableList())
+        return TransactionDetailListResponseModel(transactions.asSequence().map { TransactionDetailsResponseModel(it) }.toMutableList())
     }
 }

@@ -19,22 +19,22 @@ data class TransactionDetailsResponseModel(
     val currencyId: String?,
 
     @ApiModelProperty(value = "Amount in smallest currency unit (e.g. cent)", example = "2000")
-    val amount: String?,
+    val amount: Int?,
 
     @ApiModelProperty(value = "Reason", example = "Payment for dinner")
     val reason: String?,
 
     @ApiModelProperty("Transaction action")
-    val action: TransactionAction?,
+    val action: String?,
 
     @ApiModelProperty(value = "Transaction status", example = "AUTHORIZED")
-    val status: TransactionStatus?,
+    val status: String?,
 
     @ApiModelProperty(value = "Payment method", example = "SEPA")
-    val paymentMethod: PaymentMethod?,
+    val paymentMethod: String?,
 
     @ApiModelProperty(value = "Payment information")
-    val paymentInfo: PaymentInfoModel?,
+    val paymentInfo: String?,
 
     @ApiModelProperty(value = "Merchant transaction id", example = "frtdqw7m")
     val merchantTransactionId: String?,
@@ -50,4 +50,21 @@ data class TransactionDetailsResponseModel(
 
     @ApiModelProperty(value = "Alias id", example = "sswe34wdff")
     val aliasId: String?
-)
+) {
+    constructor(transaction: Array<Any>) : this(
+        transaction[0] as String?,
+        transaction[1] as String?,
+        transaction[2] as Int?,
+        transaction[3] as String?,
+        transaction[4] as String?,
+        transaction[5] as String?,
+        transaction[6] as String?,
+        transaction[7] as String?,
+        transaction[8] as String?,
+        transaction[9] as String?,
+        transaction[10] as Boolean?,
+        transaction[11] as String?,
+        transaction[12] as String?
+    )
+}
+
