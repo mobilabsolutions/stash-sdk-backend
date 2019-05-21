@@ -89,10 +89,7 @@ class TransactionDetailsServiceTest {
             listOf(arrayOf(correctTransactionId, amount, currency, status.name, action.name, "some reason", "some customer id", paymentMethod.name, Timestamp(
                 Date().time
             ))))
-        Mockito.`when`(transactionRepository.getTransactionsByTransactionId(correctTransactionId)).thenReturn(
-            listOf(arrayOf(correctTransactionId, amount, currency, status.name, action.name, "some reason", "some customer id", paymentMethod.name, Timestamp(
-                Date().time
-            ))))
+        Mockito.`when`(transactionRepository.getTransactionsByTransactionId(correctTransactionId)).thenReturn(listOf(transaction))
     }
 
     @Test

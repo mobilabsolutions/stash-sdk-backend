@@ -45,7 +45,7 @@ class TransactionDetailsService(
             transaction.action!!.name,
             transaction.status!!.name,
             transaction.paymentMethod!!.name,
-            transaction.paymentInfo,
+            objectMapper.readValue(transaction.paymentInfo, PaymentInfoModel::class.java),
             transaction.merchantTransactionId,
             transaction.merchantCustomerId,
             transaction.pspTestMode,
@@ -74,14 +74,30 @@ class TransactionDetailsService(
      * Get transactions by transaction ID
      *
      * @param merchantId Merchant ID
-     * @param transactionId Transanction ID
+     * @param transactionId Transaction ID
      * @return transaction list
      */
     fun getTransactionDetails(merchantId: String, transactionId: String): TransactionDetailListResponseModel {
         merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transactions = transactionRepository.getTransactionsByTransactionId(transactionId)
+        val transactionDetails = ArrayList<TransactionDetailsResponseModel>()
+        transactions.forEach { transactionDetails.add(TransactionDetailsResponseModel(
+            transactionId = it.transactionId,
+            currencyId = it.currencyId,
+            amount = it.amount,
+            reason = it.reason,
+            action = it.action!!.name,
+            status = it.status!!.name,
+            paymentMethod = it.paymentMethod!!.name,
+            paymentInfo = objectMapper.readValue(it.paymentInfo, PaymentInfoModel::class.java),
+            merchantTransactionId = it.merchantTransactionId,
+            merchantCustomerId = it.merchantCustomerId,
+            pspTestMode = it.pspTestMode,
+            merchantId = it.merchant.id,
+            aliasId = it.alias!!.id
+        )) }
 
-        return TransactionDetailListResponseModel(transactions.asSequence().map { TransactionDetailsResponseModel(it) }.toMutableList())
+        return TransactionDetailListResponseModel(transactionDetails)
     }
 }

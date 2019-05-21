@@ -1,8 +1,5 @@
 package com.mobilabsolutions.payment.model.response
 
-import com.mobilabsolutions.payment.data.enum.PaymentMethod
-import com.mobilabsolutions.payment.data.enum.TransactionAction
-import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.PaymentInfoModel
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
@@ -24,7 +21,7 @@ data class TransactionDetailsResponseModel(
     @ApiModelProperty(value = "Reason", example = "Payment for dinner")
     val reason: String?,
 
-    @ApiModelProperty("Transaction action")
+    @ApiModelProperty(value = "Transaction action")
     val action: String?,
 
     @ApiModelProperty(value = "Transaction status", example = "AUTHORIZED")
@@ -34,7 +31,7 @@ data class TransactionDetailsResponseModel(
     val paymentMethod: String?,
 
     @ApiModelProperty(value = "Payment information")
-    val paymentInfo: String?,
+    val paymentInfo: PaymentInfoModel?,
 
     @ApiModelProperty(value = "Merchant transaction id", example = "frtdqw7m")
     val merchantTransactionId: String?,
@@ -50,21 +47,4 @@ data class TransactionDetailsResponseModel(
 
     @ApiModelProperty(value = "Alias id", example = "sswe34wdff")
     val aliasId: String?
-) {
-    constructor(transaction: Array<Any>) : this(
-        transaction[0] as String?,
-        transaction[1] as String?,
-        transaction[2] as Int?,
-        transaction[3] as String?,
-        transaction[4] as String?,
-        transaction[5] as String?,
-        transaction[6] as String?,
-        transaction[7] as String?,
-        transaction[8] as String?,
-        transaction[9] as String?,
-        transaction[10] as Boolean?,
-        transaction[11] as String?,
-        transaction[12] as String?
-    )
-}
-
+)
