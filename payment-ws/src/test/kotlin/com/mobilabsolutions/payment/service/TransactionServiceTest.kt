@@ -77,9 +77,9 @@ class TransactionServiceTest {
         "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\", \"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}}"
     private val reverseInfo = ReversalRequestModel("some reason")
     private val pspConfigModel = PspConfigModel(
-        PaymentServiceProvider.BS_PAYONE.toString(), "mobilab", "123", "123", "123", null, null, null, null, null, true, null, null, null, null
+        PaymentServiceProvider.BS_PAYONE.name, "mobilab", "123", "123", "123", null, null, null, null, null, true, null, null, null, null
     )
-    private val aliasExtra = AliasExtraModel(null, null, null, PersonalDataModel(null, null, null, "Mustermann", null, null, "Berlin", "DE", null), PaymentMethod.CC.toString(), null)
+    private val aliasExtra = AliasExtraModel(null, null, null, PersonalDataModel(null, null, null, "Mustermann", null, null, "Berlin", "DE", null), PaymentMethod.CC.name, null)
     private val merchantTransactionId = "12345"
 
     @InjectMocks
@@ -150,7 +150,7 @@ class TransactionServiceTest {
             )
         ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
         Mockito.`when`(
-            psp.refund(PspRefundRequestModel(pspTransactionId, 1, "EUR", TransactionAction.AUTH, pspConfigModel, null, PaymentMethod.CC.toString()), test
+            psp.refund(PspRefundRequestModel(pspTransactionId, 1, "EUR", TransactionAction.AUTH, pspConfigModel, null, PaymentMethod.CC.name), test
             )
         ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
         Mockito.`when`(

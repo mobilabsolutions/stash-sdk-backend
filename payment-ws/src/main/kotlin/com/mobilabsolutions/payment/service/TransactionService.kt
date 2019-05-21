@@ -104,7 +104,7 @@ class TransactionService(
             ?: throw throw ApiError.ofErrorCode(ApiErrorCode.ALIAS_NOT_FOUND).asException()
         val psp = pspRegistry.find(alias.psp!!)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_IMPL_NOT_FOUND, "PSP implementation '${alias.psp}' cannot be found").asException()
-        if (getAliasExtra(alias).paymentMethod == PaymentMethod.SEPA.toString())
+        if (getAliasExtra(alias).paymentMethod == PaymentMethod.SEPA.name)
             throw ApiError.ofErrorCode(ApiErrorCode.SEPA_NOT_ALLOWED).asException()
 
         val pspPreauthorizeRequest = PspPaymentRequestModel(
@@ -334,7 +334,7 @@ class TransactionService(
             action = prevTransaction.action,
             pspConfig = getPspConfig(prevTransaction.alias!!),
             purchaseId = prevTransaction.merchantTransactionId,
-            paymentMethod = prevTransaction.paymentMethod.toString()
+            paymentMethod = prevTransaction.paymentMethod!!.name
         )
 
         return executeIdempotentTransactionOperation(
