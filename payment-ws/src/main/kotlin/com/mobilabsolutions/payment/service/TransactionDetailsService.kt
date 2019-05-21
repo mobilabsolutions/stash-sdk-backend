@@ -68,4 +68,19 @@ class TransactionDetailsService(
 
         return TransactionListResponseModel(transactions.asSequence().map { TransactionModel(it) }.toMutableList())
     }
+
+    /**
+     * Get transactions by transaction ID
+     *
+     * @param merchantId Merchant ID
+     * @param transactionId Trasanction ID
+     * @return transaction list
+     */
+    fun getTransactionDetails(merchantId: String, transactionId: String): TransactionListResponseModel {
+        merchantRepository.getMerchantById(merchantId)
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        val transactions = transactionRepository.getTransactionsByTransactionId(transactionId)
+
+        return TransactionListResponseModel(transactions.asSequence().map { TransactionModel(it) }.toMutableList())
+    }
 }

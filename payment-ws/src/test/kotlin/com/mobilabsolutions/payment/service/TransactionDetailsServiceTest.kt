@@ -89,6 +89,10 @@ class TransactionDetailsServiceTest {
             listOf(arrayOf(correctTransactionId, amount, currency, status.name, action.name, "some reason", "some customer id", paymentMethod.name, Timestamp(
                 Date().time
             ))))
+        Mockito.`when`(transactionRepository.getTransactionsByTransactionId(correctTransactionId)).thenReturn(
+            listOf(arrayOf(correctTransactionId, amount, currency, status.name, action.name, "some reason", "some customer id", paymentMethod.name, Timestamp(
+                Date().time
+            ))))
     }
 
     @Test
@@ -120,6 +124,19 @@ class TransactionDetailsServiceTest {
     fun `get transactions unsuccessfully`() {
         Assertions.assertThrows(ApiException::class.java) {
             transactionDetailsService.getTransactions(wrongMerchantId, null, null)
+        }
+    }
+
+    @Test
+    fun `get transaction details successfully`() {
+        val transactionList = transactionDetailsService.getTransactionDetails(merchantId, correctTransactionId)
+        Assertions.assertEquals(transactionList.transactions.size, 1)
+    }
+
+    @Test
+    fun `get transaction details unsuccessfully`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            transactionDetailsService.getTransactionDetails(wrongMerchantId, correctTransactionId)
         }
     }
 }
