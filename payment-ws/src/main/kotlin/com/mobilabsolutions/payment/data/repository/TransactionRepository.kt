@@ -37,4 +37,7 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
         nativeQuery = true
     )
     fun getTransactionsByLimitAndOffset(@Param("merchantId") merchantId: String, @Param("limit") limit: Int, @Param("offset") offset: Int): List<Array<Any>>
+
+    @Query("SELECT * FROM transaction_record tr WHERE tr.transaction_id = :transactionId AND tr.action = :action AND tr.status = :status", nativeQuery = true)
+    fun getByTransactionIdAndActionAndStatus(@Param("transactionId") transactionId: String, @Param("action") action: String, @Param("status") status: String): List<Transaction>
 }

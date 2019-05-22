@@ -1,8 +1,5 @@
 package com.mobilabsolutions.payment.model.response
 
-import com.mobilabsolutions.payment.data.enum.PaymentMethod
-import com.mobilabsolutions.payment.data.enum.TransactionAction
-import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.PaymentInfoModel
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
@@ -19,19 +16,19 @@ data class TransactionDetailsResponseModel(
     val currencyId: String?,
 
     @ApiModelProperty(value = "Amount in smallest currency unit (e.g. cent)", example = "2000")
-    val amount: String?,
+    val amount: Int?,
 
     @ApiModelProperty(value = "Reason", example = "Payment for dinner")
     val reason: String?,
 
-    @ApiModelProperty("Transaction action")
-    val action: TransactionAction?,
+    @ApiModelProperty(value = "Transaction action")
+    val action: String?,
 
     @ApiModelProperty(value = "Transaction status", example = "AUTHORIZED")
-    val status: TransactionStatus?,
+    val status: String?,
 
     @ApiModelProperty(value = "Payment method", example = "SEPA")
-    val paymentMethod: PaymentMethod?,
+    val paymentMethod: String?,
 
     @ApiModelProperty(value = "Payment information")
     val paymentInfo: PaymentInfoModel?,
