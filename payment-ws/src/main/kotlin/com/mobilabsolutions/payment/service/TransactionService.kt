@@ -24,7 +24,6 @@ import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
 import com.mobilabsolutions.payment.model.request.ReversalRequestModel
 import com.mobilabsolutions.payment.model.response.PaymentResponseModel
 import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
-import com.mobilabsolutions.payment.model.response.TransactionDetailListResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import mu.KLogging
@@ -41,7 +40,6 @@ class TransactionService(
     private val transactionRepository: TransactionRepository,
     private val merchantApiKeyRepository: MerchantApiKeyRepository,
     private val aliasRepository: AliasRepository,
-    private val transactionDetailsService: TransactionDetailsService,
     private val pspRegistry: PspRegistry,
     private val objectMapper: ObjectMapper
 ) {
@@ -323,7 +321,7 @@ class TransactionService(
         if (prevTransaction.merchant.id != apiKey.merchant.id)
             throw ApiError.ofErrorCode(ApiErrorCode.WRONG_ALIAS_MERCHANT_MAPPING).asException()
 
-        val allTransactions = transactionDetailsService.getTransactionsByActionAndStatus(prevTransaction.merchant.id!!, prevTransaction.transactionId!!)
+        val allTransactions = transactionRepository.getByTransactionIdAndActionAndStatus(prevTransaction.transactionId!!, TransactionAction.REFUND.name, TransactionStatus.SUCCESS.name)
 
         if (!checkRefundEligibility(prevTransaction.amount!!, refundInfo.amount!!, allTransactions))
             throw ApiError.ofErrorCode(ApiErrorCode.INCORRECT_REFUND_VALUE).asException()
@@ -355,9 +353,9 @@ class TransactionService(
         ) { psp.refund(pspRefundRequest, pspTestMode) }
     }
 
-    private fun checkRefundEligibility(prevTotalAmount: Int, refundAmount: Int, allTransactions: TransactionDetailListResponseModel): Boolean {
+    private fun checkRefundEligibility(prevTotalAmount: Int, refundAmount: Int, allTransactions: List<Transaction>): Boolean {
         var prevRefundAmount = refundAmount
-        for (transaction in allTransactions.transactions) prevRefundAmount += transaction.amount!!
+        for (transaction in allTransactions) prevRefundAmount += transaction.amount!!
         if (prevRefundAmount > prevTotalAmount) return false
         return true
     }

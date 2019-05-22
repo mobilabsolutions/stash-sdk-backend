@@ -14,7 +14,6 @@ import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
-import com.mobilabsolutions.payment.model.PaymentInfoModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
@@ -25,8 +24,6 @@ import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
 import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
 import com.mobilabsolutions.payment.model.request.ReversalRequestModel
 import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
-import com.mobilabsolutions.payment.model.response.TransactionDetailListResponseModel
-import com.mobilabsolutions.payment.model.response.TransactionDetailsResponseModel
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
@@ -87,9 +84,6 @@ class TransactionServiceTest {
 
     @InjectMocks
     private lateinit var transactionService: TransactionService
-
-    @Mock
-    private lateinit var transactionDetailsService: TransactionDetailsService
 
     @Mock
     private lateinit var transactionRepository: TransactionRepository
@@ -280,26 +274,19 @@ class TransactionServiceTest {
                 alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
                 pspResponse = pspResponse)
         )
-        Mockito.`when`(transactionDetailsService.getTransactionsByActionAndStatus("1", correctTransactionId))
-            .thenReturn(
-                TransactionDetailListResponseModel(mutableListOf(
-                    TransactionDetailsResponseModel(
-                        transactionId = correctTransactionId,
-                        currencyId = "EUR",
-                        amount = 1,
-                        reason = "reason",
-                        action = "AUTH",
-                        status = "SUCCESS",
-                        paymentMethod = "CC",
-                        paymentInfo = PaymentInfoModel(extra = aliasExtra, pspConfig = pspConfigModel),
-                        merchantTransactionId = "1",
-                        merchantCustomerId = "1",
-                        pspTestMode = true,
-                        merchantId = "1",
-                        aliasId = "1"
-                    )
-                ))
-            )
+        Mockito.`when`(transactionRepository.getByTransactionIdAndActionAndStatus(correctTransactionId, "REFUND", "SUCCESS"))
+            .thenReturn(listOf(
+                Transaction(
+                    amount = 1,
+                    transactionId = correctTransactionId,
+                    currencyId = "EUR",
+                    pspTestMode = test,
+                    action = TransactionAction.AUTH,
+                    paymentMethod = PaymentMethod.CC,
+                    merchant = Merchant("1", pspConfig = pspConfig),
+                    alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
+                    pspResponse = pspResponse)
+            ))
     }
 
     @Test
