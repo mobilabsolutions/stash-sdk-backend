@@ -24,6 +24,7 @@ import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
 import com.mobilabsolutions.payment.model.request.ReversalRequestModel
 import com.mobilabsolutions.payment.model.response.PaymentResponseModel
 import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
+import com.mobilabsolutions.payment.model.response.TransactionDetailListResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import mu.KLogging
@@ -40,6 +41,7 @@ class TransactionService(
     private val transactionRepository: TransactionRepository,
     private val merchantApiKeyRepository: MerchantApiKeyRepository,
     private val aliasRepository: AliasRepository,
+    private val transactionDetailsService: TransactionDetailsService,
     private val pspRegistry: PspRegistry,
     private val objectMapper: ObjectMapper
 ) {
@@ -321,6 +323,11 @@ class TransactionService(
         if (prevTransaction.merchant.id != apiKey.merchant.id)
             throw ApiError.ofErrorCode(ApiErrorCode.WRONG_ALIAS_MERCHANT_MAPPING).asException()
 
+        val allTransactions = transactionDetailsService.getTransactionDetails(prevTransaction.merchant.id!!, prevTransaction.transactionId!!)
+
+        if (!checkRefundEligibility(prevTransaction.amount!!, refundInfo.amount!!, allTransactions))
+            throw ApiError.ofErrorCode(ApiErrorCode.INCORRECT_REFUND_VALUE).asException()
+
         val paymentRequestModel = PaymentRequestModel(
             alias.id,
             refundInfo,
@@ -346,6 +353,16 @@ class TransactionService(
             pspTestMode,
             TransactionAction.REFUND
         ) { psp.refund(pspRefundRequest, pspTestMode) }
+    }
+
+    private fun checkRefundEligibility(prevTotalAmount: Int, refundAmount: Int, allTransactions: TransactionDetailListResponseModel): Boolean {
+        var prevRefundAmount = 0
+        for (transaction in allTransactions.transactions) {
+            if (transaction.action == "REFUND") prevRefundAmount += transaction.amount!!
+        }
+
+        if (prevRefundAmount + refundAmount > prevTotalAmount) return false
+        return true
     }
 
     private fun executeIdempotentTransactionOperation(
