@@ -166,7 +166,7 @@ class MerchantController(
         @RequestParam(required = false) offset: Int?
     ) = transactionDetailsService.getTransactions(merchantId, limit, offset)
 
-    @ApiOperation(value = "Get transactions by transaction ID")
+    @ApiOperation(value = "Get transactions details")
     @ApiResponses(
         ApiResponse(code = 200, message = "Successfully queried transactions"),
         ApiResponse(code = 401, message = "Unauthorized access"),
