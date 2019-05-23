@@ -8,6 +8,7 @@ import com.mobilabsolutions.payment.service.TransactionDetailsService
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
+import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
@@ -145,7 +146,7 @@ class MerchantController(
         @PathVariable(value = "Transaction-Id") transactionId: String
     ) = transactionDetailsService.getTransaction(merchantId, transactionId)
 
-    @ApiOperation(value = "Get transactions")
+    @ApiOperation(value = "Filter transactions")
     @ApiResponses(
         ApiResponse(code = 200, message = "Successfully queried transactions"),
         ApiResponse(code = 401, message = "Unauthorized access"),
@@ -159,9 +160,16 @@ class MerchantController(
     )
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
-    fun getTransactions(
+    fun getTransactionsByFilters(
         @PathVariable("Merchant-Id") merchantId: String,
+        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS") createdAtStart: String?,
+        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS") createdAtEnd: String?,
+        @RequestParam(required = false) paymentMethod: String?,
+        @RequestParam(required = false) action: String?,
+        @RequestParam(required = false) status: String?,
+        @RequestParam(required = false) text: String?,
         @RequestParam(required = false) limit: Int?,
         @RequestParam(required = false) offset: Int?
-    ) = transactionDetailsService.getTransactions(merchantId, limit, offset)
+    ) = transactionDetailsService.getTransactionsByFilters(merchantId, createdAtStart, createdAtEnd, paymentMethod,
+        action, status, text, limit, offset)
 }

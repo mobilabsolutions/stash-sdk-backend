@@ -28,13 +28,41 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
     fun getByTransactionId(@Param("transactionId") transactionId: String): Transaction?
 
     @Query(
-        "SELECT tr1.transaction_id, tr1.amount, tr1.currency_id, tr1.status, tr1.action, tr1.reason, tr1.merchant_customer_id, tr1.payment_method, tr1.created_date FROM transaction_record tr1\n" +
-            "JOIN (\n" +
-            "    SELECT transaction_id, max(created_date) max_created_date\n" +
-            "    FROM transaction_record\n" +
-            "    GROUP BY transaction_id\n" +
-            ") tr2 ON tr1.transaction_id = tr2.transaction_id AND tr1.created_date = tr2.max_created_date WHERE tr1.merchant_id = :merchantId ORDER BY tr1.created_date desc LIMIT :limit OFFSET :offset",
-        nativeQuery = true
-    )
-    fun getTransactionsByLimitAndOffset(@Param("merchantId") merchantId: String, @Param("limit") limit: Int, @Param("offset") offset: Int): List<Array<Any>>
+        "SELECT tr.transaction_id, tr.amount, tr.currency_id, tr.status, tr.action, tr.reason, tr.merchant_customer_id, " +
+            "COALESCE(CAST(tr.payment_info AS json)#>>'{extra, ccConfig, ccType}', tr.payment_method), tr.created_date FROM transaction_record tr " +
+            "JOIN (" +
+            "SELECT transaction_id, max(created_date) max_created_date " +
+            "FROM transaction_record " +
+            "GROUP BY transaction_id" +
+            ") tr1 ON tr.transaction_id = tr1.transaction_id AND tr.created_date = tr1.max_created_date " +
+            "WHERE tr.merchant_id = :merchantId " +
+            "AND tr.payment_method = CASE WHEN :paymentMethod <> '' THEN CAST(:paymentMethod AS varchar) ELSE tr.payment_method END " +
+            "AND tr.action = CASE WHEN :action <> '' THEN CAST(:action AS varchar) ELSE tr.action END " +
+            "AND tr.status = CASE WHEN :status <> '' THEN CAST(:status AS varchar) ELSE tr.status END " +
+            "AND tr.created_date >= CASE WHEN :createdAtStart <> '' THEN TO_TIMESTAMP(CAST(:createdAtStart AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END " +
+            "AND tr.created_date <= CASE WHEN :createdAtEnd <> '' THEN TO_TIMESTAMP(CAST(:createdAtEnd AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END " +
+            "AND CASE WHEN :text <> '' THEN (CAST(tr.payment_info AS json)#>>'{pspConfig, type}' ~* CAST(:text AS text) " +
+            "OR tr.reason ~* CAST(:text AS varchar) " +
+            "OR tr.transaction_id ~* CAST(:text AS varchar) " +
+            "OR tr.currency_id ~* CAST(:text AS varchar) " +
+            "OR tr.merchant_transaction_id ~* CAST(:text AS varchar) " +
+            "OR tr.merchant_customer_id ~* CAST(:text AS varchar) " +
+            "OR tr.alias_id ~* CAST(:text AS varchar) " +
+            "OR CAST(tr.payment_info AS json)#>>'{extra, ccConfig, ccMask}' ~* CAST(:text AS text) " +
+            "OR CAST(tr.payment_info AS json)#>>'{extra, ccConfig, ccExpiryDate}' ~* CAST(:text AS text) " +
+            "OR CAST(tr.payment_info AS json)#>>'{extra, ccConfig, ccType}' ~* CAST(:text AS text) " +
+            "OR CAST(tr.payment_info AS json)#>>'{extra, sepaConfig, iban}' ~* CAST(:text AS text)) ELSE tr.reason = tr.reason END " +
+            "ORDER BY tr.created_date desc LIMIT :limit OFFSET :offset",
+        nativeQuery = true)
+    fun getTransactionsByFilters(
+        @Param("merchantId") merchantId: String,
+        @Param("createdAtStart") createdAtStart: String?,
+        @Param("createdAtEnd") createdAtEnd: String?,
+        @Param("paymentMethod") paymentMethod: String?,
+        @Param("action") action: String?,
+        @Param("status") status: String?,
+        @Param("text") text: String?,
+        @Param("limit") limit: Int?,
+        @Param("offset") offset: Int?
+    ): List<Array<Any>>
 }

@@ -54,18 +54,35 @@ class TransactionDetailsService(
     }
 
     /**
-     * Get transactions by limit and offset
+     * Get transactions by given filters
      *
-     * @param merchantId Merchant ID
-     * @param limit limit
-     * @param offset offset
-     * @return transaction list
+     * @param merchantId
+     * @param createdAtStart created date start
+     * @param createdAtEnd created date end
+     * @param paymentMethod payment method
+     * @param action action
+     * @param status status
+     * @param text any transaction related information
+     * @return filtered transaction list
      */
-    fun getTransactions(merchantId: String, limit: Int?, offset: Int?): TransactionListResponseModel {
+    fun getTransactionsByFilters(
+        merchantId: String,
+        createdAtStart: String?,
+        createdAtEnd: String?,
+        paymentMethod: String?,
+        action: String?,
+        status: String?,
+        text: String?,
+        limit: Int?,
+        offset: Int?
+    ): TransactionListResponseModel {
         merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        val transactions = transactionRepository.getTransactionsByLimitAndOffset(merchantId, limit ?: 10, offset ?: 0)
+        val transactions = transactionRepository.getTransactionsByFilters(merchantId, createdAtStart, createdAtEnd, paymentMethod,
+            action, status, text, limit ?: 10, offset ?: 0)
 
-        return TransactionListResponseModel(transactions.asSequence().map { TransactionModel(it) }.toMutableList())
+        val transactionList = TransactionListResponseModel(transactions.asSequence().map { TransactionModel(it) }.toMutableList())
+        if (transactionList.transactions.isEmpty()) throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTIONS_NOT_FOUND).asException()
+        return transactionList
     }
 }

@@ -85,8 +85,8 @@ class TransactionDetailsServiceTest {
         )
         Mockito.`when`(transactionRepository.getByTransactionId(correctTransactionId)).thenReturn(transaction)
         Mockito.`when`(transactionRepository.getByTransactionId(wrongTransactionId)).thenReturn(null)
-        Mockito.`when`(transactionRepository.getTransactionsByLimitAndOffset(merchantId, limit, offset)).thenReturn(
-            listOf(arrayOf(correctTransactionId, amount, currency, status.name, action.name, "some reason", "some customer id", paymentMethod.name, Timestamp(
+        Mockito.`when`(transactionRepository.getTransactionsByFilters(merchantId, null, null, paymentMethod.name, action.name, status.name, "some", limit, offset))
+            .thenReturn(listOf(arrayOf(correctTransactionId, amount, currency, status.name, action.name, "some reason", "some customer id", paymentMethod.name, Timestamp(
                 Date().time
             ))))
     }
@@ -105,21 +105,21 @@ class TransactionDetailsServiceTest {
     }
 
     @Test
-    fun `get transactions successfully`() {
-        val transactionList = transactionDetailsService.getTransactions(merchantId, limit, offset)
+    fun `filter transactions successfully`() {
+        val transactionList = transactionDetailsService.getTransactionsByFilters(merchantId, null, null, paymentMethod.name, action.name, status.name, "some", limit, offset)
         Assertions.assertEquals(transactionList.transactions.size, 1)
     }
 
     @Test
-    fun `get transactions successfully with default limit and offset`() {
-        val transactionList = transactionDetailsService.getTransactions(merchantId, null, null)
+    fun `filter transactions successfully with default limit and offset`() {
+        val transactionList = transactionDetailsService.getTransactionsByFilters(merchantId, null, null, paymentMethod.name, action.name, status.name, "some", null, null)
         Assertions.assertEquals(transactionList.transactions.size, 1)
     }
 
     @Test
-    fun `get transactions unsuccessfully`() {
+    fun `filter transactions unsuccessfully`() {
         Assertions.assertThrows(ApiException::class.java) {
-            transactionDetailsService.getTransactions(wrongMerchantId, null, null)
+            transactionDetailsService.getTransactionsByFilters(wrongMerchantId, null, null, paymentMethod.name, action.name, status.name, "some", limit, offset)
         }
     }
 }
