@@ -66,7 +66,7 @@ class ApiKeyService(
                 name = apiKeyInfo.name,
                 key = generatedKey,
                 active = true,
-                keyType = apiKeyInfo.type,
+                keyType = KeyType.valueOf(apiKeyInfo.type!!),
                 merchant = merchant
         )
         merchantApiKeyRepository.save(merchantApiKey)

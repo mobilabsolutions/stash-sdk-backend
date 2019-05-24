@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import javax.validation.Valid
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
@@ -52,7 +53,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService) {
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun createApiKey(
         @PathVariable("Merchant-Id") merchantId: String,
-        @RequestBody apiKeyInfo: ApiKeyRequestModel
+        @Valid @RequestBody apiKeyInfo: ApiKeyRequestModel
     ) = apiKeyService.createMerchantApiKey(merchantId, apiKeyInfo)
 
     @ApiOperation(value = "Get api for specific merchant using id")
