@@ -321,6 +321,11 @@ class TransactionService(
         if (prevTransaction.merchant.id != apiKey.merchant.id)
             throw ApiError.ofErrorCode(ApiErrorCode.WRONG_ALIAS_MERCHANT_MAPPING).asException()
 
+        val allTransactions = transactionRepository.getByTransactionIdAndActionAndStatus(prevTransaction.transactionId!!, TransactionAction.REFUND.name, TransactionStatus.SUCCESS.name)
+
+        if (!checkRefundEligibility(prevTransaction.amount!!, refundInfo.amount!!, allTransactions))
+            throw ApiError.ofErrorCode(ApiErrorCode.INCORRECT_REFUND_VALUE).asException()
+
         val paymentRequestModel = PaymentRequestModel(
             alias.id,
             refundInfo,
@@ -346,6 +351,13 @@ class TransactionService(
             pspTestMode,
             TransactionAction.REFUND
         ) { psp.refund(pspRefundRequest, pspTestMode) }
+    }
+
+    private fun checkRefundEligibility(prevTotalAmount: Int, refundAmount: Int, allTransactions: List<Transaction>): Boolean {
+        var prevRefundAmount = refundAmount
+        for (transaction in allTransactions) prevRefundAmount += transaction.amount!!
+        if (prevRefundAmount > prevTotalAmount) return false
+        return true
     }
 
     private fun executeIdempotentTransactionOperation(

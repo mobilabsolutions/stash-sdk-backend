@@ -264,7 +264,8 @@ class TransactionServiceTest {
             )
         ).thenReturn(
             Transaction(
-                amount = 1,
+                amount = 50,
+                transactionId = correctTransactionId,
                 currencyId = "EUR",
                 pspTestMode = test,
                 action = TransactionAction.AUTH,
@@ -273,6 +274,19 @@ class TransactionServiceTest {
                 alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
                 pspResponse = pspResponse)
         )
+        Mockito.`when`(transactionRepository.getByTransactionIdAndActionAndStatus(correctTransactionId, "REFUND", "SUCCESS"))
+            .thenReturn(listOf(
+                Transaction(
+                    amount = 1,
+                    transactionId = correctTransactionId,
+                    currencyId = "EUR",
+                    pspTestMode = test,
+                    action = TransactionAction.AUTH,
+                    paymentMethod = PaymentMethod.CC,
+                    merchant = Merchant("1", pspConfig = pspConfig),
+                    alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
+                    pspResponse = pspResponse)
+            ))
     }
 
     @Test
