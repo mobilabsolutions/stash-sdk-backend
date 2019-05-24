@@ -79,7 +79,7 @@ class ApiKeyServiceTest {
 
     @Test
     fun `create merchant api key successfully`() {
-        apiKeyService.createMerchantApiKey(knownMerchantId, Mockito.mock(ApiKeyRequestModel::class.java))
+        apiKeyService.createMerchantApiKey(knownMerchantId, ApiKeyRequestModel(type = "SECRET", name = "Key"))
     }
 
     @Test

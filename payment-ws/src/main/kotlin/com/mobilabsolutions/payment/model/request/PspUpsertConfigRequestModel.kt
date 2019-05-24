@@ -1,6 +1,6 @@
 package com.mobilabsolutions.payment.model.request
 
-import com.mobilabsolutions.payment.validation.CountryCode
+import com.mobilabsolutions.payment.validation.CountryCodeValidator
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
@@ -43,7 +43,7 @@ data class PspUpsertConfigRequestModel(
     val currency: String?,
 
     @ApiModelProperty(value = "Country code of account holder", example = "DE")
-    @field:CountryCode
+    @field:CountryCodeValidator
     val country: String?,
 
     @ApiModelProperty(value = "Locale of the merchant user", example = "de-DE")

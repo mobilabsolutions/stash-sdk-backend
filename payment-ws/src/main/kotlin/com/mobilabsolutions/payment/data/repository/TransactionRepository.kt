@@ -27,6 +27,9 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
     @Query(value = "SELECT * FROM transaction_record tr WHERE tr.transaction_id = :transactionId GROUP BY :transactionId, tr.id ORDER BY tr.created_date DESC LIMIT 1", nativeQuery = true)
     fun getByTransactionId(@Param("transactionId") transactionId: String): Transaction?
 
+    @Query("SELECT * FROM transaction_record tr WHERE tr.transaction_id = :transactionId AND tr.action = :action AND tr.status = :status", nativeQuery = true)
+    fun getByTransactionIdAndActionAndStatus(@Param("transactionId") transactionId: String, @Param("action") action: String, @Param("status") status: String): List<Transaction>
+
     @Query(
         "SELECT tr.transaction_id, tr.amount, tr.currency_id, tr.status, tr.action, tr.reason, tr.merchant_customer_id, " +
             "COALESCE(CAST(tr.payment_info AS json)#>>'{extra, ccConfig, ccType}', tr.payment_method), tr.created_date FROM transaction_record tr " +
