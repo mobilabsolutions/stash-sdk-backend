@@ -165,23 +165,4 @@ class MerchantController(
         @RequestParam(required = false) limit: Int?,
         @RequestParam(required = false) offset: Int?
     ) = transactionDetailsService.getTransactions(merchantId, limit, offset)
-
-    @ApiOperation(value = "Get transactions details")
-    @ApiResponses(
-        ApiResponse(code = 200, message = "Successfully queried transactions"),
-        ApiResponse(code = 401, message = "Unauthorized access"),
-        ApiResponse(code = 403, message = "Forbidden access"),
-        ApiResponse(code = 404, message = "Resource not found")
-    )
-    @RequestMapping(
-        MerchantController.TRANSACTION_DETAILS_URL,
-        method = [RequestMethod.GET],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
-    )
-    @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
-    fun getTransactionDetails(
-        @PathVariable("Merchant-Id") merchantId: String,
-        @PathVariable(value = "Transaction-Id") transactionId: String
-    ) = transactionDetailsService.getTransactionDetails(merchantId, transactionId)
 }

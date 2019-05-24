@@ -5,7 +5,7 @@ import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.PaymentInfoModel
 import com.mobilabsolutions.payment.model.TransactionModel
-import com.mobilabsolutions.payment.model.response.TransactionDetailListResponseModel
+import com.mobilabsolutions.payment.model.response.TimelineModel
 import com.mobilabsolutions.payment.model.response.TransactionDetailsResponseModel
 import com.mobilabsolutions.payment.model.response.TransactionListResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
@@ -36,6 +36,7 @@ class TransactionDetailsService(
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transaction = transactionRepository.getByTransactionId(transactionId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_FOUND).asException()
+        val timelineTransactions = transactionRepository.getTransactionsByTimeline(transactionId)
 
         return TransactionDetailsResponseModel(
             transaction.transactionId,
@@ -50,7 +51,8 @@ class TransactionDetailsService(
             transaction.merchantCustomerId,
             transaction.pspTestMode,
             transaction.merchant.id,
-            transaction.alias!!.id
+            transaction.alias!!.id,
+            timelineTransactions.asSequence().map { TimelineModel(it) }.toMutableList()
         )
     }
 
@@ -68,36 +70,5 @@ class TransactionDetailsService(
         val transactions = transactionRepository.getTransactionsByLimitAndOffset(merchantId, limit ?: 10, offset ?: 0)
 
         return TransactionListResponseModel(transactions.asSequence().map { TransactionModel(it) }.toMutableList())
-    }
-
-    /**
-     * Get transactions by transaction ID
-     *
-     * @param merchantId Merchant ID
-     * @param transactionId Transaction ID
-     * @return transaction list
-     */
-    fun getTransactionDetails(merchantId: String, transactionId: String): TransactionDetailListResponseModel {
-        merchantRepository.getMerchantById(merchantId)
-            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        val transactions = transactionRepository.getTransactionsByTransactionId(transactionId)
-        val transactionDetails = ArrayList<TransactionDetailsResponseModel>()
-        transactions.forEach { transactionDetails.add(TransactionDetailsResponseModel(
-            transactionId = it.transactionId,
-            currencyId = it.currencyId,
-            amount = it.amount,
-            reason = it.reason,
-            action = it.action!!.name,
-            status = it.status!!.name,
-            paymentMethod = it.paymentMethod!!.name,
-            paymentInfo = objectMapper.readValue(it.paymentInfo, PaymentInfoModel::class.java),
-            merchantTransactionId = it.merchantTransactionId,
-            merchantCustomerId = it.merchantCustomerId,
-            pspTestMode = it.pspTestMode,
-            merchantId = it.merchant.id,
-            aliasId = it.alias!!.id
-        )) }
-
-        return TransactionDetailListResponseModel(transactionDetails)
     }
 }

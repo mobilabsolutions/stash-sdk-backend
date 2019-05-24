@@ -46,5 +46,8 @@ data class TransactionDetailsResponseModel(
     val merchantId: String?,
 
     @ApiModelProperty(value = "Alias id", example = "sswe34wdff")
-    val aliasId: String?
+    val aliasId: String?,
+
+    @ApiModelProperty(value = "Timeline information")
+    val timelineInfo: MutableList<TimelineModel> = mutableListOf()
 )

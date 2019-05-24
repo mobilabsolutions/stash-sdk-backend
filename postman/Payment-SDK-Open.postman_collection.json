@@ -1066,42 +1066,6 @@
                         }
                     },
                     "response": []
-                },
-                {
-                    "name": "Get All Transactions Details",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "body": {
-                            "mode": "raw",
-                            "raw": ""
-                        },
-                        "url": {
-                            "raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/transactions/{Transaction-Id}/details",
-                            "host": [
-                                "{{wsEndpoint}}"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "merchant",
-                                "{Merchant-Id}",
-                                "transactions",
-                                "{Transaction-Id}"
-                            ]
-                        }
-                    },
-                    "response": []
                 }
             ]
         }
