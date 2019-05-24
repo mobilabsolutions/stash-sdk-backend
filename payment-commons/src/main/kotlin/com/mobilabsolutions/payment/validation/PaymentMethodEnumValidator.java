@@ -18,7 +18,7 @@ import static java.lang.annotation.ElementType.FIELD;
 @Constraint(validatedBy = PaymentMethodEnumValidatorImpl.class)
 @Retention(RetentionPolicy.RUNTIME)
 @Target(FIELD)
-@NotNull(message = "Value cannot be null")
+@NotNull
 @ReportAsSingleViolation
 public @interface PaymentMethodEnumValidator {
 
