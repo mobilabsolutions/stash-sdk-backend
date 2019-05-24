@@ -63,7 +63,7 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
     override fun registerAlias(pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, pspTestMode: Boolean?): PspRegisterAliasResponseModel? {
         logger.info("Registering PayPal alias {} for {} mode", pspRegisterAliasRequestModel.aliasId, getBraintreeMode(pspTestMode))
         if (pspRegisterAliasRequestModel.aliasExtra == null) throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Alias extra cannot be found").asException()
-        if (pspRegisterAliasRequestModel.aliasExtra?.paymentMethod != PaymentMethod.PAY_PAL)
+        if (pspRegisterAliasRequestModel.aliasExtra?.paymentMethod != PaymentMethod.PAY_PAL.name)
             throw throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Only PayPal registration is supported for Braintree").asException()
 
         val braintreeRequest = BraintreeRegisterAliasRequestModel(

@@ -3,6 +3,7 @@ package com.mobilabsolutions.payment.model.request
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.validation.PaymentMethodEnumValidator
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import javax.persistence.EnumType
@@ -33,6 +34,6 @@ data class PspRefundRequestModel(
     val purchaseId: String?,
 
     @ApiModelProperty(value = "Payment method", example = "SEPA")
-    @field:Enumerated(EnumType.STRING)
-    val paymentMethod: PaymentMethod?
+    @PaymentMethodEnumValidator(PaymentMethod = PaymentMethod::class)
+    val paymentMethod: String?
 )

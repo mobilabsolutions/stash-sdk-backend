@@ -104,7 +104,7 @@ class TransactionService(
             ?: throw throw ApiError.ofErrorCode(ApiErrorCode.ALIAS_NOT_FOUND).asException()
         val psp = pspRegistry.find(alias.psp!!)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_IMPL_NOT_FOUND, "PSP implementation '${alias.psp}' cannot be found").asException()
-        if (getAliasExtra(alias).paymentMethod == PaymentMethod.SEPA)
+        if (getAliasExtra(alias).paymentMethod == PaymentMethod.SEPA.name)
             throw ApiError.ofErrorCode(ApiErrorCode.SEPA_NOT_ALLOWED).asException()
 
         val pspPreauthorizeRequest = PspPaymentRequestModel(
@@ -321,6 +321,11 @@ class TransactionService(
         if (prevTransaction.merchant.id != apiKey.merchant.id)
             throw ApiError.ofErrorCode(ApiErrorCode.WRONG_ALIAS_MERCHANT_MAPPING).asException()
 
+        val allTransactions = transactionRepository.getByTransactionIdAndActionAndStatus(prevTransaction.transactionId!!, TransactionAction.REFUND.name, TransactionStatus.SUCCESS.name)
+
+        if (!checkRefundEligibility(prevTransaction.amount!!, refundInfo.amount!!, allTransactions))
+            throw ApiError.ofErrorCode(ApiErrorCode.INCORRECT_REFUND_VALUE).asException()
+
         val paymentRequestModel = PaymentRequestModel(
             alias.id,
             refundInfo,
@@ -334,7 +339,7 @@ class TransactionService(
             action = prevTransaction.action,
             pspConfig = getPspConfig(prevTransaction.alias!!),
             purchaseId = prevTransaction.merchantTransactionId,
-            paymentMethod = prevTransaction.paymentMethod
+            paymentMethod = prevTransaction.paymentMethod!!.name
         )
 
         return executeIdempotentTransactionOperation(
@@ -346,6 +351,13 @@ class TransactionService(
             pspTestMode,
             TransactionAction.REFUND
         ) { psp.refund(pspRefundRequest, pspTestMode) }
+    }
+
+    private fun checkRefundEligibility(prevTotalAmount: Int, refundAmount: Int, allTransactions: List<Transaction>): Boolean {
+        var prevRefundAmount = refundAmount
+        for (transaction in allTransactions) prevRefundAmount += transaction.amount!!
+        if (prevRefundAmount > prevTotalAmount) return false
+        return true
     }
 
     private fun executeIdempotentTransactionOperation(
@@ -388,7 +400,7 @@ class TransactionService(
                     reason = paymentInfo.paymentData.reason,
                     status = pspPaymentResponse.status ?: TransactionStatus.FAIL,
                     action = transactionAction,
-                    paymentMethod = extra.paymentMethod,
+                    paymentMethod = PaymentMethod.valueOf(extra.paymentMethod!!),
                     paymentInfo = objectMapper.writeValueAsString(paymentInfoModel),
                     pspResponse = objectMapper.writeValueAsString(pspPaymentResponse),
                     merchantTransactionId = paymentInfo.purchaseId,

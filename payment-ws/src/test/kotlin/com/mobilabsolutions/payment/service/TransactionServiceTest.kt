@@ -77,9 +77,9 @@ class TransactionServiceTest {
         "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\", \"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}}"
     private val reverseInfo = ReversalRequestModel("some reason")
     private val pspConfigModel = PspConfigModel(
-        PaymentServiceProvider.BS_PAYONE.toString(), "mobilab", "123", "123", "123", null, null, null, null, null, true, null, null, null, null
+        PaymentServiceProvider.BS_PAYONE.name, "mobilab", "123", "123", "123", null, null, null, null, null, true, null, null, null, null
     )
-    private val aliasExtra = AliasExtraModel(null, null, null, PersonalDataModel(null, null, null, "Mustermann", null, null, "Berlin", "DE", null), PaymentMethod.CC, null)
+    private val aliasExtra = AliasExtraModel(null, null, null, PersonalDataModel(null, null, null, "Mustermann", null, null, "Berlin", "DE", null), PaymentMethod.CC.name, null)
     private val merchantTransactionId = "12345"
 
     @InjectMocks
@@ -150,7 +150,7 @@ class TransactionServiceTest {
             )
         ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
         Mockito.`when`(
-            psp.refund(PspRefundRequestModel(pspTransactionId, 1, "EUR", TransactionAction.AUTH, pspConfigModel, null, PaymentMethod.CC), test
+            psp.refund(PspRefundRequestModel(pspTransactionId, 1, "EUR", TransactionAction.AUTH, pspConfigModel, null, PaymentMethod.CC.name), test
             )
         ).thenReturn(PspPaymentResponseModel(pspTransactionId, TransactionStatus.SUCCESS, customerId, null, null))
         Mockito.`when`(
@@ -264,7 +264,8 @@ class TransactionServiceTest {
             )
         ).thenReturn(
             Transaction(
-                amount = 1,
+                amount = 50,
+                transactionId = correctTransactionId,
                 currencyId = "EUR",
                 pspTestMode = test,
                 action = TransactionAction.AUTH,
@@ -273,6 +274,19 @@ class TransactionServiceTest {
                 alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
                 pspResponse = pspResponse)
         )
+        Mockito.`when`(transactionRepository.getByTransactionIdAndActionAndStatus(correctTransactionId, "REFUND", "SUCCESS"))
+            .thenReturn(listOf(
+                Transaction(
+                    amount = 1,
+                    transactionId = correctTransactionId,
+                    currencyId = "EUR",
+                    pspTestMode = test,
+                    action = TransactionAction.AUTH,
+                    paymentMethod = PaymentMethod.CC,
+                    merchant = Merchant("1", pspConfig = pspConfig),
+                    alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
+                    pspResponse = pspResponse)
+            ))
     }
 
     @Test

@@ -1,28 +1,27 @@
 package com.mobilabsolutions.payment.validation;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Set;
-import java.util.stream.Collectors;
+import javax.validation.Constraint;
+import javax.validation.Payload;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-public final class CountryCodeValidator implements ConstraintValidator<CountryCode, String> {
+@Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER })
+@Retention(RUNTIME)
+@Documented
+@Constraint(validatedBy = { CountryCodeValidatorImpl.class })
+public @interface CountryCodeValidator {
 
-    private static Set<String> ISO_COUNTRY_CODES = Arrays.stream(Locale.getISOCountries()).map(String::toLowerCase)
-            .collect(Collectors.toSet());
+    String message() default "Invalid country code.";
 
-    @Override
-    public void initialize(CountryCode constraintAnnotation) {
-        // do nothing
-    }
+    Class<?>[]groups() default {};
 
-    @Override
-    public boolean isValid(String value, ConstraintValidatorContext context) {
-        return value == null || ISO_COUNTRY_CODES.contains(value.toLowerCase());
-    }
-
+    Class<? extends Payload>[]payload() default {};
 }
