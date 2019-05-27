@@ -5,13 +5,15 @@ import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.PaymentInfoModel
 import com.mobilabsolutions.payment.model.TransactionModel
+import com.mobilabsolutions.payment.model.TransactionTimelineModel
 import com.mobilabsolutions.payment.model.response.TransactionDetailsResponseModel
 import com.mobilabsolutions.payment.model.response.TransactionListResponseModel
-import com.mobilabsolutions.payment.model.TransactionTimelineModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
@@ -23,6 +25,9 @@ class TransactionDetailsService(
     private val merchantRepository: MerchantRepository,
     private val objectMapper: ObjectMapper
 ) {
+
+    val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS Z")
+            .withZone(ZoneId.of("Europe/Berlin"))
 
     /**
      * Get transaction by ID
@@ -39,6 +44,7 @@ class TransactionDetailsService(
         val timelineTransactions = transactionRepository.getTransactionDetails(transactionId)
 
         return TransactionDetailsResponseModel(
+            dateTimeFormatter.format(transaction.createdDate),
             transaction.transactionId,
             transaction.currencyId,
             transaction.amount,
