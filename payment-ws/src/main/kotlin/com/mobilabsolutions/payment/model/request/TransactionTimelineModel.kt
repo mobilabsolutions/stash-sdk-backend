@@ -1,4 +1,4 @@
-package com.mobilabsolutions.payment.model.response
+package com.mobilabsolutions.payment.model.request
 
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
@@ -9,7 +9,7 @@ import java.text.SimpleDateFormat
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
 @ApiModel(value = "Timeline Model")
-data class TimelineModel(
+data class TransactionTimelineModel(
     @ApiModelProperty(value = "Amount in smallest currency unit (e.g. cent)", example = "2000")
     val amount: Int?,
 

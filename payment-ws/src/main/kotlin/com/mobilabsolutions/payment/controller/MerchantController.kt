@@ -35,7 +35,6 @@ class MerchantController(
         const val MERCHANT_PSP_CONFIG_URL = "/{Merchant-Id}/psp/{Psp-Id}"
         const val TRANSACTION_ID_URL = "/{Merchant-Id}/transactions/{Transaction-Id}"
         const val TRANSACTION_URL = "/{Merchant-Id}/transactions"
-        const val TRANSACTION_DETAILS_URL = "/{Merchant-Id}/transactions/{Transaction-Id}/details"
     }
 
     @ApiOperation(value = "Create merchant")
@@ -144,7 +143,7 @@ class MerchantController(
     fun getTransaction(
         @PathVariable("Merchant-Id") merchantId: String,
         @PathVariable(value = "Transaction-Id") transactionId: String
-    ) = transactionDetailsService.getTransaction(merchantId, transactionId)
+    ) = transactionDetailsService.getTransactionDetails(merchantId, transactionId)
 
     @ApiOperation(value = "Get transactions")
     @ApiResponses(

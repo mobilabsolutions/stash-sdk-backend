@@ -5,9 +5,9 @@ import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.PaymentInfoModel
 import com.mobilabsolutions.payment.model.TransactionModel
-import com.mobilabsolutions.payment.model.response.TimelineModel
 import com.mobilabsolutions.payment.model.response.TransactionDetailsResponseModel
 import com.mobilabsolutions.payment.model.response.TransactionListResponseModel
+import com.mobilabsolutions.payment.model.request.TransactionTimelineModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import org.springframework.stereotype.Service
@@ -31,12 +31,12 @@ class TransactionDetailsService(
      * @param transactionId Transaction ID
      * @return transaction details by id response
      */
-    fun getTransaction(merchantId: String, transactionId: String): TransactionDetailsResponseModel {
+    fun getTransactionDetails(merchantId: String, transactionId: String): TransactionDetailsResponseModel {
         merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transaction = transactionRepository.getByTransactionId(transactionId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_FOUND).asException()
-        val timelineTransactions = transactionRepository.getTransactionsByTimeline(transactionId)
+        val timelineTransactions = transactionRepository.getTransactionDetails(transactionId)
 
         return TransactionDetailsResponseModel(
             transaction.transactionId,
@@ -52,7 +52,7 @@ class TransactionDetailsService(
             transaction.pspTestMode,
             transaction.merchant.id,
             transaction.alias!!.id,
-            timelineTransactions.asSequence().map { TimelineModel(it) }.toMutableList()
+            timelineTransactions.asSequence().map { TransactionTimelineModel(it) }.toMutableList()
         )
     }
 

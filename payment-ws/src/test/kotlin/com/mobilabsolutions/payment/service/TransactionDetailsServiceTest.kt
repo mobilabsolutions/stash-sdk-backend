@@ -93,14 +93,14 @@ class TransactionDetailsServiceTest {
 
     @Test
     fun `get transaction by id successfully`() {
-        val transaction = transactionDetailsService.getTransaction(merchantId, correctTransactionId)
+        val transaction = transactionDetailsService.getTransactionDetails(merchantId, correctTransactionId)
         Assertions.assertNotNull(transaction)
     }
 
     @Test
     fun `get transaction by id unsuccessfully`() {
         Assertions.assertThrows(ApiException::class.java) {
-            transactionDetailsService.getTransaction(merchantId, wrongTransactionId)
+            transactionDetailsService.getTransactionDetails(merchantId, wrongTransactionId)
         }
     }
 
