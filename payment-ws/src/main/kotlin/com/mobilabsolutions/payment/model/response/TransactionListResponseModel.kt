@@ -1,5 +1,6 @@
 package com.mobilabsolutions.payment.model.response
 
+import com.mobilabsolutions.payment.model.TransactionListMetadata
 import com.mobilabsolutions.payment.model.TransactionModel
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
@@ -21,18 +22,3 @@ data class TransactionListResponseModel(
         transactions.asSequence().map { TransactionModel(it) }.toMutableList()
     )
 }
-
-@ApiModel(value = "Transaction list metadata")
-data class TransactionListMetadata(
-    @ApiModelProperty(value = "Total transaction count")
-    val totalCount: BigInteger?,
-
-    @ApiModelProperty(value = "Returned transaction count")
-    val pageCount: Int?,
-
-    @ApiModelProperty(value = "Transaction list offset")
-    val offset: Int?,
-
-    @ApiModelProperty(value = "Transaction list limit")
-    val limit: Int?
-)
