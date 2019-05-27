@@ -35,7 +35,7 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
 
     @Query(
         "SELECT tr.transaction_id, tr.amount, tr.currency_id, tr.status, tr.action, tr.reason, tr.merchant_customer_id, " +
-            "COALESCE(CAST(tr.payment_info AS json)#>>'{extra, ccConfig, ccType}', tr.payment_method), tr.created_date FROM transaction_record tr " +
+            "COALESCE(CAST(tr.payment_info AS json)#>>'{extra, ccConfig, ccType}', tr.payment_method), tr.created_date, count(*) OVER() AS full_count FROM transaction_record tr " +
             "JOIN (" +
             "SELECT transaction_id, max(created_date) max_created_date " +
             "FROM transaction_record " +

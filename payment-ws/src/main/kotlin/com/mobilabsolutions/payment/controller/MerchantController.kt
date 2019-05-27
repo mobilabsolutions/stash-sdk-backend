@@ -173,5 +173,5 @@ class MerchantController(
         @RequestParam(required = false) limit: Int?,
         @RequestParam(required = false) offset: Int?
     ) = transactionDetailsService.getTransactionsByFilters(merchantId, createdAtStart, createdAtEnd, paymentMethod,
-        action, status, text, limit, offset)
+        action, status, text, limit ?: 10, offset ?: 0)
 }

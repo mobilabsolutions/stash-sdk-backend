@@ -90,7 +90,7 @@ class TransactionDetailsServiceTest {
         Mockito.`when`(transactionRepository.getTransactionsByFilters(merchantId, null, null, paymentMethod.name, action.name, status.name, "some", limit, offset))
             .thenReturn(listOf(arrayOf(correctTransactionId, amount, currency, status.name, action.name, "some reason", "some customer id", paymentMethod.name, Timestamp(
                 Date().time
-            ))))
+            ), 1.toBigInteger())))
     }
 
     @Test
@@ -109,12 +109,6 @@ class TransactionDetailsServiceTest {
     @Test
     fun `filter transactions successfully`() {
         val transactionList = transactionDetailsService.getTransactionsByFilters(merchantId, null, null, paymentMethod.name, action.name, status.name, "some", limit, offset)
-        Assertions.assertEquals(transactionList.transactions.size, 1)
-    }
-
-    @Test
-    fun `filter transactions successfully with default limit and offset`() {
-        val transactionList = transactionDetailsService.getTransactionsByFilters(merchantId, null, null, paymentMethod.name, action.name, status.name, "some", null, null)
         Assertions.assertEquals(transactionList.transactions.size, 1)
     }
 

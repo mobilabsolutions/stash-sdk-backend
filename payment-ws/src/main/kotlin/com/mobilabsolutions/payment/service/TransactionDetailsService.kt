@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.PaymentInfoModel
-import com.mobilabsolutions.payment.model.TransactionModel
 import com.mobilabsolutions.payment.model.TransactionTimelineModel
 import com.mobilabsolutions.payment.model.response.TransactionDetailsResponseModel
 import com.mobilabsolutions.payment.model.response.TransactionListResponseModel
@@ -72,6 +71,8 @@ class TransactionDetailsService(
      * @param action action
      * @param status status
      * @param text any transaction related information
+     * @param limit requested transaction list limit
+     * @param offset requested transaction list offset
      * @return filtered transaction list
      */
     fun getTransactionsByFilters(
@@ -88,9 +89,9 @@ class TransactionDetailsService(
         merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transactions = transactionRepository.getTransactionsByFilters(merchantId, createdAtStart, createdAtEnd, paymentMethod,
-            action, status, text, limit ?: 10, offset ?: 0)
+            action, status, text, limit, offset)
 
-        val transactionList = TransactionListResponseModel(transactions.asSequence().map { TransactionModel(it) }.toMutableList())
+        val transactionList = TransactionListResponseModel(transactions, offset, limit)
         if (transactionList.transactions.isEmpty()) throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTIONS_NOT_FOUND).asException()
         return transactionList
     }
