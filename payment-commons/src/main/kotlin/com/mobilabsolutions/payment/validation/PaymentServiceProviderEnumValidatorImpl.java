@@ -11,19 +11,15 @@ import java.util.List;
 
 public class PaymentServiceProviderEnumValidatorImpl implements ConstraintValidator<PaymentServiceProviderEnumValidator, String> {
 
-    List<String> valueList = null;
+    private List<String> valueList = new ArrayList<>();
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        if(!valueList.contains(value.toUpperCase())) {
-            return false;
-        }
-        return true;
+        return valueList.contains(value.toUpperCase());
     }
 
     @Override
     public void initialize(PaymentServiceProviderEnumValidator constraintAnnotation) {
-        valueList = new ArrayList<String>();
         Class<? extends Enum<?>> enumClass = constraintAnnotation.PaymentServiceProvider();
 
         @SuppressWarnings("rawtypes")

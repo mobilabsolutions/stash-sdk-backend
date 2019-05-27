@@ -4,14 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.PaymentInfoModel
-import com.mobilabsolutions.payment.model.TransactionModel
+import com.mobilabsolutions.payment.model.TransactionTimelineModel
 import com.mobilabsolutions.payment.model.response.TransactionDetailsResponseModel
 import com.mobilabsolutions.payment.model.response.TransactionListResponseModel
-import com.mobilabsolutions.payment.model.TransactionTimelineModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
@@ -23,6 +24,9 @@ class TransactionDetailsService(
     private val merchantRepository: MerchantRepository,
     private val objectMapper: ObjectMapper
 ) {
+
+    val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS Z")
+            .withZone(ZoneId.of("Europe/Berlin"))
 
     /**
      * Get transaction by ID
@@ -39,6 +43,7 @@ class TransactionDetailsService(
         val timelineTransactions = transactionRepository.getTransactionDetails(transactionId)
 
         return TransactionDetailsResponseModel(
+            dateTimeFormatter.format(transaction.createdDate),
             transaction.transactionId,
             transaction.currencyId,
             transaction.amount,
@@ -57,18 +62,37 @@ class TransactionDetailsService(
     }
 
     /**
-     * Get transactions by limit and offset
+     * Get transactions by given filters
      *
-     * @param merchantId Merchant ID
-     * @param limit limit
-     * @param offset offset
-     * @return transaction list
+     * @param merchantId
+     * @param createdAtStart created date start
+     * @param createdAtEnd created date end
+     * @param paymentMethod payment method
+     * @param action action
+     * @param status status
+     * @param text any transaction related information
+     * @param limit requested transaction list limit
+     * @param offset requested transaction list offset
+     * @return filtered transaction list
      */
-    fun getTransactions(merchantId: String, limit: Int?, offset: Int?): TransactionListResponseModel {
+    fun getTransactionsByFilters(
+        merchantId: String,
+        createdAtStart: String?,
+        createdAtEnd: String?,
+        paymentMethod: String?,
+        action: String?,
+        status: String?,
+        text: String?,
+        limit: Int?,
+        offset: Int?
+    ): TransactionListResponseModel {
         merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        val transactions = transactionRepository.getTransactionsByLimitAndOffset(merchantId, limit ?: 10, offset ?: 0)
+        val transactions = transactionRepository.getTransactionsByFilters(merchantId, createdAtStart, createdAtEnd, paymentMethod,
+            action, status, text, limit, offset)
 
-        return TransactionListResponseModel(transactions.asSequence().map { TransactionModel(it) }.toMutableList())
+        val transactionList = TransactionListResponseModel(transactions, offset, limit)
+        if (transactionList.transactions.isEmpty()) throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTIONS_NOT_FOUND).asException()
+        return transactionList
     }
 }

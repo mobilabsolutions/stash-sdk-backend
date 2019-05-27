@@ -5,12 +5,14 @@ import com.mobilabsolutions.payment.model.request.PspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspUpsertConfigRequestModel
 import com.mobilabsolutions.payment.service.MerchantService
 import com.mobilabsolutions.payment.service.TransactionDetailsService
+import com.mobilabsolutions.payment.validation.DateValidator
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -25,6 +27,7 @@ import javax.validation.Valid
  */
 @RestController
 @RequestMapping(MerchantController.BASE_MERCHANT_URL)
+@Validated
 class MerchantController(
     private val merchantService: MerchantService,
     private val transactionDetailsService: TransactionDetailsService
@@ -145,7 +148,7 @@ class MerchantController(
         @PathVariable(value = "Transaction-Id") transactionId: String
     ) = transactionDetailsService.getTransactionDetails(merchantId, transactionId)
 
-    @ApiOperation(value = "Get transactions")
+    @ApiOperation(value = "Filter transactions")
     @ApiResponses(
         ApiResponse(code = 200, message = "Successfully queried transactions"),
         ApiResponse(code = 401, message = "Unauthorized access"),
@@ -159,9 +162,16 @@ class MerchantController(
     )
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
-    fun getTransactions(
+    fun getTransactionsByFilters(
         @PathVariable("Merchant-Id") merchantId: String,
+        @DateValidator @RequestParam(required = false) createdAtStart: String?,
+        @DateValidator @RequestParam(required = false) createdAtEnd: String?,
+        @RequestParam(required = false) paymentMethod: String?,
+        @RequestParam(required = false) action: String?,
+        @RequestParam(required = false) status: String?,
+        @RequestParam(required = false) text: String?,
         @RequestParam(required = false) limit: Int?,
         @RequestParam(required = false) offset: Int?
-    ) = transactionDetailsService.getTransactions(merchantId, limit, offset)
+    ) = transactionDetailsService.getTransactionsByFilters(merchantId, createdAtStart, createdAtEnd, paymentMethod,
+        action, status, text, limit ?: 10, offset ?: 0)
 }

@@ -10,6 +10,9 @@ import io.swagger.annotations.ApiModelProperty
  */
 @ApiModel(value = "Transaction Details Response")
 data class TransactionDetailsResponseModel(
+    @ApiModelProperty(value = "Created date", example = "2018-12-31 23:59:59.999 +0100")
+    val createdDate: String?,
+
     @ApiModelProperty(value = "Transaction id", example = "frtdqw7m")
     val transactionId: String?,
 
