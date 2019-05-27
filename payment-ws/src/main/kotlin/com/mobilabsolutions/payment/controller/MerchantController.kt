@@ -165,7 +165,7 @@ class MerchantController(
     fun getTransactionsByFilters(
         @PathVariable("Merchant-Id") merchantId: String,
         @DateValidator @RequestParam(required = false) createdAtStart: String?,
-        @RequestParam(required = false) @DateValidator createdAtEnd: String?,
+        @DateValidator @RequestParam(required = false) createdAtEnd: String?,
         @RequestParam(required = false) paymentMethod: String?,
         @RequestParam(required = false) action: String?,
         @RequestParam(required = false) status: String?,
