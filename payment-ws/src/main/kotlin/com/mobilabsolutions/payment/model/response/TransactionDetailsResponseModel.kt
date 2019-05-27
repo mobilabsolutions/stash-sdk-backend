@@ -1,7 +1,7 @@
 package com.mobilabsolutions.payment.model.response
 
 import com.mobilabsolutions.payment.model.PaymentInfoModel
-import com.mobilabsolutions.payment.model.request.TransactionTimelineModel
+import com.mobilabsolutions.payment.model.TransactionTimelineModel
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 

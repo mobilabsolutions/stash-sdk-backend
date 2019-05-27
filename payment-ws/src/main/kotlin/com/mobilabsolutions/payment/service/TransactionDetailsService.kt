@@ -7,7 +7,7 @@ import com.mobilabsolutions.payment.model.PaymentInfoModel
 import com.mobilabsolutions.payment.model.TransactionModel
 import com.mobilabsolutions.payment.model.response.TransactionDetailsResponseModel
 import com.mobilabsolutions.payment.model.response.TransactionListResponseModel
-import com.mobilabsolutions.payment.model.request.TransactionTimelineModel
+import com.mobilabsolutions.payment.model.TransactionTimelineModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import org.springframework.stereotype.Service
