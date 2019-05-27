@@ -17,7 +17,6 @@ public final class CountryCodeValidatorImpl implements ConstraintValidator<Count
 
     @Override
     public void initialize(CountryCodeValidator constraintAnnotation) {
-        // do nothing
     }
 
     @Override

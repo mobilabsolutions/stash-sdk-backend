@@ -5,13 +5,14 @@ import com.mobilabsolutions.payment.model.request.PspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspUpsertConfigRequestModel
 import com.mobilabsolutions.payment.service.MerchantService
 import com.mobilabsolutions.payment.service.TransactionDetailsService
+import com.mobilabsolutions.payment.validation.DateValidator
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
-import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -26,6 +27,7 @@ import javax.validation.Valid
  */
 @RestController
 @RequestMapping(MerchantController.BASE_MERCHANT_URL)
+@Validated
 class MerchantController(
     private val merchantService: MerchantService,
     private val transactionDetailsService: TransactionDetailsService
@@ -162,8 +164,8 @@ class MerchantController(
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun getTransactionsByFilters(
         @PathVariable("Merchant-Id") merchantId: String,
-        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS") createdAtStart: String?,
-        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS") createdAtEnd: String?,
+        @DateValidator @RequestParam(required = false) createdAtStart: String?,
+        @RequestParam(required = false) @DateValidator createdAtEnd: String?,
         @RequestParam(required = false) paymentMethod: String?,
         @RequestParam(required = false) action: String?,
         @RequestParam(required = false) status: String?,
