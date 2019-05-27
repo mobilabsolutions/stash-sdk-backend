@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
 import java.sql.Timestamp
+import java.time.Instant
 import java.util.Date
 
 @ExtendWith(MockitoExtension::class)
@@ -83,6 +84,7 @@ class TransactionDetailsServiceTest {
         Mockito.`when`(merchantRepository.getMerchantById(merchantId)).thenReturn(
             Merchant(merchantId, pspConfig = pspConfig)
         )
+        transaction.createdDate = Instant.now()
         Mockito.`when`(transactionRepository.getByTransactionId(correctTransactionId)).thenReturn(transaction)
         Mockito.`when`(transactionRepository.getByTransactionId(wrongTransactionId)).thenReturn(null)
         Mockito.`when`(transactionRepository.getTransactionsByFilters(merchantId, null, null, paymentMethod.name, action.name, status.name, "some", limit, offset))
@@ -92,13 +94,13 @@ class TransactionDetailsServiceTest {
     }
 
     @Test
-    fun `get transaction by id successfully`() {
+    fun `get transaction details successfully`() {
         val transaction = transactionDetailsService.getTransactionDetails(merchantId, correctTransactionId)
         Assertions.assertNotNull(transaction)
     }
 
     @Test
-    fun `get transaction by id unsuccessfully`() {
+    fun `get transaction details unsuccessfully`() {
         Assertions.assertThrows(ApiException::class.java) {
             transactionDetailsService.getTransactionDetails(merchantId, wrongTransactionId)
         }
