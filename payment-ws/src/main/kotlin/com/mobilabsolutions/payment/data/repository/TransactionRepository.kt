@@ -21,11 +21,14 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
     @Query("SELECT DISTINCT tr FROM Transaction tr WHERE tr.transactionId = :transactionId AND (tr.action = :action1 OR tr.action = :action2) AND (tr.status = :status OR :status IS NULL)")
     fun getByTransactionIdAndActions(@Param("transactionId") transactionId: String, @Param("action1") action1: TransactionAction, @Param("action2") action2: TransactionAction, @Param("status") status: TransactionStatus? = null): Transaction?
 
-    @Query(value = "SELECT * FROM transaction_record tr WHERE tr.transaction_id = :transactionId AND tr.status = :status GROUP BY :transactionId, tr.id ORDER BY tr.created_date DESC LIMIT 1", nativeQuery = true)
+    @Query("SELECT * FROM transaction_record tr WHERE tr.transaction_id = :transactionId AND tr.status = :status GROUP BY :transactionId, tr.id ORDER BY tr.created_date DESC LIMIT 1", nativeQuery = true)
     fun getByTransactionIdAndStatus(@Param("transactionId") transactionId: String, @Param("status") status: String): Transaction?
 
-    @Query(value = "SELECT * FROM transaction_record tr WHERE tr.transaction_id = :transactionId GROUP BY :transactionId, tr.id ORDER BY tr.created_date DESC LIMIT 1", nativeQuery = true)
+    @Query("SELECT * FROM transaction_record tr WHERE tr.transaction_id = :transactionId GROUP BY :transactionId, tr.id ORDER BY tr.created_date DESC LIMIT 1", nativeQuery = true)
     fun getByTransactionId(@Param("transactionId") transactionId: String): Transaction?
+
+    @Query("SELECT tr.amount, tr.reason, tr.action, tr.status, tr.created_date FROM transaction_record tr WHERE tr.transaction_id = :transactionId", nativeQuery = true)
+    fun getTransactionDetails(@Param("transactionId") transactionId: String): List<Array<Any>>
 
     @Query("SELECT * FROM transaction_record tr WHERE tr.transaction_id = :transactionId AND tr.action = :action AND tr.status = :status", nativeQuery = true)
     fun getByTransactionIdAndActionAndStatus(@Param("transactionId") transactionId: String, @Param("action") action: String, @Param("status") status: String): List<Transaction>
