@@ -7,6 +7,7 @@ import com.mobilabsolutions.payment.model.PaymentInfoModel
 import com.mobilabsolutions.payment.model.TransactionModel
 import com.mobilabsolutions.payment.model.response.TransactionDetailsResponseModel
 import com.mobilabsolutions.payment.model.response.TransactionListResponseModel
+import com.mobilabsolutions.payment.model.TransactionTimelineModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import org.springframework.stereotype.Service
@@ -30,26 +31,28 @@ class TransactionDetailsService(
      * @param transactionId Transaction ID
      * @return transaction details by id response
      */
-    fun getTransaction(merchantId: String, transactionId: String): TransactionDetailsResponseModel {
+    fun getTransactionDetails(merchantId: String, transactionId: String): TransactionDetailsResponseModel {
         merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transaction = transactionRepository.getByTransactionId(transactionId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_FOUND).asException()
+        val timelineTransactions = transactionRepository.getTransactionDetails(transactionId)
 
         return TransactionDetailsResponseModel(
             transaction.transactionId,
             transaction.currencyId,
-            transaction.amount.toString(),
+            transaction.amount,
             transaction.reason,
-            transaction.action,
-            transaction.status,
-            transaction.paymentMethod,
+            transaction.action!!.name,
+            transaction.status!!.name,
+            transaction.paymentMethod!!.name,
             objectMapper.readValue(transaction.paymentInfo, PaymentInfoModel::class.java),
             transaction.merchantTransactionId,
             transaction.merchantCustomerId,
             transaction.pspTestMode,
             transaction.merchant.id,
-            transaction.alias!!.id
+            transaction.alias!!.id,
+            timelineTransactions.asSequence().map { TransactionTimelineModel(it) }.toMutableList()
         )
     }
 

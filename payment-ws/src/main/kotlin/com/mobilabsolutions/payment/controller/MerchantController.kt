@@ -143,7 +143,7 @@ class MerchantController(
     fun getTransaction(
         @PathVariable("Merchant-Id") merchantId: String,
         @PathVariable(value = "Transaction-Id") transactionId: String
-    ) = transactionDetailsService.getTransaction(merchantId, transactionId)
+    ) = transactionDetailsService.getTransactionDetails(merchantId, transactionId)
 
     @ApiOperation(value = "Get transactions")
     @ApiResponses(
