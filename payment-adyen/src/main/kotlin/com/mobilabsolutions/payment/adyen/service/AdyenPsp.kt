@@ -194,14 +194,16 @@ class AdyenPsp(
         val adyenMode = getAdyenMode(pspTestMode)
         logger.info("Deleting alias {} for {} mode", pspDeleteAliasRequestModel.aliasId, adyenMode)
 
-        val request = AdyenDeleteAliasRequestModel(
-            shopperReference = pspDeleteAliasRequestModel.customerReference,
-            recurringDetailReference = pspDeleteAliasRequestModel.pspAlias,
-            merchantAccount = if (adyenMode == AdyenMode.TEST.mode)
-                pspDeleteAliasRequestModel.pspConfig?.sandboxMerchantId else pspDeleteAliasRequestModel.pspConfig?.merchantId
-        )
+        if (pspDeleteAliasRequestModel.paymentMethod == PaymentMethod.CC.name) {
+            val request = AdyenDeleteAliasRequestModel(
+                shopperReference = pspDeleteAliasRequestModel.customerReference,
+                recurringDetailReference = pspDeleteAliasRequestModel.pspAlias,
+                merchantAccount = if (adyenMode == AdyenMode.TEST.mode)
+                    pspDeleteAliasRequestModel.pspConfig?.sandboxMerchantId else pspDeleteAliasRequestModel.pspConfig?.merchantId
+            )
 
-        adyenClient.deleteAlias(request, pspDeleteAliasRequestModel.pspConfig!!, adyenMode)
+            adyenClient.deleteAlias(request, pspDeleteAliasRequestModel.pspConfig!!, adyenMode)
+        }
     }
 
     /**
