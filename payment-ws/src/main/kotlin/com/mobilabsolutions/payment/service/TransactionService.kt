@@ -307,12 +307,12 @@ class TransactionService(
     ): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asException()
-        val prevTransaction = transactionRepository.getByTransactionIdAndActions(
-            transactionId,
-            TransactionAction.CAPTURE,
-            TransactionAction.AUTH,
-            TransactionStatus.SUCCESS
-        ) ?: throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_FOUND).asException()
+
+        val transactions = transactionRepository.getListByTransactionIdAndStatus(transactionId, TransactionStatus.SUCCESS.name)
+
+        val prevTransaction = transactions.asSequence().filter { TransactionAction.CAPTURE == it.action || TransactionAction.AUTH == it.action }.firstOrNull() ?: throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_ALLOWED).asException()
+
+        val originalTransaction = transactions.asSequence().filter { TransactionAction.PREAUTH == it.action || TransactionAction.AUTH == it.action }.firstOrNull()
 
         val alias = prevTransaction.alias
         val psp = pspRegistry.find(alias!!.psp!!)
@@ -321,9 +321,9 @@ class TransactionService(
         if (prevTransaction.merchant.id != apiKey.merchant.id)
             throw ApiError.ofErrorCode(ApiErrorCode.WRONG_ALIAS_MERCHANT_MAPPING).asException()
 
-        val allTransactions = transactionRepository.getByTransactionIdAndActionAndStatus(prevTransaction.transactionId!!, TransactionAction.REFUND.name, TransactionStatus.SUCCESS.name)
+        val allRefundTransactions = transactions.asSequence().filter { TransactionAction.REFUND == it.action }.toMutableList()
 
-        if (!checkRefundEligibility(prevTransaction.amount!!, refundInfo.amount!!, allTransactions))
+        if (!checkRefundEligibility(prevTransaction.amount!!, refundInfo.amount!!, allRefundTransactions))
             throw ApiError.ofErrorCode(ApiErrorCode.INCORRECT_REFUND_VALUE).asException()
 
         val paymentRequestModel = PaymentRequestModel(
@@ -333,7 +333,7 @@ class TransactionService(
             prevTransaction.merchantCustomerId
         )
         val pspRefundRequest = PspRefundRequestModel(
-            pspTransactionId = getPspPaymentResponse(prevTransaction).pspTransactionId,
+            pspTransactionId = getPspPaymentResponse(originalTransaction).pspTransactionId,
             amount = refundInfo.amount,
             currency = prevTransaction.currencyId,
             action = prevTransaction.action,
@@ -434,8 +434,8 @@ class TransactionService(
         )
     }
 
-    private fun getPspPaymentResponse(transaction: Transaction): PspPaymentResponseModel {
-        return objectMapper.readValue(transaction.pspResponse, PspPaymentResponseModel::class.java)
+    private fun getPspPaymentResponse(transaction: Transaction?): PspPaymentResponseModel {
+        return objectMapper.readValue(transaction?.pspResponse, PspPaymentResponseModel::class.java)
     }
 
     private fun getPspConfig(alias: Alias): PspConfigModel {
