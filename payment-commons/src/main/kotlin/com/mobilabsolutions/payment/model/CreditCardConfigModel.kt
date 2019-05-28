@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModelProperty
 
 @ApiModel(value = "Credit Card Configuration")
 data class CreditCardConfigModel(
-    @ApiModelProperty(value = "Credit card mask", example = "1114")
+    @ApiModelProperty(value = "Credit card mask", example = "VISA-1111")
     val ccMask: String?,
 
     @ApiModelProperty(value = "Credit card expiry", example = "11/20")
