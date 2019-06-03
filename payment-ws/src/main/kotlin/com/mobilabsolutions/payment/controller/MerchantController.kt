@@ -200,10 +200,10 @@ class MerchantController(
         @PathVariable(value = "Transaction-Id") transactionId: String
     ) = transactionService.dashboardCapture(merchantId, pspTestMode, transactionId)
 
-    @ApiOperation(value = "Capture transaction")
+    @ApiOperation(value = "Reverse transaction")
     @ApiResponses(
-        ApiResponse(code = 200, message = "Successfully captured transaction"),
-        ApiResponse(code = 400, message = "Failed to capture transaction"),
+        ApiResponse(code = 200, message = "Successfully reversed transaction"),
+        ApiResponse(code = 400, message = "Failed to reverse transaction"),
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 404, message = "Not found")
     )
@@ -217,10 +217,10 @@ class MerchantController(
         @Valid @RequestBody reverseInfo: ReversalRequestModel
     ) = transactionService.dashboardReverse(merchantId, pspTestMode, transactionId, reverseInfo)
 
-    @ApiOperation(value = "Capture transaction")
+    @ApiOperation(value = "Refund transaction")
     @ApiResponses(
-        ApiResponse(code = 200, message = "Successfully captured transaction"),
-        ApiResponse(code = 400, message = "Failed to capture transaction"),
+        ApiResponse(code = 200, message = "Successfully refunded transaction"),
+        ApiResponse(code = 400, message = "Failed to refund transaction"),
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 404, message = "Not found")
     )

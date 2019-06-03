@@ -163,14 +163,6 @@ class TransactionService(
         return capture(pspTestMode, transactionId, apiKey.merchant)
     }
 
-    /**
-     * Capture transaction
-     *
-     * @param pspTestMode indicator whether is the test mode or not
-     * @param transactionId Transaction ID
-     * @param merchant Merchant
-     * @return Payment response model
-     */
     private fun capture(
         pspTestMode: Boolean?,
         transactionId: String,
@@ -282,15 +274,6 @@ class TransactionService(
         return reverse(pspTestMode, transactionId, reverseInfo, apiKey.merchant)
     }
 
-    /**
-     * Reverse transaction
-     *
-     * @param pspTestMode indicator whether is the test mode or not
-     * @param transactionId Transaction ID
-     * @param reverseInfo Reversion request model
-     * @param merchant Merchant
-     * @return Payment response model
-     */
     private fun reverse(
         pspTestMode: Boolean?,
         transactionId: String,
@@ -406,15 +389,6 @@ class TransactionService(
         return refund(idempotentKey, pspTestMode, transactionId, refundInfo, apiKey.merchant)
     }
 
-    /**
-     * Refund transaction
-     *
-     * @param idempotentKey Idempotent key
-     * @param pspTestMode indicator whether is the test mode or not
-     * @param transactionId Transaction ID
-     * @param refundInfo Payment information
-     * @return Payment response model
-     */
     private fun refund(
         idempotentKey: String,
         pspTestMode: Boolean?,
