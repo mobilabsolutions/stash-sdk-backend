@@ -12,6 +12,7 @@ import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
+import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
@@ -52,6 +53,8 @@ class TransactionServiceTest {
     private val correctSecretKey = "correct key"
     private val someSecretKey = "some secret key"
     private val wrongSecretKey = "wrong key"
+    private val correctMerchantId = "merchant id"
+    private val wrongMerchantId = "wrong id"
     private val correctAliasId = "correct alias id"
     private val wrongAliasId = "wrong alias id"
     private val purchaseId = "purchase id"
@@ -67,7 +70,6 @@ class TransactionServiceTest {
     private val test = true
     private val preauthAction = TransactionAction.PREAUTH
     private val authAction = TransactionAction.AUTH
-    private val captureAction = TransactionAction.CAPTURE
     private val correctPaymentData = PaymentDataRequestModel(1, "EUR", "reason")
     private val wrongPaymentData = PaymentDataRequestModel(2, "EUR", "reason")
     private val pspResponse = "{\"pspTransactionId\":\"325105132\",\"status\":\"SUCCESS\",\"customerId\":\"160624370\"}"
@@ -95,6 +97,9 @@ class TransactionServiceTest {
     private lateinit var aliasIdRepository: AliasRepository
 
     @Mock
+    private lateinit var merchantRepository: MerchantRepository
+
+    @Mock
     private lateinit var psp: Psp
 
     @Mock
@@ -114,7 +119,7 @@ class TransactionServiceTest {
                 correctSecretKey
             )
         ).thenReturn(
-            MerchantApiKey(active = true, merchant = Merchant("1", pspConfig = pspConfig))
+            MerchantApiKey(active = true, merchant = Merchant(correctMerchantId, pspConfig = pspConfig))
         )
         Mockito.`when`(
             merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(
@@ -123,10 +128,12 @@ class TransactionServiceTest {
                 someSecretKey
             )
         ).thenReturn(
-            MerchantApiKey(active = true, merchant = Merchant("1", pspConfig = pspConfig))
+            MerchantApiKey(active = true, merchant = Merchant(correctMerchantId, pspConfig = pspConfig))
         )
+        Mockito.`when`(merchantRepository.getMerchantById(correctMerchantId)).thenReturn(Merchant(correctMerchantId, pspConfig = pspConfig))
+        Mockito.`when`(merchantRepository.getMerchantById(wrongMerchantId)).thenReturn(null)
         Mockito.`when`(aliasIdRepository.getFirstByIdAndActive(correctAliasId, true)).thenReturn(
-            Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig))
+            Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig))
         )
         Mockito.`when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
         Mockito.`when`(
@@ -157,36 +164,36 @@ class TransactionServiceTest {
             transactionRepository.getByIdempotentKeyAndActionAndMerchantAndAlias(
                 newIdempotentKey,
                 preauthAction,
-                merchant = Merchant("1", pspConfig = pspConfig),
-                alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig))))
+                merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
+                alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig))))
             .thenReturn(null)
         Mockito.`when`(transactionRepository.getByIdempotentKeyAndActionAndMerchantAndAlias(
             usedIdempotentKey,
             preauthAction,
-            merchant = Merchant("1", pspConfig = pspConfig),
-            alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig))))
+            merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
+            alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig))))
             .thenReturn(Transaction(
                 amount = 1,
                 currencyId = "EUR",
                 transactionId = correctTransactionId,
                 pspTestMode = test,
                 action = TransactionAction.PREAUTH,
-                merchant = Merchant("1", pspConfig = pspConfig),
+                merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
                 paymentMethod = PaymentMethod.CC,
-                alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
+                alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig)),
                 pspResponse = pspResponse)
             )
         Mockito.`when`(transactionRepository.getByIdempotentKeyAndActionAndMerchantAndAlias(
             newIdempotentKey,
             authAction,
-            merchant = Merchant("1", pspConfig = pspConfig),
-            alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig))))
+            merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
+            alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig))))
             .thenReturn(null)
         Mockito.`when`(transactionRepository.getByIdempotentKeyAndActionAndMerchantAndAlias(
             usedIdempotentKey,
             authAction,
-            merchant = Merchant("1", pspConfig = pspConfig),
-            alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig))))
+            merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
+            alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig))))
             .thenReturn(Transaction(
                 amount = 1,
                 currencyId = "EUR",
@@ -194,8 +201,8 @@ class TransactionServiceTest {
                 pspTestMode = test,
                 action = TransactionAction.AUTH,
                 paymentMethod = PaymentMethod.CC,
-                merchant = Merchant("1", pspConfig = pspConfig),
-                alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
+                merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
+                alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig)),
                 pspResponse = pspResponse)
             )
         Mockito.`when`(
@@ -211,8 +218,8 @@ class TransactionServiceTest {
                 pspTestMode = test,
                 action = TransactionAction.PREAUTH,
                 paymentMethod = PaymentMethod.CC,
-                merchant = Merchant("1", pspConfig = pspConfig),
-                alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
+                merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
+                alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig)),
                 pspResponse = pspResponse,
                 merchantTransactionId = merchantTransactionId
             )
@@ -230,8 +237,8 @@ class TransactionServiceTest {
                 pspTestMode = test,
                 action = TransactionAction.CAPTURE,
                 paymentMethod = PaymentMethod.CC,
-                merchant = Merchant("1", pspConfig = pspConfig),
-                alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
+                merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
+                alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig)),
                 pspResponse = pspResponse,
                 merchantTransactionId = merchantTransactionId
             )
@@ -249,8 +256,8 @@ class TransactionServiceTest {
                 pspTestMode = test,
                 action = TransactionAction.REVERSAL,
                 paymentMethod = PaymentMethod.CC,
-                merchant = Merchant("1", pspConfig = pspConfig),
-                alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
+                merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
+                alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig)),
                 pspResponse = pspResponse,
                 merchantTransactionId = merchantTransactionId
             )
@@ -266,14 +273,14 @@ class TransactionServiceTest {
                     pspTestMode = test,
                     action = TransactionAction.AUTH,
                     paymentMethod = PaymentMethod.CC,
-                    merchant = Merchant("1", pspConfig = pspConfig),
+                    merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
                     alias = Alias(
                         id = correctAliasId,
                         active = true,
                         extra = extra,
                         psp = PaymentServiceProvider.BS_PAYONE,
                         pspAlias = pspAlias,
-                        merchant = Merchant("1", pspConfig = pspConfig)
+                        merchant = Merchant(correctMerchantId, pspConfig = pspConfig)
                     ),
                     pspResponse = pspResponse
                 ), Transaction(
@@ -283,14 +290,14 @@ class TransactionServiceTest {
                     pspTestMode = test,
                     action = TransactionAction.REFUND,
                     paymentMethod = PaymentMethod.CC,
-                    merchant = Merchant("1", pspConfig = pspConfig),
+                    merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
                     alias = Alias(
                         id = correctAliasId,
                         active = true,
                         extra = extra,
                         psp = PaymentServiceProvider.BS_PAYONE,
                         pspAlias = pspAlias,
-                        merchant = Merchant("1", pspConfig = pspConfig)
+                        merchant = Merchant(correctMerchantId, pspConfig = pspConfig)
                     ),
                     pspResponse = pspResponse
                 )
@@ -641,5 +648,41 @@ class TransactionServiceTest {
             correctTransactionId,
             correctPaymentData
         )
+    }
+
+    @Test
+    fun `capture transaction from dashboard successfully`() {
+        transactionService.dashboardCapture(correctMerchantId, test, correctTransactionId)
+    }
+
+    @Test
+    fun `capture transaction from dashboard with wrong merchant id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            transactionService.dashboardCapture(wrongMerchantId, test, correctTransactionId)
+        }
+    }
+
+    @Test
+    fun `reverse transaction from dashboard successfully`() {
+        transactionService.dashboardReverse(correctMerchantId, test, correctTransactionId, reverseInfo)
+    }
+
+    @Test
+    fun `reverse transaction from dashboard with wrong merchant id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            transactionService.dashboardReverse(wrongMerchantId, test, correctTransactionId, reverseInfo)
+        }
+    }
+
+    @Test
+    fun `refund transaction from dashboard successfully`() {
+        transactionService.dashboardRefund(correctMerchantId, newIdempotentKey, test, correctTransactionId, correctPaymentData)
+    }
+
+    @Test
+    fun `refund transaction from dashboard with wrong merchant id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            transactionService.dashboardRefund(wrongMerchantId, newIdempotentKey, test, correctTransactionId, correctPaymentData)
+        }
     }
 }
