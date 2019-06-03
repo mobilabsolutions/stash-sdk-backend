@@ -37,10 +37,11 @@ class AliasController(private val aliasService: AliasService) {
     fun createAlias(
         @RequestHeader(value = "Publishable-Key") publishableKey: String,
         @RequestHeader(value = "PSP-Type") pspType: String,
+        @RequestHeader(value = "User-Agent", required = false) userAgent: String?,
         @Size(min = 10, max = 40) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
         @Valid @RequestBody(required = false) dynamicPspConfig: DynamicPspConfigRequestModel?
-    ) = aliasService.createAlias(publishableKey, pspType, idempotentKey, dynamicPspConfig, pspTestMode)
+    ) = aliasService.createAlias(publishableKey, pspType, idempotentKey, userAgent, dynamicPspConfig, pspTestMode)
 
     @ApiOperation(value = "Update the given Alias for payment operations")
     @ApiResponses(
@@ -54,9 +55,10 @@ class AliasController(private val aliasService: AliasService) {
     fun exchangeAlias(
         @RequestHeader(value = "Publishable-Key") publishableKey: String,
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
+        @RequestHeader(value = "User-Agent", required = false) userAgent: String?,
         @PathVariable("Alias-Id") aliasId: String,
         @Valid @RequestBody alias: AliasRequestModel
-    ) = aliasService.exchangeAlias(publishableKey, pspTestMode, aliasId, alias)
+    ) = aliasService.exchangeAlias(publishableKey, pspTestMode, userAgent, aliasId, alias)
 
     @ApiOperation(value = "Delete an Alias")
     @ApiResponses(

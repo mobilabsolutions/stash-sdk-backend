@@ -48,6 +48,7 @@ class AliasServiceTest {
     private val pspType = "some psp type"
     private val pspAlias = "some psp alias"
     private val knownPspType = "BS_PAYONE"
+    private val userAgent = "Android-1.0.0"
     private val merchant = Merchant(id = "mobilab",
         pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
         " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")
@@ -90,6 +91,7 @@ class AliasServiceTest {
         doNothing().`when`(aliasRepository).updateAlias(
             ArgumentMatchers.anyString(),
             ArgumentMatchers.anyString(),
+            ArgumentMatchers.anyString(),
             ArgumentMatchers.anyString()
         )
         Mockito.`when`(pspRegistry.find(PaymentServiceProvider.BS_PAYONE)).thenReturn(psp)
@@ -114,44 +116,44 @@ class AliasServiceTest {
     @Test
     fun `create alias with wrong header parameters`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(unknownPublishableKey, pspType, usedIdempotentKey, DynamicPspConfigRequestModel(null, null, null), true)
+            aliasService.createAlias(unknownPublishableKey, pspType, usedIdempotentKey, userAgent, DynamicPspConfigRequestModel(null, null, null), true)
         }
     }
 
     @Test
     fun `create alias with unknown pspType`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(knownPublishableKey, pspType, usedIdempotentKey, DynamicPspConfigRequestModel(null, null, null), true)
+            aliasService.createAlias(knownPublishableKey, pspType, usedIdempotentKey, userAgent, DynamicPspConfigRequestModel(null, null, null), true)
         }
     }
 
     @Test
     fun `create alias with new idempotent key`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(knownPublishableKey, pspType, newIdempotentKey, DynamicPspConfigRequestModel(null, null, null), true)
+            aliasService.createAlias(knownPublishableKey, pspType, newIdempotentKey, userAgent, DynamicPspConfigRequestModel(null, null, null), true)
         }
     }
 
     @Test
     fun `create alias with used idempotent key`() {
-        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, DynamicPspConfigRequestModel(null, null, null), true)
+        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, userAgent, DynamicPspConfigRequestModel(null, null, null), true)
     }
 
     @Test
     fun `create alias successfully`() {
-        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, DynamicPspConfigRequestModel(null, null, null), true)
+        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, userAgent, DynamicPspConfigRequestModel(null, null, null), true)
     }
 
     @Test
     fun `exchange alias with wrong alias id`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.exchangeAlias(knownPublishableKey, true, unknownAliasId, Mockito.mock(AliasRequestModel::class.java))
+            aliasService.exchangeAlias(knownPublishableKey, true, userAgent, unknownAliasId, Mockito.mock(AliasRequestModel::class.java))
         }
     }
 
     @Test
     fun `exchange alias successfully`() {
-        aliasService.exchangeAlias(knownPublishableKey, true, knownAliasId, AliasRequestModel(pspAlias, Mockito.mock(AliasExtraModel::class.java)))
+        aliasService.exchangeAlias(knownPublishableKey, true, userAgent, knownAliasId, AliasRequestModel(pspAlias, Mockito.mock(AliasExtraModel::class.java)))
     }
 
     @Test

@@ -45,11 +45,12 @@ class AliasService(
      * @param publishableKey Publishable Key
      * @param pspType PSP Type
      * @param idempotentKey Idempotent key
+     * @param userAgent User Agent
      * @param dynamicPspConfig Dynamic PSP config
      * @param pspTestMode indicator whether is the test mode or not
      * @return alias method response
      */
-    fun createAlias(publishableKey: String, pspType: String, idempotentKey: String, dynamicPspConfig: DynamicPspConfigRequestModel?, pspTestMode: Boolean?): AliasResponseModel {
+    fun createAlias(publishableKey: String, pspType: String, idempotentKey: String, userAgent: String?, dynamicPspConfig: DynamicPspConfigRequestModel?, pspTestMode: Boolean?): AliasResponseModel {
         logger.info("Creating alias for {} psp", pspType)
         val merchantApiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofErrorCode(ApiErrorCode.PUBLISHABLE_KEY_NOT_FOUND).asException()
 
@@ -63,7 +64,8 @@ class AliasService(
             merchantApiKey.merchant,
             pspConfigType,
             calculatedConfig,
-            idempotentKey
+            idempotentKey,
+            userAgent
         )
     }
 
@@ -72,10 +74,11 @@ class AliasService(
      *
      * @param publishableKey Publishable Key
      * @param pspTestMode indicator whether is the test mode or not
+     * @param userAgent User Agent
      * @param aliasId Alias ID
      * @param aliasRequestModel Alias Request Model
      */
-    fun exchangeAlias(publishableKey: String, pspTestMode: Boolean?, aliasId: String, aliasRequestModel: AliasRequestModel) {
+    fun exchangeAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, aliasRequestModel: AliasRequestModel) {
         logger.info("Exchanging alias {}", aliasId)
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofErrorCode(ApiErrorCode.PUBLISHABLE_KEY_NOT_FOUND).asException()
         val alias = aliasRepository.getFirstByIdAndActive(aliasId, true) ?: throw ApiError.ofErrorCode(ApiErrorCode.ALIAS_NOT_FOUND).asException()
@@ -100,7 +103,7 @@ class AliasService(
 
         val pspAlias = aliasRequestModel.pspAlias ?: pspRegisterAliasResponse?.pspAlias
         val extra = if (aliasExtraModel != null) objectMapper.writeValueAsString(aliasExtraModel) else null
-        aliasRepository.updateAlias(pspAlias, extra, aliasId)
+        aliasRepository.updateAlias(pspAlias, extra, aliasId, userAgent)
     }
 
     /**
@@ -146,13 +149,15 @@ class AliasService(
      * @param pspConfigType PSP Config Type
      * @param calculatedConfig Calculated Config Type
      * @param idempotentKey Idempotent key
+     * @param userAgent User Agent
      * @return alias method response
      */
     private fun executeIdempotentAliasOperation(
         merchant: Merchant,
         pspConfigType: PaymentServiceProvider,
         calculatedConfig: PspAliasConfigModel?,
-        idempotentKey: String
+        idempotentKey: String,
+        userAgent: String?
     ): AliasResponseModel {
         val alias = aliasRepository.getByIdempotentKeyAndActiveAndMerchantAndPspType(idempotentKey, true, merchant, pspConfigType)
         val generatedAliasId = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
@@ -168,7 +173,8 @@ class AliasService(
                     id = generatedAliasId,
                     idempotentKey = idempotentKey,
                     merchant = merchant,
-                    psp = pspConfigType
+                    psp = pspConfigType,
+                    userAgent = userAgent
                 )
                 aliasRepository.save(newAlias)
 
