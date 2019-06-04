@@ -456,7 +456,7 @@ class TransactionService(
         paymentInfo: PaymentRequestModel,
         pspTestMode: Boolean?,
         transactionAction: TransactionAction,
-        pspAction: ((requestModel: PaymentRequestModel) -> PspPaymentResponseModel)
+        pspAction: (() -> PspPaymentResponseModel)
     ): PaymentResponseModel {
         val extra = getAliasExtra(alias)
 
@@ -479,7 +479,7 @@ class TransactionService(
             )
 
             else -> {
-                val pspPaymentResponse = pspAction.invoke(paymentInfo)
+                val pspPaymentResponse = pspAction.invoke()
                 val newTransaction = Transaction(
                     transactionId = transactionId ?: RandomStringUtils.randomAlphanumeric(TransactionService.TRANSACTION_ID_LENGTH),
                     idempotentKey = idempotentKey,
