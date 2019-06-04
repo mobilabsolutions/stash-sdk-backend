@@ -1022,52 +1022,7 @@
                     },
                     "response": []
                 },
-                {
-                    "name": "Get Transactions",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "body": {
-                            "mode": "raw",
-                            "raw": ""
-                        },
-                        "url": {
-                            "raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/transactions?limit={Limit}&offset={Offset}",
-                            "host": [
-                                "{{wsEndpoint}}"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "merchant",
-                                "{Merchant-Id}",
-                                "transactions"
-                            ],
-                            "query": [
-                                {
-                                    "key": "limit",
-                                    "value": "{Limit}"
-                                },
-                                {
-                                    "key": "offset",
-                                    "value": "{Offset}"
-                                }
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
+                 {
                     "name": "Filter Transactions",
                     "request": {
                         "auth": {
@@ -1131,6 +1086,151 @@
                                     "key": "offset",
                                     "value": "{Offset}"
                                 }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Capture Transaction",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "PSP-Test-Mode",
+                                "value": "true",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/preauthorization/{Transaction-Id}/capture",
+                            "host": [
+                                "{{wsEndpoint}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "merchant",
+                                "{Merchant-Id}",
+                                "preauthorization",
+                                "{Transaction-Id}",
+                                "capture"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Refund Transaction",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "PSP-Test-Mode",
+                                "value": "true",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Idempotent-Key",
+                                "value": "",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n\t\"amount\": 300,\n\t\"currency\": \"EUR\",\n\t\"reason\": \"Book\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/authorization/{Transaction-Id}/refund",
+                            "host": [
+                                "{{wsEndpoint}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "merchant",
+                                "{Merchant-Id}",
+                                "authorization",
+                                "{Transaction-Id}",
+                                "refund"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reverse Transaction",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "PSP-Test-Mode",
+                                "value": "true",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n\t\"reason\": \"Reverse\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/preauthorization/{Transaction-Id}/reverse",
+                            "host": [
+                                "{{wsEndpoint}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "merchant",
+                                "{Merchant-Id}",
+                                "preauthorization",
+                                "{Transaction-Id}",
+                                "reverse"
                             ]
                         }
                     },

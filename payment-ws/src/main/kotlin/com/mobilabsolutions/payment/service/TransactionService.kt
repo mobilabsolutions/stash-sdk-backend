@@ -2,7 +2,7 @@ package com.mobilabsolutions.payment.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.domain.Alias
-import com.mobilabsolutions.payment.data.domain.MerchantApiKey
+import com.mobilabsolutions.payment.data.domain.Merchant
 import com.mobilabsolutions.payment.data.domain.Transaction
 import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
@@ -10,6 +10,7 @@ import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
+import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PaymentInfoModel
@@ -40,6 +41,7 @@ class TransactionService(
     private val transactionRepository: TransactionRepository,
     private val merchantApiKeyRepository: MerchantApiKeyRepository,
     private val aliasRepository: AliasRepository,
+    private val merchantRepository: MerchantRepository,
     private val pspRegistry: PspRegistry,
     private val objectMapper: ObjectMapper
 ) {
@@ -76,7 +78,7 @@ class TransactionService(
         )
         return executeIdempotentTransactionOperation(
             alias = alias,
-            apiKey = apiKey,
+            merchant = apiKey.merchant,
             idempotentKey = idempotentKey,
             paymentInfo = authorizeInfo,
             pspTestMode = pspTestMode,
@@ -117,12 +119,30 @@ class TransactionService(
         )
         return executeIdempotentTransactionOperation(
             alias = alias,
-            apiKey = apiKey,
+            merchant = apiKey.merchant,
             idempotentKey = idempotentKey,
             paymentInfo = preauthorizeInfo,
             pspTestMode = pspTestMode,
             transactionAction = TransactionAction.PREAUTH
         ) { psp.preauthorize(pspPreauthorizeRequest, pspTestMode) }
+    }
+
+    /**
+     * Capture transaction from a dashboard
+     *
+     * @param merchantId Merchant id
+     * @param pspTestMode indicator whether is the test mode or not
+     * @param transactionId Transaction ID
+     * @return Payment response model
+     */
+    fun dashboardCapture(
+        merchantId: String,
+        pspTestMode: Boolean?,
+        transactionId: String
+    ): PaymentResponseModel {
+        val merchant = merchantRepository.getMerchantById(merchantId)
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        return capture(pspTestMode, transactionId, merchant)
     }
 
     /**
@@ -140,6 +160,14 @@ class TransactionService(
     ): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asException()
+        return capture(pspTestMode, transactionId, apiKey.merchant)
+    }
+
+    private fun capture(
+        pspTestMode: Boolean?,
+        transactionId: String,
+        merchant: Merchant
+    ): PaymentResponseModel {
         val lastTransaction = transactionRepository.getByTransactionIdAndStatus(
             transactionId,
             TransactionStatus.SUCCESS.toString()
@@ -148,7 +176,7 @@ class TransactionService(
         if (lastTransaction.action != TransactionAction.PREAUTH && lastTransaction.action != TransactionAction.CAPTURE)
             throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_ALLOWED, "${lastTransaction.action} transaction cannot be captured").asException()
 
-        if (lastTransaction.merchant.id != apiKey.merchant.id)
+        if (lastTransaction.merchant.id != merchant.id)
             throw ApiError.ofErrorCode(ApiErrorCode.WRONG_ALIAS_MERCHANT_MAPPING).asException()
 
         val testMode = pspTestMode ?: false
@@ -207,6 +235,26 @@ class TransactionService(
     }
 
     /**
+     * Reverse transaction from a dashboard
+     *
+     * @param merchantId Merchant Id
+     * @param pspTestMode indicator whether is the test mode or not
+     * @param transactionId Transaction ID
+     * @param reverseInfo Reversion request model
+     * @return Payment response model
+     */
+    fun dashboardReverse(
+        merchantId: String,
+        pspTestMode: Boolean?,
+        transactionId: String,
+        reverseInfo: ReversalRequestModel
+    ): PaymentResponseModel {
+        val merchant = merchantRepository.getMerchantById(merchantId)
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        return reverse(pspTestMode, transactionId, reverseInfo, merchant)
+    }
+
+    /**
      * Reverse transaction
      *
      * @param secretKey Secret Key
@@ -223,6 +271,15 @@ class TransactionService(
     ): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asException()
+        return reverse(pspTestMode, transactionId, reverseInfo, apiKey.merchant)
+    }
+
+    private fun reverse(
+        pspTestMode: Boolean?,
+        transactionId: String,
+        reverseInfo: ReversalRequestModel,
+        merchant: Merchant
+    ): PaymentResponseModel {
         val lastTransaction = transactionRepository.getByTransactionIdAndStatus(
             transactionId,
             TransactionStatus.SUCCESS.toString()
@@ -231,7 +288,7 @@ class TransactionService(
         if (lastTransaction.action != TransactionAction.PREAUTH && lastTransaction.action != TransactionAction.REVERSAL)
             throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_ALLOWED, "${lastTransaction.action} transaction cannot be reversed").asException()
 
-        if (lastTransaction.merchant.id != apiKey.merchant.id)
+        if (lastTransaction.merchant.id != merchant.id)
             throw ApiError.ofErrorCode(ApiErrorCode.WRONG_ALIAS_MERCHANT_MAPPING).asException()
 
         val testMode = pspTestMode ?: false
@@ -289,6 +346,28 @@ class TransactionService(
     }
 
     /**
+     * Refund transaction from a dashboard
+     *
+     * @param merchantId Merchant Id
+     * @param idempotentKey Idempotent key
+     * @param pspTestMode indicator whether is the test mode or not
+     * @param transactionId Transaction ID
+     * @param refundInfo Payment information
+     * @return Payment response model
+     */
+    fun dashboardRefund(
+        merchantId: String,
+        idempotentKey: String,
+        pspTestMode: Boolean?,
+        transactionId: String,
+        refundInfo: PaymentDataRequestModel
+    ): PaymentResponseModel {
+        val merchant = merchantRepository.getMerchantById(merchantId)
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        return refund(idempotentKey, pspTestMode, transactionId, refundInfo, merchant)
+    }
+
+    /**
      * Refund transaction
      *
      * @param secretKey Secret Key
@@ -307,7 +386,16 @@ class TransactionService(
     ): PaymentResponseModel {
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asException()
+        return refund(idempotentKey, pspTestMode, transactionId, refundInfo, apiKey.merchant)
+    }
 
+    private fun refund(
+        idempotentKey: String,
+        pspTestMode: Boolean?,
+        transactionId: String,
+        refundInfo: PaymentDataRequestModel,
+        merchant: Merchant
+    ): PaymentResponseModel {
         val transactions = transactionRepository.getListByTransactionIdAndStatus(transactionId, TransactionStatus.SUCCESS.name)
 
         val prevTransaction = transactions.asSequence().filter { TransactionAction.CAPTURE == it.action || TransactionAction.AUTH == it.action }.firstOrNull() ?: throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_ALLOWED).asException()
@@ -318,7 +406,7 @@ class TransactionService(
         val psp = pspRegistry.find(alias!!.psp!!)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_IMPL_NOT_FOUND, "PSP implementation '${alias.psp}' cannot be found").asException()
 
-        if (prevTransaction.merchant.id != apiKey.merchant.id)
+        if (prevTransaction.merchant.id != merchant.id)
             throw ApiError.ofErrorCode(ApiErrorCode.WRONG_ALIAS_MERCHANT_MAPPING).asException()
 
         val allRefundTransactions = transactions.asSequence().filter { TransactionAction.REFUND == it.action }.toMutableList()
@@ -344,7 +432,7 @@ class TransactionService(
 
         return executeIdempotentTransactionOperation(
             alias,
-            apiKey,
+            merchant,
             idempotentKey,
             prevTransaction.transactionId,
             paymentRequestModel,
@@ -362,13 +450,13 @@ class TransactionService(
 
     private fun executeIdempotentTransactionOperation(
         alias: Alias,
-        apiKey: MerchantApiKey,
+        merchant: Merchant,
         idempotentKey: String,
         transactionId: String? = null,
         paymentInfo: PaymentRequestModel,
         pspTestMode: Boolean?,
         transactionAction: TransactionAction,
-        pspAction: ((requestModel: PaymentRequestModel) -> PspPaymentResponseModel)
+        pspAction: (() -> PspPaymentResponseModel)
     ): PaymentResponseModel {
         val extra = getAliasExtra(alias)
 
@@ -378,7 +466,7 @@ class TransactionService(
                 getPspConfig(alias)
             )
 
-        val transaction = transactionRepository.getByIdempotentKeyAndActionAndMerchantAndAlias(idempotentKey, transactionAction, apiKey.merchant, alias)
+        val transaction = transactionRepository.getByIdempotentKeyAndActionAndMerchantAndAlias(idempotentKey, transactionAction, merchant, alias)
 
         when {
             transaction != null -> return PaymentResponseModel(
@@ -391,7 +479,7 @@ class TransactionService(
             )
 
             else -> {
-                val pspPaymentResponse = pspAction.invoke(paymentInfo)
+                val pspPaymentResponse = pspAction.invoke()
                 val newTransaction = Transaction(
                     transactionId = transactionId ?: RandomStringUtils.randomAlphanumeric(TransactionService.TRANSACTION_ID_LENGTH),
                     idempotentKey = idempotentKey,
@@ -406,7 +494,7 @@ class TransactionService(
                     merchantTransactionId = paymentInfo.purchaseId,
                     merchantCustomerId = paymentInfo.customerId,
                     pspTestMode = pspTestMode ?: false,
-                    merchant = apiKey.merchant,
+                    merchant = merchant,
                     alias = alias
                 )
                 transactionRepository.save(newTransaction)
