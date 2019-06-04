@@ -139,15 +139,6 @@ class AliasService(
         aliasRepository.save(alias)
     }
 
-    /**
-     * Execute idempotent operation alias creation
-     *
-     * @param merchant Merchant
-     * @param pspConfigType PSP Config Type
-     * @param calculatedConfig Calculated Config Type
-     * @param idempotentKey Idempotent key
-     * @return alias method response
-     */
     private fun executeIdempotentAliasOperation(
         merchant: Merchant,
         pspConfigType: PaymentServiceProvider,
