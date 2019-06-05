@@ -19,6 +19,6 @@ interface AliasRepository : BaseRepository<Alias, String> {
     fun getByIdempotentKeyAndActiveAndMerchantAndPspType(@Param("idempotentKey") idempotentKey: String, @Param("active") active: Boolean, @Param("merchant") merchant: Merchant, @Param("psp") psp: PaymentServiceProvider): Alias?
 
     @Modifying
-    @Query("UPDATE Alias a SET a.pspAlias = :pspAlias, a.extra = :extra, a.lastModifiedDate = CURRENT_TIMESTAMP WHERE a.id = :aliasId")
-    fun updateAlias(@Param("pspAlias") pspAlias: String?, @Param("extra") extra: String?, @Param("aliasId") aliasId: String)
+    @Query("UPDATE Alias a SET a.pspAlias = :pspAlias, a.extra = :extra, a.userAgent = :userAgent, a.lastModifiedDate = CURRENT_TIMESTAMP WHERE a.id = :aliasId")
+    fun updateAlias(@Param("pspAlias") pspAlias: String?, @Param("extra") extra: String?, @Param("aliasId") aliasId: String, @Param("userAgent") userAgent: String?)
 }

@@ -43,6 +43,9 @@ class Alias(
     @Column(name = "psp")
     var psp: PaymentServiceProvider? = null,
 
+    @Column(name = "user_agent")
+    var userAgent: String? = null,
+
     @ManyToOne
     @JoinColumn(name = "merchant_id", foreignKey = ForeignKey(name = "fk_merchant_alias"))
     var merchant: Merchant? = Merchant()
