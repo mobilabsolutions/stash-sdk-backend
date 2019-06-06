@@ -16,6 +16,7 @@ target/
 *.iml
 *.ipr
 payment-ws/src/main/resources/application-local.properties
+payment-ws/src/main/resources/db/changelog/changelog-local.xml
 
 ### NetBeans ###
 /nbproject/private/
