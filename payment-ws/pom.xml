@@ -19,6 +19,7 @@
         <jaxb.version>2.3.1</jaxb.version>
         <javax.act.version>1.1</javax.act.version>
         <liquibase.plugin>3.6.3</liquibase.plugin>
+        <license.plugin>1.20</license.plugin>
     </properties>
 
     <dependencies>
@@ -177,6 +178,19 @@
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
                 <version>${liquibase.plugin}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>${license.plugin}</version>
+                <executions>
+                    <execution>
+                        <id>add-third-party</id>
+                        <goals>
+                            <goal>add-third-party</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
