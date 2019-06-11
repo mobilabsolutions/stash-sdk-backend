@@ -197,17 +197,17 @@ class CommonExceptionHandler {
 
     @ResponseStatus(INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception::class)
-    fun handleException(request: HttpServletRequest, exception: Exception): ApiError {
+    fun handleException(request: HttpServletRequest, exception: Exception?): ApiError {
         logger.error(
             "Error on request: [{} {}]. Message: {}",
             request.method,
             request.requestURI,
-            exception.message,
+            exception?.message,
             exception
         )
         return ApiError.builder()
             .withErrorCode(ApiErrorCode.SDK_GENERAL_ERROR)
-            .withMessage(exception.message!!)
+            .withMessage(if (exception != null) exception.message!! else "Unknown exception occurred.")
             .build()
     }
 
