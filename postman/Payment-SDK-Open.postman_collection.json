@@ -1092,6 +1092,75 @@
                     "response": []
                 },
                 {
+                    "name": "Export Transactions",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": ""
+                        },
+                        "url": {
+                            "raw": "{{wsEndpoint}}/api/v1/merchant/mobilab/transactions/csv?createdAtStart={createdAtStart}&createdAtEnd={createdAtEnd}&paymentMethod={paymentMethod}&action={action}&status={status}&text={text}&limit={limit}&offset={offset}",
+                            "host": [
+                                "{{wsEndpoint}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "merchant",
+                                "{Merchant-Id}",
+                                "transactions"
+                            ],
+                            "query": [
+                                {
+                                    "key": "createdAtStart",
+                                    "value": "{CreatedAtStart}"
+                                },
+                                {
+                                    "key": "createdAtEnd",
+                                    "value": "{CreatedAtEnd}"
+                                },
+                                {
+                                    "key": "paymentMethod",
+                                    "value": "{PaymentMethod}"
+                                },
+                                {
+                                    "key": "action",
+                                    "value": "{Action}"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "{Status}"
+                                },
+                                {
+                                    "key": "text",
+                                    "value": "{Text}"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "{Limit}"
+                                },
+                                {
+                                    "key": "offset",
+                                    "value": "{Offset}"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
                     "name": "Capture Transaction",
                     "request": {
                         "auth": {
