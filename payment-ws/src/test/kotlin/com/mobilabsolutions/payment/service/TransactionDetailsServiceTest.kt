@@ -127,7 +127,7 @@ class TransactionDetailsServiceTest {
     }
 
     @Test
-    fun `write transactions to csv unsuccessfully with sercah span more than one year`() {
+    fun `write transactions to csv unsuccessfully with search span more than one year`() {
         Assertions.assertThrows(ApiException::class.java) {
             transactionDetailsService.writeTransactionsToCsv(response, merchantId, "2018-06-09 12:00:00", "2019-06-11 12:00:00", paymentMethod.name, action.name, status.name, "some", limit, offset)
         }
