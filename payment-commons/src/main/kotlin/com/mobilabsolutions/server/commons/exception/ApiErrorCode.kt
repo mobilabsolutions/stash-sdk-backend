@@ -40,7 +40,7 @@ enum class ApiErrorCode(val code: String, val message: String, val httpStatus: H
     SEPA_NOT_ALLOWED("3017", "SEPA is not supported for this operation.", HttpStatus.BAD_REQUEST),
     INCORRECT_REFUND_VALUE("3018", "Total refund amount is greater than original payment's amount.", HttpStatus.BAD_REQUEST),
     TRANSACTIONS_NOT_FOUND("3019", "There are no transactions for the given filters.", HttpStatus.BAD_REQUEST),
-    EXCEEDED_MAX_TRANSACTION_SEARCH_PERIOD("3020", "Maximum search span can be one year.", HttpStatus.BAD_REQUEST),
+    EXCEEDED_MAX_TRANSACTION_SEARCH_PERIOD("3020", "Maximum search span can not exceed one year.", HttpStatus.BAD_REQUEST),
 
     PSP_MODULE_ERROR("4000", "Unexpected PSP operation error.", HttpStatus.INTERNAL_SERVER_ERROR),
 
