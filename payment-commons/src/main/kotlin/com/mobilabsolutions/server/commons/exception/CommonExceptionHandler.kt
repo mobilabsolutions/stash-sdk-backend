@@ -28,6 +28,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.multipart.MaxUploadSizeExceededException
 import org.springframework.web.multipart.MultipartException
 import org.springframework.web.servlet.NoHandlerFoundException
+import java.io.IOException
 import java.net.UnknownHostException
 import java.util.Arrays
 import java.util.stream.Collectors
@@ -224,6 +225,16 @@ class CommonExceptionHandler {
     @ExceptionHandler(UnknownHostException::class)
     fun handleUnknownHostException(exception: UnknownHostException): ApiError {
         logger.error("Unknown host exception.", exception)
+        return ApiError.builder()
+            .withErrorCode(ApiErrorCode.SDK_GENERAL_ERROR)
+            .withMessage(exception.message!!)
+            .build()
+    }
+
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(IOException::class)
+    fun handleIOException(exception: IOException): ApiError {
+        logger.error("I/O exception.", exception)
         return ApiError.builder()
             .withErrorCode(ApiErrorCode.SDK_GENERAL_ERROR)
             .withMessage(exception.message!!)
