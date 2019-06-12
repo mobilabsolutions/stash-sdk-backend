@@ -172,7 +172,7 @@ class TransactionDetailsService(
     }
 
     private fun mapStatus(status: String?, action: String?): String {
-        return when (true) {
+        return when {
             status == TransactionStatus.SUCCESS.name && action == TransactionAction.PREAUTH.name -> PREAUTHORIZED
             status == TransactionStatus.SUCCESS.name && action == TransactionAction.AUTH.name -> AUTHORIZED
             status == TransactionStatus.SUCCESS.name && action == TransactionAction.CAPTURE.name -> CAPTURED
