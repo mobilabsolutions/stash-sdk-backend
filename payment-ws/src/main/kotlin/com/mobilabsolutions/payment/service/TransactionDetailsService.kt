@@ -142,24 +142,26 @@ class TransactionDetailsService(
         offset: Int?
     ) {
         validateSearchPeriod(createdAtStart, createdAtEnd)
-        val csvWriter = CsvBeanWriter(response.writer, CsvPreference.STANDARD_PREFERENCE)
-        csvWriter.writeHeader(*csvHeaders)
-        val transactionList = getTransactionsByFilters(merchantId, createdAtStart, createdAtEnd, paymentMethod, action, status, text, limit, offset)
-        for (transaction in transactionList.transactions) {
-            val transactions = TransactionReportModel(
-                csvWriter.lineNumber,
-                transaction.transactionId,
-                transaction.amount?.toDouble()?.div(100),
-                transaction.currencyId,
-                mapStatus(transaction.status, transaction.action),
-                transaction.reason,
-                transaction.customerId,
-                transaction.paymentMethod,
-                transaction.createdDate
-            )
-            csvWriter.write(transactions, *csvHeaders)
+
+        CsvBeanWriter(response.writer, CsvPreference.STANDARD_PREFERENCE).use { csvWriter ->
+            csvWriter.writeHeader(*csvHeaders)
+            val transactionList = getTransactionsByFilters(merchantId, createdAtStart, createdAtEnd, paymentMethod, action, status, text, limit, offset)
+            for (transaction in transactionList.transactions) {
+                val transactions = TransactionReportModel(
+                    csvWriter.lineNumber,
+                    transaction.transactionId,
+                    transaction.amount?.toDouble()?.div(100),
+                    transaction.currencyId,
+                    mapStatus(transaction.status, transaction.action),
+                    transaction.reason,
+                    transaction.customerId,
+                    transaction.paymentMethod,
+                    transaction.createdDate
+                )
+                csvWriter.write(transactions, *csvHeaders)
+            }
+            csvWriter.close()
         }
-        csvWriter.close()
     }
 
     private fun validateSearchPeriod(createdAtStart: String?, createdAtEnd: String?) {
