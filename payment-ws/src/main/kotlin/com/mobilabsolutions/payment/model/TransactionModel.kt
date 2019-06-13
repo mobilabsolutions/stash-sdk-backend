@@ -46,6 +46,6 @@ data class TransactionModel(
         transaction[5] as String?,
         transaction[6] as String?,
         transaction[7] as String?,
-        SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z").format(transaction[8] as Timestamp)
+        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(transaction[8] as Timestamp)
     )
 }

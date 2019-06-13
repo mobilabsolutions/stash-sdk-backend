@@ -25,7 +25,7 @@ class TransactionDetailsService(
     private val objectMapper: ObjectMapper
 ) {
 
-    val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS Z")
+    val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
             .withZone(ZoneId.of("Europe/Berlin"))
 
     /**

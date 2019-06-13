@@ -30,6 +30,6 @@ data class TransactionTimelineModel(
         transaction[1] as String?,
         transaction[2] as String?,
         transaction[3] as String?,
-        SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z").format(transaction[4] as Timestamp)
+        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(transaction[4] as Timestamp)
     )
 }
