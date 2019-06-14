@@ -17,7 +17,8 @@ import org.springframework.transaction.annotation.Transactional
 import org.supercsv.io.CsvBeanWriter
 import org.supercsv.prefs.CsvPreference
 import java.text.SimpleDateFormat
-import java.time.ZoneId
+import java.time.Instant
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -35,7 +36,6 @@ class TransactionDetailsService(
 ) {
 
     companion object {
-        const val DATE_PATTERN = "yyyy-MM-dd HH:mm:ss"
         const val PREAUTHORIZED = "Pre-authorised"
         const val AUTHORIZED = "Authorised"
         const val CAPTURED = "Captured"
@@ -43,7 +43,9 @@ class TransactionDetailsService(
         const val REFUNDED = "Refunded"
         const val FAILED = "Failed"
 
-        val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_PATTERN).withZone(ZoneId.of("Europe/Berlin"))
+        const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        const val DATE_FORMAT_LOCAL = "yyyy-MM-dd HH:mm:ss"
+
         val csvHeaders = arrayOf("no", "id", "amount", "currency", "status", "reason", "customerId", "paymentMethod", "createdDate")
     }
 
@@ -62,7 +64,7 @@ class TransactionDetailsService(
         val timelineTransactions = transactionRepository.getTransactionDetails(transactionId)
 
         return TransactionDetailsResponseModel(
-            dateTimeFormatter.format(transaction.createdDate),
+            DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneOffset.UTC).format(transaction.createdDate),
             transaction.transactionId,
             transaction.currencyId,
             transaction.amount,
@@ -107,7 +109,7 @@ class TransactionDetailsService(
     ): TransactionListResponseModel {
         merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        val transactions = transactionRepository.getTransactionsByFilters(merchantId, createdAtStart, createdAtEnd, paymentMethod,
+        val transactions = transactionRepository.getTransactionsByFilters(merchantId, getLocalDateTime(createdAtStart), getLocalDateTime(createdAtEnd), paymentMethod,
             action, status, text, limit, offset)
 
         val transactionList = TransactionListResponseModel(transactions, offset, limit)
@@ -160,12 +162,11 @@ class TransactionDetailsService(
                 )
                 csvWriter.write(transactions, *csvHeaders)
             }
-            csvWriter.close()
         }
     }
 
     private fun validateSearchPeriod(createdAtStart: String?, createdAtEnd: String?) {
-        val simpleDateFormat = SimpleDateFormat(DATE_PATTERN)
+        val simpleDateFormat = SimpleDateFormat(DATE_FORMAT)
         val startDate = if (createdAtEnd != null) simpleDateFormat.parse(createdAtStart) else Date()
         val endDate = if (createdAtEnd != null) simpleDateFormat.parse(createdAtEnd) else Date()
         val diffInMillis = Math.abs(endDate.time - startDate.time)
@@ -182,5 +183,9 @@ class TransactionDetailsService(
             status == TransactionStatus.SUCCESS.name && action == TransactionAction.REFUND.name -> REFUNDED
             else -> FAILED
         }
+    }
+
+    private fun getLocalDateTime(date: String?): String? {
+        return date?.let { Instant.parse(it).atZone(ZoneOffset.systemDefault()).format(DateTimeFormatter.ofPattern(DATE_FORMAT_LOCAL)) }
     }
 }

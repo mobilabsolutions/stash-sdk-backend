@@ -1,9 +1,11 @@
 package com.mobilabsolutions.payment.model
 
+import com.mobilabsolutions.payment.service.TransactionDetailsService
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import java.sql.Timestamp
-import java.text.SimpleDateFormat
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
@@ -30,6 +32,6 @@ data class TransactionTimelineModel(
         transaction[1] as String?,
         transaction[2] as String?,
         transaction[3] as String?,
-        SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z").format(transaction[4] as Timestamp)
+        DateTimeFormatter.ofPattern(TransactionDetailsService.DATE_FORMAT).withZone(ZoneOffset.UTC).format((transaction[4] as Timestamp).toInstant())
     )
 }
