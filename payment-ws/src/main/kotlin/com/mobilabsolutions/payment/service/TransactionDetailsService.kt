@@ -11,7 +11,8 @@ import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.ZoneId
+import java.time.Instant
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 /**
@@ -24,10 +25,6 @@ class TransactionDetailsService(
     private val merchantRepository: MerchantRepository,
     private val objectMapper: ObjectMapper
 ) {
-
-    val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
-            .withZone(ZoneId.of("Europe/Berlin"))
-
     /**
      * Get transaction by ID
      *
@@ -43,7 +40,7 @@ class TransactionDetailsService(
         val timelineTransactions = transactionRepository.getTransactionDetails(transactionId)
 
         return TransactionDetailsResponseModel(
-            dateTimeFormatter.format(transaction.createdDate),
+            DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneOffset.UTC).format(transaction.createdDate),
             transaction.transactionId,
             transaction.currencyId,
             transaction.amount,
@@ -88,11 +85,20 @@ class TransactionDetailsService(
     ): TransactionListResponseModel {
         merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        val transactions = transactionRepository.getTransactionsByFilters(merchantId, createdAtStart, createdAtEnd, paymentMethod,
+        val transactions = transactionRepository.getTransactionsByFilters(merchantId, getLocalDateTime(createdAtStart), getLocalDateTime(createdAtEnd), paymentMethod,
             action, status, text, limit, offset)
 
         val transactionList = TransactionListResponseModel(transactions, offset, limit)
         if (transactionList.transactions.isEmpty()) throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTIONS_NOT_FOUND).asException()
         return transactionList
+    }
+
+    private fun getLocalDateTime(date: String?): String? {
+        return date?.let { Instant.parse(it).atZone(ZoneOffset.systemDefault()).format(DateTimeFormatter.ofPattern(DATE_FORMAT_LOCAL)) }
+    }
+
+    companion object {
+        const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        const val DATE_FORMAT_LOCAL = "yyyy-MM-dd HH:mm:ss"
     }
 }
