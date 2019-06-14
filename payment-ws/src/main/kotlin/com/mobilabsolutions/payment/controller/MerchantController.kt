@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import javax.servlet.http.HttpServletResponse
 import javax.validation.Valid
 import javax.validation.constraints.Size
 
@@ -42,11 +43,16 @@ class MerchantController(
         const val BASE_MERCHANT_URL = "merchant"
         const val MERCHANT_CONFIG_URL = "/{Merchant-Id}/psp"
         const val MERCHANT_PSP_CONFIG_URL = "/{Merchant-Id}/psp/{Psp-Id}"
-        const val TRANSACTION_ID_URL = "/{Merchant-Id}/transactions/{Transaction-Id}"
+        const val TRANSACTION_DETAILS_URL = "/{Merchant-Id}/transactions/{Transaction-Id}"
         const val TRANSACTION_URL = "/{Merchant-Id}/transactions"
+        const val TRANSACTION_CSV_URL = "/{Merchant-Id}/transactions/csv"
         const val CAPTURE_URL = "/{Merchant-Id}/preauthorization/{Transaction-Id}/capture"
         const val REVERSE_URL = "/{Merchant-Id}/preauthorization/{Transaction-Id}/reverse"
         const val REFUND_URL = "/{Merchant-Id}/authorization/{Transaction-Id}/refund"
+
+        const val CSV_CONTENT_TYPE = "text/csv"
+        const val CSV_HEADER_KEY = "Content-Disposition"
+        const val CSV_HEADER_VALUE = "attachment; filename=Transactions.csv"
     }
 
     @ApiOperation(value = "Create merchant")
@@ -138,7 +144,7 @@ class MerchantController(
         @Valid @RequestBody pspUpsertConfigRequestModel: PspUpsertConfigRequestModel
     ) = merchantService.updatePspConfig(merchantId, pspId, pspUpsertConfigRequestModel)
 
-    @ApiOperation(value = "Get transaction by transaction ID")
+    @ApiOperation(value = "Get transaction details")
     @ApiResponses(
         ApiResponse(code = 200, message = "Successfully queried transaction"),
         ApiResponse(code = 401, message = "Unauthorized access"),
@@ -146,7 +152,7 @@ class MerchantController(
         ApiResponse(code = 404, message = "Resource not found")
     )
     @RequestMapping(
-        MerchantController.TRANSACTION_ID_URL,
+        MerchantController.TRANSACTION_DETAILS_URL,
         method = [RequestMethod.GET],
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
@@ -183,6 +189,38 @@ class MerchantController(
         @RequestParam(required = false) offset: Int?
     ) = transactionDetailsService.getTransactionsByFilters(merchantId, createdAtStart, createdAtEnd, paymentMethod,
         action, status, text, limit ?: 10, offset ?: 0)
+
+    @ApiOperation(value = "Export transactions to CSV file")
+    @ApiResponses(
+        ApiResponse(code = 200, message = "Successfully exported transactions"),
+        ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 403, message = "Forbidden access"),
+        ApiResponse(code = 404, message = "Resource not found")
+    )
+    @RequestMapping(
+        MerchantController.TRANSACTION_CSV_URL,
+        method = [RequestMethod.GET],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
+    fun downloadTransactionsCsv(
+        response: HttpServletResponse,
+        @PathVariable("Merchant-Id") merchantId: String,
+        @DateValidator @RequestParam(required = false) createdAtStart: String?,
+        @DateValidator @RequestParam(required = false) createdAtEnd: String?,
+        @RequestParam(required = false) paymentMethod: String?,
+        @RequestParam(required = false) action: String?,
+        @RequestParam(required = false) status: String?,
+        @RequestParam(required = false) text: String?,
+        @RequestParam(required = false) limit: Int?,
+        @RequestParam(required = false) offset: Int?
+    ) {
+        response.contentType = CSV_CONTENT_TYPE
+        response.setHeader(CSV_HEADER_KEY, CSV_HEADER_VALUE)
+        transactionDetailsService.writeTransactionsToCsv(response, merchantId, createdAtStart, createdAtEnd,
+            paymentMethod, action, status, text, limit ?: 10, offset ?: 0)
+    }
 
     @ApiOperation(value = "Capture transaction")
     @ApiResponses(

@@ -25,6 +25,7 @@ import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
+import org.springframework.mock.web.MockHttpServletResponse
 import java.sql.Timestamp
 import java.time.Instant
 import java.util.Date
@@ -64,6 +65,7 @@ class TransactionDetailsServiceTest {
         merchant = Merchant(merchantId, pspConfig = pspConfig),
         alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
         pspResponse = pspResponse)
+    private val response = MockHttpServletResponse()
 
     @Spy
     val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
@@ -116,6 +118,18 @@ class TransactionDetailsServiceTest {
     fun `filter transactions unsuccessfully`() {
         Assertions.assertThrows(ApiException::class.java) {
             transactionDetailsService.getTransactionsByFilters(wrongMerchantId, null, null, paymentMethod.name, action.name, status.name, "some", limit, offset)
+        }
+    }
+
+    @Test
+    fun `write transactions to csv successfully`() {
+        transactionDetailsService.writeTransactionsToCsv(response, merchantId, null, null, paymentMethod.name, action.name, status.name, "some", limit, offset)
+    }
+
+    @Test
+    fun `write transactions to csv unsuccessfully with search span more than one year`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            transactionDetailsService.writeTransactionsToCsv(response, merchantId, "2018-06-09T12:00:00Z", "2019-06-11T12:00:00Z", paymentMethod.name, action.name, status.name, "some", limit, offset)
         }
     }
 }
