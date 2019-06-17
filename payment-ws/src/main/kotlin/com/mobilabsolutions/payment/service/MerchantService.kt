@@ -151,7 +151,8 @@ class MerchantService(
                 id = merchantInfo.id,
                 name = merchantInfo.name,
                 email = merchantInfo.email,
-                defaultCurrency = merchantInfo.currency
+                defaultCurrency = merchantInfo.currency,
+                timezone = merchantInfo.timezone
             )
         )
 

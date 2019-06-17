@@ -1,5 +1,6 @@
 package com.mobilabsolutions.payment.model.request
 
+import com.mobilabsolutions.payment.validation.TimeZoneValidator
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import javax.validation.constraints.Email
@@ -27,5 +28,9 @@ data class MerchantRequestModel(
 
     @ApiModelProperty(value = "Merchant default currency", example = "EUR")
     @field:NotNull
-    val currency: String?
+    val currency: String?,
+
+    @ApiModelProperty(value = "Merchant time zone", example = "Europe/Berlin")
+    @field:TimeZoneValidator
+    val timezone: String?
 )

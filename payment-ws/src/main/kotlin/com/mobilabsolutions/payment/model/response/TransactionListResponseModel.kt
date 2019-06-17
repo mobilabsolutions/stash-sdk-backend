@@ -17,8 +17,8 @@ data class TransactionListResponseModel(
     @ApiModelProperty(value = "Transaction Model")
     val transactions: MutableList<TransactionModel> = mutableListOf()
 ) {
-    constructor(transactions: List<Array<Any>>, offset: Int?, limit: Int?) : this(
+    constructor(transactions: List<Array<Any>>, offset: Int?, limit: Int?, timezone: String?) : this(
         TransactionListMetadata(if (!transactions.isEmpty()) transactions[0][9] as BigInteger else null, transactions.size, offset, limit),
-        transactions.asSequence().map { TransactionModel(it) }.toMutableList()
+        transactions.asSequence().map { TransactionModel(it, timezone) }.toMutableList()
     )
 }

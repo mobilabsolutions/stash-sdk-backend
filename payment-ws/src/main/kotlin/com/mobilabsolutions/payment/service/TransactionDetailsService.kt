@@ -18,7 +18,7 @@ import org.supercsv.io.CsvBeanWriter
 import org.supercsv.prefs.CsvPreference
 import java.text.SimpleDateFormat
 import java.time.Instant
-import java.time.ZoneOffset
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -44,7 +44,6 @@ class TransactionDetailsService(
         const val FAILED = "Failed"
 
         const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'"
-        const val DATE_FORMAT_LOCAL = "yyyy-MM-dd HH:mm:ss"
 
         val csvHeaders = arrayOf("no", "id", "amount", "currency", "status", "reason", "customerId", "paymentMethod", "createdDate")
     }
@@ -57,14 +56,14 @@ class TransactionDetailsService(
      * @return transaction details by id response
      */
     fun getTransactionDetails(merchantId: String, transactionId: String): TransactionDetailsResponseModel {
-        merchantRepository.getMerchantById(merchantId)
+        val merchant = merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transaction = transactionRepository.getByTransactionId(transactionId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_FOUND).asException()
         val timelineTransactions = transactionRepository.getTransactionDetails(transactionId)
 
         return TransactionDetailsResponseModel(
-            DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneOffset.UTC).format(transaction.createdDate),
+            DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.of(merchant.timezone)).format(transaction.createdDate),
             transaction.transactionId,
             transaction.currencyId,
             transaction.amount,
@@ -78,7 +77,7 @@ class TransactionDetailsService(
             transaction.pspTestMode,
             transaction.merchant.id,
             transaction.alias!!.id,
-            timelineTransactions.asSequence().map { TransactionTimelineModel(it) }.toMutableList()
+            timelineTransactions.asSequence().map { TransactionTimelineModel(it, merchant.timezone) }.toMutableList()
         )
     }
 
@@ -107,12 +106,12 @@ class TransactionDetailsService(
         limit: Int?,
         offset: Int?
     ): TransactionListResponseModel {
-        merchantRepository.getMerchantById(merchantId)
+        val merchant = merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        val transactions = transactionRepository.getTransactionsByFilters(merchantId, getLocalDateTime(createdAtStart), getLocalDateTime(createdAtEnd), paymentMethod,
+        val transactions = transactionRepository.getTransactionsByFilters(merchantId, getLocalDateTime(createdAtStart, merchant.timezone), getLocalDateTime(createdAtEnd, merchant.timezone), paymentMethod,
             action, status, text, limit, offset)
 
-        val transactionList = TransactionListResponseModel(transactions, offset, limit)
+        val transactionList = TransactionListResponseModel(transactions, offset, limit, merchant.timezone)
         if (transactionList.transactions.isEmpty()) throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTIONS_NOT_FOUND).asException()
         return transactionList
     }
@@ -185,7 +184,7 @@ class TransactionDetailsService(
         }
     }
 
-    private fun getLocalDateTime(date: String?): String? {
-        return date?.let { Instant.parse(it).atZone(ZoneOffset.systemDefault()).format(DateTimeFormatter.ofPattern(DATE_FORMAT_LOCAL)) }
+    private fun getLocalDateTime(date: String?, timezone: String?): String? {
+        return date?.let { Instant.parse(it).atZone(ZoneId.of(timezone)).format(DateTimeFormatter.ofPattern(DATE_FORMAT)) }
     }
 }

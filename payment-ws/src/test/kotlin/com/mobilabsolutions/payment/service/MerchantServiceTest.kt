@@ -86,7 +86,7 @@ class MerchantServiceTest {
     @Test
     fun `create merchant with existing merchant id`() {
         Assertions.assertThrows(ApiException::class.java) {
-            merchantService.createMerchant(MerchantRequestModel(knownMerchantId, "test", "test@mobilabsolutions.com", "EUR"))
+            merchantService.createMerchant(MerchantRequestModel(knownMerchantId, "test", "test@mobilabsolutions.com", "EUR", "Europe/Berlin"))
         }
     }
 
@@ -119,6 +119,6 @@ class MerchantServiceTest {
 
     @Test
     fun `create merchant successfully`() {
-        merchantService.createMerchant(MerchantRequestModel(unknownMerchantId, "test", "test@mobilabsolutions.com", "EUR"))
+        merchantService.createMerchant(MerchantRequestModel(unknownMerchantId, "test", "test@mobilabsolutions.com", "EUR", "Europe/Berlin"))
     }
 }

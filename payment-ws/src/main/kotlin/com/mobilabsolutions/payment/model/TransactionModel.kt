@@ -4,7 +4,7 @@ import com.mobilabsolutions.payment.service.TransactionDetailsService
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import java.sql.Timestamp
-import java.time.ZoneOffset
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 /**
@@ -39,7 +39,7 @@ data class TransactionModel(
     @ApiModelProperty(value = "Creation Date", example = "2018-12-31 23:59:59.999 +0100")
     val createdDate: String?
 ) {
-    constructor(transaction: Array<Any>) : this(
+    constructor(transaction: Array<Any>, timezone: String?) : this(
         transaction[0] as String?,
         transaction[1] as Int?,
         transaction[2] as String?,
@@ -48,6 +48,6 @@ data class TransactionModel(
         transaction[5] as String?,
         transaction[6] as String?,
         transaction[7] as String?,
-        DateTimeFormatter.ofPattern(TransactionDetailsService.DATE_FORMAT).withZone(ZoneOffset.UTC).format((transaction[8] as Timestamp).toInstant())
+        DateTimeFormatter.ofPattern(TransactionDetailsService.DATE_FORMAT).withZone(ZoneId.of(timezone)).format((transaction[8] as Timestamp).toInstant())
     )
 }

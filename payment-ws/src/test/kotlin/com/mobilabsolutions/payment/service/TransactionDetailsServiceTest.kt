@@ -62,7 +62,7 @@ class TransactionDetailsServiceTest {
         action = action,
         status = status,
         paymentMethod = paymentMethod,
-        merchant = Merchant(merchantId, pspConfig = pspConfig),
+        merchant = Merchant(merchantId, pspConfig = pspConfig, timezone = "Europe/Berlin"),
         alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
         pspResponse = pspResponse)
     private val response = MockHttpServletResponse()
@@ -84,7 +84,7 @@ class TransactionDetailsServiceTest {
         MockitoAnnotations.initMocks(this)
 
         Mockito.`when`(merchantRepository.getMerchantById(merchantId)).thenReturn(
-            Merchant(merchantId, pspConfig = pspConfig)
+            Merchant(merchantId, pspConfig = pspConfig, timezone = "Europe/Berlin")
         )
         transaction.createdDate = Instant.now()
         Mockito.`when`(transactionRepository.getByTransactionId(correctTransactionId)).thenReturn(transaction)
