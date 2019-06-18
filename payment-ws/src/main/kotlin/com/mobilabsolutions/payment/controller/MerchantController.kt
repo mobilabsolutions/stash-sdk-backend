@@ -1,5 +1,8 @@
 package com.mobilabsolutions.payment.controller
 
+import com.mobilabsolutions.payment.data.enum.PaymentMethod
+import com.mobilabsolutions.payment.data.enum.TransactionAction
+import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.request.MerchantRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PspConfigRequestModel
@@ -9,6 +12,9 @@ import com.mobilabsolutions.payment.service.MerchantService
 import com.mobilabsolutions.payment.service.TransactionDetailsService
 import com.mobilabsolutions.payment.service.TransactionService
 import com.mobilabsolutions.payment.validation.DateValidator
+import com.mobilabsolutions.payment.validation.PaymentMethodEnumValidator
+import com.mobilabsolutions.payment.validation.TransactionActionEnumValidator
+import com.mobilabsolutions.payment.validation.TransactionStatusEnumValidator
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
@@ -181,9 +187,9 @@ class MerchantController(
         @PathVariable("Merchant-Id") merchantId: String,
         @DateValidator @RequestParam(required = false) createdAtStart: String?,
         @DateValidator @RequestParam(required = false) createdAtEnd: String?,
-        @RequestParam(required = false) paymentMethod: String?,
-        @RequestParam(required = false) action: String?,
-        @RequestParam(required = false) status: String?,
+        @PaymentMethodEnumValidator(PaymentMethod = PaymentMethod::class) @RequestParam(required = false) paymentMethod: String?,
+        @TransactionActionEnumValidator(TransactionAction = TransactionAction::class) @RequestParam(required = false) action: String?,
+        @TransactionStatusEnumValidator(TransactionStatus = TransactionStatus::class) @RequestParam(required = false) status: String?,
         @RequestParam(required = false) text: String?,
         @RequestParam(required = false) limit: Int?,
         @RequestParam(required = false) offset: Int?
