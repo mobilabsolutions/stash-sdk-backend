@@ -44,6 +44,7 @@ class TransactionDetailsService(
         const val FAILED = "Failed"
 
         const val DATE_FORMAT = "yyyy-MM-dd HH:mm:ss"
+        const val DATE_FORMAT_UTC = "yyyy-MM-dd'T'HH:mm:ss'Z'"
 
         val csvHeaders = arrayOf("no", "id", "amount", "currency", "status", "reason", "customerId", "paymentMethod", "createdDate")
     }
@@ -167,7 +168,7 @@ class TransactionDetailsService(
     }
 
     private fun validateSearchPeriod(createdAtStart: String?, createdAtEnd: String?) {
-        val simpleDateFormat = SimpleDateFormat(DATE_FORMAT)
+        val simpleDateFormat = SimpleDateFormat(DATE_FORMAT_UTC)
         val startDate = if (createdAtEnd != null) simpleDateFormat.parse(createdAtStart) else Date()
         val endDate = if (createdAtEnd != null) simpleDateFormat.parse(createdAtEnd) else Date()
         val diffInMillis = Math.abs(endDate.time - startDate.time)
