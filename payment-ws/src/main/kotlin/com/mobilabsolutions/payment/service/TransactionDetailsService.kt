@@ -18,6 +18,7 @@ import org.supercsv.io.CsvBeanWriter
 import org.supercsv.prefs.CsvPreference
 import java.text.SimpleDateFormat
 import java.time.ZoneId
+import java.time.ZoneId.systemDefault
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -60,9 +61,10 @@ class TransactionDetailsService(
         val transaction = transactionRepository.getByTransactionId(transactionId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_FOUND).asException()
         val timelineTransactions = transactionRepository.getTransactionDetails(transactionId)
+        val timezone = merchant.timezone ?: systemDefault().toString()
 
         return TransactionDetailsResponseModel(
-            DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.of(merchant.timezone)).format(transaction.createdDate),
+            DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.of(timezone)).format(transaction.createdDate),
             transaction.transactionId,
             transaction.currencyId,
             transaction.amount,
@@ -76,7 +78,7 @@ class TransactionDetailsService(
             transaction.pspTestMode,
             transaction.merchant.id,
             transaction.alias!!.id,
-            timelineTransactions.asSequence().map { TransactionTimelineModel(it, merchant.timezone) }.toMutableList()
+            timelineTransactions.asSequence().map { TransactionTimelineModel(it, timezone) }.toMutableList()
         )
     }
 
@@ -109,8 +111,9 @@ class TransactionDetailsService(
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transactions = transactionRepository.getTransactionsByFilters(merchantId, createdAtStart, createdAtEnd, paymentMethod,
             action, status, text, limit, offset)
+        val timezone = merchant.timezone ?: systemDefault().toString()
 
-        val transactionList = TransactionListResponseModel(transactions, offset, limit, merchant.timezone)
+        val transactionList = TransactionListResponseModel(transactions, offset, limit, timezone)
         if (transactionList.transactions.isEmpty()) throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTIONS_NOT_FOUND).asException()
         return transactionList
     }
