@@ -14,6 +14,7 @@ import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
+import com.mobilabsolutions.server.commons.util.RequestHashing
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -73,6 +74,9 @@ class AliasServiceTest {
     @Mock
     private lateinit var randomStringGenerator: RandomStringGenerator
 
+    @Mock
+    private lateinit var requestHashing: RequestHashing
+
     @Spy
     val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
 
@@ -104,44 +108,53 @@ class AliasServiceTest {
                 knownAliasId, active = true))
             .thenReturn(Alias(psp = PaymentServiceProvider.BS_PAYONE, extra = extra, merchant = merchant))
         Mockito.`when`(
-            aliasRepository.getByIdempotentKeyAndActiveAndMerchantAndPspType(
-                newIdempotentKey, true, merchant, PaymentServiceProvider.BS_PAYONE))
+            aliasRepository.getByIdempotentKeyAndActiveAndMerchantAndPspTypeAndUserAgent(
+                newIdempotentKey, true, merchant, PaymentServiceProvider.BS_PAYONE, userAgent))
             .thenReturn(null)
         Mockito.`when`(
-            aliasRepository.getByIdempotentKeyAndActiveAndMerchantAndPspType(
-                usedIdempotentKey, true, merchant, PaymentServiceProvider.BS_PAYONE))
+            aliasRepository.getByIdempotentKeyAndActiveAndMerchantAndPspTypeAndUserAgent(
+                usedIdempotentKey, true, merchant, PaymentServiceProvider.BS_PAYONE, userAgent))
             .thenReturn(Alias(merchant = merchant))
+        Mockito.`when`(requestHashing.hashRequest(DynamicPspConfigRequestModel("test token", null, null)))
+            .thenReturn("different hash")
     }
 
     @Test
     fun `create alias with wrong header parameters`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(unknownPublishableKey, pspType, usedIdempotentKey, userAgent, DynamicPspConfigRequestModel(null, null, null), true)
+            aliasService.createAlias(unknownPublishableKey, pspType, usedIdempotentKey, userAgent, null, true)
         }
     }
 
     @Test
     fun `create alias with unknown pspType`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(knownPublishableKey, pspType, usedIdempotentKey, userAgent, DynamicPspConfigRequestModel(null, null, null), true)
+            aliasService.createAlias(knownPublishableKey, pspType, usedIdempotentKey, userAgent, null, true)
         }
     }
 
     @Test
     fun `create alias with new idempotent key`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(knownPublishableKey, pspType, newIdempotentKey, userAgent, DynamicPspConfigRequestModel(null, null, null), true)
+            aliasService.createAlias(knownPublishableKey, pspType, newIdempotentKey, userAgent, null, true)
         }
     }
 
     @Test
     fun `create alias with used idempotent key`() {
-        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, userAgent, DynamicPspConfigRequestModel(null, null, null), true)
+        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, userAgent, null, true)
+    }
+
+    @Test
+    fun `create alias with used idempotent key and different request body`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, userAgent, DynamicPspConfigRequestModel("test token", null, null), true)
+        }
     }
 
     @Test
     fun `create alias successfully`() {
-        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, userAgent, DynamicPspConfigRequestModel(null, null, null), true)
+        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, userAgent, null, true)
     }
 
     @Test

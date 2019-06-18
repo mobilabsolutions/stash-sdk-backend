@@ -15,8 +15,14 @@ import org.springframework.stereotype.Repository
 interface AliasRepository : BaseRepository<Alias, String> {
     fun getFirstByIdAndActive(id: String, active: Boolean): Alias?
 
-    @Query("SELECT DISTINCT a FROM Alias a WHERE a.idempotentKey = :idempotentKey AND a.active = :active AND a.merchant = :merchant AND a.psp = :psp")
-    fun getByIdempotentKeyAndActiveAndMerchantAndPspType(@Param("idempotentKey") idempotentKey: String, @Param("active") active: Boolean, @Param("merchant") merchant: Merchant, @Param("psp") psp: PaymentServiceProvider): Alias?
+    @Query("SELECT DISTINCT a FROM Alias a WHERE a.idempotentKey = :idempotentKey AND a.active = :active AND a.merchant = :merchant AND a.psp = :psp AND (a.userAgent = :userAgent OR :userAgent IS NULL)")
+    fun getByIdempotentKeyAndActiveAndMerchantAndPspTypeAndUserAgent(
+        @Param("idempotentKey") idempotentKey: String,
+        @Param("active") active: Boolean,
+        @Param("merchant") merchant: Merchant,
+        @Param("psp") psp: PaymentServiceProvider,
+        @Param("userAgent") userAgent: String?
+    ): Alias?
 
     @Modifying
     @Query("UPDATE Alias a SET a.pspAlias = :pspAlias, a.extra = :extra, a.userAgent = :userAgent, a.lastModifiedDate = CURRENT_TIMESTAMP WHERE a.id = :aliasId")

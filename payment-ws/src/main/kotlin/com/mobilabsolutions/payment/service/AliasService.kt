@@ -19,6 +19,7 @@ import com.mobilabsolutions.payment.model.response.AliasResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
+import com.mobilabsolutions.server.commons.util.RequestHashing
 import mu.KLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -33,6 +34,7 @@ class AliasService(
     private val merchantApiKeyRepository: MerchantApiKeyRepository,
     private val pspRegistry: PspRegistry,
     private val randomStringGenerator: RandomStringGenerator,
+    private val requestHashing: RequestHashing,
     private val objectMapper: ObjectMapper
 ) {
     companion object : KLogging() {
@@ -64,6 +66,7 @@ class AliasService(
             merchantApiKey.merchant,
             pspConfigType,
             calculatedConfig,
+            dynamicPspConfig,
             idempotentKey,
             userAgent
         )
@@ -146,17 +149,23 @@ class AliasService(
         merchant: Merchant,
         pspConfigType: PaymentServiceProvider,
         calculatedConfig: PspAliasConfigModel?,
+        dynamicPspConfig: DynamicPspConfigRequestModel?,
         idempotentKey: String,
         userAgent: String?
     ): AliasResponseModel {
-        val alias = aliasRepository.getByIdempotentKeyAndActiveAndMerchantAndPspType(idempotentKey, true, merchant, pspConfigType)
+        val alias = aliasRepository.getByIdempotentKeyAndActiveAndMerchantAndPspTypeAndUserAgent(idempotentKey, true, merchant, pspConfigType, userAgent)
         val generatedAliasId = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
+        val requestHash = if (dynamicPspConfig != null)
+            requestHashing.hashRequest(dynamicPspConfig) else null
 
         when {
-            alias != null -> return AliasResponseModel(
+            alias != null && requestHash.equals(alias.requestHash) -> return AliasResponseModel(
                 alias.id,
                 calculatedConfig
             )
+
+            alias != null && !requestHash.equals(alias.requestHash) ->
+                throw ApiError.ofErrorCode(ApiErrorCode.IDEMPOTENCY_VIOLATION).asException()
 
             else -> {
                 val newAlias = Alias(
@@ -164,7 +173,8 @@ class AliasService(
                     idempotentKey = idempotentKey,
                     merchant = merchant,
                     psp = pspConfigType,
-                    userAgent = userAgent
+                    userAgent = userAgent,
+                    requestHash = requestHash
                 )
                 aliasRepository.save(newAlias)
 
