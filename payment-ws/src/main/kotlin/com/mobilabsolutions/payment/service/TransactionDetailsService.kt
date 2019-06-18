@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional
 import org.supercsv.io.CsvBeanWriter
 import org.supercsv.prefs.CsvPreference
 import java.text.SimpleDateFormat
-import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
@@ -108,7 +107,7 @@ class TransactionDetailsService(
     ): TransactionListResponseModel {
         val merchant = merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        val transactions = transactionRepository.getTransactionsByFilters(merchantId, getLocalDateTime(createdAtStart, merchant.timezone), getLocalDateTime(createdAtEnd, merchant.timezone), paymentMethod,
+        val transactions = transactionRepository.getTransactionsByFilters(merchantId, createdAtStart, createdAtEnd, paymentMethod,
             action, status, text, limit, offset)
 
         val transactionList = TransactionListResponseModel(transactions, offset, limit, merchant.timezone)
@@ -182,9 +181,5 @@ class TransactionDetailsService(
             status == TransactionStatus.SUCCESS.name && action == TransactionAction.REFUND.name -> REFUNDED
             else -> FAILED
         }
-    }
-
-    private fun getLocalDateTime(date: String?, timezone: String?): String? {
-        return date?.let { Instant.parse(it).atZone(ZoneId.of(timezone)).format(DateTimeFormatter.ofPattern(DATE_FORMAT)) }
     }
 }
