@@ -43,7 +43,7 @@ class TransactionDetailsService(
         const val REFUNDED = "Refunded"
         const val FAILED = "Failed"
 
-        const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        const val DATE_FORMAT = "yyyy-MM-dd HH:mm:ss"
 
         val csvHeaders = arrayOf("no", "id", "amount", "currency", "status", "reason", "customerId", "paymentMethod", "createdDate")
     }
@@ -69,15 +69,15 @@ class TransactionDetailsService(
             transaction.currencyId,
             transaction.amount,
             transaction.reason,
-            transaction.action!!.name,
-            transaction.status!!.name,
+            transaction.action?.name,
+            transaction.status?.name,
             transaction.paymentMethod!!.name,
             objectMapper.readValue(transaction.paymentInfo, PaymentInfoModel::class.java),
             transaction.merchantTransactionId,
             transaction.merchantCustomerId,
             transaction.pspTestMode,
             transaction.merchant.id,
-            transaction.alias!!.id,
+            transaction.alias?.id,
             timelineTransactions.asSequence().map { TransactionTimelineModel(it, timezone) }.toMutableList()
         )
     }
