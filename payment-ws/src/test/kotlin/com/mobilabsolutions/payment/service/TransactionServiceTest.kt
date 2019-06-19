@@ -27,6 +27,7 @@ import com.mobilabsolutions.payment.model.request.ReversalRequestModel
 import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
+import com.mobilabsolutions.server.commons.util.RequestHashing
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -83,6 +84,8 @@ class TransactionServiceTest {
     )
     private val aliasExtra = AliasExtraModel(null, null, null, PersonalDataModel(null, null, null, "Mustermann", null, null, "Berlin", "DE", null), PaymentMethod.CC.name, null)
     private val merchantTransactionId = "12345"
+    private val requestHash = "17b7f62ccd46abba2576714496908760"
+    private val differentRequestHash = "different hash"
 
     @InjectMocks
     private lateinit var transactionService: TransactionService
@@ -104,6 +107,9 @@ class TransactionServiceTest {
 
     @Mock
     private lateinit var pspRegistry: PspRegistry
+
+    @Mock
+    private lateinit var requestHashing: RequestHashing
 
     @Spy
     val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
@@ -171,15 +177,16 @@ class TransactionServiceTest {
             usedIdempotentKey,
             preauthAction,
             merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
-            alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig))))
+            alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig))))
             .thenReturn(Transaction(
                 amount = 1,
                 currencyId = "EUR",
                 transactionId = correctTransactionId,
                 pspTestMode = test,
-                action = TransactionAction.PREAUTH,
+                action = preauthAction,
                 merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
                 paymentMethod = PaymentMethod.CC,
+                requestHash = requestHash,
                 alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig)),
                 pspResponse = pspResponse)
             )
@@ -193,14 +200,32 @@ class TransactionServiceTest {
             usedIdempotentKey,
             authAction,
             merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
-            alias = Alias(active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig))))
+            alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig))))
             .thenReturn(Transaction(
                 amount = 1,
                 currencyId = "EUR",
                 transactionId = correctTransactionId,
                 pspTestMode = test,
-                action = TransactionAction.AUTH,
+                action = authAction,
                 paymentMethod = PaymentMethod.CC,
+                requestHash = requestHash,
+                merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
+                alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig)),
+                pspResponse = pspResponse)
+            )
+        Mockito.`when`(transactionRepository.getByIdempotentKeyAndActionAndMerchantAndAlias(
+            usedIdempotentKey,
+            TransactionAction.REFUND,
+            merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
+            alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig))))
+            .thenReturn(Transaction(
+                amount = 1,
+                currencyId = "EUR",
+                transactionId = correctTransactionId,
+                pspTestMode = test,
+                action = TransactionAction.REFUND,
+                paymentMethod = PaymentMethod.CC,
+                requestHash = requestHash,
                 merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
                 alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig)),
                 pspResponse = pspResponse)
@@ -218,6 +243,7 @@ class TransactionServiceTest {
                 pspTestMode = test,
                 action = TransactionAction.PREAUTH,
                 paymentMethod = PaymentMethod.CC,
+                requestHash = requestHash,
                 merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
                 alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig)),
                 pspResponse = pspResponse,
@@ -237,6 +263,7 @@ class TransactionServiceTest {
                 pspTestMode = test,
                 action = TransactionAction.CAPTURE,
                 paymentMethod = PaymentMethod.CC,
+                requestHash = requestHash,
                 merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
                 alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig)),
                 pspResponse = pspResponse,
@@ -256,6 +283,7 @@ class TransactionServiceTest {
                 pspTestMode = test,
                 action = TransactionAction.REVERSAL,
                 paymentMethod = PaymentMethod.CC,
+                requestHash = requestHash,
                 merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
                 alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant(correctMerchantId, pspConfig = pspConfig)),
                 pspResponse = pspResponse,
@@ -273,6 +301,7 @@ class TransactionServiceTest {
                     pspTestMode = test,
                     action = TransactionAction.AUTH,
                     paymentMethod = PaymentMethod.CC,
+                    requestHash = requestHash,
                     merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
                     alias = Alias(
                         id = correctAliasId,
@@ -290,6 +319,7 @@ class TransactionServiceTest {
                     pspTestMode = test,
                     action = TransactionAction.REFUND,
                     paymentMethod = PaymentMethod.CC,
+                    requestHash = requestHash,
                     merchant = Merchant(correctMerchantId, pspConfig = pspConfig),
                     alias = Alias(
                         id = correctAliasId,
@@ -303,6 +333,12 @@ class TransactionServiceTest {
                 )
             )
         )
+        Mockito.`when`(requestHashing.hashRequest(PaymentRequestModel(correctAliasId, correctPaymentData, purchaseId, customerId))
+        ).thenReturn(requestHash)
+        Mockito.`when`(requestHashing.hashRequest(PaymentRequestModel(correctAliasId, correctPaymentData, "2", customerId))
+        ).thenReturn(differentRequestHash)
+        Mockito.`when`(requestHashing.hashRequest(PaymentRequestModel(correctAliasId, correctPaymentData, null, null))
+        ).thenReturn(requestHash)
     }
 
     @Test
@@ -412,6 +448,23 @@ class TransactionServiceTest {
     }
 
     @Test
+    fun `preauthorize transaction with used idempotent key and different request body`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            transactionService.preauthorize(
+                correctSecretKey,
+                usedIdempotentKey,
+                test,
+                PaymentRequestModel(
+                    correctAliasId,
+                    correctPaymentData,
+                    "2",
+                    customerId
+                )
+            )
+        }
+    }
+
+    @Test
     fun `authorize transaction with wrong secret key`() {
         Assertions.assertThrows(ApiException::class.java) {
             transactionService.preauthorize(
@@ -518,6 +571,23 @@ class TransactionServiceTest {
     }
 
     @Test
+    fun `authorize transaction with used idempotent key and different request body`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            transactionService.preauthorize(
+                correctSecretKey,
+                usedIdempotentKey,
+                test,
+                PaymentRequestModel(
+                    correctAliasId,
+                    correctPaymentData,
+                    "2",
+                    customerId
+                )
+            )
+        }
+    }
+
+    @Test
     fun `capture transaction with wrong transaction id`() {
         Assertions.assertThrows(ApiException::class.java) {
             transactionService.capture(correctSecretKey, test, wrongTransactionId)
@@ -610,7 +680,7 @@ class TransactionServiceTest {
     fun `refund transaction with correct secret key`() {
         transactionService.refund(
             correctSecretKey,
-            usedIdempotentKey,
+            newIdempotentKey,
             test,
             correctTransactionId,
             correctPaymentData
@@ -640,10 +710,23 @@ class TransactionServiceTest {
     }
 
     @Test
+    fun `refund transaction with used idempotent key and different request body`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            transactionService.refund(
+                correctSecretKey,
+                usedIdempotentKey,
+                test,
+                correctTransactionId,
+                wrongPaymentData
+            )
+        }
+    }
+
+    @Test
     fun `refund transaction successfully`() {
         transactionService.refund(
             someSecretKey,
-            usedIdempotentKey,
+            newIdempotentKey,
             test,
             correctTransactionId,
             correctPaymentData

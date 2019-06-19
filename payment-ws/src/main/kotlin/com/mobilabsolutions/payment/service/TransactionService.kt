@@ -27,8 +27,10 @@ import com.mobilabsolutions.payment.model.response.PaymentResponseModel
 import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
+import com.mobilabsolutions.server.commons.util.RequestHashing
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
+import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -43,6 +45,7 @@ class TransactionService(
     private val aliasRepository: AliasRepository,
     private val merchantRepository: MerchantRepository,
     private val pspRegistry: PspRegistry,
+    private val requestHashing: RequestHashing,
     private val objectMapper: ObjectMapper
 ) {
 
@@ -467,9 +470,10 @@ class TransactionService(
             )
 
         val transaction = transactionRepository.getByIdempotentKeyAndActionAndMerchantAndAlias(idempotentKey, transactionAction, merchant, alias)
+        val requestHash = requestHashing.hashRequest(paymentInfo)
 
         when {
-            transaction != null -> return PaymentResponseModel(
+            transaction != null && StringUtils.equals(requestHash, transaction.requestHash) -> return PaymentResponseModel(
                 transaction.transactionId,
                 transaction.amount,
                 transaction.currencyId,
@@ -477,6 +481,9 @@ class TransactionService(
                 transaction.action,
                 objectMapper.readValue(transaction.pspResponse, PspPaymentResponseModel::class.java)?.errorMessage
             )
+
+            transaction != null && !StringUtils.equals(requestHash, transaction.requestHash) ->
+                throw ApiError.ofErrorCode(ApiErrorCode.IDEMPOTENCY_VIOLATION).asException()
 
             else -> {
                 val pspPaymentResponse = pspAction.invoke()
@@ -494,6 +501,7 @@ class TransactionService(
                     merchantTransactionId = paymentInfo.purchaseId,
                     merchantCustomerId = paymentInfo.customerId,
                     pspTestMode = pspTestMode ?: false,
+                    requestHash = requestHash,
                     merchant = merchant,
                     alias = alias
                 )
