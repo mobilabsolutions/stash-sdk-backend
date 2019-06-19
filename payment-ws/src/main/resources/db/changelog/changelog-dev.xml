@@ -180,6 +180,11 @@
     <changeSet author="generated" id="initial_schema_20">
         <addForeignKeyConstraint baseColumnNames="merchant_user_id" baseTableName="merchant_user_authorities" constraintName="fksfekfb2b1gckr2hixfsfvtsav" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="merchant_user"/>
     </changeSet>
+    <changeSet author="mohamed.osman" id="PSOS-326_1">
+        <addColumn tableName="merchant">
+            <column name="time_zone" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
     <changeSet author="veskovic.jovana" id="PSOS-289_1">
         <addColumn tableName="alias">
             <column name="request_hash" type="VARCHAR(255)"/>
