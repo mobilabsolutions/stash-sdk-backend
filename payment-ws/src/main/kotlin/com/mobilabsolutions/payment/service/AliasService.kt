@@ -21,6 +21,7 @@ import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import com.mobilabsolutions.server.commons.util.RequestHashing
 import mu.KLogging
+import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -159,12 +160,12 @@ class AliasService(
             requestHashing.hashRequest(dynamicPspConfig) else null
 
         when {
-            alias != null && requestHash.equals(alias.requestHash) -> return AliasResponseModel(
+            alias != null && StringUtils.equals(requestHash, alias.requestHash) -> return AliasResponseModel(
                 alias.id,
                 calculatedConfig
             )
 
-            alias != null && !requestHash.equals(alias.requestHash) ->
+            alias != null && !StringUtils.equals(requestHash, alias.requestHash) ->
                 throw ApiError.ofErrorCode(ApiErrorCode.IDEMPOTENCY_VIOLATION).asException()
 
             else -> {
