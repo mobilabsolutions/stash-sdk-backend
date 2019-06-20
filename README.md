@@ -73,9 +73,9 @@ The secret key is used to authenticate the transactions requests and the alias d
 
 ## Idempotency
 
-The Payment SDK uses a concept of idempotency for both aliases and transactions. The idempotent operation is the one that produces the same result no matter how many times it is called. The idempotency is performed by sending an `Idempotent-Key` in the header for `Create Alias`, `Preauthorization`, `Authorization` and `Refund` requests. This will avoid adding the same alias more than once or to perform the same transaction several times if unintentionally called.
+The Payment SDK uses a concept of idempotency for both aliases and transactions. The idempotent operation is the one that produces the same result no matter how many times it is called. The idempotency is performed by sending an `Idempotent-Key` in the header for `Create Alias`, `Preauthorization`, `Authorization` and `Refund` requests. This will avoid adding the same alias more than once or performing the same transaction several times if unintentionally called.
 
-When a request comes with a new idempotent key, the key and the request body are stored in the Payment SDK backend. If the other request comes with the same idempotent key and the same body, the original response is returned. However, if the other request has the same idempotent key as the original one, but the different body, an appropriate error will be returned.
+When a request comes with a new idempotent key, the key and the request body are stored in the Payment SDK backend. If a second request comes with the same idempotent key and the same body, the original response is returned. However, if the second request has the same idempotent key as the original one, but a different body, an appropriate error will be returned.
 
 ## Feedback
 
