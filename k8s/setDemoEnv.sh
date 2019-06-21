@@ -22,3 +22,4 @@ export KUBE_CONFIGMAP_SQL_JDBC_URL="jdbc:postgresql://localhost/payment-sdk-back
 
 # ingress variables
 export KUBE_INGRESS_STATIC_IP_NAME="payment-backend-demo"
+export KUBE_INGRESS_HOST_NAME="payment-demo.mblb.net"

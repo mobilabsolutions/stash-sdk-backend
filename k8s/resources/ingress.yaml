@@ -14,7 +14,7 @@ spec:
     serviceName: payment-dashboard
     servicePort: 80
   rules:
-    - host: payment-dev.mblb.net
+    - host: "${KUBE_INGRESS_HOST_NAME}"
       http:
         paths:
           - path: /api/*
