@@ -7,14 +7,14 @@ metadata:
     app: payment-sdk-backend
   annotations:
     kubernetes.io/ingress.global-static-ip-name: "${KUBE_INGRESS_STATIC_IP_NAME}"
-    ingress.gcp.kubernetes.io/pre-shared-cert: "payment-dev"
+    ingress.gcp.kubernetes.io/pre-shared-cert: "${KUBE_INGRESS_CERT_NAME}"
     kubernetes.io/ingress.allow-http: "false"
 spec:
   backend:
     serviceName: payment-dashboard
     servicePort: 80
   rules:
-    - host: payment-dev.mblb.net
+    - host: "${KUBE_INGRESS_HOST_NAME}"
       http:
         paths:
           - path: /api/*
