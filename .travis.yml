@@ -14,7 +14,7 @@ env:
 branches:
   only:
     - master
-    - ^(\d+\.)?(\d+\.)?\d+(-demo)?$
+    - /^(\d+\.)?(\d+\.)?\d+(-demo)?$/
 
 install: true
 
