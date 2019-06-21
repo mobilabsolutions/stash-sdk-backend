@@ -7,7 +7,7 @@ metadata:
     app: payment-sdk-backend
   annotations:
     kubernetes.io/ingress.global-static-ip-name: "${KUBE_INGRESS_STATIC_IP_NAME}"
-    ingress.gcp.kubernetes.io/pre-shared-cert: "payment-dev"
+    ingress.gcp.kubernetes.io/pre-shared-cert: "${KUBE_INGRESS_CERT_NAME}"
     kubernetes.io/ingress.allow-http: "false"
 spec:
   backend:
