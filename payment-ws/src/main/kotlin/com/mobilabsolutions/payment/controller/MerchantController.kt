@@ -16,6 +16,7 @@ import com.mobilabsolutions.payment.validation.PaymentMethodEnumValidator
 import com.mobilabsolutions.payment.validation.TransactionActionEnumValidator
 import com.mobilabsolutions.payment.validation.TransactionStatusEnumValidator
 import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
 import org.springframework.http.HttpStatus
@@ -187,9 +188,9 @@ class MerchantController(
         @PathVariable("Merchant-Id") merchantId: String,
         @DateValidator @RequestParam(required = false) createdAtStart: String?,
         @DateValidator @RequestParam(required = false) createdAtEnd: String?,
-        @PaymentMethodEnumValidator(PaymentMethod = PaymentMethod::class) @RequestParam(required = false) paymentMethod: String?,
-        @TransactionActionEnumValidator(TransactionAction = TransactionAction::class) @RequestParam(required = false) action: String?,
-        @TransactionStatusEnumValidator(TransactionStatus = TransactionStatus::class) @RequestParam(required = false) status: String?,
+        @ApiParam(value = "Payment method", example = "Values: CC, SEPA, PAY_PAL, GOOGLE_PAY, APPLE_PAY, KLARNA") @PaymentMethodEnumValidator(PaymentMethod = PaymentMethod::class) @RequestParam(required = false) paymentMethod: String?,
+        @ApiParam(value = "Transaction action", example = "Values: PREAUTH, AUTH, REVERSAL, REFUND, CAPTURE") @TransactionActionEnumValidator(TransactionAction = TransactionAction::class) @RequestParam(required = false) action: String?,
+        @ApiParam(value = "Transaction status", example = "Values: SUCCESS, FAIL") @TransactionStatusEnumValidator(TransactionStatus = TransactionStatus::class) @RequestParam(required = false) status: String?,
         @RequestParam(required = false) text: String?,
         @RequestParam(required = false) limit: Int?,
         @RequestParam(required = false) offset: Int?

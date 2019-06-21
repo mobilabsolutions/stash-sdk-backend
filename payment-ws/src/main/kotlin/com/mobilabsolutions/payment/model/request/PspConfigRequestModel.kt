@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty
  */
 @ApiModel(value = "PSP Config Request")
 data class PspConfigRequestModel(
-    @ApiModelProperty(value = "Payment service provider type", example = "BS_PAYONE")
+    @ApiModelProperty(value = "Payment service provider type", example = "Values: BS_PAYONE, BRAINTREE, ADYEN")
     @PaymentServiceProviderEnumValidator(PaymentServiceProvider = PaymentServiceProvider::class)
     val pspId: String?,
 

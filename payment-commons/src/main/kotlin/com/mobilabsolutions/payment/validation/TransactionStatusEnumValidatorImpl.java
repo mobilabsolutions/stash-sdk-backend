@@ -11,8 +11,7 @@ public class TransactionStatusEnumValidatorImpl implements ConstraintValidator<T
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        if (value == null) return true;
-        return valueList.contains(value.toUpperCase());
+        return value == null || valueList.contains(value.toUpperCase());
     }
 
     @Override

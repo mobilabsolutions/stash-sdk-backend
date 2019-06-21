@@ -15,7 +15,7 @@ public class KeyTypeEnumValidatorImpl implements ConstraintValidator<KeyTypeEnum
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        return valueList.contains(value.toUpperCase());
+        return value == null || valueList.contains(value.toUpperCase());
     }
 
     @Override

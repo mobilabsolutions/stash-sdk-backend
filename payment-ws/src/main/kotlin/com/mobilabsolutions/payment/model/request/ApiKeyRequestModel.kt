@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty
  */
 @ApiModel(value = "Api Key Request")
 data class ApiKeyRequestModel(
-    @ApiModelProperty(value = "Api key type", example = "PUBLISHABLE")
+    @ApiModelProperty(value = "Api key type", example = "Values: PUBLISHABLE, SECRET")
     @KeyTypeEnumValidator(KeyType = KeyType::class)
     val type: String?,
 
