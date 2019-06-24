@@ -8,14 +8,13 @@ import java.util.List;
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-
 public class PaymentMethodEnumValidatorImpl implements ConstraintValidator<PaymentMethodEnumValidator, String> {
 
     private List<String> valueList = new ArrayList<>();
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        return valueList.contains(value.toUpperCase());
+        return value == null || valueList.contains(value.toUpperCase());
     }
 
     @Override
@@ -29,6 +28,5 @@ public class PaymentMethodEnumValidatorImpl implements ConstraintValidator<Payme
             Enum enumVal : enumValArr) {
             valueList.add(enumVal.toString().toUpperCase());
         }
-
     }
 }

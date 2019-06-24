@@ -4,24 +4,24 @@ import javax.validation.Constraint;
 import javax.validation.Payload;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-
 @Documented
-@Constraint(validatedBy = PaymentServiceProviderEnumValidatorImpl.class)
-@Retention(RetentionPolicy.RUNTIME)
-@Target(FIELD)
-public @interface PaymentServiceProviderEnumValidator {
+@Constraint(validatedBy = TransactionStatusEnumValidatorImpl.class)
+@Retention(RUNTIME)
+@Target({FIELD, PARAMETER})
+public @interface TransactionStatusEnumValidator {
 
-    Class<? extends Enum<?>> PaymentServiceProvider();
+    Class<? extends Enum<?>> TransactionStatus();
 
-    String message() default "Invalid payment service provider.";
+    String message() default "Invalid transaction status.";
 
     Class<?>[]groups() default {};
 

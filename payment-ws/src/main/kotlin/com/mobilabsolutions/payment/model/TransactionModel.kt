@@ -33,7 +33,7 @@ data class TransactionModel(
     @ApiModelProperty(value = "Merchant customer id", example = "frefatdfqw7am")
     val customerId: String?,
 
-    @ApiModelProperty(value = "Payment method", example = "SEPA")
+    @ApiModelProperty(value = "Payment method", example = "Values: CC, SEPA, PAY_PAL, GOOGLE_PAY, APPLE_PAY, KLARNA")
     val paymentMethod: String?,
 
     @ApiModelProperty(value = "Creation Date", example = "2018-12-31 23:59:59.999 +0100")

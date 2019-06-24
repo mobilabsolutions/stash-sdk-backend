@@ -8,8 +8,7 @@ import java.util.List;
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-
-public class PaymentServiceProviderEnumValidatorImpl implements ConstraintValidator<PaymentServiceProviderEnumValidator, String> {
+public class TransactionActionEnumValidatorImpl implements ConstraintValidator<TransactionActionEnumValidator, String> {
 
     private List<String> valueList = new ArrayList<>();
 
@@ -19,8 +18,8 @@ public class PaymentServiceProviderEnumValidatorImpl implements ConstraintValida
     }
 
     @Override
-    public void initialize(PaymentServiceProviderEnumValidator constraintAnnotation) {
-        Class<? extends Enum<?>> enumClass = constraintAnnotation.PaymentServiceProvider();
+    public void initialize(TransactionActionEnumValidator constraintAnnotation) {
+        Class<? extends Enum<?>> enumClass = constraintAnnotation.TransactionAction();
 
         @SuppressWarnings("rawtypes")
         Enum[] enumValArr = enumClass.getEnumConstants();
@@ -29,6 +28,5 @@ public class PaymentServiceProviderEnumValidatorImpl implements ConstraintValida
             Enum enumVal : enumValArr) {
             valueList.add(enumVal.toString().toUpperCase());
         }
-
     }
 }
