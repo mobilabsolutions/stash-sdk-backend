@@ -16,6 +16,8 @@ import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.payment.model.response.AliasResponseModel
+import com.mobilabsolutions.payment.validation.ConfigValidator
+import com.mobilabsolutions.payment.validation.PspValidator
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
@@ -34,6 +36,8 @@ class AliasService(
     private val aliasRepository: AliasRepository,
     private val merchantApiKeyRepository: MerchantApiKeyRepository,
     private val pspRegistry: PspRegistry,
+    private val pspValidator: PspValidator,
+    private val configValidator: ConfigValidator,
     private val randomStringGenerator: RandomStringGenerator,
     private val requestHashing: RequestHashing,
     private val objectMapper: ObjectMapper
@@ -55,8 +59,8 @@ class AliasService(
      */
     fun createAlias(publishableKey: String, pspType: String, idempotentKey: String, userAgent: String?, dynamicPspConfig: DynamicPspConfigRequestModel?, pspTestMode: Boolean?): AliasResponseModel {
         logger.info("Creating alias for {} psp", pspType)
+        if (!pspValidator.validate(pspType, dynamicPspConfig)) throw ApiError.ofErrorCode(ApiErrorCode.DYNAMIC_CONFIG_NOT_FOUND).asException()
         val merchantApiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofErrorCode(ApiErrorCode.PUBLISHABLE_KEY_NOT_FOUND).asException()
-
         val result = objectMapper.readValue(merchantApiKey.merchant.pspConfig ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_EMPTY).asException(), PspConfigListModel::class.java)
         val pspConfig = result.psp.firstOrNull { it.type == pspType }
         val pspConfigType = PaymentServiceProvider.valueOf(pspConfig?.type ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_NOT_FOUND, "PSP configuration for '$pspType' cannot be found from given merchant").asException())
@@ -84,6 +88,7 @@ class AliasService(
      */
     fun exchangeAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, aliasRequestModel: AliasRequestModel) {
         logger.info("Exchanging alias {}", aliasId)
+        if (!configValidator.validate(aliasRequestModel.extra)) throw ApiError.ofErrorCode(ApiErrorCode.CONFIG_NOT_FOUND).asException()
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofErrorCode(ApiErrorCode.PUBLISHABLE_KEY_NOT_FOUND).asException()
         val alias = aliasRepository.getFirstByIdAndActive(aliasId, true) ?: throw ApiError.ofErrorCode(ApiErrorCode.ALIAS_NOT_FOUND).asException()
         if (apiKey.merchant.id != alias.merchant?.id) throw ApiError.ofErrorCode(ApiErrorCode.WRONG_ALIAS_MERCHANT_MAPPING).asException()
