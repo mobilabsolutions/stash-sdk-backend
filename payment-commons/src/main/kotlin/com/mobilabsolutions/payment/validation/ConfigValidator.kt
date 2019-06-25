@@ -22,48 +22,51 @@ class ConfigValidator {
     }
 
     fun checkCcData(aliasExtra: AliasExtraModel, pspType: String): Boolean {
-        if (pspType == PaymentServiceProvider.BS_PAYONE.name) {
-            if (aliasExtra.personalData?.country == null || aliasExtra.personalData.firstName == null || aliasExtra.personalData.lastName == null || !checkCcConfig(aliasExtra.ccConfig)) return false
-            return true
-        } else if (pspType == PaymentServiceProvider.ADYEN.name) {
-            if (aliasExtra.personalData?.firstName == null || aliasExtra.personalData.lastName == null || !checkCcConfig(aliasExtra.ccConfig)) return false
-            return true
+        return when (pspType) {
+            PaymentServiceProvider.BS_PAYONE.name -> {
+                (aliasExtra.personalData?.country != null && aliasExtra.personalData.firstName != null && aliasExtra.personalData.lastName != null && checkCcConfig(aliasExtra.ccConfig))
+            }
+            PaymentServiceProvider.ADYEN.name -> {
+                (aliasExtra.personalData?.firstName != null && aliasExtra.personalData.lastName != null && checkCcConfig(aliasExtra.ccConfig))
+            }
+            else -> false
         }
-        return false
     }
 
     fun checkSepaData(aliasExtra: AliasExtraModel, pspType: String): Boolean {
-        if (pspType == PaymentServiceProvider.BS_PAYONE.name) {
-            if (aliasExtra.personalData?.country == null || aliasExtra.personalData.firstName == null || aliasExtra.personalData.lastName == null || !checkSepaConfig(aliasExtra.sepaConfig)) return false
-            return true
-        } else if (pspType == PaymentServiceProvider.ADYEN.name) {
-            if (aliasExtra.personalData?.firstName == null || aliasExtra.personalData.lastName == null || aliasExtra.sepaConfig?.iban == null) return false
-            return true
+        return when (pspType) {
+            PaymentServiceProvider.BS_PAYONE.name -> {
+                (aliasExtra.personalData?.country != null && aliasExtra.personalData.firstName != null && aliasExtra.personalData.lastName != null && checkSepaConfig(aliasExtra.sepaConfig))
+            }
+            PaymentServiceProvider.ADYEN.name -> {
+                (aliasExtra.personalData?.firstName != null && aliasExtra.personalData.lastName != null && aliasExtra.sepaConfig?.iban != null)
+            }
+            else -> false
         }
-        return false
     }
 
     fun checkPaypalData(aliasExtra: AliasExtraModel, pspType: String): Boolean {
-        if (aliasExtra.payPalConfig == null || pspType != PaymentServiceProvider.BRAINTREE.name) return false
-        else {
-            if (aliasExtra.payPalConfig.nonce == null || aliasExtra.payPalConfig.deviceData == null || aliasExtra.personalData?.email == null) return false
+        if (aliasExtra.payPalConfig == null) return false
+
+        return when (pspType) {
+            PaymentServiceProvider.BRAINTREE.name -> {
+                (aliasExtra.payPalConfig.nonce != null && aliasExtra.payPalConfig.deviceData != null && aliasExtra.personalData?.email != null)
+            }
+            else -> false
         }
-        return true
     }
 
     fun checkCcConfig(ccConfig: CreditCardConfigModel?): Boolean {
-        if (ccConfig == null) return false
-        else {
-            if (ccConfig.ccMask == null || ccConfig.ccExpiry == null || ccConfig.ccType == null || ccConfig.ccHolderName == null) return false
+        return when (ccConfig) {
+            null -> false
+            else -> (ccConfig.ccMask != null && ccConfig.ccExpiry != null && ccConfig.ccType != null && ccConfig.ccHolderName != null)
         }
-        return true
     }
 
     fun checkSepaConfig(sepaConfig: SepaConfigModel?): Boolean {
-        if (sepaConfig == null) return false
-        else {
-            if (sepaConfig.iban == null || sepaConfig.bic == null) return false
+        return when (sepaConfig) {
+            null -> false
+            else -> (sepaConfig.iban == null || sepaConfig.bic == null)
         }
-        return true
     }
 }
