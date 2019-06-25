@@ -26,7 +26,7 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
     @Query("SELECT * FROM transaction_record tr WHERE tr.transaction_id = :transactionId GROUP BY :transactionId, tr.id ORDER BY tr.created_date DESC LIMIT 1", nativeQuery = true)
     fun getByTransactionId(@Param("transactionId") transactionId: String): Transaction?
 
-    @Query("SELECT tr.amount, tr.reason, tr.action, tr.status, tr.created_date FROM transaction_record tr WHERE tr.transaction_id = :transactionId", nativeQuery = true)
+    @Query("SELECT tr.amount, tr.reason, tr.action, tr.status, tr.created_date FROM transaction_record tr WHERE tr.transaction_id = :transactionId ORDER BY tr.created_date desc", nativeQuery = true)
     fun getTransactionDetails(@Param("transactionId") transactionId: String): List<Array<Any>>
 
     @Query(
@@ -50,7 +50,7 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
             "OR tr.merchant_transaction_id ~* CAST(:text AS varchar) " +
             "OR tr.merchant_customer_id ~* CAST(:text AS varchar) " +
             "OR tr.alias_id ~* CAST(:text AS varchar) " +
-            "OR tr.payment_method ~* CASE WHEN :text ~* 'pay' THEN 'PAY_PAL' WHEN :text ~* 'credit' THEN 'CC' ELSE CAST(:text AS varchar) END " +
+            "OR tr.payment_method ~* CASE WHEN CAST(:text AS varchar) ~* 'pay' THEN 'PAY_PAL' WHEN CAST(:text AS varchar) ~* 'credit' THEN 'CC' ELSE CAST(:text AS varchar) END " +
             "OR CAST(tr.payment_info AS json)#>>'{extra, ccConfig, ccMask}' ~* CAST(:text AS text) " +
             "OR CAST(tr.payment_info AS json)#>>'{extra, ccConfig, ccExpiryDate}' ~* CAST(:text AS text) " +
             "OR CAST(tr.payment_info AS json)#>>'{extra, ccConfig, ccType}' ~* CAST(:text AS text) " +
