@@ -13,15 +13,16 @@ import org.springframework.stereotype.Component
 @Component
 class ConfigValidator {
     fun validate(aliasModel: AliasExtraModel?, pspType: String): Boolean {
-        return when (aliasModel!!.paymentMethod) {
+        return when (aliasModel?.paymentMethod) {
             PaymentMethod.CC.name -> checkCcData(aliasModel, pspType)
             PaymentMethod.SEPA.name -> checkSepaData(aliasModel, pspType)
             PaymentMethod.PAY_PAL.name -> checkPaypalData(aliasModel, pspType)
+            null -> false
             else -> false
         }
     }
 
-    fun checkCcData(aliasExtra: AliasExtraModel, pspType: String): Boolean {
+    private fun checkCcData(aliasExtra: AliasExtraModel, pspType: String): Boolean {
         return when (pspType) {
             PaymentServiceProvider.BS_PAYONE.name -> {
                 (aliasExtra.personalData?.country != null && aliasExtra.personalData.firstName != null && aliasExtra.personalData.lastName != null && checkCcConfig(aliasExtra.ccConfig))
@@ -33,7 +34,7 @@ class ConfigValidator {
         }
     }
 
-    fun checkSepaData(aliasExtra: AliasExtraModel, pspType: String): Boolean {
+    private fun checkSepaData(aliasExtra: AliasExtraModel, pspType: String): Boolean {
         return when (pspType) {
             PaymentServiceProvider.BS_PAYONE.name -> {
                 (aliasExtra.personalData?.country != null && aliasExtra.personalData.firstName != null && aliasExtra.personalData.lastName != null && checkSepaConfig(aliasExtra.sepaConfig))
@@ -45,25 +46,23 @@ class ConfigValidator {
         }
     }
 
-    fun checkPaypalData(aliasExtra: AliasExtraModel, pspType: String): Boolean {
-        if (aliasExtra.payPalConfig == null) return false
-
+    private fun checkPaypalData(aliasExtra: AliasExtraModel, pspType: String): Boolean {
         return when (pspType) {
             PaymentServiceProvider.BRAINTREE.name -> {
-                (aliasExtra.payPalConfig.nonce != null && aliasExtra.payPalConfig.deviceData != null && aliasExtra.personalData?.email != null)
+                (aliasExtra.payPalConfig?.nonce != null && aliasExtra.payPalConfig.deviceData != null && aliasExtra.personalData?.email != null)
             }
             else -> false
         }
     }
 
-    fun checkCcConfig(ccConfig: CreditCardConfigModel?): Boolean {
+    private fun checkCcConfig(ccConfig: CreditCardConfigModel?): Boolean {
         return when (ccConfig) {
             null -> false
             else -> (ccConfig.ccMask != null && ccConfig.ccExpiry != null && ccConfig.ccType != null && ccConfig.ccHolderName != null)
         }
     }
 
-    fun checkSepaConfig(sepaConfig: SepaConfigModel?): Boolean {
+    private fun checkSepaConfig(sepaConfig: SepaConfigModel?): Boolean {
         return when (sepaConfig) {
             null -> false
             else -> (sepaConfig.iban == null || sepaConfig.bic == null)
