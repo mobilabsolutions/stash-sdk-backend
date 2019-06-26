@@ -21,7 +21,7 @@ spec:
             backend:
               serviceName: payment-sdk-backend
               servicePort: 80
-          - path: /notifications/*
+          - path: /notification/*
             backend:
               serviceName: payment-sdk-notification
               servicePort: 80
