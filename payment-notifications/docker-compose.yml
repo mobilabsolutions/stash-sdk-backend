@@ -1,0 +1,24 @@
+version: "3"
+services:
+  web:
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - "SPRING_PROFILES_ACTIVE=dev"
+      - "DB_URL=jdbc:postgresql://db:5432/payment"
+      - "DB_NAME=notifications"
+      - "DB_USERNAME=notifications"
+      - "DB_PASSWORD=notifications"
+      - "AUTH_USERNAME=admin"
+      - "AUTH_PASSWORD=nimda"
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile-postgres
+    ports:
+      - 5432:5432

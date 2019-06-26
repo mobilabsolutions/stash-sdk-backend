@@ -1,4 +1,4 @@
-package com.mobilabsolutions.payment.auth.configuration
+package com.mobilabsolutions.payment.configuration
 
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import org.springframework.http.HttpStatus

@@ -1,4 +1,4 @@
-package com.mobilabsolutions.payment.data.domain
+package com.mobilabsolutions.payment.data.configuration
 
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate

@@ -1,4 +1,4 @@
-package com.mobilabsolutions.payment.auth.configuration
+package com.mobilabsolutions.server.commons
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

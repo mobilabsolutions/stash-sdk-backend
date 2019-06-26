@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payment-sdk-notification
+  namespace: ${KUBE_NAMESPACE}
+  labels:
+    app: payment-sdk-notification
+data:
+  JAVA_OPTS: ${KUBE_NOTIF_CONFIGMAP_JAVA_OPTS}
+  SPRING_PROFILES_ACTIVE: ${KUBE_NOTIF_CONFIGMAP_SPRING_PROFILE}
+  DB_URL: ${KUBE_NOTIF_CONFIGMAP_SQL_JDBC_URL}
