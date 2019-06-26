@@ -8,8 +8,8 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenDeleteAliasRequestM
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentMethodRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
-import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRefundRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
@@ -23,11 +23,11 @@ import com.mobilabsolutions.payment.model.SepaConfigModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
+import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
-import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import com.mobilabsolutions.server.commons.exception.ApiException
@@ -127,7 +127,7 @@ class AdyenPspTest {
         Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(20)).thenReturn(reference)
         Mockito.`when`(adyenClient.preauthorization(
             AdyenPaymentRequestModel(amount, email, customerIP, null, pspAlias,
-                AdyenRecurringRequestModel(adyenProperties.contract), adyenProperties.shopperInteraction, reference, sandboxMerchantId, null, null),
+                AdyenRecurringRequestModel(adyenProperties.contract), adyenProperties.shopperInteraction, reference, sandboxMerchantId, null, null, null, null, null),
             pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, null, null))
         Mockito.`when`(adyenClient.verifyPayment(verifyRequest, urlPrefix, AdyenMode.TEST.mode))
@@ -135,13 +135,13 @@ class AdyenPspTest {
         Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(20)).thenReturn(reference)
         Mockito.`when`(adyenClient.authorization(
             AdyenPaymentRequestModel(amount, email, customerIP, customerReference, pspAlias,
-                AdyenRecurringRequestModel(adyenProperties.contract), adyenProperties.shopperInteraction, reference, sandboxMerchantId, 0, null),
+                AdyenRecurringRequestModel(adyenProperties.contract), adyenProperties.shopperInteraction, reference, sandboxMerchantId, 0, null, null, null, null),
             pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, null, null))
         Mockito.`when`(adyenClient.sepaPayment(
             AdyenPaymentRequestModel(amount, null, null, null, null,
                 null, null, reference, sandboxMerchantId, null,
-                AdyenPaymentMethodRequestModel(adyenProperties.sepaPaymentMethod, holderName, iban)),
+                AdyenPaymentMethodRequestModel(adyenProperties.sepaPaymentMethod, holderName, iban, null, null, null, null), null, null, null),
             pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, null, null))
         Mockito.`when`(adyenClient.reverse(AdyenReverseRequestModel(pspTransactionId, purchaseId, sandboxMerchantId), pspConfig, "test"))

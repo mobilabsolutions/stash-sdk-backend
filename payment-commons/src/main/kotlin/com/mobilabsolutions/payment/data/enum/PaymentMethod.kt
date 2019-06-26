@@ -9,5 +9,6 @@ enum class PaymentMethod {
     PAY_PAL,
     GOOGLE_PAY,
     APPLE_PAY,
-    KLARNA
+    KLARNA,
+    THREE_D_SECURE
 }

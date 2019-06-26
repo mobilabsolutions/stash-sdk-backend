@@ -48,7 +48,7 @@ class AdyenClient(
         const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'"
         const val PREAUTH_URL = "/authorise"
         const val AUTHORIZATION_URL = "/authorise"
-        const val SEPA_PAYMENT_URL = "/payments"
+        const val PAYMENT_URL = "/payments"
         const val REVERSE_URL = "/cancel"
         const val CAPTURE_URL = "/capture"
         const val REFUND_URL = "/refund"
@@ -132,6 +132,32 @@ class AdyenClient(
             url = verifyUrl,
             headers = mapOf(API_KEY to verifyRequest.apiKey!!),
             json = mapOf(PAYLOAD to verifyRequest.payload)
+        )
+
+        return AdyenVerifyPaymentResponseModel(response.jsonObject)
+    }
+
+    /**
+     * Makes a payment and registers a credit card with 3D Secure
+     *
+     * @param request Adyen authorization request
+     * @param pspConfig Adyen configuration
+     * @param mode test or live mode
+     * @return Adyen payment response
+     */
+    fun registerThreeDSecure(
+        request: AdyenPaymentRequestModel,
+        pspConfig: PspConfigModel,
+        mode: String
+    ): AdyenVerifyPaymentResponseModel {
+        val apiKey = if (mode == AdyenMode.TEST.mode) pspConfig.sandboxPublicKey else pspConfig.publicKey
+        val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testCheckoutBaseUrl + PAYMENT_URL
+        else adyenProperties.liveCheckoutBaseUrl.format(pspConfig.urlPrefix) + PAYMENT_URL
+
+        val response = khttp.post(
+            url = paymentUrl,
+            headers = mapOf(API_KEY to apiKey!!),
+            json = JSONObject(objectMapper.writeValueAsString(request))
         )
 
         return AdyenVerifyPaymentResponseModel(response.jsonObject)
@@ -255,8 +281,8 @@ class AdyenClient(
         mode: String
     ): AdyenPaymentResponseModel {
         val apiKey = if (mode == AdyenMode.TEST.mode) pspConfig.sandboxPublicKey else pspConfig.publicKey
-        val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testCheckoutBaseUrl + SEPA_PAYMENT_URL
-        else adyenProperties.liveCheckoutBaseUrl.format(pspConfig.urlPrefix) + SEPA_PAYMENT_URL
+        val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testCheckoutBaseUrl + PAYMENT_URL
+        else adyenProperties.liveCheckoutBaseUrl.format(pspConfig.urlPrefix) + PAYMENT_URL
 
         val response = khttp.post(
             url = paymentUrl,
