@@ -41,7 +41,7 @@ enum class ApiErrorCode(val code: String, val message: String, val httpStatus: H
     INCORRECT_REFUND_VALUE("3018", "Total refund amount is greater than the original payment's amount.", HttpStatus.BAD_REQUEST),
     TRANSACTIONS_NOT_FOUND("3019", "There are no transactions for the given filters.", HttpStatus.BAD_REQUEST),
     EXCEEDED_MAX_TRANSACTION_SEARCH_PERIOD("3020", "Maximum search span cannot exceed one year.", HttpStatus.BAD_REQUEST),
-    IDEMPOTENCY_VIOLATION("3021", "Keys for idempotent requests can only be used with the same parameters they were first used with. Try using the other key if you meant to execute a different request.", HttpStatus.BAD_REQUEST),
+    IDEMPOTENCY_VIOLATION("3021", "Keys for idempotent requests can only be used with the same parameters they were first used with.", HttpStatus.BAD_REQUEST),
 
     PSP_MODULE_ERROR("4000", "Unexpected PSP operation error.", HttpStatus.INTERNAL_SERVER_ERROR),
 
