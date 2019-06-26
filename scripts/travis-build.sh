@@ -21,10 +21,10 @@ NOTIF_BASE_IMAGE=${REGISTRY_HOSTNAME}/${PROJECT_ID}/${NOTIF_IMAGE_NAME}
 NOTIF_INITIAL_IMAGE=${NOTIF_BASE_IMAGE}:commit-${TRAVIS_COMMIT}
 
 build() {
-  echo "Building ${WS_IMAGE_NAME}"
-  docker build -t ${WS_IMAGE_NAME} ${TRAVIS_BUILD_DIR}/payment-ws
-  echo "Building ${NOTIF_IMAGE_NAME}"
-  docker build -t ${NOTIF_IMAGE_NAME} ${TRAVIS_BUILD_DIR}/payment-notifications
+  echo "Building ${WS_INITIAL_IMAGE}"
+  docker build -t ${WS_INITIAL_IMAGE} ${TRAVIS_BUILD_DIR}/payment-ws
+  echo "Building ${NOTIF_INITIAL_IMAGE}"
+  docker build -t ${NOTIF_INITIAL_IMAGE} ${TRAVIS_BUILD_DIR}/payment-notifications
 }
 
 tag() {
