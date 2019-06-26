@@ -12,6 +12,7 @@ import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.request.AliasRequestModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.validation.ConfigValidator
+import com.mobilabsolutions.payment.validation.PspAliasValidator
 import com.mobilabsolutions.payment.validation.PspValidator
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
@@ -82,6 +83,9 @@ class AliasServiceTest {
     private lateinit var configValidator: ConfigValidator
 
     @Mock
+    private lateinit var pspAliasValidator: PspAliasValidator
+
+    @Mock
     private lateinit var randomStringGenerator: RandomStringGenerator
 
     @Mock
@@ -95,6 +99,7 @@ class AliasServiceTest {
         MockitoAnnotations.initMocks(this)
 
         Mockito.`when`(pspValidator.validate(knownPspType, null)).thenReturn(true)
+        Mockito.`when`(pspAliasValidator.validate(pspAlias, knownPspType)).thenReturn(true)
         Mockito.`when`(configValidator.validate(objectMapper.readValue(extra, AliasExtraModel::class.java), knownPspType)).thenReturn(true)
         Mockito.`when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, unknownPublishableKey))
             .thenReturn(null)

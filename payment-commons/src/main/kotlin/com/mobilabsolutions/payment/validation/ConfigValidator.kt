@@ -37,10 +37,10 @@ class ConfigValidator {
     private fun checkSepaData(aliasExtra: AliasExtraModel, pspType: String): Boolean {
         return when (pspType) {
             PaymentServiceProvider.BS_PAYONE.name -> {
-                (aliasExtra.personalData?.country != null && aliasExtra.personalData.firstName != null && aliasExtra.personalData.lastName != null && checkSepaConfig(aliasExtra.sepaConfig))
+                (aliasExtra.personalData?.country != null && aliasExtra.personalData.firstName != null && aliasExtra.personalData.lastName != null && checkSepaConfig(aliasExtra.sepaConfig, pspType))
             }
             PaymentServiceProvider.ADYEN.name -> {
-                (aliasExtra.personalData?.firstName != null && aliasExtra.personalData.lastName != null && aliasExtra.sepaConfig?.iban != null)
+                (aliasExtra.personalData?.firstName != null && aliasExtra.personalData.lastName != null && checkSepaConfig(aliasExtra.sepaConfig, pspType))
             }
             else -> false
         }
@@ -62,10 +62,16 @@ class ConfigValidator {
         }
     }
 
-    private fun checkSepaConfig(sepaConfig: SepaConfigModel?): Boolean {
+    private fun checkSepaConfig(sepaConfig: SepaConfigModel?, pspType: String): Boolean {
         return when (sepaConfig) {
             null -> false
-            else -> (sepaConfig.iban == null || sepaConfig.bic == null)
+            else -> {
+                return when (pspType) {
+                    PaymentServiceProvider.BS_PAYONE.name -> (sepaConfig.iban != null && sepaConfig.bic != null)
+                    PaymentServiceProvider.ADYEN.name -> (sepaConfig.iban != null)
+                    else -> false
+                }
+            }
         }
     }
 }

@@ -44,6 +44,7 @@ enum class ApiErrorCode(val code: String, val message: String, val httpStatus: H
     IDEMPOTENCY_VIOLATION("3021", "Keys for idempotent requests can only be used with the same parameters they were first used with. Try using the other key if you meant to execute a different request.", HttpStatus.BAD_REQUEST),
     DYNAMIC_CONFIG_NOT_FOUND("3022", "Dynamic configuration (token, returnUrl, channel) must be supplied when using Adyen as a PSP.", HttpStatus.BAD_REQUEST),
     CONFIG_NOT_FOUND("3023", "Required configurations for specified payment method are not complete", HttpStatus.BAD_REQUEST),
+    PSP_ALIAS_NOT_FOUND("3024", "PSP alias is required for this PSP", HttpStatus.BAD_REQUEST),
 
     PSP_MODULE_ERROR("4000", "Unexpected PSP operation error.", HttpStatus.INTERNAL_SERVER_ERROR),
 

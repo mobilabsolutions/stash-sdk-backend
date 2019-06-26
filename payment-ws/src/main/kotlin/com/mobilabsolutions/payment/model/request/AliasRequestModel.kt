@@ -11,6 +11,7 @@ import javax.validation.Valid
 @ApiModel(value = "Alias Request")
 data class AliasRequestModel(
     @ApiModelProperty(value = "Payment service provider alias", example = "GygOIj76ighI7T98yHg98ty78tH0h0hT6960lMLnsSD")
+    @field:Valid
     val pspAlias: String?,
 
     @ApiModelProperty(value = "Alias Extra")

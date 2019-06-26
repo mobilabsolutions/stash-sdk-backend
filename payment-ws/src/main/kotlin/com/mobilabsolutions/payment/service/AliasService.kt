@@ -17,6 +17,7 @@ import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.payment.model.response.AliasResponseModel
 import com.mobilabsolutions.payment.validation.ConfigValidator
+import com.mobilabsolutions.payment.validation.PspAliasValidator
 import com.mobilabsolutions.payment.validation.PspValidator
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
@@ -38,6 +39,7 @@ class AliasService(
     private val pspRegistry: PspRegistry,
     private val pspValidator: PspValidator,
     private val configValidator: ConfigValidator,
+    private val pspAliasValidator: PspAliasValidator,
     private val randomStringGenerator: RandomStringGenerator,
     private val requestHashing: RequestHashing,
     private val objectMapper: ObjectMapper
@@ -96,6 +98,7 @@ class AliasService(
         val pspConfig = result.psp.firstOrNull { it.type == alias.psp.toString() }
         val pspConfigType = PaymentServiceProvider.valueOf(pspConfig?.type
             ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_NOT_FOUND, "PSP configuration for '${alias.psp}' cannot be found from given merchant").asException())
+        if (!pspAliasValidator.validate(aliasRequestModel.pspAlias, pspConfigType.name)) throw ApiError.ofErrorCode(ApiErrorCode.PSP_ALIAS_NOT_FOUND).asException()
         if (!configValidator.validate(aliasRequestModel.extra, pspConfigType.name)) throw ApiError.ofErrorCode(ApiErrorCode.CONFIG_NOT_FOUND).asException()
         val psp = pspRegistry.find(pspConfigType)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_IMPL_NOT_FOUND, "PSP implementation '${alias.psp}' cannot be found").asException()
