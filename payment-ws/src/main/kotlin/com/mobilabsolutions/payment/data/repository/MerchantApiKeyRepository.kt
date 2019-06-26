@@ -1,5 +1,6 @@
 package com.mobilabsolutions.payment.data.repository
 
+import com.mobilabsolutions.payment.data.configuration.BaseRepository
 import com.mobilabsolutions.payment.data.domain.MerchantApiKey
 import com.mobilabsolutions.payment.data.enum.KeyType
 import org.springframework.data.jpa.repository.Modifying

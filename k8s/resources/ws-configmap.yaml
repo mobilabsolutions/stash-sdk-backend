@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payment-sdk-backend
+  namespace: ${KUBE_NAMESPACE}
+  labels:
+    app: payment-sdk-backend
+data:
+  JAVA_OPTS: ${KUBE_WS_CONFIGMAP_JAVA_OPTS}
+  SPRING_PROFILES_ACTIVE: ${KUBE_WS_CONFIGMAP_SPRING_PROFILE}
+  DB_URL: ${KUBE_WS_CONFIGMAP_SQL_JDBC_URL}

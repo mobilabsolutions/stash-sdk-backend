@@ -1,4 +1,4 @@
-package com.mobilabsolutions.payment.auth.configuration
+package com.mobilabsolutions.payment.configuration
 
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity

@@ -8,15 +8,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.PARAMETER;
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-
 @Documented
 @Constraint(validatedBy = PaymentServiceProviderEnumValidatorImpl.class)
 @Retention(RetentionPolicy.RUNTIME)
-@Target(FIELD)
+@Target({FIELD, PARAMETER})
 public @interface PaymentServiceProviderEnumValidator {
 
     Class<? extends Enum<?>> PaymentServiceProvider();

@@ -11,17 +11,10 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
-import springfox.documentation.builders.ApiInfoBuilder
-import springfox.documentation.builders.RequestHandlerSelectors
-import springfox.documentation.service.Contact
-import springfox.documentation.spi.DocumentationType
-import springfox.documentation.spring.web.plugins.Docket
-import springfox.documentation.swagger2.annotations.EnableSwagger2
 import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 
 @Configuration
-@EnableSwagger2
 class WebConfiguration : WebMvcConfigurer {
     companion object {
         val DEFAULT_TIMEOUT = TimeUnit.SECONDS.toMillis(5).toInt()
@@ -32,27 +25,6 @@ class WebConfiguration : WebMvcConfigurer {
 
     @Autowired
     private lateinit var jsonMapper: ObjectMapper
-
-    @Bean
-    fun api(): Docket = Docket(DocumentationType.SWAGGER_2)
-        .apiInfo(
-            ApiInfoBuilder()
-                .title("Payment SDK Backend")
-                .description("Project Wiki: https://github.com/mobilabsolutions/payment-sdk-wiki-open")
-                .version("1.0")
-                .contact(
-                    Contact(
-                        "MobiLab Solutions GmbH",
-                        "https://mobilabsolutions.com/",
-                        "info@mobilabsolutions.com"
-                    )
-                )
-                .build()
-        )
-        .useDefaultResponseMessages(false)
-        .select()
-        .apis(RequestHandlerSelectors.basePackage("com.mobilabsolutions.payment.controller"))
-        .build()
 
     @Bean
     fun restTemplate(): RestTemplate {

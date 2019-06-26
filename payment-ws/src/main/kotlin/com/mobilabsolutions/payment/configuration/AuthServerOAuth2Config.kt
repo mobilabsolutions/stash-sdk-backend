@@ -1,4 +1,4 @@
-package com.mobilabsolutions.payment.auth.configuration
+package com.mobilabsolutions.payment.configuration
 
 import com.mobilabsolutions.payment.service.UserDetailsServiceImpl
 import org.springframework.beans.factory.annotation.Autowired

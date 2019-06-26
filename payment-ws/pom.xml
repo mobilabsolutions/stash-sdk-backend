@@ -11,18 +11,6 @@
 
     <artifactId>payment-ws</artifactId>
 
-    <properties>
-        <postgresql-jdbc.version>42.2.5</postgresql-jdbc.version>
-        <testcontainers.version>1.10.5</testcontainers.version>
-        <spring.version>5.1.5.RELEASE</spring.version>
-        <spring.jwt.version>1.0.10.RELEASE</spring.jwt.version>
-        <jaxb.version>2.3.1</jaxb.version>
-        <javax.act.version>1.1</javax.act.version>
-        <liquibase.plugin>3.6.3</liquibase.plugin>
-        <license.plugin>1.20</license.plugin>
-        <super.csv>2.4.0</super.csv>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -92,17 +80,14 @@
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
-            <version>${jaxb.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.activation</groupId>
             <artifactId>activation</artifactId>
-            <version>${javax.act.version}</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
-            <version>${jaxb.version}</version>
         </dependency>
 
         <dependency>
@@ -119,12 +104,10 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>${postgresql-jdbc.version}</version>
         </dependency>
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>${liquibase.plugin}</version>
         </dependency>
 
         <!--Test-->
@@ -184,12 +167,10 @@
             <plugin>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
-                <version>${liquibase.plugin}</version>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>${license.plugin}</version>
                 <executions>
                     <execution>
                         <id>add-third-party</id>

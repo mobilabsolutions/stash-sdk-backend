@@ -1,4 +1,4 @@
-package com.mobilabsolutions.payment.data.repository
+package com.mobilabsolutions.payment.data.configuration
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
