@@ -188,7 +188,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"currency\": \"EUR\",\n  \"email\": \"merchant@mobilabsolutions.com\",\n  \"id\": \"mobilab\",\n  \"name\": \"Mobilab's Best Merchant\"\n}"
+							"raw": "{\n  \"currency\": \"EUR\",\n  \"email\": \"merchant@mobilabsolutions.com\",\n  \"id\": \"mobilab\",\n  \"name\": \"Mobilab's Best Merchant\",\n  \"timezone\": \"Europe/Berlin\"\n}"
 						},
 						"url": {
 							"raw": "{{wsEndpoint}}/api/v1/merchant",
