@@ -105,7 +105,7 @@ class AdyenClient(
             checkout.paymentSession(paymentSessionRequest)
         } catch (exception: ApiException) {
             throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
-                .withError(exception.error.message)
+                .withError(exception.error?.message ?: "adyen_error")
                 .withMessage("Error during requesting Adyen payment session").build().asException()
         }
 

@@ -23,7 +23,7 @@ data class PspRefundRequestModel(
     @ApiModelProperty(value = "Currency", example = "EUR")
     val currency: String?,
 
-    @ApiModelProperty(value = "Transaction action", example = "CAPTURE")
+    @ApiModelProperty(value = "Transaction action", example = "Values: PREAUTH, AUTH, REVERSAL, REFUND, CAPTURE")
     @field:Enumerated(EnumType.STRING)
     val action: TransactionAction?,
 

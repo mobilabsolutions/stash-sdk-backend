@@ -17,7 +17,7 @@ data class PspDeleteAliasRequestModel(
     @ApiModelProperty(value = "PSP Alias ID", example = "JipfjLKL6BkTIREaRGyX")
     val pspAlias: String?,
 
-    @ApiModelProperty(value = "Payment method", example = "SEPA")
+    @ApiModelProperty(value = "Payment method", example = "Values: CC, SEPA, PAY_PAL, GOOGLE_PAY, APPLE_PAY, KLARNA")
     @PaymentMethodEnumValidator(PaymentMethod = PaymentMethod::class)
     val paymentMethod: String?,
 

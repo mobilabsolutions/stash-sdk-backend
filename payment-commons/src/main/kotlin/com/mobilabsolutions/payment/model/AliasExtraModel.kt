@@ -5,6 +5,7 @@ import com.mobilabsolutions.payment.validation.PaymentMethodEnumValidator
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import javax.validation.Valid
+import javax.validation.constraints.NotNull
 
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
@@ -28,7 +29,8 @@ data class AliasExtraModel(
     val personalData: PersonalDataModel?,
 
     @ApiModelProperty(value = "Payment method", example = "SEPA")
-    @PaymentMethodEnumValidator(PaymentMethod = PaymentMethod::class)
+    @field:PaymentMethodEnumValidator(PaymentMethod = PaymentMethod::class)
+    @field:NotNull
     val paymentMethod: String?,
 
     @ApiModelProperty(value = "Payload")

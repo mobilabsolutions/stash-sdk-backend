@@ -5,11 +5,7 @@ import javax.validation.ConstraintValidatorContext;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
- */
-
-public class PaymentServiceProviderEnumValidatorImpl implements ConstraintValidator<PaymentServiceProviderEnumValidator, String> {
+public class TransactionStatusEnumValidatorImpl implements ConstraintValidator<TransactionStatusEnumValidator, String> {
 
     private List<String> valueList = new ArrayList<>();
 
@@ -19,8 +15,8 @@ public class PaymentServiceProviderEnumValidatorImpl implements ConstraintValida
     }
 
     @Override
-    public void initialize(PaymentServiceProviderEnumValidator constraintAnnotation) {
-        Class<? extends Enum<?>> enumClass = constraintAnnotation.PaymentServiceProvider();
+    public void initialize(TransactionStatusEnumValidator constraintAnnotation) {
+        Class<? extends Enum<?>> enumClass = constraintAnnotation.TransactionStatus();
 
         @SuppressWarnings("rawtypes")
         Enum[] enumValArr = enumClass.getEnumConstants();
@@ -29,6 +25,5 @@ public class PaymentServiceProviderEnumValidatorImpl implements ConstraintValida
             Enum enumVal : enumValArr) {
             valueList.add(enumVal.toString().toUpperCase());
         }
-
     }
 }
