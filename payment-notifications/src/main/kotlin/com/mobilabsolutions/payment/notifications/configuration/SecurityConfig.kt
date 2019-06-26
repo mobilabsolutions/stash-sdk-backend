@@ -37,7 +37,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
 
     override fun configure(http: HttpSecurity) {
         http.csrf().disable().authorizeRequests()
-            .antMatchers(*SWAGGER_PATTERNS).permitAll()
+            .antMatchers(*SWAGGER_PATTERNS, *PERMITTED_PATTERNS).permitAll()
             .anyRequest()
             .authenticated()
             .and()
@@ -46,5 +46,6 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
 
     companion object {
         private val SWAGGER_PATTERNS = arrayOf("/swagger-ui.html", "/api-docs/**", "/webjars/**", "/v2/**", "/swagger-resources/**")
+        private val PERMITTED_PATTERNS = arrayOf("/actuator/**")
     }
 }
