@@ -32,10 +32,10 @@ class NotificationController(
         const val ADYEN__URL = "adyen"
     }
 
-    @ApiOperation(value = "Create merchant")
+    @ApiOperation(value = "Create Adyen notification")
     @ApiResponses(
-        ApiResponse(code = 200, message = "Successfully created merchant"),
-        ApiResponse(code = 400, message = "Failed to create merchant"),
+        ApiResponse(code = 200, message = "Successfully created Adyen notification"),
+        ApiResponse(code = 400, message = "Failed to Adyen notification"),
         ApiResponse(code = 401, message = "Unauthorized access")
     )
     @RequestMapping(
