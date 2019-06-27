@@ -58,7 +58,7 @@ class AliasServiceTest {
         " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")
     private val extra =
         "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\"," +
-            "\"ccConfig\": {\n" + "\"ccMask\": \"VISA-1111\",\n" + "\"ccExpiry\": \"11/20\",\n" + "\"ccType\": \"VISA\",\n" + "\"ccHolderName\": \"Max Mustermann\"\n" +
+            "\"ccConfig\": {\n" + "\"ccMask\": \"1111\",\n" + "\"ccExpiry\": \"11/20\",\n" + "\"ccType\": \"VISA\",\n" + "\"ccHolderName\": \"Max Mustermann\"\n" +
             "    \t},\"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}}"
 
     @InjectMocks
