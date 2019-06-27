@@ -17,7 +17,6 @@ class ConfigValidator {
             PaymentMethod.CC.name -> checkCcData(aliasModel, pspType)
             PaymentMethod.SEPA.name -> checkSepaData(aliasModel, pspType)
             PaymentMethod.PAY_PAL.name -> checkPaypalData(aliasModel, pspType)
-            null -> false
             else -> false
         }
     }
