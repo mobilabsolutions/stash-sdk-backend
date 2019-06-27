@@ -99,7 +99,7 @@ class AliasServiceTest {
         MockitoAnnotations.initMocks(this)
 
         Mockito.`when`(pspValidator.validate(knownPspType, null)).thenReturn(true)
-        Mockito.`when`(pspAliasValidator.validate(pspAlias, knownPspType)).thenReturn(true)
+        Mockito.`when`(pspAliasValidator.validate(objectMapper.readValue(extra, AliasExtraModel::class.java), pspAlias, knownPspType)).thenReturn(true)
         Mockito.`when`(configValidator.validate(objectMapper.readValue(extra, AliasExtraModel::class.java), knownPspType)).thenReturn(true)
         Mockito.`when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, unknownPublishableKey))
             .thenReturn(null)
