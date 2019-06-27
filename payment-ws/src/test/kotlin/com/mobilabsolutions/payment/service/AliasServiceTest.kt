@@ -58,7 +58,7 @@ class AliasServiceTest {
         " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")
     private val extra =
         "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\"," +
-            "\"ccConfig\": {\n" + "\"ccMask\": \"VISA-1111\",\n" + "\"ccExpiry\": \"11/20\",\n" + "\"ccType\": \"VISA\",\n" + "\"ccHolderName\": \"Max Mustermann\"\n" +
+            "\"ccConfig\": {\n" + "\"ccMask\": \"1111\",\n" + "\"ccExpiry\": \"11/20\",\n" + "\"ccType\": \"VISA\",\n" + "\"ccHolderName\": \"Max Mustermann\"\n" +
             "    \t},\"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}}"
 
     @InjectMocks
@@ -99,7 +99,7 @@ class AliasServiceTest {
         MockitoAnnotations.initMocks(this)
 
         Mockito.`when`(pspValidator.validate(knownPspType, null)).thenReturn(true)
-        Mockito.`when`(pspAliasValidator.validate(pspAlias, knownPspType)).thenReturn(true)
+        Mockito.`when`(pspAliasValidator.validate(objectMapper.readValue(extra, AliasExtraModel::class.java), pspAlias, knownPspType)).thenReturn(true)
         Mockito.`when`(configValidator.validate(objectMapper.readValue(extra, AliasExtraModel::class.java), knownPspType)).thenReturn(true)
         Mockito.`when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, unknownPublishableKey))
             .thenReturn(null)

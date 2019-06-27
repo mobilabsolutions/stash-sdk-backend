@@ -98,7 +98,7 @@ class AliasService(
         val pspConfig = result.psp.firstOrNull { it.type == alias.psp.toString() }
         val pspConfigType = PaymentServiceProvider.valueOf(pspConfig?.type
             ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_NOT_FOUND, "PSP configuration for '${alias.psp}' cannot be found from given merchant").asException())
-        if (!pspAliasValidator.validate(aliasRequestModel.pspAlias, pspConfigType.name)) throw ApiError.ofErrorCode(ApiErrorCode.PSP_ALIAS_NOT_FOUND).asException()
+        if (!pspAliasValidator.validate(aliasRequestModel.extra, aliasRequestModel.pspAlias, pspConfigType.name)) throw ApiError.ofErrorCode(ApiErrorCode.PSP_ALIAS_NOT_FOUND).asException()
         if (!configValidator.validate(aliasRequestModel.extra, pspConfigType.name)) throw ApiError.ofErrorCode(ApiErrorCode.CONFIG_NOT_FOUND).asException()
         val psp = pspRegistry.find(pspConfigType)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_IMPL_NOT_FOUND, "PSP implementation '${alias.psp}' cannot be found").asException()

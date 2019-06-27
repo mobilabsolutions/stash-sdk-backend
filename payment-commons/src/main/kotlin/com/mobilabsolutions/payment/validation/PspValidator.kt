@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component
 @Component
 class PspValidator {
     fun validate(pspType: String?, dynamicModel: DynamicPspConfigRequestModel?): Boolean {
-        if (pspType == PaymentServiceProvider.ADYEN.name || dynamicModel != null) {
-            if (dynamicModel?.token == null || dynamicModel.channel == null || dynamicModel.returnUrl == null) return false
+        return when (pspType) {
+            PaymentServiceProvider.ADYEN.name -> return (dynamicModel?.token != null && dynamicModel.channel != null && dynamicModel.returnUrl != null)
+            else -> true
         }
-        return true
     }
 }
