@@ -11,6 +11,9 @@ import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.request.AliasRequestModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
+import com.mobilabsolutions.payment.validation.ConfigValidator
+import com.mobilabsolutions.payment.validation.PspAliasValidator
+import com.mobilabsolutions.payment.validation.PspValidator
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
@@ -54,7 +57,9 @@ class AliasServiceTest {
         pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
         " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")
     private val extra =
-        "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\", \"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}}"
+        "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\"," +
+            "\"ccConfig\": {\n" + "\"ccMask\": \"VISA-1111\",\n" + "\"ccExpiry\": \"11/20\",\n" + "\"ccType\": \"VISA\",\n" + "\"ccHolderName\": \"Max Mustermann\"\n" +
+            "    \t},\"personalData\": {\"lastName\": \"Mustermann\",\"city\": \"Berlin\", \"country\": \"DE\"}}"
 
     @InjectMocks
     private lateinit var aliasService: AliasService
@@ -72,6 +77,15 @@ class AliasServiceTest {
     private lateinit var psp: Psp
 
     @Mock
+    private lateinit var pspValidator: PspValidator
+
+    @Mock
+    private lateinit var configValidator: ConfigValidator
+
+    @Mock
+    private lateinit var pspAliasValidator: PspAliasValidator
+
+    @Mock
     private lateinit var randomStringGenerator: RandomStringGenerator
 
     @Mock
@@ -84,6 +98,9 @@ class AliasServiceTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
+        Mockito.`when`(pspValidator.validate(knownPspType, null)).thenReturn(true)
+        Mockito.`when`(pspAliasValidator.validate(pspAlias, knownPspType)).thenReturn(true)
+        Mockito.`when`(configValidator.validate(objectMapper.readValue(extra, AliasExtraModel::class.java), knownPspType)).thenReturn(true)
         Mockito.`when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, unknownPublishableKey))
             .thenReturn(null)
         Mockito.`when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, knownPublishableKey))
@@ -166,7 +183,7 @@ class AliasServiceTest {
 
     @Test
     fun `exchange alias successfully`() {
-        aliasService.exchangeAlias(knownPublishableKey, true, userAgent, knownAliasId, AliasRequestModel(pspAlias, Mockito.mock(AliasExtraModel::class.java)))
+        aliasService.exchangeAlias(knownPublishableKey, true, userAgent, knownAliasId, AliasRequestModel(pspAlias, objectMapper.readValue(extra, AliasExtraModel::class.java)))
     }
 
     @Test

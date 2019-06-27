@@ -25,6 +25,7 @@ data class AliasExtraModel(
     val payPalConfig: PayPalConfigModel?,
 
     @ApiModelProperty(value = "Personal data")
+    @field:Valid
     val personalData: PersonalDataModel?,
 
     @ApiModelProperty(value = "Payment method", example = "SEPA")

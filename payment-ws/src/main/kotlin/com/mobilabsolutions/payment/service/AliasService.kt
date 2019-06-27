@@ -16,6 +16,9 @@ import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.payment.model.response.AliasResponseModel
+import com.mobilabsolutions.payment.validation.ConfigValidator
+import com.mobilabsolutions.payment.validation.PspAliasValidator
+import com.mobilabsolutions.payment.validation.PspValidator
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
@@ -34,6 +37,9 @@ class AliasService(
     private val aliasRepository: AliasRepository,
     private val merchantApiKeyRepository: MerchantApiKeyRepository,
     private val pspRegistry: PspRegistry,
+    private val pspValidator: PspValidator,
+    private val configValidator: ConfigValidator,
+    private val pspAliasValidator: PspAliasValidator,
     private val randomStringGenerator: RandomStringGenerator,
     private val requestHashing: RequestHashing,
     private val objectMapper: ObjectMapper
@@ -55,8 +61,8 @@ class AliasService(
      */
     fun createAlias(publishableKey: String, pspType: String, idempotentKey: String, userAgent: String?, dynamicPspConfig: DynamicPspConfigRequestModel?, pspTestMode: Boolean?): AliasResponseModel {
         logger.info("Creating alias for {} psp", pspType)
+        if (!pspValidator.validate(pspType, dynamicPspConfig)) throw ApiError.ofErrorCode(ApiErrorCode.DYNAMIC_CONFIG_NOT_FOUND).asException()
         val merchantApiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofErrorCode(ApiErrorCode.PUBLISHABLE_KEY_NOT_FOUND).asException()
-
         val result = objectMapper.readValue(merchantApiKey.merchant.pspConfig ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_EMPTY).asException(), PspConfigListModel::class.java)
         val pspConfig = result.psp.firstOrNull { it.type == pspType }
         val pspConfigType = PaymentServiceProvider.valueOf(pspConfig?.type ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_NOT_FOUND, "PSP configuration for '$pspType' cannot be found from given merchant").asException())
@@ -92,6 +98,8 @@ class AliasService(
         val pspConfig = result.psp.firstOrNull { it.type == alias.psp.toString() }
         val pspConfigType = PaymentServiceProvider.valueOf(pspConfig?.type
             ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_NOT_FOUND, "PSP configuration for '${alias.psp}' cannot be found from given merchant").asException())
+        if (!pspAliasValidator.validate(aliasRequestModel.pspAlias, pspConfigType.name)) throw ApiError.ofErrorCode(ApiErrorCode.PSP_ALIAS_NOT_FOUND).asException()
+        if (!configValidator.validate(aliasRequestModel.extra, pspConfigType.name)) throw ApiError.ofErrorCode(ApiErrorCode.CONFIG_NOT_FOUND).asException()
         val psp = pspRegistry.find(pspConfigType)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_IMPL_NOT_FOUND, "PSP implementation '${alias.psp}' cannot be found").asException()
 
