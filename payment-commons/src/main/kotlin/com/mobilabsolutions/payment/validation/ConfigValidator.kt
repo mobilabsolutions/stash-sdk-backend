@@ -66,7 +66,7 @@ class ConfigValidator {
             null -> false
             else -> {
                 return when (pspType) {
-                    PaymentServiceProvider.BS_PAYONE.name -> (sepaConfig.iban != null && sepaConfig.bic != null)
+                    PaymentServiceProvider.BS_PAYONE.name -> (sepaConfig.iban != null)
                     PaymentServiceProvider.ADYEN.name -> (sepaConfig.iban != null)
                     else -> false
                 }
