@@ -23,7 +23,7 @@ class NotificationService(
     companion object : KLogging()
 
     @Transactional
-    fun saveAdyenNotifications(adyenNotificationRequestModel: AdyenNotificationRequestModel) : AdyenNotificationResponseModel {
+    fun saveAdyenNotifications(adyenNotificationRequestModel: AdyenNotificationRequestModel): AdyenNotificationResponseModel {
         logger.info("adding Adyen transaction notifications for references ${adyenNotificationRequestModel.notificationItems?.stream()?.map { it.notificationRequestItem?.pspReference }?.collect(Collectors.joining(","))}")
         notificationRepository.save(Notification(
             status = NotificationStatus.CREATED,
