@@ -28,16 +28,16 @@ class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServ
 
     @ApiOperation(value = "Create the merchant user by given data")
     @ApiResponses(
-        ApiResponse(code = 204, message = "Successfully create the merchant user"),
-        ApiResponse(code = 400, message = "Request model validation is failed"),
-        ApiResponse(code = 401, message = "Authentication is failed"),
+        ApiResponse(code = 201, message = "Successfully created a merchant user"),
+        ApiResponse(code = 400, message = "Request model validation failed"),
+        ApiResponse(code = 401, message = "Authentication failed"),
         ApiResponse(code = 403, message = "User doesn't have the required rights for this operation")
     )
     @RequestMapping(
         method = [RequestMethod.POST],
         consumes = [MediaType.APPLICATION_JSON_VALUE]
     )
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('admin')")
     fun createUser(@PathVariable("Merchant-Id") merchantId: String, @Valid @RequestBody merchantUserCreateModel: MerchantUserRequestModel) {
         userDetailsServiceImpl.createMerchantUser(merchantId, merchantUserCreateModel)
@@ -45,9 +45,9 @@ class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServ
 
     @ApiOperation(value = "Update the given merchant user by user id")
     @ApiResponses(
-        ApiResponse(code = 204, message = "Successfully update the merchant user"),
-        ApiResponse(code = 400, message = "Request model validation is failed"),
-        ApiResponse(code = 401, message = "Authentication is failed"),
+        ApiResponse(code = 204, message = "Successfully updated merchant user"),
+        ApiResponse(code = 400, message = "Request model validation failed"),
+        ApiResponse(code = 401, message = "Authentication failed"),
         ApiResponse(code = 403, message = "User doesn't have the required rights for this operation")
     )
     @RequestMapping(
@@ -63,9 +63,9 @@ class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServ
 
     @ApiOperation(value = "Change the password of the given merchant user by user id")
     @ApiResponses(
-        ApiResponse(code = 204, message = "Successfully update the merchant user password"),
-        ApiResponse(code = 400, message = "Request model validation is failed"),
-        ApiResponse(code = 401, message = "Authentication is failed"),
+        ApiResponse(code = 204, message = "Successfully updated merchant user's password"),
+        ApiResponse(code = 400, message = "Request model validation failed"),
+        ApiResponse(code = 401, message = "Authentication failed"),
         ApiResponse(code = 403, message = "User doesn't have the required rights for this operation")
     )
     @RequestMapping(
