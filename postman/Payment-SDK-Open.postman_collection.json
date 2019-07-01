@@ -84,7 +84,7 @@
 							"raw": "{\n\t\"pspAlias\" : \"TESTTESTTESTasd\",\n    \"extra\": {\n        \"paymentMethod\": \"SEPA\"\n    }\n}"
 						},
 						"url": {
-							"raw": "{{wsEndpoint}}/api/v1/alias/{Alias-Id}}",
+							"raw": "{{wsEndpoint}}/api/v1/alias/:Alias-Id",
 							"host": [
 								"{{wsEndpoint}}"
 							],
@@ -124,7 +124,7 @@
 							"mode": "raw",
 							"raw": ""
 						},
-						"url": "{{wsEndpoint}}/api/v1/alias/{Alias-Id}"
+						"url": "{{wsEndpoint}}/api/v1/alias/:Alias-Id"
 					},
 					"response": []
 				}
@@ -160,7 +160,7 @@
 							"raw": "{\n  \"firstname\": \"Max\",\n  \"lastname\": \"Mustermann\",\n  \"locale\": \"de-DE\"\n}"
 						},
 						"url": {
-							"raw": "{{wsEndpoint}}/api/v1/user/{Email}",
+							"raw": "{{wsEndpoint}}/api/v1/user/:Email",
 							"host": [
 								"{{wsEndpoint}}"
 							],
@@ -221,7 +221,7 @@
 							"raw": "{\n  \"email\": \"test@mobilabsolutions.com\",\n  \"locale\": \"de-DE\",\n  \"password\": \"test1234\"\n}"
 						},
 						"url": {
-							"raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/user",
+							"raw": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/user",
 							"host": [
 								"{{wsEndpoint}}"
 							],
@@ -305,7 +305,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/api-key",
+							"raw": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/api-key",
 							"host": [
 								"{{wsEndpoint}}"
 							],
@@ -357,7 +357,7 @@
 							"raw": "{\n  \"name\": \"Test key34\",\n  \"type\": \"SECRET\"\n}"
 						},
 						"url": {
-							"raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/api-key",
+							"raw": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/api-key",
 							"host": [
 								"{{wsEndpoint}}"
 							],
@@ -392,7 +392,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/api-key/3",
+							"raw": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/api-key/3",
 							"host": [
 								"{{wsEndpoint}}"
 							],
@@ -435,7 +435,7 @@
 							"raw": "{\n  \"name\": \"Test key\"\n}"
 						},
 						"url": {
-							"raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/api-key/{Api-Key-Id}",
+							"raw": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/api-key/:Api-Key-Id",
 							"host": [
 								"{{wsEndpoint}}"
 							],
@@ -471,7 +471,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/api-key/{Api-Key-Id}",
+							"raw": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/api-key/:Api-Key-Id",
 							"host": [
 								"{{wsEndpoint}}"
 							],
@@ -518,7 +518,7 @@
 							"raw": "{\n\t\"pspId\": \"BS_PAYONE\",\n\t\"pspConfig\": {\n\t\t\"merchantId\": \"\",\n\t\t\"portalId\": \"\",\n\t\t\"key\": \"\",\n\t\t\"accountId\": \"\"\n\t}\n}"
 						},
 						"url": {
-							"raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/psp",
+							"raw": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/psp",
 							"host": [
 								"{{wsEndpoint}}"
 							],
@@ -559,7 +559,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/psp",
+							"raw": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/psp",
 							"host": [
 								"{{wsEndpoint}}"
 							],
@@ -600,7 +600,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/psp/{Psp-Id}",
+							"raw": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/psp/:Psp-Id",
 							"host": [
 								"{{wsEndpoint}}"
 							],
@@ -642,7 +642,7 @@
 							"raw": "{\n    \"merchantId\": \"42865\",\n    \"portalId\": \"2030968\",\n    \"key\": \"41P13T71t40B8F8f\",\n    \"accountId\": \"42949\"\n}"
 						},
 						"url": {
-							"raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/psp/{Psp-Id}",
+							"raw": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/psp/:Psp-Id",
 							"host": [
 								"{{wsEndpoint}}"
 							],
@@ -865,7 +865,7 @@
 							"mode": "raw",
 							"raw": ""
 						},
-						"url": "{{wsEndpoint}}/api/v1/preauthorization/{Transaction-Id}/capture"
+						"url": "{{wsEndpoint}}/api/v1/preauthorization/:Transaction-Id/capture"
 					},
 					"response": []
 				},
@@ -936,7 +936,7 @@
                             "mode": "raw",
                             "raw": "{\n\t\"reason\": \"Some reason\"\n}"
                         },
-                        "url": "{{wsEndpoint}}/api/v1/preauthorization/{Transaction-Id}/reverse"
+                        "url": "{{wsEndpoint}}/api/v1/preauthorization/:Transaction-Id/reverse"
                     },
                     "response": []
                 },
@@ -977,7 +977,7 @@
                             "mode": "raw",
                             "raw": "{\n\t\"amount\": \"500\",\n\t\"currency\": \"EUR\",\n\t\"reason\": \"reason\"\n}"
                         },
-                        "url": "{{wsEndpoint}}/api/v1/authorization/{Transaction-Id}/refund"
+                        "url": "{{wsEndpoint}}/api/v1/authorization/:Transaction-Id/refund"
                     },
                     "response": []
                 }
@@ -1006,7 +1006,7 @@
                             "raw": ""
                         },
                         "url": {
-                            "raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/transactions/{Transaction-Id}",
+                            "raw": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/transactions/:Transaction-Id",
                             "host": [
                                 "{{wsEndpoint}}"
                             ],
@@ -1042,7 +1042,7 @@
                             "raw": ""
                         },
                         "url": {
-                            "raw": "{{wsEndpoint}}/api/v1/merchant/mobilab/transactions?createdAtStart={createdAtStart}&createdAtEnd={createdAtEnd}&paymentMethod={paymentMethod}&action={action}&status={status}&text={text}&limit={limit}&offset={offset}",
+                            "raw": "{{wsEndpoint}}/api/v1/merchant/mobilab/transactions?createdAtStart=:createdAtStart&createdAtEnd=:createdAtEnd&paymentMethod=:paymentMethod&action=:action&status=:status&text=:text&limit=:limit&offset=:offset",
                             "host": [
                                 "{{wsEndpoint}}"
                             ],
@@ -1111,7 +1111,7 @@
                             "raw": ""
                         },
                         "url": {
-                            "raw": "{{wsEndpoint}}/api/v1/merchant/mobilab/transactions/csv?createdAtStart={createdAtStart}&createdAtEnd={createdAtEnd}&paymentMethod={paymentMethod}&action={action}&status={status}&text={text}&limit={limit}&offset={offset}",
+                            "raw": "{{wsEndpoint}}/api/v1/merchant/mobilab/transactions/csv?createdAtStart=:createdAtStart&createdAtEnd=:createdAtEnd&paymentMethod=:paymentMethod&action=:action&status=:status&text=:text&limit=:limit&offset=:offset",
                             "host": [
                                 "{{wsEndpoint}}"
                             ],
@@ -1187,7 +1187,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/preauthorization/{Transaction-Id}/capture",
+                            "raw": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/preauthorization/:Transaction-Id/capture",
                             "host": [
                                 "{{wsEndpoint}}"
                             ],
@@ -1240,7 +1240,7 @@
                             "raw": "{\n\t\"amount\": 300,\n\t\"currency\": \"EUR\",\n\t\"reason\": \"Book\"\n}"
                         },
                         "url": {
-                            "raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/authorization/{Transaction-Id}/refund",
+                            "raw": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/authorization/:Transaction-Id/refund",
                             "host": [
                                 "{{wsEndpoint}}"
                             ],
@@ -1288,7 +1288,7 @@
                             "raw": "{\n\t\"reason\": \"Reverse\"\n}"
                         },
                         "url": {
-                            "raw": "{{wsEndpoint}}/api/v1/merchant/{Merchant-Id}/preauthorization/{Transaction-Id}/reverse",
+                            "raw": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/preauthorization/:Transaction-Id/reverse",
                             "host": [
                                 "{{wsEndpoint}}"
                             ],
