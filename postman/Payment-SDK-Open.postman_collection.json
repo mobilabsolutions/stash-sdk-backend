@@ -975,7 +975,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n\t\"amount\": \"20\",\n\t\t\"currency\": \"CAD\",\n\t\t\"reason\": \"reason\"\n\t}\"\n}"
+                            "raw": "{\n\t\"amount\": \"500\",\n\t\"currency\": \"EUR\",\n\t\"reason\": \"reason\"\n}"
                         },
                         "url": "{{wsEndpoint}}/api/v1/authorization/{Transaction-Id}/refund"
                     },
