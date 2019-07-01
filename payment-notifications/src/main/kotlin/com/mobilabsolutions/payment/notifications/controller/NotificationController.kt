@@ -45,7 +45,7 @@ class NotificationController(
     )
     @ResponseStatus(HttpStatus.OK)
     fun createAdyenNotification(
-        @Valid @RequestBody adyenNotificationRequestModel: AdyenNotificationRequestModel
+        @Valid @RequestBody adyenNotificationRequestModel: AdyenNotificationRequestModel?
     ) = notificationService.saveAdyenNotifications(adyenNotificationRequestModel)
 
     @RequestMapping(

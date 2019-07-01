@@ -23,13 +23,16 @@ class NotificationService(
     companion object : KLogging()
 
     @Transactional
-    fun saveAdyenNotifications(adyenNotificationRequestModel: AdyenNotificationRequestModel): AdyenNotificationResponseModel {
-        logger.info("adding Adyen transaction notifications for references ${adyenNotificationRequestModel.notificationItems?.stream()?.map { it.notificationRequestItem?.pspReference }?.collect(Collectors.joining(","))}")
-        notificationRepository.save(Notification(
-            status = NotificationStatus.CREATED,
-            psp = PaymentServiceProvider.ADYEN,
-            message = objectMapper.writeValueAsString(adyenNotificationRequestModel)
-        ))
+    fun saveAdyenNotifications(adyenNotificationRequestModel: AdyenNotificationRequestModel?): AdyenNotificationResponseModel {
+        logger.info("adding Adyen transaction notifications for references ${adyenNotificationRequestModel?.notificationItems?.stream()?.map { it.notificationRequestItem?.pspReference }?.collect(Collectors.joining(","))}")
+        adyenNotificationRequestModel?.notificationItems?.forEach {
+            notificationRepository.save(Notification(
+                id = it.notificationRequestItem?.pspReference?.plus("-")?.plus(it.notificationRequestItem.eventCode),
+                status = NotificationStatus.CREATED,
+                psp = PaymentServiceProvider.ADYEN,
+                message = objectMapper.writeValueAsString(it.notificationRequestItem)
+            ))
+        }
         return AdyenNotificationResponseModel(
             notificationResponse = "[accepted]"
         )

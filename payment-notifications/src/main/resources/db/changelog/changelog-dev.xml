@@ -2,7 +2,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
     <changeSet author="doruk.coskun" id="PSOS-63_1">
         <createTable tableName="notification">
-            <column autoIncrement="true" name="id" type="BIGSERIAL">
+            <column name="id" type="VARCHAR(255)">
                 <constraints primaryKey="true" primaryKeyName="notification_pkey"/>
             </column>
             <column name="created_date" type="TIMESTAMP(6) WITHOUT TIME ZONE">
