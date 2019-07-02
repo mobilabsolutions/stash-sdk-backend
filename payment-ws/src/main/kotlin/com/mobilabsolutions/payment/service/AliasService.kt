@@ -15,7 +15,9 @@ import com.mobilabsolutions.payment.model.request.AliasRequestModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
+import com.mobilabsolutions.payment.model.request.VerifyAliasRequestModel
 import com.mobilabsolutions.payment.model.response.AliasResponseModel
+import com.mobilabsolutions.payment.model.response.ExchangeAliasResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
@@ -82,7 +84,7 @@ class AliasService(
      * @param aliasId Alias ID
      * @param aliasRequestModel Alias Request Model
      */
-    fun exchangeAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, aliasRequestModel: AliasRequestModel) {
+    fun exchangeAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, aliasRequestModel: AliasRequestModel): ExchangeAliasResponseModel? {
         logger.info("Exchanging alias {}", aliasId)
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofErrorCode(ApiErrorCode.PUBLISHABLE_KEY_NOT_FOUND).asException()
         val alias = aliasRepository.getFirstByIdAndActive(aliasId, true) ?: throw ApiError.ofErrorCode(ApiErrorCode.ALIAS_NOT_FOUND).asException()
@@ -103,11 +105,40 @@ class AliasService(
         val pspRegisterAliasResponse = psp.registerAlias(pspRegisterAliasRequest, pspTestMode)
         val paypalConfig = aliasRequestModel.extra?.payPalConfig?.copy(billingAgreementId = pspRegisterAliasResponse?.billingAgreementId)
         val personalConfig = aliasRequestModel.extra?.personalData?.copy(customerReference = pspRegisterAliasResponse?.registrationReference)
-        val aliasExtraModel = aliasRequestModel.extra?.copy(payPalConfig = paypalConfig, personalData = personalConfig)
+        val threeDSecureConfig = aliasRequestModel.extra?.threeDSecureConfig?.copy(paymentData = pspRegisterAliasResponse?.paymentData)
+        val aliasExtraModel = aliasRequestModel.extra?.copy(payPalConfig = paypalConfig, personalData = personalConfig, threeDSecureConfig = threeDSecureConfig)
 
         val pspAlias = aliasRequestModel.pspAlias ?: pspRegisterAliasResponse?.pspAlias
         val extra = if (aliasExtraModel != null) objectMapper.writeValueAsString(aliasExtraModel) else null
         aliasRepository.updateAlias(pspAlias, extra, aliasId, userAgent)
+        return ExchangeAliasResponseModel(pspRegisterAliasResponse?.paReq, pspRegisterAliasResponse?.termUrl, pspRegisterAliasResponse?.md, pspRegisterAliasResponse?.url)
+    }
+
+    fun verifyAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, verifyAliasRequest: VerifyAliasRequestModel) {
+        logger.info("Verifying alias {}", aliasId)
+        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofErrorCode(ApiErrorCode.PUBLISHABLE_KEY_NOT_FOUND).asException()
+        val alias = aliasRepository.getFirstByIdAndActive(aliasId, true) ?: throw ApiError.ofErrorCode(ApiErrorCode.ALIAS_NOT_FOUND).asException()
+        if (apiKey.merchant.id != alias.merchant?.id) throw ApiError.ofErrorCode(ApiErrorCode.WRONG_ALIAS_MERCHANT_MAPPING).asException()
+        val result = objectMapper.readValue(apiKey.merchant.pspConfig
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_EMPTY).asException(), PspConfigListModel::class.java)
+        val pspConfig = result.psp.firstOrNull { it.type == alias.psp.toString() }
+        val pspConfigType = PaymentServiceProvider.valueOf(pspConfig?.type
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_NOT_FOUND, "PSP configuration for '${alias.psp}' cannot be found from given merchant").asException())
+        val psp = pspRegistry.find(pspConfigType)
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_IMPL_NOT_FOUND, "PSP implementation '${alias.psp}' cannot be found").asException()
+
+        val extra = objectMapper.readValue(alias.extra, AliasExtraModel::class.java)
+        val threeDSecureConfig = extra?.threeDSecureConfig?.copy(paRes = verifyAliasRequest.paRes, md = verifyAliasRequest.md)
+        val aliasExtraModel = extra?.copy(threeDSecureConfig = threeDSecureConfig)
+
+        val pspRegisterAliasRequest = PspRegisterAliasRequestModel(
+            aliasId = aliasId,
+            aliasExtra = aliasExtraModel,
+            pspConfig = pspConfig
+        )
+
+        val pspResponse = psp.verifyThreeDSecure(pspRegisterAliasRequest, pspTestMode)
+        aliasRepository.updateAlias(pspResponse?.pspAlias, objectMapper.writeValueAsString(aliasExtraModel), aliasId, userAgent)
     }
 
     /**

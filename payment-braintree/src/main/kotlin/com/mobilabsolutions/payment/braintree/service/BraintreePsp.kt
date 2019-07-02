@@ -73,7 +73,11 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
         )
 
         val braintreeResponse = braintreeClient.registerPayPalAlias(braintreeRequest, pspRegisterAliasRequestModel.pspConfig!!, getBraintreeMode(pspTestMode))
-        return PspRegisterAliasResponseModel(braintreeResponse.token, braintreeResponse.billingAgreementId, null)
+        return PspRegisterAliasResponseModel(braintreeResponse.token, braintreeResponse.billingAgreementId, null, null, null, null, null, null)
+    }
+
+    override fun verifyThreeDSecure(pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, pspTestMode: Boolean?): PspRegisterAliasResponseModel? {
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun preauthorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {

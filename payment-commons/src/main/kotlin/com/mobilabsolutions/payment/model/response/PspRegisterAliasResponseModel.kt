@@ -15,5 +15,15 @@ data class PspRegisterAliasResponseModel(
     val billingAgreementId: String?,
 
     @ApiModelProperty(value = "Registration reference")
-    val registrationReference: String?
+    val registrationReference: String?,
+
+    val paymentData: String?,
+
+    val paReq: String?,
+
+    val termUrl: String?,
+
+    val md: String?,
+
+    val url: String?
 )

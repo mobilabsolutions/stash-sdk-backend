@@ -16,7 +16,9 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenDeleteAliasRequestM
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRefundRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenVerify3DSecureRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
+import com.mobilabsolutions.payment.adyen.model.response.Adyen3DSecureResponseModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
 import com.mobilabsolutions.payment.model.PspConfigModel
@@ -49,6 +51,7 @@ class AdyenClient(
         const val PREAUTH_URL = "/authorise"
         const val AUTHORIZATION_URL = "/authorise"
         const val PAYMENT_URL = "/payments"
+        const val VERIFY_PAYMENT_URL = "/payments/details"
         const val REVERSE_URL = "/cancel"
         const val CAPTURE_URL = "/capture"
         const val REFUND_URL = "/refund"
@@ -140,19 +143,45 @@ class AdyenClient(
     /**
      * Makes a payment and registers a credit card with 3D Secure
      *
-     * @param request Adyen authorization request
+     * @param request Adyen payment request
      * @param pspConfig Adyen configuration
      * @param mode test or live mode
-     * @return Adyen payment response
+     * @return Adyen 3D secure response
      */
     fun registerThreeDSecure(
         request: AdyenPaymentRequestModel,
         pspConfig: PspConfigModel,
         mode: String
-    ): AdyenVerifyPaymentResponseModel {
+    ): Adyen3DSecureResponseModel {
         val apiKey = if (mode == AdyenMode.TEST.mode) pspConfig.sandboxPublicKey else pspConfig.publicKey
         val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testCheckoutBaseUrl + PAYMENT_URL
         else adyenProperties.liveCheckoutBaseUrl.format(pspConfig.urlPrefix) + PAYMENT_URL
+
+        val response = khttp.post(
+            url = paymentUrl,
+            headers = mapOf(API_KEY to apiKey!!),
+            json = JSONObject(objectMapper.writeValueAsString(request))
+        )
+
+        return Adyen3DSecureResponseModel(response.jsonObject)
+    }
+
+    /**
+     * Verifies a payment for 3D Secure
+     *
+     * @param request Adyen verify payment request
+     * @param pspConfig Adyen configuration
+     * @param mode test or live mode
+     * @return Adyen verify payment response
+     */
+    fun verifyThreeDSecure(
+        request: AdyenVerify3DSecureRequestModel,
+        pspConfig: PspConfigModel,
+        mode: String
+    ): AdyenVerifyPaymentResponseModel {
+        val apiKey = if (mode == AdyenMode.TEST.mode) pspConfig.sandboxPublicKey else pspConfig.publicKey
+        val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testCheckoutBaseUrl + VERIFY_PAYMENT_URL
+        else adyenProperties.liveCheckoutBaseUrl.format(pspConfig.urlPrefix) + VERIFY_PAYMENT_URL
 
         val response = khttp.post(
             url = paymentUrl,

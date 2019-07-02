@@ -41,6 +41,15 @@ interface Psp {
     fun registerAlias(pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, pspTestMode: Boolean?): PspRegisterAliasResponseModel?
 
     /**
+     * Returns psp register alias response {@link PspRegisterAliasResponseModel} for the given psp register alias request {@link PspRegisterAliasRequestModel}
+     *
+     * @param pspRegisterAliasRequestModel PSP register alias request
+     * @param pspTestMode indicator whether is the test mode or not
+     * @return PSP register alias response
+     */
+    fun verifyThreeDSecure(pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, pspTestMode: Boolean?): PspRegisterAliasResponseModel?
+
+    /**
      * Returns psp preauthorization payment response {@link PspPaymentResponseModel} for the given psp preauthorization payment request {@link PspPaymentRequestModel}
      *
      * @param pspPaymentRequestModel PSP payment request

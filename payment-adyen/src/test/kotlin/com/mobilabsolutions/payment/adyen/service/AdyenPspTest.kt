@@ -169,6 +169,7 @@ class AdyenPspTest {
                 null,
                 null,
                 null,
+                null,
                 PersonalDataModel(
                     email,
                     customerIP,
@@ -191,6 +192,7 @@ class AdyenPspTest {
             AliasExtraModel(
                 null,
                 SepaConfigModel(iban, null),
+                null,
                 null,
                 PersonalDataModel(
                     null,
@@ -216,6 +218,7 @@ class AdyenPspTest {
                     null,
                     null,
                     null,
+                    null,
                     PersonalDataModel(
                         email,
                         customerIP,
@@ -236,6 +239,7 @@ class AdyenPspTest {
     fun `register alias`() {
         adyenPsp.registerAlias(PspRegisterAliasRequestModel(correctAliasId,
             AliasExtraModel(
+                null,
                 null,
                 null,
                 null,
@@ -269,6 +273,7 @@ class AdyenPspTest {
         adyenPsp.preauthorize(PspPaymentRequestModel(
             aliasId,
             AliasExtraModel(
+                null,
                 null,
                 null,
                 null,

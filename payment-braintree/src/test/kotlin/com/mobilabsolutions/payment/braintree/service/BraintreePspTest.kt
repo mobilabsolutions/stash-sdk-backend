@@ -136,6 +136,7 @@ class BraintreePspTest {
                 null,
                 PayPalConfigModel(nonce, billingAgreementId, deviceData),
                 null,
+                null,
                 PaymentMethod.PAY_PAL.name,
                 null
             ), pspConfig), test)
@@ -149,6 +150,7 @@ class BraintreePspTest {
                     null,
                     null,
                     PayPalConfigModel(nonce, billingAgreementId, deviceData),
+                    null,
                     null,
                     PaymentMethod.CC.name,
                     null
@@ -182,6 +184,7 @@ class BraintreePspTest {
                     null,
                     PayPalConfigModel(nonce, billingAgreementId, deviceData),
                     null,
+                    null,
                     PaymentMethod.PAY_PAL.name,
                     null
                 ),
@@ -203,6 +206,7 @@ class BraintreePspTest {
                     null,
                     null,
                     PayPalConfigModel(nonce, billingAgreementId, deviceData),
+                    null,
                     null,
                     PaymentMethod.PAY_PAL.name,
                     null
@@ -255,6 +259,7 @@ class BraintreePspTest {
                     null,
                     PayPalConfigModel(nonce, billingAgreementId, deviceData),
                     null,
+                    null,
                     PaymentMethod.PAY_PAL.name,
                     null
                 ),
@@ -276,6 +281,7 @@ class BraintreePspTest {
                     null,
                     null,
                     PayPalConfigModel(nonce, billingAgreementId, deviceData),
+                    null,
                     null,
                     PaymentMethod.PAY_PAL.name,
                     null

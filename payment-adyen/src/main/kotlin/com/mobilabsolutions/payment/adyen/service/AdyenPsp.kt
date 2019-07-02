@@ -10,6 +10,7 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRefundRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenVerify3DSecureRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
@@ -42,7 +43,6 @@ class AdyenPsp(
     private val adyenProperties: AdyenProperties,
     private val randomStringGenerator: RandomStringGenerator
 ) : Psp {
-
     companion object : KLogging() {
         const val REFERENCE_LENGTH = 20
     }
@@ -83,6 +83,29 @@ class AdyenPsp(
             else -> return null
         }
         return null
+    }
+
+    override fun verifyThreeDSecure(pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, pspTestMode: Boolean?): PspRegisterAliasResponseModel? {
+        val adyenMode = getAdyenMode(pspTestMode)
+        logger.info("Adyen verify 3D Secure payment has been called for alias {} for {} mode", pspRegisterAliasRequestModel.aliasId, adyenMode)
+        val threeDSecureConfig = pspRegisterAliasRequestModel.aliasExtra?.threeDSecureConfig
+
+        val request = AdyenVerify3DSecureRequestModel(
+            paymentData = threeDSecureConfig?.paymentData,
+            md = threeDSecureConfig?.md,
+            paRes = threeDSecureConfig?.paRes
+        )
+
+        val response = adyenClient.verifyThreeDSecure(request, pspRegisterAliasRequestModel.pspConfig!!, adyenMode)
+
+        if (response.errorMessage != null || response.refusalReason != null) {
+            logger.error("Adyen verification is failed, reason {}", response.errorMessage ?: response.refusalReason)
+            throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
+                .withMessage("Error during verifying Adyen 3D Secure")
+                .withError(response.errorMessage ?: response.refusalReason!!).build().asException()
+        }
+
+        return PspRegisterAliasResponseModel(response.recurringDetailReference, null, response.shopperReference, null, null, null, null, null)
     }
 
     override fun preauthorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
@@ -299,7 +322,7 @@ class AdyenPsp(
                 .withError(response.errorMessage ?: response.refusalReason!!).build().asException()
         }
 
-        return PspRegisterAliasResponseModel(pspAlias = response.recurringDetailReference, registrationReference = response.shopperReference, billingAgreementId = null)
+        return PspRegisterAliasResponseModel(response.recurringDetailReference, null, response.shopperReference, null, null, null, null, null)
     }
 
     private fun register3DSecure(pspConfig: PspConfigModel?, pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, adyenMode: String): PspRegisterAliasResponseModel {
@@ -340,6 +363,6 @@ class AdyenPsp(
                 .withError(response.errorMessage ?: response.refusalReason!!).build().asException()
         }
 
-        return PspRegisterAliasResponseModel(pspAlias = response.recurringDetailReference, registrationReference = response.shopperReference, billingAgreementId = null)
+        return PspRegisterAliasResponseModel(null, null, null, response.paymentData, response.paReq, response.termUrl, response.md, response.url)
     }
 }

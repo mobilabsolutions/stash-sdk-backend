@@ -77,6 +77,10 @@ class BsPayonePsp(
         return null
     }
 
+    override fun verifyThreeDSecure(pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, pspTestMode: Boolean?): PspRegisterAliasResponseModel? {
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun preauthorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
         logger.info("BS Payone preauthorization for {} mode", getPspMode(pspTestMode))
         val bsPayonePreauthorizeRequest = BsPayonePaymentRequestModel(
