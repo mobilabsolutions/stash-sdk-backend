@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.enum.NotificationStatus
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.notifications.data.Notification
+import com.mobilabsolutions.payment.notifications.data.NotificationId
 import com.mobilabsolutions.payment.notifications.data.repository.NotificationRepository
 import com.mobilabsolutions.payment.notifications.model.request.AdyenNotificationRequestModel
 import com.mobilabsolutions.payment.notifications.model.response.AdyenNotificationResponseModel
@@ -27,7 +28,7 @@ class NotificationService(
         logger.info("adding Adyen transaction notifications for references ${adyenNotificationRequestModel?.notificationItems?.stream()?.map { it.notificationRequestItem?.pspReference }?.collect(Collectors.joining(","))}")
         adyenNotificationRequestModel?.notificationItems?.forEach {
             notificationRepository.save(Notification(
-                id = it.notificationRequestItem?.pspReference?.plus("-")?.plus(it.notificationRequestItem.eventCode),
+                notificationId = NotificationId(pspTransactionId = it.notificationRequestItem?.pspReference, pspEvent = it.notificationRequestItem?.eventCode),
                 status = NotificationStatus.CREATED,
                 psp = PaymentServiceProvider.ADYEN,
                 message = objectMapper.writeValueAsString(it.notificationRequestItem)
@@ -46,7 +47,7 @@ class NotificationService(
         // process the notification
         // TODO
         notifications.forEach {
-            logger.info { "${it.id}, ${it.status}" }
+            logger.info { "${it.notificationId}, ${it.status}" }
         }
 
         // send notifications
