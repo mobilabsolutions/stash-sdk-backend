@@ -10,7 +10,7 @@ import javax.validation.constraints.Size
 data class AdyenAmountModel(
     @ApiModelProperty("Amount in smallest currency unit (e.g. cent)", example = "300")
     @field:NotNull
-    val amount: Int?,
+    val value: Int?,
 
     @ApiModelProperty("Currency", example = "EUR")
     @field:Size(min = 3, max = 3)
