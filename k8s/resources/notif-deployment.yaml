@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: payment-sdk-backend
+  name: payment-sdk-notification
   namespace: ${KUBE_NAMESPACE}
 spec:
-  replicas: ${KUBE_DEPLOYMENT_REPLICA_COUNT}
+  replicas: ${KUBE_NOTIF_DEPLOYMENT_REPLICA_COUNT}
   selector:
     matchLabels:
-      app: payment-sdk-backend
+      app: payment-sdk-notification
   template:
     metadata:
       labels:
-        app: payment-sdk-backend
+        app: payment-sdk-notification
         date: "${KUBE_APPLY_DATE}"
     spec:
       volumes:
@@ -19,26 +19,26 @@ spec:
         secret:
           secretName: cloudsql-instance-credentials
       containers:
-      - name: payment-sdk-backend
-        image: eu.gcr.io/payment-server-reloaded/payment-sdk-backend:${KUBE_DEPLOYMENT_IMAGE_TAG}
+      - name: payment-sdk-notification
+        image: eu.gcr.io/payment-server-reloaded/payment-sdk-notification:${KUBE_NOTIF_DEPLOYMENT_IMAGE_TAG}
         resources:
           requests:
-            cpu: ${KUBE_DEPLOYMENT_CPU_REQUEST}
-            memory: ${KUBE_DEPLOYMENT_MEMORY_REQUEST}
+            cpu: ${KUBE_NOTIF_DEPLOYMENT_CPU_REQUEST}
+            memory: ${KUBE_NOTIF_DEPLOYMENT_MEMORY_REQUEST}
           limits:
-            cpu: ${KUBE_DEPLOYMENT_CPU_LIMIT}
-            memory: ${KUBE_DEPLOYMENT_MEMORY_LIMIT}
+            cpu: ${KUBE_NOTIF_DEPLOYMENT_CPU_LIMIT}
+            memory: ${KUBE_NOTIF_DEPLOYMENT_MEMORY_LIMIT}
         envFrom:
         - configMapRef:
-            name: payment-sdk-backend
+            name: payment-sdk-notification
         - secretRef:
-            name: payment-sdk-backend
+            name: payment-sdk-notification
         ports:
         - containerPort: 8080
           name: api
         readinessProbe:
           httpGet:
-            path: "/api/v1/actuator/health"
+            path: "/notification/actuator/health"
             port: api
           initialDelaySeconds: 60
           periodSeconds: 15
@@ -48,7 +48,7 @@ spec:
       - name: cloudsql-proxy
         image: gcr.io/cloudsql-docker/gce-proxy:1.13
         command: ["/cloud_sql_proxy",
-                  "-instances=payment-server-reloaded:europe-west3:${KUBE_DEPLOYMENT_SQL_INSTANCE_NAME}=tcp:5432",
+                  "-instances=payment-server-reloaded:europe-west3:${KUBE_NOTIF_DEPLOYMENT_SQL_INSTANCE_NAME}=tcp:5432",
                   "-credential_file=/secrets/cloudsql/credentials.json"]
         securityContext:
           runAsUser: 2  # non-root user

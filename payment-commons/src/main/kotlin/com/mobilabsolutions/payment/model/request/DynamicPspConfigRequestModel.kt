@@ -1,5 +1,7 @@
 package com.mobilabsolutions.payment.model.request
 
+import com.mobilabsolutions.payment.data.enum.Channel
+import com.mobilabsolutions.payment.validation.ChannelValidator
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
@@ -15,5 +17,6 @@ data class DynamicPspConfigRequestModel(
     val returnUrl: String?,
 
     @ApiModelProperty(value = "Channel", example = "Android")
+    @field:ChannelValidator(Channel = Channel::class)
     val channel: String?
 )

@@ -2,10 +2,12 @@ package com.mobilabsolutions.payment.model
 
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
+import javax.validation.constraints.Size
 
 @ApiModel(value = "Credit Card Configuration")
 data class CreditCardConfigModel(
-    @ApiModelProperty(value = "Credit card mask", example = "VISA-1111")
+    @ApiModelProperty(value = "Credit card mask", example = "1111")
+    @field:Size(min = 4, max = 4)
     val ccMask: String?,
 
     @ApiModelProperty(value = "Credit card expiry", example = "11/20")

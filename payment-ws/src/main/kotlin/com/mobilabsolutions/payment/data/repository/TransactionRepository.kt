@@ -1,5 +1,6 @@
 package com.mobilabsolutions.payment.data.repository
 
+import com.mobilabsolutions.payment.data.configuration.BaseRepository
 import com.mobilabsolutions.payment.data.domain.Alias
 import com.mobilabsolutions.payment.data.domain.Merchant
 import com.mobilabsolutions.payment.data.domain.Transaction

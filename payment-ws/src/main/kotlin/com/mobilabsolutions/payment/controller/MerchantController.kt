@@ -64,7 +64,7 @@ class MerchantController(
 
     @ApiOperation(value = "Create merchant")
     @ApiResponses(
-        ApiResponse(code = 204, message = "Successfully created merchant"),
+        ApiResponse(code = 201, message = "Successfully created a merchant"),
         ApiResponse(code = 400, message = "Failed to create merchant"),
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 403, message = "Forbidden access")

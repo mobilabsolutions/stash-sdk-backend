@@ -9,7 +9,6 @@ import com.adyen.service.Checkout
 import com.adyen.service.exception.ApiException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
-import com.mobilabsolutions.payment.adyen.data.enum.AdyenChannel
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.adyen.model.request.AdyenCaptureRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenDeleteAliasRequestModel
@@ -21,6 +20,7 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentReques
 import com.mobilabsolutions.payment.adyen.model.response.Adyen3DSecureResponseModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
+import com.mobilabsolutions.payment.data.enum.Channel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
@@ -88,7 +88,7 @@ class AdyenClient(
         paymentSessionRequest.reference = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
         paymentSessionRequest.shopperReference = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
         paymentSessionRequest.channel =
-            if (dynamicPspConfig?.channel.equals(AdyenChannel.ANDROID.channel, ignoreCase = true))
+            if (dynamicPspConfig?.channel.equals(Channel.ANDROID.name, ignoreCase = true))
                 PaymentSessionRequest.ChannelEnum.ANDROID else PaymentSessionRequest.ChannelEnum.IOS
         paymentSessionRequest.enableRecurring(true)
         paymentSessionRequest.enableOneClick(true)

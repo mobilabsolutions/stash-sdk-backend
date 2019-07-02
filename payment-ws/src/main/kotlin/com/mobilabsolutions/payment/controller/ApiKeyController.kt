@@ -26,7 +26,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService) {
 
     @ApiOperation(value = "Get all api keys for specific merchant")
     @ApiResponses(
-        ApiResponse(code = 200, message = "Successfully fetched api key"),
+        ApiResponse(code = 200, message = "Successfully fetched the api key"),
         ApiResponse(code = 400, message = "Merchant does not exist"),
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 403, message = "Forbidden access"),
@@ -58,7 +58,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService) {
 
     @ApiOperation(value = "Get api for specific merchant using id")
     @ApiResponses(
-        ApiResponse(code = 200, message = "Successfully fetched api key"),
+        ApiResponse(code = 200, message = "Successfully fetched the api key"),
         ApiResponse(code = 400, message = "Merchant does not exist"),
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 403, message = "Forbidden access"),
@@ -74,7 +74,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService) {
 
     @ApiOperation(value = "Edit merchant api key name")
     @ApiResponses(
-        ApiResponse(code = 204, message = "Successfully edited api key"),
+        ApiResponse(code = 204, message = "Successfully edited the api key"),
         ApiResponse(code = 400, message = "Merchant does not exist"),
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 403, message = "Forbidden access"),
@@ -93,7 +93,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService) {
 
     @ApiOperation(value = "Delete merchant api key")
     @ApiResponses(
-        ApiResponse(code = 204, message = "Successfully deleted api key"),
+        ApiResponse(code = 204, message = "Successfully deleted the api key"),
         ApiResponse(code = 400, message = "Merchant does not exist"),
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 403, message = "Forbidden access"),

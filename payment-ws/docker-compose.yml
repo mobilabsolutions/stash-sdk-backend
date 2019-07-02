@@ -15,7 +15,10 @@ services:
       - "DB_USERNAME=payment"
       - "DB_PASSWORD=payment"
       - "ADMIN_USERNAME=admin"
-      - "ADMIN_PASSWORD=yGAmXjrcxta5wQGSe5dx"
+      - "ADMIN_PASSWORD=admin24"
+      - "OAUTH_CLIENT_USERNAME=client"
+      - "OAUTH_CLIENT_PASSWORD=client24"
+      - "SIGNING_KEY=zvJcsfK8qsPPp7uP3zKc8WTGhCETgF"
   db:
     build:
       context: .

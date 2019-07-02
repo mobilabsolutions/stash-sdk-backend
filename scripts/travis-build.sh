@@ -12,25 +12,35 @@ gcloud auth activate-service-account --key-file ${KEY_FILE}
 gcloud config set project ${PROJECT_ID}
 gcloud auth configure-docker --quiet
 
-IMAGE_NAME="payment-sdk-backend"
-BASE_IMAGE=${REGISTRY_HOSTNAME}/${PROJECT_ID}/${IMAGE_NAME}
-INITIAL_IMAGE=${BASE_IMAGE}:commit-${TRAVIS_COMMIT}
+WS_IMAGE_NAME="payment-sdk-backend"
+WS_BASE_IMAGE=${REGISTRY_HOSTNAME}/${PROJECT_ID}/${WS_IMAGE_NAME}
+WS_INITIAL_IMAGE=${WS_BASE_IMAGE}:commit-${TRAVIS_COMMIT}
+
+NOTIF_IMAGE_NAME="payment-sdk-notification"
+NOTIF_BASE_IMAGE=${REGISTRY_HOSTNAME}/${PROJECT_ID}/${NOTIF_IMAGE_NAME}
+NOTIF_INITIAL_IMAGE=${NOTIF_BASE_IMAGE}:commit-${TRAVIS_COMMIT}
 
 build() {
-  echo "Building ${INITIAL_IMAGE}"
-  docker build -t ${INITIAL_IMAGE} ${TRAVIS_BUILD_DIR}/payment-ws
+  echo "Building ${WS_INITIAL_IMAGE}"
+  docker build -t ${WS_INITIAL_IMAGE} ${TRAVIS_BUILD_DIR}/payment-ws
+  echo "Building ${NOTIF_INITIAL_IMAGE}"
+  docker build -t ${NOTIF_INITIAL_IMAGE} ${TRAVIS_BUILD_DIR}/payment-notifications
 }
 
 tag() {
   for TAG in "$@"; do
-    echo "Tagging ${BASE_IMAGE}:${TAG}"
-    docker tag ${INITIAL_IMAGE} ${BASE_IMAGE}:${TAG}
+    echo "Tagging ${WS_BASE_IMAGE}:${TAG}"
+    docker tag ${WS_INITIAL_IMAGE} ${WS_BASE_IMAGE}:${TAG}
+    echo "Tagging ${NOTIF_BASE_IMAGE}:${TAG}"
+    docker tag ${NOTIF_INITIAL_IMAGE} ${NOTIF_BASE_IMAGE}:${TAG}
   done
 }
 
 push() {
-  echo "Pushing tags for ${BASE_IMAGE}"
-  docker push ${BASE_IMAGE}
+  echo "Pushing tags for ${WS_BASE_IMAGE}"
+  docker push ${WS_BASE_IMAGE}
+  echo "Pushing tags for ${NOTIF_BASE_IMAGE}"
+  docker push ${NOTIF_BASE_IMAGE}
 }
 
 build
