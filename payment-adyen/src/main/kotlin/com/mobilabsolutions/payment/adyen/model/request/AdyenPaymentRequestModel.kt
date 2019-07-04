@@ -42,7 +42,7 @@ data class AdyenPaymentRequestModel(
     val paymentMethod: AdyenPaymentMethodRequestModel?,
 
     @ApiModelProperty(value = "Additional data")
-    val additionalData: AdyenAdditionalData?,
+    val additionalData: AdyenAdditionalDataModel?,
 
     @ApiModelProperty(value = "Return URL", example = "payment-dev.mblb.net")
     val returnUrl: String?,

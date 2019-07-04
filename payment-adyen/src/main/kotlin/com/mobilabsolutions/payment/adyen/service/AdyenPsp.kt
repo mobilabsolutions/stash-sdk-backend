@@ -2,7 +2,8 @@ package com.mobilabsolutions.payment.adyen.service
 
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
-import com.mobilabsolutions.payment.adyen.model.request.AdyenAdditionalData
+import com.mobilabsolutions.payment.adyen.model.request.Adyen3DSecureDetailsModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenAdditionalDataModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenCaptureRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenDeleteAliasRequestModel
@@ -92,8 +93,10 @@ class AdyenPsp(
 
         val request = AdyenVerify3DSecureRequestModel(
             paymentData = threeDSecureConfig?.paymentData,
-            md = threeDSecureConfig?.md,
-            paRes = threeDSecureConfig?.paRes
+            details = Adyen3DSecureDetailsModel(
+                md = threeDSecureConfig?.md,
+                paRes = threeDSecureConfig?.paRes
+            )
         )
 
         val response = adyenClient.verifyThreeDSecure(request, pspRegisterAliasRequestModel.pspConfig!!, adyenMode)
@@ -350,7 +353,7 @@ class AdyenPsp(
                 encryptedExpiryYear = pspRegisterAliasRequestModel.aliasExtra?.ccConfig?.encryptedExpiryYear,
                 encryptedSecurityCode = pspRegisterAliasRequestModel.aliasExtra?.ccConfig?.encryptedSecurityCode
             ),
-            additionalData = AdyenAdditionalData(
+            additionalData = AdyenAdditionalDataModel(
                 executeThreeD = true.toString()
             ),
             returnUrl = pspRegisterAliasRequestModel.aliasExtra?.ccConfig?.returnUrl,
