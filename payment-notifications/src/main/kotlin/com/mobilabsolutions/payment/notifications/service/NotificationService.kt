@@ -11,6 +11,7 @@ import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.PspNotificationModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
+import com.mobilabsolutions.payment.model.request.PspNotificationListRequestModel
 import com.mobilabsolutions.payment.notifications.data.Notification
 import com.mobilabsolutions.payment.notifications.data.NotificationId
 import com.mobilabsolutions.payment.notifications.data.repository.NotificationRepository
@@ -80,7 +81,7 @@ class NotificationService(
         val response = khttp.post(
             url = paymentURL,
             headers = mapOf("API-KEY" to paymentApiKey),
-            json = JSONObject(objectMapper.writeValueAsString(notificationModels))
+            json = JSONObject(objectMapper.writeValueAsString(PspNotificationListRequestModel().apply { this.notifications.addAll(notificationModels) }))
         )
 
         notifications.forEach {
