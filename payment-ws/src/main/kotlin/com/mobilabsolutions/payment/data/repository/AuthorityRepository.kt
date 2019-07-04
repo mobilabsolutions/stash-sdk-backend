@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.data.repository
 
 import com.mobilabsolutions.payment.data.configuration.BaseRepository

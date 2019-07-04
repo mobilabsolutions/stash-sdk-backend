@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.adyen.model.response
 
 import com.mobilabsolutions.payment.adyen.configuration.getJsonObjectSafe
