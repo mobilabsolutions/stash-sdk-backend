@@ -1,6 +1,5 @@
 package com.mobilabsolutions.payment.adyen.model.request
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
@@ -42,9 +41,8 @@ data class AdyenPaymentRequestModel(
     @ApiModelProperty(value = "Adyen payment method")
     val paymentMethod: AdyenPaymentMethodRequestModel?,
 
-    @ApiModelProperty(value = "Execute 3D Secure", example = "true")
-    @JsonProperty(value = "additionalData.executeThreeD")
-    val execute3D: String?,
+    @ApiModelProperty(value = "Additional data")
+    val additionalData: AdyenAdditionalData?,
 
     @ApiModelProperty(value = "Return URL", example = "payment-dev.mblb.net")
     val returnUrl: String?,

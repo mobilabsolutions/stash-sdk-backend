@@ -11,6 +11,7 @@ import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
+import com.mobilabsolutions.payment.model.ThreeDSecureConfigModel
 import com.mobilabsolutions.payment.model.request.AliasRequestModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
@@ -90,7 +91,7 @@ class AliasService(
      * @param aliasId Alias ID
      * @param aliasRequestModel Alias Request Model
      */
-    fun exchangeAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, aliasRequestModel: AliasRequestModel): ExchangeAliasResponseModel? {
+    fun exchangeAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, aliasRequestModel: AliasRequestModel): ExchangeAliasResponseModel {
         logger.info("Exchanging alias {}", aliasId)
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofErrorCode(ApiErrorCode.PUBLISHABLE_KEY_NOT_FOUND).asException()
         val alias = aliasRepository.getFirstByIdAndActive(aliasId, true) ?: throw ApiError.ofErrorCode(ApiErrorCode.ALIAS_NOT_FOUND).asException()
@@ -113,8 +114,12 @@ class AliasService(
         val pspRegisterAliasResponse = psp.registerAlias(pspRegisterAliasRequest, pspTestMode)
         val paypalConfig = aliasRequestModel.extra?.payPalConfig?.copy(billingAgreementId = pspRegisterAliasResponse?.billingAgreementId)
         val personalConfig = aliasRequestModel.extra?.personalData?.copy(customerReference = pspRegisterAliasResponse?.registrationReference)
-        val threeDSecureConfig = aliasRequestModel.extra?.threeDSecureConfig?.copy(paymentData = pspRegisterAliasResponse?.paymentData)
-        val aliasExtraModel = aliasRequestModel.extra?.copy(payPalConfig = paypalConfig, personalData = personalConfig, threeDSecureConfig = threeDSecureConfig)
+        val aliasExtraModel = aliasRequestModel.extra?.copy(
+            payPalConfig = paypalConfig,
+            personalData = personalConfig,
+            threeDSecureConfig = ThreeDSecureConfigModel(paymentData = pspRegisterAliasResponse?.paymentData, md = null, paRes = null))
+
+        println(objectMapper.writeValueAsString(pspRegisterAliasResponse))
 
         val pspAlias = aliasRequestModel.pspAlias ?: pspRegisterAliasResponse?.pspAlias
         val extra = if (aliasExtraModel != null) objectMapper.writeValueAsString(aliasExtraModel) else null

@@ -28,9 +28,10 @@ data class Adyen3DSecureResponseModel(
     companion object {
         const val PAYMENT_DATA = "paymentData"
         const val REDIRECT = "redirect"
-        const val PA_REQ = "data.PeReq"
-        const val TERM_URL = "data.TermUrl"
-        const val MD = "data.MD"
+        const val DATA = "data"
+        const val PA_REQ = "PaReq"
+        const val TERM_URL = "TermUrl"
+        const val MD = "MD"
         const val URL = "url"
         const val REFUSAL_REASON = "refusalReason"
         const val ERROR_MESSAGE = "message"
@@ -38,10 +39,10 @@ data class Adyen3DSecureResponseModel(
 
     constructor(jsonObject: JSONObject) : this(
         jsonObject.getStringSafe(PAYMENT_DATA),
-        jsonObject.getJsonObjectSafe(REDIRECT)?.getStringSafe(PA_REQ),
-        jsonObject.getJsonObjectSafe(REDIRECT)?.getStringSafe(TERM_URL),
-        jsonObject.getJsonObjectSafe(REDIRECT)?.getStringSafe(MD),
-        jsonObject.getStringSafe(URL),
+        jsonObject.getJsonObjectSafe(REDIRECT)?.getJsonObjectSafe(DATA)?.getStringSafe(PA_REQ),
+        jsonObject.getJsonObjectSafe(REDIRECT)?.getJsonObjectSafe(DATA)?.getStringSafe(TERM_URL),
+        jsonObject.getJsonObjectSafe(REDIRECT)?.getJsonObjectSafe(DATA)?.getStringSafe(MD),
+        jsonObject.getJsonObjectSafe(REDIRECT)?.getStringSafe(URL),
         jsonObject.getStringSafe(REFUSAL_REASON),
         jsonObject.getStringSafe(ERROR_MESSAGE)
     )

@@ -2,6 +2,7 @@ package com.mobilabsolutions.payment.adyen.service
 
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
+import com.mobilabsolutions.payment.adyen.model.request.AdyenAdditionalData
 import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenCaptureRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenDeleteAliasRequestModel
@@ -77,12 +78,11 @@ class AdyenPsp(
         if (pspRegisterAliasRequestModel.aliasExtra == null) throw ApiError.ofErrorCode(ApiErrorCode.INCOMPLETE_ALIAS).asException()
         val adyenMode = getAdyenMode(pspTestMode)
         val pspConfig = pspRegisterAliasRequestModel.pspConfig
-        when (pspRegisterAliasRequestModel.aliasExtra?.paymentMethod) {
+        return when (pspRegisterAliasRequestModel.aliasExtra?.paymentMethod) {
             PaymentMethod.CC.name -> registerCreditCard(pspConfig, pspRegisterAliasRequestModel, adyenMode)
             PaymentMethod.THREE_D_SECURE.name -> register3DSecure(pspConfig, pspRegisterAliasRequestModel, adyenMode)
-            else -> return null
+            else -> null
         }
-        return null
     }
 
     override fun verifyThreeDSecure(pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, pspTestMode: Boolean?): PspRegisterAliasResponseModel? {
@@ -244,7 +244,7 @@ class AdyenPsp(
                 pspPaymentRequestModel.pspConfig?.sandboxMerchantId else pspPaymentRequestModel.pspConfig?.merchantId,
             captureDelayHours = if (executeCapture) 0 else null,
             paymentMethod = null,
-            execute3D = null,
+            additionalData = null,
             returnUrl = null,
             enableRecurring = null)
         return if (executeCapture) adyenClient.authorization(request, pspPaymentRequestModel.pspConfig!!, adyenMode) else adyenClient.preauthorization(request, pspPaymentRequestModel.pspConfig!!, adyenMode)
@@ -276,7 +276,7 @@ class AdyenPsp(
                 encryptedExpiryYear = null,
                 encryptedSecurityCode = null
             ),
-            execute3D = null,
+            additionalData = null,
             returnUrl = null,
             enableRecurring = null
         )
@@ -350,7 +350,9 @@ class AdyenPsp(
                 encryptedExpiryYear = pspRegisterAliasRequestModel.aliasExtra?.ccConfig?.encryptedExpiryYear,
                 encryptedSecurityCode = pspRegisterAliasRequestModel.aliasExtra?.ccConfig?.encryptedSecurityCode
             ),
-            execute3D = true.toString(),
+            additionalData = AdyenAdditionalData(
+                executeThreeD = true.toString()
+            ),
             returnUrl = pspRegisterAliasRequestModel.aliasExtra?.ccConfig?.returnUrl,
             enableRecurring = true
         )
