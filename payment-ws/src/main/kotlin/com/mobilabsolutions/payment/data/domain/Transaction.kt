@@ -80,6 +80,9 @@ class Transaction(
     @Column(name = "request_hash")
     var requestHash: String? = null,
 
+    @Column(name = "notification")
+    var notification: Boolean? = false,
+
     @ManyToOne
     @JoinColumn(name = "merchant_id", nullable = false, foreignKey = ForeignKey(name = "fk_merchant_transactionrecord"))
     var merchant: Merchant = Merchant(),

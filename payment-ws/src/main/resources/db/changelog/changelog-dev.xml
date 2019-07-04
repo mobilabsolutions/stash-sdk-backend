@@ -195,5 +195,11 @@
             <column name="request_hash" type="VARCHAR(255)"/>
         </addColumn>
     </changeSet>
+    <changeSet author="doruk.coskun" id="PSOS-111_1">
+        <addColumn tableName="transaction_record">
+            <column name="notification" type="BOOLEAN"/>
+        </addColumn>
+        <addDefaultValue columnDataType="BOOLEAN" columnName="notification" defaultValueBoolean="false" tableName="transaction_record"/>
+    </changeSet>
 
 </databaseChangeLog>
