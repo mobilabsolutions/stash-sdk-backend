@@ -91,7 +91,7 @@ class NotificationService(
             )
         }.collect(Collectors.toList())
 
-        val response = khttp.post(
+        val response = khttp.put(
             url = paymentURL,
             headers = mapOf("API-KEY" to paymentApiKey),
             json = JSONObject(objectMapper.writeValueAsString(PspNotificationListRequestModel().apply { this.notifications.addAll(notificationModels) }))
