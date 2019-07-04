@@ -3,12 +3,20 @@ package com.mobilabsolutions.payment.notifications.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.enum.NotificationStatus
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
+import com.mobilabsolutions.payment.data.enum.TransactionAction
+import com.mobilabsolutions.payment.data.enum.TransactionStatus
+import com.mobilabsolutions.payment.model.PspNotificationModel
+import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.notifications.data.Notification
 import com.mobilabsolutions.payment.notifications.data.NotificationId
 import com.mobilabsolutions.payment.notifications.data.repository.NotificationRepository
+import com.mobilabsolutions.payment.notifications.model.AdyenNotificationItemModel
 import com.mobilabsolutions.payment.notifications.model.request.AdyenNotificationRequestModel
 import com.mobilabsolutions.payment.notifications.model.response.AdyenNotificationResponseModel
 import mu.KLogging
+import org.json.JSONObject
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.stream.Collectors
@@ -19,7 +27,11 @@ import java.util.stream.Collectors
 @Service
 class NotificationService(
     private val notificationRepository: NotificationRepository,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    @Value("\${payment.ws.notification.url:}")
+    private val paymentURL: String,
+    @Value("\${payment.ws.notification.apiKey:}")
+    private val paymentApiKey: String
 ) {
     companion object : KLogging()
 
@@ -44,20 +56,44 @@ class NotificationService(
         logger.info("picking notifications for $psp")
         val notifications = notificationRepository.findNotificationByPsp(psp, 2)
 
-        // process the notification
-        // TODO
         notifications.forEach {
-            logger.info { "${it.notificationId}, ${it.status}" }
+            logger.info { "Processing PSP transaction ${it.notificationId.pspTransactionId} and status ${it.status}" }
         }
 
-        // send notifications
-        // TODO
+        val notificationModels = notifications.stream().map {
+            PspNotificationModel(
+                pspTransactionId =  it.notificationId.pspTransactionId,
+                paymentData = PaymentDataRequestModel(
+                    amount = objectMapper.readValue(it.message, AdyenNotificationItemModel::class.java).amount?.value,
+                    currency = objectMapper.readValue(it.message, AdyenNotificationItemModel::class.java).amount?.currency,
+                    reason =  objectMapper.readValue(it.message, AdyenNotificationItemModel::class.java).reason
+                ),
+                transactionAction = adyenActionToTransactionAction(it.notificationId.pspEvent, false),
+                transactionStatus = if (objectMapper.readValue(it.message, AdyenNotificationItemModel::class.java).success == "true") TransactionStatus.SUCCESS.name else TransactionStatus.FAIL.name
+            )
+        }.collect(Collectors.toList())
 
-        // update notifications based on received status
-        // TODO
+        val response = khttp.post(
+            url = paymentURL,
+            headers = mapOf("API-KEY" to paymentApiKey),
+            json = JSONObject(objectMapper.writeValueAsString(notificationModels))
+        )
+
         notifications.forEach {
-            it.status = NotificationStatus.SUCCESS
+            it.status = if(response.statusCode == HttpStatus.CREATED.value()) NotificationStatus.SUCCESS else NotificationStatus.FAIL
             notificationRepository.save(it)
+        }
+    }
+
+    private fun adyenActionToTransactionAction(adyenStatus: String?, preAuth: Boolean): String? {
+       return when(adyenStatus) {
+           "AUTHORISATION" -> {
+               if(preAuth) TransactionAction.PREAUTH.name else TransactionAction.AUTH.name
+           }
+           "CAPTURE" -> TransactionAction.CAPTURE.name
+           "REFUND" -> TransactionAction.REFUND.name
+           "CANCELLATION" -> TransactionAction.REVERSAL.name
+           else -> null
         }
     }
 }
