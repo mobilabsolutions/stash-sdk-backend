@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.configuration
 
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode

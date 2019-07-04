@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.model
 
 import com.mobilabsolutions.payment.validation.CountryCodeValidator

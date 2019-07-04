@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.adyen.model.request
 
 import com.fasterxml.jackson.annotation.JsonProperty

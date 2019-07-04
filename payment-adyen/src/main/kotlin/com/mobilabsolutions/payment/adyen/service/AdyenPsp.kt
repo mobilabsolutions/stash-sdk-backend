@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.adyen.service
 
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties

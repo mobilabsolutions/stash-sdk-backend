@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.adyen.service
 
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
@@ -8,8 +12,8 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenDeleteAliasRequestM
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentMethodRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
-import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRefundRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
@@ -23,11 +27,11 @@ import com.mobilabsolutions.payment.model.SepaConfigModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
+import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
-import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import com.mobilabsolutions.server.commons.exception.ApiException

@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.notifications.configuration
 
 import org.springframework.beans.factory.annotation.Autowired

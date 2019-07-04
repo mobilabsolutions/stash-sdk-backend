@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.controller
 
 import com.mobilabsolutions.payment.data.enum.PaymentMethod

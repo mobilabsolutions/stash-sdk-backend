@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.notifications
 
 import com.mobilabsolutions.payment.notifications.configuration.SecurityConfig

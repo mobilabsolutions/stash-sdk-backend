@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.model.response
 
 import com.mobilabsolutions.payment.model.PspAliasConfigModel

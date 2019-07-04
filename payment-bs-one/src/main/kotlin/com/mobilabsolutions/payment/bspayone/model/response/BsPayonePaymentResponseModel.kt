@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.bspayone.model.response
 
 import com.fasterxml.jackson.annotation.JsonProperty

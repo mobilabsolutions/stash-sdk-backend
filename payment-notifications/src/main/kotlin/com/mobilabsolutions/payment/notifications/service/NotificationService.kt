@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.notifications.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
