@@ -69,4 +69,7 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
         @Param("limit") limit: Int?,
         @Param("offset") offset: Int?
     ): List<Array<Any>>
+
+    @Query("SELECT * FROM transaction_record tr WHERE CAST(tr.psp_response AS json)#>>'{pspTransactionId}' = :pspTransactionId AND tr.action = :action ORDER BY created_date DESC LIMIT 1", nativeQuery = true)
+    fun getByPspReferenceAndAction(@Param("pspTransactionId") pspTransactionId: String, @Param("action") action: String): Transaction?
 }

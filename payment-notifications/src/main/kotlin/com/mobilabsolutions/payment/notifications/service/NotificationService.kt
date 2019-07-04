@@ -37,14 +37,23 @@ class NotificationService(
 
     @Transactional
     fun saveAdyenNotifications(adyenNotificationRequestModel: AdyenNotificationRequestModel?): AdyenNotificationResponseModel {
-        logger.info("adding Adyen transaction notifications for references ${adyenNotificationRequestModel?.notificationItems?.stream()?.map { it.notificationRequestItem?.pspReference }?.collect(Collectors.joining(","))}")
+        logger.info(
+            "adding Adyen transaction notifications for references ${adyenNotificationRequestModel?.notificationItems?.stream()?.map { it.notificationRequestItem?.pspReference }?.collect(
+                Collectors.joining(",")
+            )}"
+        )
         adyenNotificationRequestModel?.notificationItems?.forEach {
-            notificationRepository.save(Notification(
-                notificationId = NotificationId(pspTransactionId = it.notificationRequestItem?.pspReference, pspEvent = it.notificationRequestItem?.eventCode),
-                status = NotificationStatus.CREATED,
-                psp = PaymentServiceProvider.ADYEN,
-                message = objectMapper.writeValueAsString(it.notificationRequestItem)
-            ))
+            notificationRepository.save(
+                Notification(
+                    notificationId = NotificationId(
+                        pspTransactionId = it.notificationRequestItem?.pspReference,
+                        pspEvent = it.notificationRequestItem?.eventCode
+                    ),
+                    status = NotificationStatus.CREATED,
+                    psp = PaymentServiceProvider.ADYEN,
+                    message = objectMapper.writeValueAsString(it.notificationRequestItem)
+                )
+            )
         }
         return AdyenNotificationResponseModel(
             notificationResponse = "[accepted]"
@@ -62,14 +71,18 @@ class NotificationService(
 
         val notificationModels = notifications.stream().map {
             PspNotificationModel(
-                pspTransactionId =  it.notificationId.pspTransactionId,
+                pspTransactionId = it.notificationId.pspTransactionId,
                 paymentData = PaymentDataRequestModel(
                     amount = objectMapper.readValue(it.message, AdyenNotificationItemModel::class.java).amount?.value,
                     currency = objectMapper.readValue(it.message, AdyenNotificationItemModel::class.java).amount?.currency,
-                    reason =  objectMapper.readValue(it.message, AdyenNotificationItemModel::class.java).reason
+                    reason = objectMapper.readValue(it.message, AdyenNotificationItemModel::class.java).reason
                 ),
                 transactionAction = adyenActionToTransactionAction(it.notificationId.pspEvent, false),
-                transactionStatus = if (objectMapper.readValue(it.message, AdyenNotificationItemModel::class.java).success == "true") TransactionStatus.SUCCESS.name else TransactionStatus.FAIL.name
+                transactionStatus = if (objectMapper.readValue(
+                        it.message,
+                        AdyenNotificationItemModel::class.java
+                    ).success == "true"
+                ) TransactionStatus.SUCCESS.name else TransactionStatus.FAIL.name
             )
         }.collect(Collectors.toList())
 
@@ -80,20 +93,21 @@ class NotificationService(
         )
 
         notifications.forEach {
-            it.status = if(response.statusCode == HttpStatus.CREATED.value()) NotificationStatus.SUCCESS else NotificationStatus.FAIL
+            it.status =
+                if (response.statusCode == HttpStatus.CREATED.value()) NotificationStatus.SUCCESS else NotificationStatus.FAIL
             notificationRepository.save(it)
         }
     }
 
     private fun adyenActionToTransactionAction(adyenStatus: String?, preAuth: Boolean): String? {
-       return when(adyenStatus) {
-           "AUTHORISATION" -> {
-               if(preAuth) TransactionAction.PREAUTH.name else TransactionAction.AUTH.name
-           }
-           "CAPTURE" -> TransactionAction.CAPTURE.name
-           "REFUND" -> TransactionAction.REFUND.name
-           "CANCELLATION" -> TransactionAction.REVERSAL.name
-           else -> null
+        return when (adyenStatus) {
+            "AUTHORISATION" -> {
+                if (preAuth) TransactionAction.PREAUTH.name else TransactionAction.AUTH.name
+            }
+            "CAPTURE" -> TransactionAction.CAPTURE.name
+            "REFUND" -> TransactionAction.REFUND.name
+            "CANCELLATION" -> TransactionAction.REVERSAL.name
+            else -> null
         }
     }
 }

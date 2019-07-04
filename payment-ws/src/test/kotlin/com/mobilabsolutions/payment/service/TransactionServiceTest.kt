@@ -41,6 +41,7 @@ import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
+import org.springframework.test.util.ReflectionTestUtils
 
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
@@ -117,6 +118,7 @@ class TransactionServiceTest {
     @BeforeAll
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
+        ReflectionTestUtils.setField(transactionService, "paymentApiKey", "test")
 
         Mockito.`when`(
             merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(
