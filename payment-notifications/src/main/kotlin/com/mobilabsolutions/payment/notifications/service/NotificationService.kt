@@ -82,7 +82,7 @@ class NotificationService(
                     currency = objectMapper.readValue(it.message, AdyenNotificationItemModel::class.java).amount?.currency,
                     reason = objectMapper.readValue(it.message, AdyenNotificationItemModel::class.java).reason
                 ),
-                transactionAction = adyenActionToTransactionAction(it.notificationId.pspEvent, false),
+                transactionAction = adyenActionToTransactionAction(it.notificationId.pspEvent),
                 transactionStatus = if (objectMapper.readValue(
                         it.message,
                         AdyenNotificationItemModel::class.java
@@ -106,9 +106,7 @@ class NotificationService(
 
     private fun adyenActionToTransactionAction(adyenStatus: String?, preAuth: Boolean): String? {
         return when (adyenStatus) {
-            "AUTHORISATION" -> {
-                if (preAuth) TransactionAction.PREAUTH.name else TransactionAction.AUTH.name
-            }
+            "AUTHORISATION" -> TransactionAction.AUTH.name
             "CAPTURE" -> TransactionAction.CAPTURE.name
             "REFUND" -> TransactionAction.REFUND.name
             "CANCELLATION" -> TransactionAction.REVERSAL.name
