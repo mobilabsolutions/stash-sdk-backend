@@ -104,7 +104,7 @@ class NotificationService(
         }
     }
 
-    private fun adyenActionToTransactionAction(adyenStatus: String?, preAuth: Boolean): String? {
+    private fun adyenActionToTransactionAction(adyenStatus: String?): String? {
         return when (adyenStatus) {
             "AUTHORISATION" -> TransactionAction.AUTH.name
             "CAPTURE" -> TransactionAction.CAPTURE.name
