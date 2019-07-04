@@ -264,8 +264,8 @@ class TransactionService(
         if (paymentApiKey != apiKey) throw ApiError.ofErrorCode(ApiErrorCode.AUTHENTICATION_ERROR).asException()
 
         pspNotificationListRequestModel.notifications.forEach {
-            val transaction = transactionRepository.getByPspReferenceAndActions(it.pspTransactionId!!, it.transactionAction!!,
-                if(it.transactionAction == TransactionAction.AUTH.name) TransactionAction.PREAUTH.name else null)
+            val extraAction = if(it.transactionAction == TransactionAction.AUTH.name) TransactionAction.PREAUTH.name else null
+            val transaction = transactionRepository.getByPspReferenceAndActions(it.pspTransactionId!!, it.transactionAction!!, extraAction)
             if (transaction != null) {
                 val newTransaction = Transaction(
                     transactionId = transaction.transactionId,
@@ -273,12 +273,15 @@ class TransactionService(
                     amount = it.paymentData?.amount,
                     reason = it.paymentData?.reason,
                     status = TransactionStatus.valueOf(it.transactionStatus!!),
-                    action = TransactionAction.valueOf(it.transactionAction!!),
+                    action = transaction.action,
                     paymentMethod = transaction.paymentMethod,
                     paymentInfo = transaction.paymentInfo,
                     merchantTransactionId = transaction.merchantTransactionId,
                     merchantCustomerId = transaction.merchantCustomerId,
                     pspTestMode = transaction.pspTestMode,
+                    pspResponse = transaction.pspResponse,
+                    idempotentKey = transaction.idempotentKey,
+                    requestHash = transaction.requestHash,
                     merchant = transaction.merchant,
                     alias = transaction.alias,
                     notification = true
