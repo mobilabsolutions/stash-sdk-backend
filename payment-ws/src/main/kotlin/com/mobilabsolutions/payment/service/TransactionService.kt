@@ -264,7 +264,7 @@ class TransactionService(
         if (paymentApiKey != apiKey) throw ApiError.ofErrorCode(ApiErrorCode.AUTHENTICATION_ERROR).asException()
 
         pspNotificationListRequestModel.notifications.forEach {
-            val extraAction = if(it.transactionAction == TransactionAction.AUTH.name) TransactionAction.PREAUTH.name else null
+            val extraAction = if(it.transactionAction == TransactionAction.AUTH.name) TransactionAction.PREAUTH.name else it.transactionAction!!
             val transaction = transactionRepository.getByPspReferenceAndActions(it.pspTransactionId!!, it.transactionAction!!, extraAction)
             if (transaction != null) {
                 val newTransaction = Transaction(
