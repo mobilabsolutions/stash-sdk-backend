@@ -42,7 +42,11 @@ class NotificationService(
 
     @Transactional
     fun saveAdyenNotifications(adyenNotificationRequestModel: AdyenNotificationRequestModel?): AdyenNotificationResponseModel {
-        logger.info("adding Adyen transaction notifications for references ${adyenNotificationRequestModel?.notificationItems?.stream()?.map { it.notificationRequestItem?.pspReference }?.collect(Collectors.joining(","))}")
+        logger.info(
+            "Adding Adyen transaction notifications for references ${adyenNotificationRequestModel?.notificationItems?.stream()?.map { it.notificationRequestItem?.pspReference }?.collect(
+                Collectors.joining(",")
+            )}"
+        )
         adyenNotificationRequestModel?.notificationItems?.forEach {
             notificationRepository.save(Notification(
                 notificationId = NotificationId(pspTransactionId = it.notificationRequestItem?.pspReference, pspEvent = it.notificationRequestItem?.eventCode),
@@ -58,7 +62,8 @@ class NotificationService(
 
     @Transactional
     fun pickNotification(psp: String) {
-        logger.info("picking notifications for $psp")
+        logger.info("Picking notifications for $psp")
+
         val notifications = notificationRepository.findNotificationByPsp(psp, 2)
 
         notifications.forEach {
@@ -85,7 +90,7 @@ class NotificationService(
         )
 
         notifications.forEach {
-            it.status = if(response.statusCode == HttpStatus.CREATED.value()) NotificationStatus.SUCCESS else NotificationStatus.FAIL
+            it.status = if (response.statusCode == HttpStatus.CREATED.value()) NotificationStatus.SUCCESS else NotificationStatus.FAIL
             notificationRepository.save(it)
         }
     }
