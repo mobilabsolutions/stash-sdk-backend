@@ -262,9 +262,8 @@ class TransactionService(
     fun createNotificationTransactionRecord(pspNotificationListRequestModel: PspNotificationListRequestModel, apiKey: String) {
         // TODO This is pure evil, we need to come up with a proper authentication mechanism for requests from notification service
         if (paymentApiKey != apiKey) throw ApiError.ofErrorCode(ApiErrorCode.AUTHENTICATION_ERROR).asException()
-
         pspNotificationListRequestModel.notifications.forEach {
-            val extraAction = if(it.transactionAction == TransactionAction.AUTH.name) TransactionAction.PREAUTH.name else it.transactionAction!!
+            val extraAction = if (it.transactionAction == TransactionAction.AUTH.name) TransactionAction.PREAUTH.name else it.transactionAction!!
             val transaction = transactionRepository.getByPspReferenceAndActions(it.pspTransactionId!!, it.transactionAction!!, extraAction)
             if (transaction != null) {
                 val newTransaction = Transaction(
