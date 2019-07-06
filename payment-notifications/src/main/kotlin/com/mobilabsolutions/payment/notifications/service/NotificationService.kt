@@ -43,7 +43,7 @@ class NotificationService(
     @Transactional
     fun saveAdyenNotifications(adyenNotificationRequestModel: AdyenNotificationRequestModel?): AdyenNotificationResponseModel {
         logger.info(
-            "adding Adyen transaction notifications for references ${adyenNotificationRequestModel?.notificationItems?.stream()?.map { it.notificationRequestItem?.pspReference }?.collect(
+            "Adding Adyen transaction notifications for references ${adyenNotificationRequestModel?.notificationItems?.stream()?.map { it.notificationRequestItem?.pspReference }?.collect(
                 Collectors.joining(",")
             )}"
         )
@@ -67,7 +67,8 @@ class NotificationService(
 
     @Transactional
     fun pickNotification(psp: String) {
-        logger.info("picking notifications for $psp")
+        logger.info("Picking notifications for $psp")
+
         val notifications = notificationRepository.findNotificationByPsp(psp, 2)
 
         notifications.forEach {
@@ -83,11 +84,7 @@ class NotificationService(
                     reason = objectMapper.readValue(it.message, AdyenNotificationItemModel::class.java).reason
                 ),
                 transactionAction = adyenActionToTransactionAction(it.notificationId.pspEvent),
-                transactionStatus = if (objectMapper.readValue(
-                        it.message,
-                        AdyenNotificationItemModel::class.java
-                    ).success == "true"
-                ) TransactionStatus.SUCCESS.name else TransactionStatus.FAIL.name
+                transactionStatus = if (objectMapper.readValue(it.message, AdyenNotificationItemModel::class.java).success == "true") TransactionStatus.SUCCESS.name else TransactionStatus.FAIL.name
             )
         }.collect(Collectors.toList())
 
@@ -98,8 +95,7 @@ class NotificationService(
         )
 
         notifications.forEach {
-            it.status =
-                if (response.statusCode == HttpStatus.CREATED.value()) NotificationStatus.SUCCESS else NotificationStatus.FAIL
+            it.status = if (response.statusCode == HttpStatus.CREATED.value()) NotificationStatus.SUCCESS else NotificationStatus.FAIL
             notificationRepository.save(it)
         }
     }
