@@ -2,7 +2,7 @@
  * Copyright © MobiLab Solutions GmbH
  */
 
-package com.mobilabsolutions.payment.notifications.model
+package com.mobilabsolutions.payment.adyen.model
 
 import javax.validation.constraints.NotNull
 

@@ -259,6 +259,12 @@ class TransactionService(
         return refund(idempotentKey, pspTestMode, transactionId, refundInfo, apiKey.merchant)
     }
 
+    /**
+     * Creates transaction record from given psp notification
+     *
+     * @param pspNotificationListRequestModel Psp notification model
+     * @param apiKey Api key for notification service authentication
+     */
     fun createNotificationTransactionRecord(pspNotificationListRequestModel: PspNotificationListRequestModel, apiKey: String) {
         // TODO This is pure evil, we need to come up with a proper authentication mechanism for requests from notification service
         if (paymentApiKey != apiKey) throw ApiError.ofErrorCode(ApiErrorCode.AUTHENTICATION_ERROR).asException()

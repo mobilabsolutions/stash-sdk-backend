@@ -21,9 +21,11 @@ import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.PspNotificationModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
+import com.mobilabsolutions.payment.model.request.PspNotificationListRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
 import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
@@ -40,6 +42,8 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
 import org.mockito.MockitoAnnotations
 import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
@@ -78,7 +82,9 @@ class TransactionServiceTest {
     private val authAction = TransactionAction.AUTH
     private val correctPaymentData = PaymentDataRequestModel(1, "EUR", "reason")
     private val wrongPaymentData = PaymentDataRequestModel(2, "EUR", "reason")
-    private val pspResponse = "{\"pspTransactionId\":\"325105132\",\"status\":\"SUCCESS\",\"customerId\":\"160624370\"}"
+    private val notifApiKey = "test-key"
+    private val pspTransId = "325105132"
+    private val pspResponse = "{\"pspTransactionId\":\"$pspTransId\",\"status\":\"SUCCESS\",\"customerId\":\"160624370\"}"
     private val pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"123\", \"key\" : \"123\"," +
         " \"merchantId\" : \"mobilab\", \"accountId\" : \"123\", \"default\" : \"true\"}]}"
     private val extra =
@@ -95,8 +101,7 @@ class TransactionServiceTest {
     @InjectMocks
     private lateinit var transactionService: TransactionService
 
-    @Mock
-    private lateinit var transactionRepository: TransactionRepository
+    private val transactionRepository = mock(TransactionRepository::class.java)
 
     @Mock
     private lateinit var merchantApiKeyRepository: MerchantApiKeyRepository
@@ -122,7 +127,7 @@ class TransactionServiceTest {
     @BeforeAll
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
-        ReflectionTestUtils.setField(transactionService, "paymentApiKey", "test")
+        ReflectionTestUtils.setField(transactionService, "paymentApiKey", notifApiKey)
 
         Mockito.`when`(
             merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(
@@ -345,6 +350,70 @@ class TransactionServiceTest {
         ).thenReturn(differentRequestHash)
         Mockito.`when`(requestHashing.hashRequest(PaymentRequestModel(correctAliasId, correctPaymentData, null, null))
         ).thenReturn(requestHash)
+    }
+
+    @Test
+    fun `create auth transaction notification successfully`() {
+        transactionService.createNotificationTransactionRecord(
+            PspNotificationListRequestModel(
+                notifications = mutableListOf(
+                    PspNotificationModel(
+                        pspTransactionId = pspTransId,
+                        paymentData = PaymentDataRequestModel(
+                            amount = 2,
+                            currency = "EUR",
+                            reason = "test"
+                        ),
+                        transactionAction = TransactionAction.AUTH.name,
+                        transactionStatus = TransactionStatus.SUCCESS.name
+                    )
+                )
+            ), notifApiKey
+        )
+        Mockito.verify(transactionRepository, times(1)).getByPspReferenceAndActions(pspTransId, TransactionAction.AUTH.name, TransactionAction.PREAUTH.name)
+    }
+
+    @Test
+    fun `create capture transaction notification successfully`() {
+        transactionService.createNotificationTransactionRecord(
+            PspNotificationListRequestModel(
+                notifications = mutableListOf(
+                    PspNotificationModel(
+                        pspTransactionId = pspTransId,
+                        paymentData = PaymentDataRequestModel(
+                            amount = 1,
+                            currency = "EUR",
+                            reason = "test"
+                        ),
+                        transactionAction = TransactionAction.CAPTURE.name,
+                        transactionStatus = TransactionStatus.SUCCESS.name
+                    )
+                )
+            ), notifApiKey
+        )
+        Mockito.verify(transactionRepository, times(1)).getByPspReferenceAndActions(pspTransId, TransactionAction.CAPTURE.name, TransactionAction.CAPTURE.name)
+    }
+
+    @Test
+    fun `create auth transaction notification with wrong api key`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            transactionService.createNotificationTransactionRecord(
+                PspNotificationListRequestModel(
+                    notifications = mutableListOf(
+                        PspNotificationModel(
+                            pspTransactionId = pspTransId,
+                            paymentData = PaymentDataRequestModel(
+                                amount = 1,
+                                currency = "EUR",
+                                reason = "test"
+                            ),
+                            transactionAction = TransactionAction.AUTH.name,
+                            transactionStatus = TransactionStatus.SUCCESS.name
+                        )
+                    )
+                ), "bad api key"
+            )
+        }
     }
 
     @Test

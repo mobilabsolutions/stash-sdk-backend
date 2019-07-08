@@ -4,8 +4,10 @@
 
 package com.mobilabsolutions.payment.adyen.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
+import com.mobilabsolutions.payment.adyen.model.AdyenNotificationItemModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenCaptureRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenDeleteAliasRequestModel
@@ -18,10 +20,13 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentReques
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
+import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.PspNotificationModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
+import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
@@ -44,7 +49,8 @@ import org.springframework.stereotype.Component
 class AdyenPsp(
     private val adyenClient: AdyenClient,
     private val adyenProperties: AdyenProperties,
-    private val randomStringGenerator: RandomStringGenerator
+    private val randomStringGenerator: RandomStringGenerator,
+    private val objectMapper: ObjectMapper
 ) : Psp {
 
     companion object : KLogging() {
@@ -113,7 +119,7 @@ class AdyenPsp(
             return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.errorMessage ?: response.refusalReason)
         }
 
-        return PspPaymentResponseModel(response.pspReference, TransactionStatus.PENDING, null, null, null)
+        return PspPaymentResponseModel(response.pspReference, TransactionStatus.SUCCESS, null, null, null)
     }
 
     override fun authorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
@@ -130,7 +136,7 @@ class AdyenPsp(
             return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.errorMessage ?: response.refusalReason)
         }
 
-        return PspPaymentResponseModel(response.pspReference, TransactionStatus.PENDING, null, null, null)
+        return PspPaymentResponseModel(response.pspReference, TransactionStatus.SUCCESS, null, null, null)
     }
 
     override fun capture(pspCaptureRequestModel: PspCaptureRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
@@ -154,7 +160,7 @@ class AdyenPsp(
             return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.errorMessage)
         }
 
-        return PspPaymentResponseModel(response.pspReference, TransactionStatus.PENDING, null, null, null)
+        return PspPaymentResponseModel(response.pspReference, TransactionStatus.SUCCESS, null, null, null)
     }
 
     override fun reverse(pspReversalRequestModel: PspReversalRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
@@ -174,7 +180,7 @@ class AdyenPsp(
             return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.errorMessage)
         }
 
-        return PspPaymentResponseModel(response.pspReference, TransactionStatus.PENDING, null, null, null)
+        return PspPaymentResponseModel(response.pspReference, TransactionStatus.SUCCESS, null, null, null)
     }
 
     override fun refund(pspRefundRequestModel: PspRefundRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
@@ -191,7 +197,7 @@ class AdyenPsp(
             return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.errorMessage)
         }
 
-        return PspPaymentResponseModel(response.pspReference, TransactionStatus.PENDING, null, null, null)
+        return PspPaymentResponseModel(response.pspReference, TransactionStatus.SUCCESS, null, null, null)
     }
 
     override fun deleteAlias(pspDeleteAliasRequestModel: PspDeleteAliasRequestModel, pspTestMode: Boolean?) {
@@ -208,6 +214,19 @@ class AdyenPsp(
 
             adyenClient.deleteAlias(request, pspDeleteAliasRequestModel.pspConfig!!, adyenMode)
         }
+    }
+
+    override fun getPspNotification(pspTransactionId: String?, pspEvent: String?, pspMessage: String?): PspNotificationModel {
+        return PspNotificationModel(
+            pspTransactionId = pspTransactionId,
+            paymentData = PaymentDataRequestModel(
+                amount = objectMapper.readValue(pspMessage, AdyenNotificationItemModel::class.java).amount?.value,
+                currency = objectMapper.readValue(pspMessage, AdyenNotificationItemModel::class.java).amount?.currency,
+                reason = objectMapper.readValue(pspMessage, AdyenNotificationItemModel::class.java).reason
+            ),
+            transactionAction = adyenActionToTransactionAction(pspEvent),
+            transactionStatus = if (objectMapper.readValue(pspMessage, AdyenNotificationItemModel::class.java).success == "true") TransactionStatus.SUCCESS.name else TransactionStatus.FAIL.name
+        )
     }
 
     /**
@@ -320,5 +339,15 @@ class AdyenPsp(
                 pspRefundRequestModel.pspConfig?.sandboxMerchantId else pspRefundRequestModel.pspConfig?.merchantId
         )
         return adyenClient.sepaRefund(request, pspRefundRequestModel.pspConfig!!, adyenMode)
+    }
+
+    private fun adyenActionToTransactionAction(adyenStatus: String?): String? {
+        return when (adyenStatus) {
+            "AUTHORISATION" -> TransactionAction.AUTH.name
+            "CAPTURE" -> TransactionAction.CAPTURE.name
+            "REFUND" -> TransactionAction.REFUND.name
+            "CANCELLATION" -> TransactionAction.REVERSAL.name
+            else -> null
+        }
     }
 }

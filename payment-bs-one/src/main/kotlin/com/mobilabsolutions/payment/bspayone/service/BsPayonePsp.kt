@@ -19,6 +19,7 @@ import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.PspNotificationModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
@@ -188,6 +189,10 @@ class BsPayonePsp(
         if (response.hasError()) {
             logger.error("Error during BS Payone alias deletion. Error code: {}, error message: {}", response.errorCode, response.errorMessage)
         }
+    }
+
+    override fun getPspNotification(pspTransactionId: String?, pspEvent: String?, pspMessage: String?): PspNotificationModel {
+        TODO("not implemented")
     }
 
     private fun getPspMode(test: Boolean?): String {

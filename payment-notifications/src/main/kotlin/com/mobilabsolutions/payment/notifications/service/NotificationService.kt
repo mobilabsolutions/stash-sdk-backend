@@ -5,21 +5,16 @@
 package com.mobilabsolutions.payment.notifications.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.mobilabsolutions.payment.adyen.model.request.AdyenNotificationRequestModel
+import com.mobilabsolutions.payment.adyen.model.response.AdyenNotificationResponseModel
 import com.mobilabsolutions.payment.data.enum.NotificationStatus
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
-import com.mobilabsolutions.payment.data.enum.TransactionAction
-import com.mobilabsolutions.payment.data.enum.TransactionStatus
-import com.mobilabsolutions.payment.model.PspNotificationModel
-import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
-import com.mobilabsolutions.payment.model.request.PspNotificationListRequestModel
 import com.mobilabsolutions.payment.notifications.data.Notification
 import com.mobilabsolutions.payment.notifications.data.NotificationId
 import com.mobilabsolutions.payment.notifications.data.repository.NotificationRepository
-import com.mobilabsolutions.payment.notifications.model.AdyenNotificationItemModel
-import com.mobilabsolutions.payment.notifications.model.request.AdyenNotificationRequestModel
-import com.mobilabsolutions.payment.notifications.model.response.AdyenNotificationResponseModel
+import com.mobilabsolutions.server.commons.exception.ApiError
+import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import mu.KLogging
-import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -32,14 +27,24 @@ import java.util.stream.Collectors
 @Service
 class NotificationService(
     private val notificationRepository: NotificationRepository,
-    private val objectMapper: ObjectMapper,
-    @Value("\${payment.ws.notification.url:}")
-    private val paymentURL: String,
-    @Value("\${payment.ws.notification.apiKey:}")
-    private val paymentApiKey: String
+    private val pspRegistry: PspRegistry,
+    private val notificationClient: NotificationClient,
+    private val objectMapper: ObjectMapper
 ) {
     companion object : KLogging()
 
+    @Value("\${payment.ws.notification.url:}")
+    private lateinit var paymentURL: String
+
+    @Value("\${payment.ws.notification.apiKey:}")
+    private lateinit var paymentApiKey: String
+
+    /**
+     * Saves Adyen notifications and returns confirmation message
+     *
+     * @param adyenNotificationRequestModel Adyen notification request model
+     * @return Adyen notification response model
+     */
     @Transactional
     fun saveAdyenNotifications(adyenNotificationRequestModel: AdyenNotificationRequestModel?): AdyenNotificationResponseModel {
         logger.info(
@@ -48,26 +53,28 @@ class NotificationService(
             )}"
         )
         adyenNotificationRequestModel?.notificationItems?.forEach {
-            notificationRepository.save(
-                Notification(
-                    notificationId = NotificationId(
-                        pspTransactionId = it.notificationRequestItem?.pspReference,
-                        pspEvent = it.notificationRequestItem?.eventCode
-                    ),
-                    status = NotificationStatus.CREATED,
-                    psp = PaymentServiceProvider.ADYEN,
-                    message = objectMapper.writeValueAsString(it.notificationRequestItem)
-                )
-            )
+            notificationRepository.save(Notification(
+                notificationId = NotificationId(pspTransactionId = it.notificationRequestItem?.pspReference, pspEvent = it.notificationRequestItem?.eventCode),
+                status = NotificationStatus.CREATED,
+                psp = PaymentServiceProvider.ADYEN,
+                message = objectMapper.writeValueAsString(it.notificationRequestItem)
+            ))
         }
         return AdyenNotificationResponseModel(
             notificationResponse = "[accepted]"
         )
     }
 
+    /**
+     * Processes transaction notifications and updates their statuses
+     *
+     * @param psp Payment service provider
+     */
     @Transactional
-    fun pickNotification(psp: String) {
+    fun processNotifications(psp: String) {
         logger.info("Picking notifications for $psp")
+        val pspImpl = pspRegistry.find(PaymentServiceProvider.valueOf(psp))
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_IMPL_NOT_FOUND, "PSP implementation '$psp' cannot be found").asException()
 
         val notifications = notificationRepository.findNotificationByPsp(psp, 2)
 
@@ -76,37 +83,14 @@ class NotificationService(
         }
 
         val notificationModels = notifications.stream().map {
-            PspNotificationModel(
-                pspTransactionId = it.notificationId.pspTransactionId,
-                paymentData = PaymentDataRequestModel(
-                    amount = objectMapper.readValue(it.message, AdyenNotificationItemModel::class.java).amount?.value,
-                    currency = objectMapper.readValue(it.message, AdyenNotificationItemModel::class.java).amount?.currency,
-                    reason = objectMapper.readValue(it.message, AdyenNotificationItemModel::class.java).reason
-                ),
-                transactionAction = adyenActionToTransactionAction(it.notificationId.pspEvent),
-                transactionStatus = if (objectMapper.readValue(it.message, AdyenNotificationItemModel::class.java).success == "true") TransactionStatus.SUCCESS.name else TransactionStatus.FAIL.name
-            )
+            pspImpl.getPspNotification(it.notificationId.pspTransactionId, it.notificationId.pspEvent, it.message)
         }.collect(Collectors.toList())
 
-        val response = khttp.put(
-            url = paymentURL,
-            headers = mapOf("API-KEY" to paymentApiKey),
-            json = JSONObject(objectMapper.writeValueAsString(PspNotificationListRequestModel().apply { this.notifications.addAll(notificationModels) }))
-        )
+        val statusCode = notificationClient.sendNotifications(paymentURL, paymentApiKey, notificationModels)
 
         notifications.forEach {
-            it.status = if (response.statusCode == HttpStatus.CREATED.value()) NotificationStatus.SUCCESS else NotificationStatus.FAIL
+            it.status = if (statusCode == HttpStatus.CREATED.value()) NotificationStatus.SUCCESS else NotificationStatus.FAIL
             notificationRepository.save(it)
-        }
-    }
-
-    private fun adyenActionToTransactionAction(adyenStatus: String?): String? {
-        return when (adyenStatus) {
-            "AUTHORISATION" -> TransactionAction.AUTH.name
-            "CAPTURE" -> TransactionAction.CAPTURE.name
-            "REFUND" -> TransactionAction.REFUND.name
-            "CANCELLATION" -> TransactionAction.REVERSAL.name
-            else -> null
         }
     }
 }
