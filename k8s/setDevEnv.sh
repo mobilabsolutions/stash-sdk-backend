@@ -34,8 +34,8 @@ export KUBE_NOTIF_CONFIGMAP_SQL_JDBC_URL="jdbc:postgresql://localhost/payment-sd
 export KUBE_NOTIF_CONFIGMAP_PAYMENT_WS_URL="https://payment-dev.mblb.net/api/v1/notification"
 export KUBE_NOTIF_CONFIGMAP_PSP="ADYEN;BRAINTREE;BSPAYONE"
 export KUBE_NOTIF_CONFIGMAP_SEPARATOR=";"
-export KUBE_NOTIF_CONFIGMAP_PARALLELISM="5"
-export KUBE_NOTIF_CONFIGMAP_INTERVAL="5000"
+export KUBE_NOTIF_CONFIGMAP_PARALLELISM="\"5\""
+export KUBE_NOTIF_CONFIGMAP_INTERVAL="\"5000\""
 
 # service variables
 

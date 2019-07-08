@@ -38,7 +38,8 @@ class ScheduledTasks(
             run {
                 try { PaymentServiceProvider.valueOf(psp) } catch (e: IllegalArgumentException) {
                     logger.info { "Unknown PSP '$psp' is defined." }
-                    return@forEach }
+                    return@forEach
+                }
                 repeat(parallelism.toInt()) {
                     GlobalScope.launch(Dispatchers.IO) {
                         notificationService.processNotifications(psp)
