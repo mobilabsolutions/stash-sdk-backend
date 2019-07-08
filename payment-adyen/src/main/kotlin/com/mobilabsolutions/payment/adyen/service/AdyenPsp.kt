@@ -119,7 +119,7 @@ class AdyenPsp(
             return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.errorMessage ?: response.refusalReason)
         }
 
-        return PspPaymentResponseModel(response.pspReference, TransactionStatus.SUCCESS, null, null, null)
+        return PspPaymentResponseModel(response.pspReference, TransactionStatus.PENDING, null, null, null)
     }
 
     override fun authorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
@@ -136,7 +136,7 @@ class AdyenPsp(
             return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.errorMessage ?: response.refusalReason)
         }
 
-        return PspPaymentResponseModel(response.pspReference, TransactionStatus.SUCCESS, null, null, null)
+        return PspPaymentResponseModel(response.pspReference, TransactionStatus.PENDING, null, null, null)
     }
 
     override fun capture(pspCaptureRequestModel: PspCaptureRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
@@ -160,7 +160,7 @@ class AdyenPsp(
             return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.errorMessage)
         }
 
-        return PspPaymentResponseModel(response.pspReference, TransactionStatus.SUCCESS, null, null, null)
+        return PspPaymentResponseModel(response.pspReference, TransactionStatus.PENDING, null, null, null)
     }
 
     override fun reverse(pspReversalRequestModel: PspReversalRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
@@ -180,7 +180,7 @@ class AdyenPsp(
             return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.errorMessage)
         }
 
-        return PspPaymentResponseModel(response.pspReference, TransactionStatus.SUCCESS, null, null, null)
+        return PspPaymentResponseModel(response.pspReference, TransactionStatus.PENDING, null, null, null)
     }
 
     override fun refund(pspRefundRequestModel: PspRefundRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
@@ -197,7 +197,7 @@ class AdyenPsp(
             return PspPaymentResponseModel(response.pspReference, TransactionStatus.FAIL, null, null, response.errorMessage)
         }
 
-        return PspPaymentResponseModel(response.pspReference, TransactionStatus.SUCCESS, null, null, null)
+        return PspPaymentResponseModel(response.pspReference, TransactionStatus.PENDING, null, null, null)
     }
 
     override fun deleteAlias(pspDeleteAliasRequestModel: PspDeleteAliasRequestModel, pspTestMode: Boolean?) {
