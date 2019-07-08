@@ -341,13 +341,15 @@ class AdyenPsp(
         return adyenClient.sepaRefund(request, pspRefundRequestModel.pspConfig!!, adyenMode)
     }
 
-    private fun adyenActionToTransactionAction(adyenStatus: String?): String? {
+    private fun adyenActionToTransactionAction(adyenStatus: String?): String {
         return when (adyenStatus) {
             "AUTHORISATION" -> TransactionAction.AUTH.name
             "CAPTURE" -> TransactionAction.CAPTURE.name
             "REFUND" -> TransactionAction.REFUND.name
             "CANCELLATION" -> TransactionAction.REVERSAL.name
-            else -> null
+            "CHARGEBACK" -> TransactionAction.CHARGEBACK.name
+            "CHARGEBACK_REVERSED" -> TransactionAction.CHARGEBACK_REVERSED.name
+            else -> TransactionAction.ADDITIONAL.name
         }
     }
 }

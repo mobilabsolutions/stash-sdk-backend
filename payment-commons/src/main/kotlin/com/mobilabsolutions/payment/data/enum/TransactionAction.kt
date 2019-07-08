@@ -12,5 +12,8 @@ enum class TransactionAction {
     AUTH,
     REVERSAL,
     REFUND,
-    CAPTURE
+    CAPTURE,
+    CHARGEBACK,
+    CHARGEBACK_REVERSED,
+    ADDITIONAL
 }

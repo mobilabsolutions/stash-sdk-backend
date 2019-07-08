@@ -39,7 +39,7 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
             "COALESCE(CAST(tr.payment_info AS json)#>>'{extra, ccConfig, ccType}', tr.payment_method), tr.created_date, count(*) OVER() AS full_count FROM transaction_record tr " +
             "JOIN (" +
             "SELECT transaction_id, max(created_date) max_created_date " +
-            "FROM transaction_record " +
+            "FROM transaction_record WHERE action != 'ADDITIONAL'" +
             "GROUP BY transaction_id" +
             ") tr1 ON tr.transaction_id = tr1.transaction_id AND tr.created_date = tr1.max_created_date " +
             "WHERE tr.merchant_id = :merchantId " +
