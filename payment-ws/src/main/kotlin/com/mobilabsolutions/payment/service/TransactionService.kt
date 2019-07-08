@@ -269,16 +269,24 @@ class TransactionService(
         // TODO This is pure evil, we need to come up with a proper authentication mechanism for requests from notification service
         if (paymentApiKey != apiKey) throw ApiError.ofErrorCode(ApiErrorCode.AUTHENTICATION_ERROR).asException()
         pspNotificationListRequestModel.notifications.forEach {
-            val extraAction = if (it.transactionAction == TransactionAction.AUTH.name) TransactionAction.PREAUTH.name else it.transactionAction!!
-            val transaction = transactionRepository.getByPspReferenceAndActions(it.pspTransactionId!!, it.transactionAction!!, extraAction)
+            val transactionNotificationAction = TransactionAction.valueOf(it.transactionAction!!)
+            val transaction = if (TransactionAction.mainTransactionActions.contains(transactionNotificationAction)) {
+                transactionRepository.getByPspReferenceAndActions(
+                    it.pspTransactionId!!,
+                    it.transactionAction!!,
+                    if (it.transactionAction == TransactionAction.AUTH.name) TransactionAction.PREAUTH.name else it.transactionAction!!
+                )
+            } else {
+                transactionRepository.getByPspReference(it.pspTransactionId!!)
+            }
             if (transaction != null) {
                 val newTransaction = Transaction(
                     transactionId = transaction.transactionId,
                     currencyId = it.paymentData?.currency,
                     amount = it.paymentData?.amount,
-                    reason = it.paymentData?.reason,
+                    reason = if (TransactionAction.mainTransactionActions.contains(transactionNotificationAction)) transaction.reason else it.paymentData?.reason,
                     status = TransactionStatus.valueOf(it.transactionStatus!!),
-                    action = transaction.action,
+                    action = if (TransactionAction.mainTransactionActions.contains(transactionNotificationAction)) transaction.action else transactionNotificationAction,
                     paymentMethod = transaction.paymentMethod,
                     paymentInfo = transaction.paymentInfo,
                     merchantTransactionId = transaction.merchantTransactionId,

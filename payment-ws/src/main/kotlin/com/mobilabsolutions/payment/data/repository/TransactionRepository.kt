@@ -76,4 +76,7 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
 
     @Query("SELECT * FROM transaction_record tr WHERE CAST(tr.psp_response AS json)#>>'{pspTransactionId}' = :pspTransactionId AND (tr.action = :action1 OR tr.action = :action2) ORDER BY created_date DESC LIMIT 1", nativeQuery = true)
     fun getByPspReferenceAndActions(@Param("pspTransactionId") pspTransactionId: String, @Param("action1") action1: String, @Param("action2") action2: String): Transaction?
+
+    @Query("SELECT * FROM transaction_record tr WHERE CAST(tr.psp_response AS json)#>>'{pspTransactionId}' = :pspTransactionId ORDER BY created_date DESC LIMIT 1", nativeQuery = true)
+    fun getByPspReference(@Param("pspTransactionId") pspTransactionId: String): Transaction?
 }

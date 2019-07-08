@@ -15,5 +15,9 @@ enum class TransactionAction {
     CAPTURE,
     CHARGEBACK,
     CHARGEBACK_REVERSED,
-    ADDITIONAL
+    ADDITIONAL;
+
+    companion object {
+        val mainTransactionActions = setOf(PREAUTH, AUTH, REVERSAL, REFUND, CAPTURE)
+    }
 }
