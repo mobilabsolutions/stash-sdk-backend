@@ -222,7 +222,7 @@ class AdyenPsp(
             paymentData = PaymentDataRequestModel(
                 amount = objectMapper.readValue(pspMessage, AdyenNotificationItemModel::class.java).amount?.value,
                 currency = objectMapper.readValue(pspMessage, AdyenNotificationItemModel::class.java).amount?.currency,
-                reason = objectMapper.readValue(pspMessage, AdyenNotificationItemModel::class.java).reason
+                reason = if (TransactionAction.ADDITIONAL.name == adyenActionToTransactionAction(pspEvent)) pspEvent else objectMapper.readValue(pspMessage, AdyenNotificationItemModel::class.java).reason
             ),
             transactionAction = adyenActionToTransactionAction(pspEvent),
             transactionStatus = if (objectMapper.readValue(pspMessage, AdyenNotificationItemModel::class.java).success == "true") TransactionStatus.SUCCESS.name else TransactionStatus.FAIL.name
