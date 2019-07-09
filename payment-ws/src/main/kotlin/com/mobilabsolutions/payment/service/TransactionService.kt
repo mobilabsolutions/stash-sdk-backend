@@ -293,8 +293,6 @@ class TransactionService(
                     merchantCustomerId = transaction.merchantCustomerId,
                     pspTestMode = transaction.pspTestMode,
                     pspResponse = transaction.pspResponse,
-                    idempotentKey = transaction.idempotentKey,
-                    requestHash = transaction.requestHash,
                     merchant = transaction.merchant,
                     alias = transaction.alias,
                     notification = true
