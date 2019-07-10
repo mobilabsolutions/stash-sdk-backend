@@ -23,6 +23,7 @@ import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
+import com.mobilabsolutions.payment.model.request.PspNotificationListRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
 import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
@@ -35,6 +36,7 @@ import com.mobilabsolutions.server.commons.util.RequestHashing
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.StringUtils
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -52,6 +54,9 @@ class TransactionService(
     private val requestHashing: RequestHashing,
     private val objectMapper: ObjectMapper
 ) {
+
+    @Value("\${payment.ws.notification.apiKey:}")
+    private lateinit var paymentApiKey: String
 
     /**
      * Authorize transaction
@@ -170,6 +175,136 @@ class TransactionService(
         return capture(pspTestMode, transactionId, apiKey.merchant)
     }
 
+    /**
+     * Reverse transaction from a dashboard
+     *
+     * @param merchantId Merchant Id
+     * @param pspTestMode indicator whether is the test mode or not
+     * @param transactionId Transaction ID
+     * @param reverseInfo Reversion request model
+     * @return Payment response model
+     */
+    fun dashboardReverse(
+        merchantId: String,
+        pspTestMode: Boolean?,
+        transactionId: String,
+        reverseInfo: ReversalRequestModel
+    ): PaymentResponseModel {
+        val merchant = merchantRepository.getMerchantById(merchantId)
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        return reverse(pspTestMode, transactionId, reverseInfo, merchant)
+    }
+
+    /**
+     * Reverse transaction
+     *
+     * @param secretKey Secret Key
+     * @param pspTestMode indicator whether is the test mode or not
+     * @param transactionId Transaction ID
+     * @param reverseInfo Reversion request model
+     * @return Payment response model
+     */
+    fun reverse(
+        secretKey: String,
+        pspTestMode: Boolean?,
+        transactionId: String,
+        reverseInfo: ReversalRequestModel
+    ): PaymentResponseModel {
+        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asException()
+        return reverse(pspTestMode, transactionId, reverseInfo, apiKey.merchant)
+    }
+
+    /**
+     * Refund transaction from a dashboard
+     *
+     * @param merchantId Merchant Id
+     * @param idempotentKey Idempotent key
+     * @param pspTestMode indicator whether is the test mode or not
+     * @param transactionId Transaction ID
+     * @param refundInfo Payment information
+     * @return Payment response model
+     */
+    fun dashboardRefund(
+        merchantId: String,
+        idempotentKey: String,
+        pspTestMode: Boolean?,
+        transactionId: String,
+        refundInfo: PaymentDataRequestModel
+    ): PaymentResponseModel {
+        val merchant = merchantRepository.getMerchantById(merchantId)
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        return refund(idempotentKey, pspTestMode, transactionId, refundInfo, merchant)
+    }
+
+    /**
+     * Refund transaction
+     *
+     * @param secretKey Secret Key
+     * @param idempotentKey Idempotent key
+     * @param pspTestMode indicator whether is the test mode or not
+     * @param transactionId Transaction ID
+     * @param refundInfo Payment information
+     * @return Payment response model
+     */
+    fun refund(
+        secretKey: String,
+        idempotentKey: String,
+        pspTestMode: Boolean?,
+        transactionId: String,
+        refundInfo: PaymentDataRequestModel
+    ): PaymentResponseModel {
+        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asException()
+        return refund(idempotentKey, pspTestMode, transactionId, refundInfo, apiKey.merchant)
+    }
+
+    /**
+     * Creates transaction record from given psp notification
+     *
+     * @param pspNotificationListRequestModel Psp notification model
+     * @param apiKey Api key for notification service authentication
+     */
+    fun createNotificationTransactionRecord(pspNotificationListRequestModel: PspNotificationListRequestModel, apiKey: String) {
+        // TODO This is pure evil, we need to come up with a proper authentication mechanism for requests from notification service
+        if (paymentApiKey != apiKey) throw ApiError.ofErrorCode(ApiErrorCode.AUTHENTICATION_ERROR).asException()
+        pspNotificationListRequestModel.notifications.forEach {
+            val transactionNotificationAction = TransactionAction.valueOf(it.transactionAction!!)
+            val transaction = if (TransactionAction.mainTransactionActions.contains(transactionNotificationAction)) {
+                transactionRepository.getByPspReferenceAndActions(
+                    it.pspTransactionId!!,
+                    it.transactionAction!!,
+                    if (it.transactionAction == TransactionAction.AUTH.name) TransactionAction.PREAUTH.name else it.transactionAction!!
+                )
+            } else {
+                transactionRepository.getByPspReference(it.pspTransactionId!!)
+            }
+            if (transaction != null) {
+                val newTransaction = Transaction(
+                    transactionId = transaction.transactionId,
+                    currencyId = it.paymentData?.currency,
+                    amount = it.paymentData?.amount,
+                    reason = if (TransactionAction.mainTransactionActions.contains(transactionNotificationAction)) transaction.reason else it.paymentData?.reason,
+                    status = TransactionStatus.valueOf(it.transactionStatus!!),
+                    action = if (TransactionAction.mainTransactionActions.contains(transactionNotificationAction)) transaction.action else transactionNotificationAction,
+                    paymentMethod = transaction.paymentMethod,
+                    paymentInfo = transaction.paymentInfo,
+                    merchantTransactionId = transaction.merchantTransactionId,
+                    merchantCustomerId = transaction.merchantCustomerId,
+                    pspTestMode = transaction.pspTestMode,
+                    pspResponse = transaction.pspResponse,
+                    merchant = transaction.merchant,
+                    alias = transaction.alias,
+                    notification = true
+                )
+                transactionRepository.save(newTransaction)
+                logger.info { "PSP transaction '${it.pspTransactionId}' is successfully processed for transaction action '${it.transactionAction}'" }
+            } else {
+                logger.info { "There is no transaction for PSP transaction '${it.pspTransactionId}' and transaction action '${it.transactionAction}'" }
+            }
+        }
+    }
+
     private fun capture(
         pspTestMode: Boolean?,
         transactionId: String,
@@ -241,46 +376,6 @@ class TransactionService(
         }
     }
 
-    /**
-     * Reverse transaction from a dashboard
-     *
-     * @param merchantId Merchant Id
-     * @param pspTestMode indicator whether is the test mode or not
-     * @param transactionId Transaction ID
-     * @param reverseInfo Reversion request model
-     * @return Payment response model
-     */
-    fun dashboardReverse(
-        merchantId: String,
-        pspTestMode: Boolean?,
-        transactionId: String,
-        reverseInfo: ReversalRequestModel
-    ): PaymentResponseModel {
-        val merchant = merchantRepository.getMerchantById(merchantId)
-            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        return reverse(pspTestMode, transactionId, reverseInfo, merchant)
-    }
-
-    /**
-     * Reverse transaction
-     *
-     * @param secretKey Secret Key
-     * @param pspTestMode indicator whether is the test mode or not
-     * @param transactionId Transaction ID
-     * @param reverseInfo Reversion request model
-     * @return Payment response model
-     */
-    fun reverse(
-        secretKey: String,
-        pspTestMode: Boolean?,
-        transactionId: String,
-        reverseInfo: ReversalRequestModel
-    ): PaymentResponseModel {
-        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
-            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asException()
-        return reverse(pspTestMode, transactionId, reverseInfo, apiKey.merchant)
-    }
-
     private fun reverse(
         pspTestMode: Boolean?,
         transactionId: String,
@@ -350,50 +445,6 @@ class TransactionService(
                 )
             }
         }
-    }
-
-    /**
-     * Refund transaction from a dashboard
-     *
-     * @param merchantId Merchant Id
-     * @param idempotentKey Idempotent key
-     * @param pspTestMode indicator whether is the test mode or not
-     * @param transactionId Transaction ID
-     * @param refundInfo Payment information
-     * @return Payment response model
-     */
-    fun dashboardRefund(
-        merchantId: String,
-        idempotentKey: String,
-        pspTestMode: Boolean?,
-        transactionId: String,
-        refundInfo: PaymentDataRequestModel
-    ): PaymentResponseModel {
-        val merchant = merchantRepository.getMerchantById(merchantId)
-            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        return refund(idempotentKey, pspTestMode, transactionId, refundInfo, merchant)
-    }
-
-    /**
-     * Refund transaction
-     *
-     * @param secretKey Secret Key
-     * @param idempotentKey Idempotent key
-     * @param pspTestMode indicator whether is the test mode or not
-     * @param transactionId Transaction ID
-     * @param refundInfo Payment information
-     * @return Payment response model
-     */
-    fun refund(
-        secretKey: String,
-        idempotentKey: String,
-        pspTestMode: Boolean?,
-        transactionId: String,
-        refundInfo: PaymentDataRequestModel
-    ): PaymentResponseModel {
-        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
-            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asException()
-        return refund(idempotentKey, pspTestMode, transactionId, refundInfo, apiKey.merchant)
     }
 
     private fun refund(

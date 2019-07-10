@@ -2,9 +2,9 @@
  * Copyright © MobiLab Solutions GmbH
  */
 
-package com.mobilabsolutions.payment.notifications.model.request
+package com.mobilabsolutions.payment.adyen.model.request
 
-import com.mobilabsolutions.payment.notifications.model.AdyenNotificationItemListModel
+import com.mobilabsolutions.payment.adyen.model.AdyenNotificationItemListModel
 import javax.validation.Valid
 
 /**

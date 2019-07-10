@@ -18,7 +18,7 @@ import javax.validation.constraints.NotNull
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
 @ApiModel(value = "PSP Notification Model")
-data class PspNotificationModel (
+data class PspNotificationModel(
     @ApiModelProperty("PSP Transaction Id", example = "rtHyGsuShuKMn")
     val pspTransactionId: String?,
 

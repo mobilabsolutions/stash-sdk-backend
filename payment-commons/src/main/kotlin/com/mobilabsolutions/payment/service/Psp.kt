@@ -7,6 +7,7 @@ package com.mobilabsolutions.payment.service
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.PspNotificationModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
@@ -97,4 +98,14 @@ interface Psp {
      * @return PSP delete alias response
      */
     fun deleteAlias(pspDeleteAliasRequestModel: PspDeleteAliasRequestModel, pspTestMode: Boolean?)
+
+    /**
+     * Returns psp notification model {@link PspNotificationModel} for the given psp specific notification information
+     *
+     * @param pspTransactionId PSP transaction id
+     * @param pspEvent PSP transaction event
+     * @param pspMessage PSP notification message
+     * @return PSP notification model
+     */
+    fun getPspNotification(pspTransactionId: String?, pspEvent: String?, pspMessage: String?): PspNotificationModel
 }

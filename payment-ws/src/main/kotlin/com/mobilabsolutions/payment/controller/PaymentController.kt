@@ -6,6 +6,7 @@ package com.mobilabsolutions.payment.controller
 
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentRequestModel
+import com.mobilabsolutions.payment.model.request.PspNotificationListRequestModel
 import com.mobilabsolutions.payment.model.request.ReversalRequestModel
 import com.mobilabsolutions.payment.service.TransactionService
 import io.swagger.annotations.ApiOperation
@@ -132,11 +133,30 @@ class PaymentController(private val transactionService: TransactionService) {
         @Valid @RequestBody refundInfo: PaymentDataRequestModel
     ) = transactionService.refund(secretKey, idempotentKey, pspTestMode, transactionId, refundInfo)
 
+    @ApiOperation(value = "Create transaction notification")
+    @ApiResponses(
+        ApiResponse(code = 201, message = "Successfully created transaction notification"),
+        ApiResponse(code = 400, message = "Failed to create transaction notification"),
+        ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 404, message = "Not found")
+    )
+    @RequestMapping(
+        PaymentController.NOTIFICATION_URL,
+        method = [RequestMethod.PUT],
+        consumes = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @ResponseStatus(HttpStatus.CREATED)
+    fun createTransactionNotification(
+        @RequestHeader(value = "API-Key") apiKey: String,
+        @Valid @RequestBody pspNotificationListRequestModel: PspNotificationListRequestModel
+    ) = transactionService.createNotificationTransactionRecord(pspNotificationListRequestModel, apiKey)
+
     companion object {
-        const val PREAUTH_URL = "preauthorization"
-        const val CAPTURE_URL = "preauthorization/{Transaction-Id}/capture"
-        const val AUTH_URL = "authorization"
-        const val REVERSE_URL = "preauthorization/{Transaction-Id}/reverse"
-        const val REFUND_URL = "authorization/{Transaction-Id}/refund"
+        private const val PREAUTH_URL = "preauthorization"
+        private const val CAPTURE_URL = "preauthorization/{Transaction-Id}/capture"
+        private const val AUTH_URL = "authorization"
+        private const val REVERSE_URL = "preauthorization/{Transaction-Id}/reverse"
+        private const val REFUND_URL = "authorization/{Transaction-Id}/refund"
+        private const val NOTIFICATION_URL = "notification"
     }
 }

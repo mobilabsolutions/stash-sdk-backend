@@ -16,6 +16,7 @@ import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.PspNotificationModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
@@ -179,6 +180,10 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
             pspDeleteAliasRequestModel.pspConfig!!,
             getBraintreeMode(pspTestMode)
         )
+    }
+
+    override fun getPspNotification(pspTransactionId: String?, pspEvent: String?, pspMessage: String?): PspNotificationModel {
+        TODO("not implemented")
     }
 
     private fun getBraintreeMode(test: Boolean?): String {

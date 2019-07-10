@@ -4,6 +4,7 @@
 
 package com.mobilabsolutions.payment.notifications.service
 
+import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -35,9 +36,13 @@ class ScheduledTasks(
         logger.info { "Notification processing is starting..." }
         pspList.split(pspSeparator).forEach { psp ->
             run {
+                try { PaymentServiceProvider.valueOf(psp) } catch (e: IllegalArgumentException) {
+                    logger.info { "Unknown PSP '$psp' is defined." }
+                    return@forEach
+                }
                 repeat(parallelism.toInt()) {
                     GlobalScope.launch(Dispatchers.IO) {
-                        notificationService.pickNotification(psp)
+                        notificationService.processNotifications(psp)
                     }
                 }
             }

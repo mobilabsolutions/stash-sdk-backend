@@ -39,7 +39,7 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
             "COALESCE(CAST(tr.payment_info AS json)#>>'{extra, ccConfig, ccType}', tr.payment_method), tr.created_date, count(*) OVER() AS full_count FROM transaction_record tr " +
             "JOIN (" +
             "SELECT transaction_id, max(created_date) max_created_date " +
-            "FROM transaction_record " +
+            "FROM transaction_record WHERE action != 'ADDITIONAL'" +
             "GROUP BY transaction_id" +
             ") tr1 ON tr.transaction_id = tr1.transaction_id AND tr.created_date = tr1.max_created_date " +
             "WHERE tr.merchant_id = :merchantId " +
@@ -73,4 +73,10 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
         @Param("limit") limit: Int?,
         @Param("offset") offset: Int?
     ): List<Array<Any>>
+
+    @Query("SELECT * FROM transaction_record tr WHERE CAST(tr.psp_response AS json)#>>'{pspTransactionId}' = :pspTransactionId AND (tr.action = :action1 OR tr.action = :action2) ORDER BY created_date DESC LIMIT 1", nativeQuery = true)
+    fun getByPspReferenceAndActions(@Param("pspTransactionId") pspTransactionId: String, @Param("action1") action1: String, @Param("action2") action2: String): Transaction?
+
+    @Query("SELECT * FROM transaction_record tr WHERE CAST(tr.psp_response AS json)#>>'{pspTransactionId}' = :pspTransactionId ORDER BY created_date DESC LIMIT 1", nativeQuery = true)
+    fun getByPspReference(@Param("pspTransactionId") pspTransactionId: String): Transaction?
 }
