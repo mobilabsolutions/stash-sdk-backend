@@ -40,6 +40,7 @@ If you want to create a database instance on your own, you will need to set the 
 - spring.datasource.password: DB password
 - spring.jpa.show-sql=true
 - authorization.server.signingKey: oauth signing key
+- payment.ws.notification.apiKey= notification service api key
   
 - initial.data.loader.oauthClientId: oauth client id
 - initial.data.loader.oauthClientPassword: oauth client password
