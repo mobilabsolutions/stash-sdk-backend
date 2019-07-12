@@ -4,11 +4,11 @@
 
 package com.mobilabsolutions.payment.service
 
-import com.mobilabsolutions.payment.data.domain.Authority
-import com.mobilabsolutions.payment.data.domain.MerchantUser
+import com.mobilabsolutions.payment.data.Authority
+import com.mobilabsolutions.payment.data.MerchantUser
 import com.mobilabsolutions.payment.data.repository.AuthorityRepository
 import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
-import com.mobilabsolutions.payment.model.request.EditMerchantUserRequestModel
+import com.mobilabsolutions.payment.model.request.MerchantUserEditRequestModel
 import com.mobilabsolutions.payment.model.request.MerchantUserPasswordRequestModel
 import com.mobilabsolutions.payment.model.request.MerchantUserRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
@@ -56,7 +56,7 @@ class UserDetailsServiceImpl(
      * @param merchantUserModel Merchant user model
      */
     @Transactional
-    fun updateMerchantUser(userId: String, principal: String, merchantUserModel: EditMerchantUserRequestModel) {
+    fun updateMerchantUser(userId: String, principal: String, merchantUserModel: MerchantUserEditRequestModel) {
         if (principal != adminUsername && principal != userId) throw ApiError.ofErrorCode(ApiErrorCode.INSUFFICIENT_RIGHTS).asException()
         merchantUserRepository.updateMerchantUser(
             userId,
@@ -105,15 +105,16 @@ class UserDetailsServiceImpl(
 
     private fun MerchantUser.toUserDetails() = User(email, password, enabled, true, true, true, authorities)
 
-    private fun MerchantUserRequestModel.toMerchantUser(authority: Authority) = MerchantUser(
-        email,
-        firstname,
-        lastname,
-        locale,
-        userPasswordEncoder.encode(password),
-        true,
-        setOf(authority)
-    )
+    private fun MerchantUserRequestModel.toMerchantUser(authority: Authority) =
+        MerchantUser(
+            email,
+            firstname,
+            lastname,
+            locale,
+            userPasswordEncoder.encode(password),
+            true,
+            setOf(authority)
+        )
 
     companion object : KLogging()
 }

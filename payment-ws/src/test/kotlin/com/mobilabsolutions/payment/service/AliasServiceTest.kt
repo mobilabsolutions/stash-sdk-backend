@@ -5,9 +5,9 @@
 package com.mobilabsolutions.payment.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.mobilabsolutions.payment.data.domain.Alias
-import com.mobilabsolutions.payment.data.domain.Merchant
-import com.mobilabsolutions.payment.data.domain.MerchantApiKey
+import com.mobilabsolutions.payment.data.Alias
+import com.mobilabsolutions.payment.data.Merchant
+import com.mobilabsolutions.payment.data.MerchantApiKey
 import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.repository.AliasRepository
@@ -57,9 +57,11 @@ class AliasServiceTest {
     private val pspAlias = "some psp alias"
     private val knownPspType = "BS_PAYONE"
     private val userAgent = "Android-1.0.0"
-    private val merchant = Merchant(id = "mobilab",
+    private val merchant = Merchant(
+        id = "mobilab",
         pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
-        " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}")
+            " {\"type\" : \"other\", \"merchantId\" : \"test merchant\"}]}"
+    )
     private val extra =
         "{\"email\": \"test@test.com\",\"paymentMethod\": \"CC\"," +
             "\"ccConfig\": {\n" + "\"ccMask\": \"1111\",\n" + "\"ccExpiry\": \"11/20\",\n" + "\"ccType\": \"VISA\",\n" + "\"ccHolderName\": \"Max Mustermann\"\n" +
@@ -127,7 +129,13 @@ class AliasServiceTest {
         Mockito.`when`(
             aliasRepository.getFirstByIdAndActive(
                 knownAliasId, active = true))
-            .thenReturn(Alias(psp = PaymentServiceProvider.BS_PAYONE, extra = extra, merchant = merchant))
+            .thenReturn(
+                Alias(
+                    psp = PaymentServiceProvider.BS_PAYONE,
+                    extra = extra,
+                    merchant = merchant
+                )
+            )
         Mockito.`when`(
             aliasRepository.getByIdempotentKeyAndActiveAndMerchantAndPspTypeAndUserAgent(
                 newIdempotentKey, true, merchant, PaymentServiceProvider.BS_PAYONE, userAgent))

@@ -7,15 +7,12 @@ package com.mobilabsolutions.payment.bspayone.model.response
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneResponseStatus
 import io.swagger.annotations.ApiModelProperty
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
 
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
 data class BsPayoneDeleteAliasResponseModel(
     @ApiModelProperty(value = "BS Payone response status", example = "APPROVED")
-    @field:Enumerated(EnumType.STRING)
     val status: BsPayoneResponseStatus?,
 
     @ApiModelProperty(value = "BS Payone error code")

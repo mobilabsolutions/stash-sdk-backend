@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel("Reversal Request Model")
+@ApiModel("Reversal request model")
 data class ReversalRequestModel(
     @ApiModelProperty("Reason", example = "Payment for dinner")
     @field:NotNull

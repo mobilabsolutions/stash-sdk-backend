@@ -10,8 +10,8 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel("Edit api key request model")
-data class EditApiKeyRequestModel(
+@ApiModel("Api key update request model")
+data class ApiKeyEditRequestModel(
     @ApiModelProperty(value = "Api key name", example = "Test key")
     val name: String?
 )

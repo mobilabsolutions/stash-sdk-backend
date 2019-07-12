@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
-@ApiModel("Payment Request Model")
+@ApiModel("Payment request model")
 data class PaymentRequestModel(
     @ApiModelProperty("Alias ID", example = "JipfjLKL6BkTIREaRGyX")
     @field:NotNull

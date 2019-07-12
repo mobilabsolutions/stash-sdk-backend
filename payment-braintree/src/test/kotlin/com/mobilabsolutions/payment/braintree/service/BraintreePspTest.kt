@@ -300,7 +300,7 @@ class BraintreePspTest {
                 pspTransactionId,
                 correctAmount,
                 currency,
-                TransactionAction.REFUND,
+                TransactionAction.REFUND.name,
                 pspConfig,
                 null,
                 PaymentMethod.PAY_PAL.name

@@ -162,7 +162,7 @@ class BsPayonePsp(
         logger.info("BS Payone refund for {} mode", getPspMode(pspTestMode))
         val bsPayoneRefundRequest = BsPayoneRefundRequestModel(
             pspTransactionId = pspRefundRequestModel.pspTransactionId,
-            sequenceNumber = if (pspRefundRequestModel.action == TransactionAction.CAPTURE) 2 else 1,
+            sequenceNumber = if (pspRefundRequestModel.action == TransactionAction.CAPTURE.name) 2 else 1,
             amount = (pspRefundRequestModel.amount!! * -1).toString(),
             currency = pspRefundRequestModel.currency
         )

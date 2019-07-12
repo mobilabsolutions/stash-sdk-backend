@@ -5,9 +5,9 @@
 package com.mobilabsolutions.payment.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.mobilabsolutions.payment.data.domain.Alias
-import com.mobilabsolutions.payment.data.domain.Merchant
-import com.mobilabsolutions.payment.data.domain.Transaction
+import com.mobilabsolutions.payment.data.Alias
+import com.mobilabsolutions.payment.data.Merchant
+import com.mobilabsolutions.payment.data.Transaction
 import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.TransactionAction
@@ -44,7 +44,6 @@ import org.springframework.transaction.annotation.Transactional
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
 @Service
-@Transactional
 class TransactionService(
     private val transactionRepository: TransactionRepository,
     private val merchantApiKeyRepository: MerchantApiKeyRepository,
@@ -67,6 +66,7 @@ class TransactionService(
      * @param authorizeInfo Payment information
      * @return Payment response model
      */
+    @Transactional
     fun authorize(
         secretKey: String,
         idempotentKey: String,
@@ -106,6 +106,7 @@ class TransactionService(
      * @param preauthorizeInfo Payment information
      * @return Payment response model
      */
+    @Transactional
     fun preauthorize(
         secretKey: String,
         idempotentKey: String,
@@ -147,6 +148,7 @@ class TransactionService(
      * @param transactionId Transaction ID
      * @return Payment response model
      */
+    @Transactional
     fun dashboardCapture(
         merchantId: String,
         pspTestMode: Boolean?,
@@ -165,6 +167,7 @@ class TransactionService(
      * @param transactionId Transaction ID
      * @return Payment response model
      */
+    @Transactional
     fun capture(
         secretKey: String,
         pspTestMode: Boolean?,
@@ -184,6 +187,7 @@ class TransactionService(
      * @param reverseInfo Reversion request model
      * @return Payment response model
      */
+    @Transactional
     fun dashboardReverse(
         merchantId: String,
         pspTestMode: Boolean?,
@@ -204,6 +208,7 @@ class TransactionService(
      * @param reverseInfo Reversion request model
      * @return Payment response model
      */
+    @Transactional
     fun reverse(
         secretKey: String,
         pspTestMode: Boolean?,
@@ -225,6 +230,7 @@ class TransactionService(
      * @param refundInfo Payment information
      * @return Payment response model
      */
+    @Transactional
     fun dashboardRefund(
         merchantId: String,
         idempotentKey: String,
@@ -247,6 +253,7 @@ class TransactionService(
      * @param refundInfo Payment information
      * @return Payment response model
      */
+    @Transactional
     fun refund(
         secretKey: String,
         idempotentKey: String,
@@ -265,6 +272,7 @@ class TransactionService(
      * @param pspNotificationListRequestModel Psp notification model
      * @param apiKey Api key for notification service authentication
      */
+    @Transactional
     fun createNotificationTransactionRecord(pspNotificationListRequestModel: PspNotificationListRequestModel, apiKey: String) {
         // TODO This is pure evil, we need to come up with a proper authentication mechanism for requests from notification service
         if (paymentApiKey != apiKey) throw ApiError.ofErrorCode(ApiErrorCode.AUTHENTICATION_ERROR).asException()
@@ -482,7 +490,7 @@ class TransactionService(
             pspTransactionId = getPspPaymentResponse(originalTransaction).pspTransactionId,
             amount = refundInfo.amount,
             currency = prevTransaction.currencyId,
-            action = prevTransaction.action,
+            action = prevTransaction.action?.name,
             pspConfig = getPspConfig(prevTransaction.alias!!),
             purchaseId = prevTransaction.merchantTransactionId,
             paymentMethod = prevTransaction.paymentMethod!!.name
@@ -543,7 +551,8 @@ class TransactionService(
             else -> {
                 val pspPaymentResponse = pspAction.invoke()
                 val newTransaction = Transaction(
-                    transactionId = transactionId ?: RandomStringUtils.randomAlphanumeric(TransactionService.TRANSACTION_ID_LENGTH),
+                    transactionId = transactionId
+                        ?: RandomStringUtils.randomAlphanumeric(TRANSACTION_ID_LENGTH),
                     idempotentKey = idempotentKey,
                     currencyId = paymentInfo.paymentData!!.currency,
                     amount = paymentInfo.paymentData.amount,

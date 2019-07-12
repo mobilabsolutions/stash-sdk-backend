@@ -5,7 +5,7 @@
 package com.mobilabsolutions.payment.data.repository
 
 import com.mobilabsolutions.payment.data.configuration.BaseRepository
-import com.mobilabsolutions.payment.data.domain.OAuthClientDetails
+import com.mobilabsolutions.payment.data.OAuthClientDetails
 import org.springframework.stereotype.Repository
 
 /**

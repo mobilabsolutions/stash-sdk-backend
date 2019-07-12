@@ -2,11 +2,9 @@
  * Copyright © MobiLab Solutions GmbH
  */
 
-package com.mobilabsolutions.payment.data.domain
+package com.mobilabsolutions.payment.data
 
-import org.springframework.data.util.ProxyUtils
 import org.springframework.security.core.GrantedAuthority
-import java.util.Objects
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
@@ -30,23 +28,21 @@ class Authority(
     private val name: String? = null
 
 ) : GrantedAuthority {
+
     override fun getAuthority() = name
 
-    override fun hashCode(): Int {
-        var hash = 7
-        hash = 97 * hash + Objects.hashCode(this.id)
-        return hash
-    }
-
     override fun equals(other: Any?): Boolean {
-        other ?: return false
-
         if (this === other) return true
-
-        if (javaClass != ProxyUtils.getUserClass(other)) return false
+        if (javaClass != other?.javaClass) return false
 
         other as Authority
 
-        return this.id == other.id
+        if (id != other.id) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return id?.hashCode() ?: 0
     }
 }

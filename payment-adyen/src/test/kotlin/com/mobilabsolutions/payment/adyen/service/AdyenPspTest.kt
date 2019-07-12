@@ -304,7 +304,7 @@ class AdyenPspTest {
                 pspReference,
                 amountValue,
                 currency,
-                TransactionAction.AUTH,
+                TransactionAction.AUTH.name,
                 pspConfig,
                 null,
                 PaymentMethod.CC.name
@@ -319,7 +319,7 @@ class AdyenPspTest {
                 pspReference,
                 null,
                 null,
-                TransactionAction.AUTH,
+                TransactionAction.AUTH.name,
                 pspConfig,
                 null,
                 PaymentMethod.SEPA.name
@@ -335,7 +335,7 @@ class AdyenPspTest {
                     pspReference,
                     amountValue,
                     currency,
-                    TransactionAction.AUTH,
+                    TransactionAction.AUTH.name,
                     pspConfig,
                     null,
                     PaymentMethod.PAY_PAL.name

@@ -17,4 +17,22 @@ class NotificationId(
     var pspTransactionId: String?,
     @Column(name = "psp_event")
     var pspEvent: String?
-) : Serializable
+) : Serializable {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as NotificationId
+
+        if (pspTransactionId != other.pspTransactionId) return false
+        if (pspEvent != other.pspEvent) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = pspTransactionId?.hashCode() ?: 0
+        result = 31 * result + (pspEvent?.hashCode() ?: 0)
+        return result
+    }
+}
