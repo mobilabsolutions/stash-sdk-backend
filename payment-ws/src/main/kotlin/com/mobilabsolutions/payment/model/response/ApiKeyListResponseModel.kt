@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel(value = "Get All Api Keys Response")
+@ApiModel(value = "Api key list response model")
 data class ApiKeyListResponseModel(
     @ApiModelProperty(value = "List of api keys")
     val data: List<ApiKeyInfoModel>

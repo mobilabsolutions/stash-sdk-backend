@@ -8,8 +8,8 @@ import com.mobilabsolutions.payment.data.Authority
 import com.mobilabsolutions.payment.data.MerchantUser
 import com.mobilabsolutions.payment.data.repository.AuthorityRepository
 import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
+import com.mobilabsolutions.payment.model.request.MerchantUserEditPasswordRequestModel
 import com.mobilabsolutions.payment.model.request.MerchantUserEditRequestModel
-import com.mobilabsolutions.payment.model.request.MerchantUserPasswordRequestModel
 import com.mobilabsolutions.payment.model.request.MerchantUserRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
@@ -121,7 +121,7 @@ class UserDetailsServiceTest {
         userDetailsService.changePasswordMerchantUser(
             knownEmail,
             knownEmail,
-            MerchantUserPasswordRequestModel(userPassword, "new password")
+            MerchantUserEditPasswordRequestModel(userPassword, "new password")
         )
     }
 
@@ -131,7 +131,7 @@ class UserDetailsServiceTest {
             userDetailsService.changePasswordMerchantUser(
                 knownEmail,
                 knownEmail,
-                MerchantUserPasswordRequestModel(anotherUserPassword, "new password")
+                MerchantUserEditPasswordRequestModel(anotherUserPassword, "new password")
             )
         }
     }
@@ -141,7 +141,7 @@ class UserDetailsServiceTest {
         userDetailsService.changePasswordMerchantUser(
             knownEmail,
             "admin",
-            MerchantUserPasswordRequestModel(userPassword, "new password")
+            MerchantUserEditPasswordRequestModel(userPassword, "new password")
         )
     }
 

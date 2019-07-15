@@ -11,7 +11,7 @@ import javax.validation.Valid
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel(value = "Payment Information Model")
+@ApiModel(value = "Payment info Model")
 data class PaymentInfoModel(
     @ApiModelProperty("Alias extra")
     @field:Valid

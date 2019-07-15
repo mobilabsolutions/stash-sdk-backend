@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel(value = "Timeline Model")
+@ApiModel(value = "Transaction timeline model")
 data class TransactionTimelineModel(
     @ApiModelProperty(value = "Amount in smallest currency unit (e.g. cent)", example = "2000")
     val amount: Int?,

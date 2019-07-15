@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel(value = "Transaction Details Response")
+@ApiModel(value = "Transaction details response model")
 data class TransactionDetailsResponseModel(
     @ApiModelProperty(value = "Created date", example = "2018-12-31 23:59:59.999 +0100")
     val createdDate: String?,

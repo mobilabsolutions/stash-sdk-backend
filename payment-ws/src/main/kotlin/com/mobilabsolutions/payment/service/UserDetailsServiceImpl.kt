@@ -8,8 +8,8 @@ import com.mobilabsolutions.payment.data.Authority
 import com.mobilabsolutions.payment.data.MerchantUser
 import com.mobilabsolutions.payment.data.repository.AuthorityRepository
 import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
+import com.mobilabsolutions.payment.model.request.MerchantUserEditPasswordRequestModel
 import com.mobilabsolutions.payment.model.request.MerchantUserEditRequestModel
-import com.mobilabsolutions.payment.model.request.MerchantUserPasswordRequestModel
 import com.mobilabsolutions.payment.model.request.MerchantUserRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
@@ -77,16 +77,16 @@ class UserDetailsServiceImpl(
     fun changePasswordMerchantUser(
         userId: String,
         principal: String,
-        merchantUserChangePasswordModel: MerchantUserPasswordRequestModel
+        merchantUserEditPasswordModel: MerchantUserEditPasswordRequestModel
     ) {
         if (principal != adminUsername && principal != userId) throw ApiError.ofErrorCode(ApiErrorCode.INSUFFICIENT_RIGHTS).asException()
 
         val merchantUser = merchantUserRepository.findByEmail(userId)
         val isPasswordMatching =
-            userPasswordEncoder.matches(merchantUserChangePasswordModel.oldPassword, merchantUser?.password)
+            userPasswordEncoder.matches(merchantUserEditPasswordModel.oldPassword, merchantUser?.password)
         if (isPasswordMatching) merchantUserRepository.updatePasswordMerchantUser(
             userId,
-            userPasswordEncoder.encode(merchantUserChangePasswordModel.newPassword)
+            userPasswordEncoder.encode(merchantUserEditPasswordModel.newPassword)
         ) else throw ApiError.ofErrorCode(ApiErrorCode.INCORRECT_OLD_PASSWORD, "Old password for user '$userId' is incorrect").asException()
     }
 

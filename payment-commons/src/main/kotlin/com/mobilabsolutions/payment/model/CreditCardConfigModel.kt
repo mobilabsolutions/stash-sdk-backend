@@ -8,7 +8,7 @@ import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import javax.validation.constraints.Size
 
-@ApiModel(value = "Credit Card Configuration")
+@ApiModel(value = "Credit card config model")
 data class CreditCardConfigModel(
     @ApiModelProperty(value = "Credit card mask", example = "1111")
     @field:Size(min = 4, max = 4)

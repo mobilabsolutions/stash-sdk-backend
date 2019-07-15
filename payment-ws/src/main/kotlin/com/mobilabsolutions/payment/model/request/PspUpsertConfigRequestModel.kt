@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "PSP upsert config model")
+@ApiModel(value = "PSP upsert config request model")
 data class PspUpsertConfigRequestModel(
     @ApiModelProperty(value = "Merchant ID", example = "42865")
     val merchantId: String?,

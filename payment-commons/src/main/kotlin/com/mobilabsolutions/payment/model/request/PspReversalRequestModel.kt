@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "PSP Reversal Request")
+@ApiModel(value = "PSP reversal request model")
 data class PspReversalRequestModel(
     @ApiModelProperty(value = "PSP transaction id", example = "42949")
     val pspTransactionId: String?,

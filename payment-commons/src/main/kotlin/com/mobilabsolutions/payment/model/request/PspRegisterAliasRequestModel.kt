@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "PSP Register Alias Request")
+@ApiModel(value = "PSP register alias request model")
 data class PspRegisterAliasRequestModel(
     @ApiModelProperty("Alias ID", example = "JipfjLKL6BkTIREaRGyX")
     val aliasId: String?,

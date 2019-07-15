@@ -4,8 +4,8 @@
 
 package com.mobilabsolutions.payment.controller
 
+import com.mobilabsolutions.payment.model.request.MerchantUserEditPasswordRequestModel
 import com.mobilabsolutions.payment.model.request.MerchantUserEditRequestModel
-import com.mobilabsolutions.payment.model.request.MerchantUserPasswordRequestModel
 import com.mobilabsolutions.payment.model.request.MerchantUserRequestModel
 import com.mobilabsolutions.payment.service.UserDetailsServiceImpl
 import io.swagger.annotations.ApiOperation
@@ -89,10 +89,10 @@ class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServ
     fun changeUserPassword(
         @PathVariable("Merchant-Id") merchantId: String,
         @PathVariable("User-Id") userId: String,
-        @Valid @ApiParam(name = "Merchant-User-Password-Model", value = "Merchant User Password Change Model") @RequestBody merchantUserChangePasswordModel: MerchantUserPasswordRequestModel
+        @Valid @ApiParam(name = "Merchant-User-Password-Model", value = "Merchant User Password Change Model") @RequestBody merchantUserEditPasswordModel: MerchantUserEditPasswordRequestModel
     ) {
         val principal = SecurityContextHolder.getContext().authentication.principal as String
-        userDetailsServiceImpl.changePasswordMerchantUser(userId, principal, merchantUserChangePasswordModel)
+        userDetailsServiceImpl.changePasswordMerchantUser(userId, principal, merchantUserEditPasswordModel)
     }
 
     companion object {

@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
-@ApiModel(value = "Transaction Response")
+@ApiModel(value = "Transaction model")
 data class TransactionModel(
     @ApiModelProperty(value = "Transaction id", example = "frtdqw7m")
     val transactionId: String?,
