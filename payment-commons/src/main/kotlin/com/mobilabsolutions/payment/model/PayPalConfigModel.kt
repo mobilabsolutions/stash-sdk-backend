@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "PayPal Configuration")
+@ApiModel(value = "PayPal config model")
 data class PayPalConfigModel(
     @ApiModelProperty(value = "PayPal nonce", example = "cnbaskjcbjakbjv")
     val nonce: String?,

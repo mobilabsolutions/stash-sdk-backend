@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
-@ApiModel("Payment Response Model")
+@ApiModel("Payment response model")
 data class PaymentResponseModel(
     @ApiModelProperty("Transaction ID")
     val id: String?,

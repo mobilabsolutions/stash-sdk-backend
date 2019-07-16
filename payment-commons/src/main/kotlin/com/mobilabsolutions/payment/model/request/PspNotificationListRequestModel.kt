@@ -12,7 +12,7 @@ import javax.validation.Valid
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
-@ApiModel(value = "PSP Notification Request Model")
+@ApiModel(value = "PSP notification list request model")
 data class PspNotificationListRequestModel(
     @ApiModelProperty(value = "List of PSP Notifications")
     @field:Valid

@@ -8,8 +8,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneResponseStatus
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
 
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
@@ -17,7 +15,6 @@ import javax.persistence.Enumerated
 @ApiModel(value = "BS Payone Payment Response")
 data class BsPayonePaymentResponseModel(
     @ApiModelProperty(value = "BS Payone response status", example = "APPROVED")
-    @field:Enumerated(EnumType.STRING)
     val status: BsPayoneResponseStatus?,
 
     @ApiModelProperty(value = "BS Payone transaction id")

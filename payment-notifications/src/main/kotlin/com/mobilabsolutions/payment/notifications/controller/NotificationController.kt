@@ -7,6 +7,7 @@ package com.mobilabsolutions.payment.notifications.controller
 import com.mobilabsolutions.payment.adyen.model.request.AdyenNotificationRequestModel
 import com.mobilabsolutions.payment.notifications.service.NotificationService
 import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
 import org.springframework.http.HttpStatus
@@ -45,6 +46,6 @@ class NotificationController(
     )
     @ResponseStatus(HttpStatus.OK)
     fun createAdyenNotification(
-        @Valid @RequestBody adyenNotificationRequestModel: AdyenNotificationRequestModel?
+        @Valid @ApiParam(name = "Adyen-Notification-Info", value = "Adyen Notification Model") @RequestBody adyenNotificationRequestModel: AdyenNotificationRequestModel?
     ) = notificationService.saveAdyenNotifications(adyenNotificationRequestModel)
 }

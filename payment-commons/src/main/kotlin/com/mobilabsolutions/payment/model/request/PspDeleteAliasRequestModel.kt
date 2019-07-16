@@ -13,7 +13,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "PSP DeleteAliasRequest")
+@ApiModel(value = "PSP delete alias request model")
 data class PspDeleteAliasRequestModel(
     @ApiModelProperty(value = "Alias ID", example = "JipfjLKL6BkTIREaRGyX")
     val aliasId: String?,

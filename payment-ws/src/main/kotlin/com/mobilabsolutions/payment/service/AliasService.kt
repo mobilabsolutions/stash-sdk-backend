@@ -6,8 +6,8 @@ package com.mobilabsolutions.payment.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.bspayone.service.BsPayonePsp
-import com.mobilabsolutions.payment.data.domain.Alias
-import com.mobilabsolutions.payment.data.domain.Merchant
+import com.mobilabsolutions.payment.data.Alias
+import com.mobilabsolutions.payment.data.Merchant
 import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.repository.AliasRepository
@@ -36,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
 @Service
-@Transactional
 class AliasService(
     private val aliasRepository: AliasRepository,
     private val merchantApiKeyRepository: MerchantApiKeyRepository,
@@ -63,6 +62,7 @@ class AliasService(
      * @param pspTestMode indicator whether is the test mode or not
      * @return alias method response
      */
+    @Transactional
     fun createAlias(publishableKey: String, pspType: String, idempotentKey: String, userAgent: String?, dynamicPspConfig: DynamicPspConfigRequestModel?, pspTestMode: Boolean?): AliasResponseModel {
         logger.info("Creating alias for {} psp", pspType)
         if (!pspValidator.validate(pspType, dynamicPspConfig)) throw ApiError.ofErrorCode(ApiErrorCode.DYNAMIC_CONFIG_NOT_FOUND).asException()
@@ -92,6 +92,7 @@ class AliasService(
      * @param aliasId Alias ID
      * @param aliasRequestModel Alias Request Model
      */
+    @Transactional
     fun exchangeAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, aliasRequestModel: AliasRequestModel) {
         logger.info("Exchanging alias {}", aliasId)
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofErrorCode(ApiErrorCode.PUBLISHABLE_KEY_NOT_FOUND).asException()
@@ -129,6 +130,7 @@ class AliasService(
      * @param pspTestMode indicator whether is the test mode or not
      * @param aliasId Alias ID
      */
+    @Transactional
     fun deleteAlias(secretKey: String, pspTestMode: Boolean?, aliasId: String) {
         BsPayonePsp.logger.info("Deleting alias {}", aliasId)
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey) ?: throw ApiError.ofErrorCode(ApiErrorCode.SECRET_KEY_NOT_FOUND).asException()

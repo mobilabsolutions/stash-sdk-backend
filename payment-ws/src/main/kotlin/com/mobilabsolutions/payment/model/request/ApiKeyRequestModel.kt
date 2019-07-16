@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel(value = "Api Key Request")
+@ApiModel(value = "Api key request model")
 data class ApiKeyRequestModel(
     @ApiModelProperty(value = "Api key type", example = "Values: PUBLISHABLE, SECRET")
     @field:KeyTypeEnumValidator(KeyType = KeyType::class)

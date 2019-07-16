@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "PSP Config Request")
+@ApiModel(value = "PSP config request model")
 data class PspConfigRequestModel(
     @ApiModelProperty(value = "Payment service provider type", example = "Values: BS_PAYONE, BRAINTREE, ADYEN")
     @field:PaymentServiceProviderEnumValidator(PaymentServiceProvider = PaymentServiceProvider::class)

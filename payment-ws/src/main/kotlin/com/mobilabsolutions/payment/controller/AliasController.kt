@@ -8,6 +8,7 @@ import com.mobilabsolutions.payment.model.request.AliasRequestModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.service.AliasService
 import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
 import org.springframework.http.HttpStatus
@@ -44,7 +45,7 @@ class AliasController(private val aliasService: AliasService) {
         @RequestHeader(value = "User-Agent", required = false) userAgent: String?,
         @Size(min = 10, max = 40) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
-        @Valid @RequestBody(required = false) dynamicPspConfig: DynamicPspConfigRequestModel?
+        @Valid @ApiParam(name = "PSP-Config", value = "Dynamic PSP Config Model") @RequestBody(required = false) dynamicPspConfig: DynamicPspConfigRequestModel?
     ) = aliasService.createAlias(publishableKey, pspType, idempotentKey, userAgent, dynamicPspConfig, pspTestMode)
 
     @ApiOperation(value = "Update the given Alias for payment operations")
@@ -61,7 +62,7 @@ class AliasController(private val aliasService: AliasService) {
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
         @RequestHeader(value = "User-Agent", required = false) userAgent: String?,
         @PathVariable("Alias-Id") aliasId: String,
-        @Valid @RequestBody alias: AliasRequestModel
+        @Valid @ApiParam(name = "Alias-Info", value = "Alias Model") @RequestBody alias: AliasRequestModel
     ) = aliasService.exchangeAlias(publishableKey, pspTestMode, userAgent, aliasId, alias)
 
     @ApiOperation(value = "Delete an Alias")

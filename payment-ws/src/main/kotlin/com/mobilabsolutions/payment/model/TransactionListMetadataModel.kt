@@ -11,8 +11,8 @@ import java.math.BigInteger
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
-@ApiModel(value = "Transaction list metadata")
-data class TransactionListMetadata(
+@ApiModel(value = "Transaction list metadata model")
+data class TransactionListMetadataModel(
     @ApiModelProperty(value = "Total transaction count")
     val totalCount: BigInteger?,
 

@@ -4,15 +4,15 @@
 
 package com.mobilabsolutions.payment.model.response
 
-import com.mobilabsolutions.payment.model.ApiKeyReturnInfoModel
+import com.mobilabsolutions.payment.model.ApiKeyInfoModel
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel(value = "Get All Api Keys Response")
-data class GetApiKeyResponseModel(
+@ApiModel(value = "Api key list response model")
+data class ApiKeyListResponseModel(
     @ApiModelProperty(value = "List of api keys")
-    val data: List<ApiKeyReturnInfoModel>
+    val data: List<ApiKeyInfoModel>
 )

@@ -5,7 +5,7 @@
 package com.mobilabsolutions.payment.data.repository
 
 import com.mobilabsolutions.payment.data.configuration.BaseRepository
-import com.mobilabsolutions.payment.data.domain.MerchantUser
+import com.mobilabsolutions.payment.data.MerchantUser
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param

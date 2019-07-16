@@ -2,10 +2,8 @@
  * Copyright © MobiLab Solutions GmbH
  */
 
-package com.mobilabsolutions.payment.data.domain
+package com.mobilabsolutions.payment.data
 
-import org.springframework.data.util.ProxyUtils
-import java.util.Objects
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
@@ -51,21 +49,18 @@ class OAuthClientDetails(
     @Column(name = "autoapprove")
     var autoapprove: String? = null
 ) {
-    override fun hashCode(): Int {
-        var hash = 7
-        hash = 97 * hash + Objects.hashCode(this.clientId)
-        return hash
-    }
-
     override fun equals(other: Any?): Boolean {
-        other ?: return false
-
         if (this === other) return true
-
-        if (javaClass != ProxyUtils.getUserClass(other)) return false
+        if (javaClass != other?.javaClass) return false
 
         other as OAuthClientDetails
 
-        return this.clientId == other.clientId
+        if (clientId != other.clientId) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return clientId.hashCode()
     }
 }

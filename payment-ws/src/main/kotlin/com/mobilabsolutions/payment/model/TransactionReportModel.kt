@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "Transaction Report")
+@ApiModel(value = "Transaction report model")
 class TransactionReportModel(
     @ApiModelProperty(value = "Line number", example = "1")
     val no: Int?,
