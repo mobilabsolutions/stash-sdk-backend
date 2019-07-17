@@ -1,0 +1,61 @@
+version: "3"
+services:
+  payment-db:
+    build:
+        context: .
+        dockerfile: payment-ws/Dockerfile-postgres
+    ports:
+          - 5432:5432
+
+  notifications-db:
+    build:
+        context: .
+        dockerfile: payment-notifications/Dockerfile-postgres
+    ports:
+          - 5433:5432
+
+  payment-ws:
+    ports:
+      - 8080:8080
+    depends_on:
+      - payment-db
+    build:
+      context: .
+      dockerfile: payment-ws/Dockerfile
+    environment:
+      - "SPRING_PROFILES_ACTIVE=dev"
+      - "DB_URL=jdbc:postgresql://payment-db:5432/payment"
+      - "DB_NAME=payment"
+      - "DB_USERNAME=payment"
+      - "DB_PASSWORD=payment"
+      - "ADMIN_USERNAME=admin"
+      - "ADMIN_PASSWORD=admin24"
+      - "OAUTH_CLIENT_USERNAME=client"
+      - "OAUTH_CLIENT_PASSWORD=client24"
+      - "SIGNING_KEY=zvJcsfK8qsPPp7uP3zKc8WTGhCETgF"
+      - "PAYMENT_API_KEY=p7uP3zKc8WTzvJcsfK8qsPPGhCETgF"
+
+  payment-notifications:
+    ports:
+      - 8082:8080
+    depends_on:
+      - notifications-db
+      - payment-ws
+    restart: always
+    build:
+      context: .
+      dockerfile: payment-notifications/Dockerfile
+    environment:
+      - "SPRING_PROFILES_ACTIVE=dev"
+      - "DB_URL=jdbc:postgresql://notifications-db:5432/notifications"
+      - "DB_NAME=notifications"
+      - "DB_USERNAME=notifications"
+      - "DB_PASSWORD=notifications"
+      - "AUTH_USERNAME=admin"
+      - "AUTH_PASSWORD=nimda"
+      - "PAYMENT_API_KEY=p7uP3zKc8WTzvJcsfK8qsPPGhCETgF"
+      - "PAYMENT_WS_URL=http://payment-ws:8080/api/v1/notification"
+      - "PAYMENT_NOTIF_PSP=ADYEN;BRAINTREE;BS_PAYONE"
+      - "PAYMENT_NOTIF_SEPARATOR=;"
+      - "PAYMENT_NOTIF_PARALLELISM=5"
+      - "PAYMENT_NOTIF_INTERVAL=5000"

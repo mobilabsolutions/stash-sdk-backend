@@ -19,6 +19,7 @@ services:
       - "OAUTH_CLIENT_USERNAME=client"
       - "OAUTH_CLIENT_PASSWORD=client24"
       - "SIGNING_KEY=zvJcsfK8qsPPp7uP3zKc8WTGhCETgF"
+      - "PAYMENT_API_KEY=p7uP3zKc8WTzvJcsfK8qsPPGhCETgF"
   db:
     build:
       context: .

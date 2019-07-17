@@ -19,7 +19,7 @@ This repository contains multiple modules:
 - `payment-ws` - the main service module that contains the Stash domain model, repositories, and API endpoints
 - `payment-commons` - the common module that contains the error handling, project validations and common models and data between the `payment-ws` and PSP modules
 - separate modules for every PSP - `payment-adyen`, `payment-braintree` and `payment-bs-one`
-- `payment-notifications` - the notification service that contains notification domain model, repositories, and notification API endpoints
+- `payment-notifications` - the notification service that contains notification domain model, repositories, and webhook endpoints for each PSP
 
 ## Requirements
 
@@ -46,9 +46,15 @@ The resulting jar file will be produced in the directory named `target`.
 
 ## Starting the service locally
 
-You should run `docker-compose up` from the `payment-ws` folder to start the following services :
+If you want to start only the ws service, you should run `docker-compose up` from the `payment-ws` folder. It will start the following services :
 - **PostgreSQL** - listens on port 5432, username:password - `payment:payment`
 - **payment-ws** - listens on port 8080
+
+If you want to start both the ws service and the notification service, you should run `docker-compose up` from the root folder. It will start the following services :
+- **PostgreSQL** - payment db, listens on port 5432, username:password - `payment:payment`
+- **payment-ws** - listens on port 8080
+- **PostgreSQL** - notifications db, listens on port 5433, username:password - `notifications:notifications`
+- **payment-notifications** - listens on port 8082
 
 To shut down the services gracefully run `ctrl+c`. To reset the data of the environment run `docker-compose down`.
 
