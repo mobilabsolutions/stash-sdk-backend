@@ -51,10 +51,12 @@ If you want to start only the ws service, you should run `docker-compose up` fro
 - **payment-ws** - listens on port 8080
 
 If you want to start both the ws service and the notification service, you should run `docker-compose up` from the root folder. It will start the following services :
-- **PostgreSQL** - payment db, listens on port 5432, username:password - `payment:payment`
-- **payment-ws** - listens on port 8080
-- **PostgreSQL** - notifications db, listens on port 5433, username:password - `notifications:notifications`
-- **payment-notifications** - listens on port 8082
+- **2 PostgreSQL databases** 
+  - payment db, listens on port 5432, username:password - `payment:payment`
+  - notifications db, listens on port 5433, username:password - `notifications:notifications`
+- **2 services** 
+  - payment-ws, listens on port 8080
+  - payment-notifications, listens on port 8082
 
 To shut down the services gracefully run `ctrl+c`. To reset the data of the environment run `docker-compose down`.
 
