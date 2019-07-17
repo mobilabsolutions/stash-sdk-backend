@@ -1,4 +1,4 @@
 FROM adoptopenjdk/openjdk11:jdk-11.0.2.9
 ENV JAVA_OPTS="-Xmx256m"
-ADD payment-ws/target/payment-ws-*.jar executable.jar
+ADD target/payment-ws-*.jar executable.jar
 ENTRYPOINT java ${JAVA_OPTS} -Djava.security.egd=file:/dev/./urandom -jar executable.jar
