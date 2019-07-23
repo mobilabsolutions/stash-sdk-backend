@@ -106,7 +106,7 @@ class MerchantController(
         ApiResponse(code = 403, message = "Forbidden access"),
         ApiResponse(code = 404, message = "Resource not found")
     )
-    @RequestMapping(MERCHANT_PSP_CONFIG_URL, method = [RequestMethod.PUT])
+    @RequestMapping(MERCHANT_PSP_CONFIG_URL, method = [RequestMethod.DELETE])
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun deletePspConfigToMerchant(
