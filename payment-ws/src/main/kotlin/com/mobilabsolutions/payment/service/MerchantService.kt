@@ -75,6 +75,22 @@ class MerchantService(
     }
 
     /**
+     * Deletes PSP configuration for the merchant based on the given merchant id and psp type.
+     *
+     * @param merchantId Merchant Id
+     * @param pspId PSP Id
+     */
+    @Transactional
+    fun deletePspConfigForMerchant(merchantId: String, pspId: String) {
+        logger.info("Deleting {} PSP config for merchant {}", pspId, merchantId)
+        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        val configList = if (merchant.pspConfig != null) objectMapper.readValue(merchant.pspConfig, PspConfigListModel::class.java) else PspConfigListModel()
+        val pspConfig = configList.psp.firstOrNull { it.type == pspId }
+        configList.psp.remove(pspConfig ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_NOT_FOUND, "PSP configuration for '$pspId' cannot be found from given merchant").asException())
+        merchantRepository.updateMerchant(objectMapper.writeValueAsString(configList), merchantId)
+    }
+
+    /**
      * Returns the PSP configuration list for the given merchant id.
      *
      * @param merchantId Merchant Id
