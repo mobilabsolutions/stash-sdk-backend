@@ -21,5 +21,11 @@ data class CreditCardConfigModel(
     val ccType: String?,
 
     @ApiModelProperty(value = "Credit card holder name", example = "Max Mustermann")
-    val ccHolderName: String?
+    val ccHolderName: String?,
+
+    @ApiModelProperty(value = "Credit card nonce", example = "cnbaskjcbjakbjv")
+    val nonce: String?,
+
+    @ApiModelProperty(value = "Credit card device data", example = "{\"correlation_id\":\"73e463b6abef4de690f3b90c940b54d3\"}")
+    val deviceData: String?
 )
