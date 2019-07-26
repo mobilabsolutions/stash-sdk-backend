@@ -200,10 +200,10 @@ class MerchantService(
             sandboxPrivateKey,
             publicKey,
             privateKey,
-            default = default,
-            currency = null,
-            country = null,
-            locale = null,
-            urlPrefix = null
+            default,
+            currency,
+            country,
+            locale,
+            urlPrefix
         )
 }
