@@ -68,11 +68,17 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
     override fun registerAlias(pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, pspTestMode: Boolean?): PspRegisterAliasResponseModel? {
         logger.info("Registering alias {} for {} mode", pspRegisterAliasRequestModel.aliasId, getBraintreeMode(pspTestMode))
         if (pspRegisterAliasRequestModel.aliasExtra == null) throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Alias extra cannot be found").asException()
-
+        if (pspRegisterAliasRequestModel.aliasExtra?.paymentMethod == PaymentMethod.SEPA.name) throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "SEPA registration is not supported for Braintree").asException()
         val braintreeRequest = BraintreeRegisterAliasRequestModel(
             customerId = pspRegisterAliasRequestModel.aliasId,
-            nonce = if (pspRegisterAliasRequestModel.aliasExtra?.paymentMethod == PaymentMethod.PAY_PAL.name) pspRegisterAliasRequestModel.aliasExtra?.payPalConfig!!.nonce else pspRegisterAliasRequestModel.aliasExtra?.ccConfig!!.nonce,
-            deviceData = if (pspRegisterAliasRequestModel.aliasExtra?.paymentMethod == PaymentMethod.PAY_PAL.name) pspRegisterAliasRequestModel.aliasExtra?.payPalConfig!!.deviceData else pspRegisterAliasRequestModel.aliasExtra?.ccConfig!!.deviceData
+            nonce = when (pspRegisterAliasRequestModel.aliasExtra?.paymentMethod) {
+                PaymentMethod.PAY_PAL.name -> pspRegisterAliasRequestModel.aliasExtra?.payPalConfig!!.nonce
+                else -> pspRegisterAliasRequestModel.aliasExtra?.ccConfig!!.nonce
+            },
+            deviceData = when (pspRegisterAliasRequestModel.aliasExtra?.paymentMethod) {
+                PaymentMethod.PAY_PAL.name -> pspRegisterAliasRequestModel.aliasExtra?.payPalConfig!!.deviceData
+                else -> pspRegisterAliasRequestModel.aliasExtra?.ccConfig!!.deviceData
+            }
         )
 
         val braintreeResponse = braintreeClient.registerAlias(braintreeRequest, pspRegisterAliasRequestModel.pspConfig!!, getBraintreeMode(pspTestMode), pspRegisterAliasRequestModel.aliasExtra?.paymentMethod!!)
@@ -85,7 +91,10 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
         val request = BraintreePaymentRequestModel(
             amount = pspPaymentRequestModel.paymentData?.amount.toString(),
             token = pspPaymentRequestModel.pspAlias,
-            deviceData = if (pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.PAY_PAL.name) pspPaymentRequestModel.extra?.payPalConfig?.deviceData else pspPaymentRequestModel.extra?.ccConfig?.deviceData
+            deviceData = when (pspPaymentRequestModel.extra?.paymentMethod) {
+                PaymentMethod.PAY_PAL.name -> pspPaymentRequestModel.extra?.payPalConfig!!.deviceData
+                else -> pspPaymentRequestModel.extra?.ccConfig!!.deviceData
+            }
         )
 
         val response = braintreeClient.preauthorization(request, pspPaymentRequestModel.pspConfig!!, braintreeMode)
@@ -105,8 +114,10 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
         val request = BraintreePaymentRequestModel(
             amount = pspPaymentRequestModel.paymentData?.amount.toString(),
             token = pspPaymentRequestModel.pspAlias,
-            deviceData = if (pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.PAY_PAL.name) pspPaymentRequestModel.extra?.payPalConfig!!.deviceData else
-                pspPaymentRequestModel.extra?.ccConfig!!.deviceData
+            deviceData = when (pspPaymentRequestModel.extra?.paymentMethod) {
+                PaymentMethod.PAY_PAL.name -> pspPaymentRequestModel.extra?.payPalConfig!!.deviceData
+                else -> pspPaymentRequestModel.extra?.ccConfig!!.deviceData
+            }
         )
         val response = braintreeClient.authorization(request, pspPaymentRequestModel.pspConfig!!, braintreeMode)
 
