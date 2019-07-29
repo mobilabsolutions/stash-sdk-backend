@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/mobilabsolutions/payment-sdk-backend-open.svg?token=eZip4D1t6wvFGqNxU2ki&branch=master)](https://travis-ci.com/mobilabsolutions/payment-sdk-backend-open)
 
-Many applications need to process payments for digital or physical goods. Implementing payment functionality can be very cumbersome though: many payment service providers support or don't support various types of payment methods and payment method registration and usage flows. The Stash simplifies the integration of payments into our applications and abstracts away a lot of the internal complexity that different payment service providers' solutions have. With the Stash it does not matter which payment service provider one chooses to register payment methods with - the API is standardized and works across the board.
+Many applications need to process payments for digital or physical goods. Implementing payment functionality can be very cumbersome though: many payment service providers support or don't support various types of payment methods and payment method registration and usage flows. The Stash SDK simplifies the integration of payments into our applications and abstracts away a lot of the internal complexity that different payment service providers' solutions have. With the Stash SDK it does not matter which payment service provider one chooses to register payment methods with - the API is standardized and works across the board.
 
 ## Supported PSPs
 
@@ -16,7 +16,7 @@ At the moment, the Stash Backend supports the following PSPs:
 
 This repository contains multiple modules:
 
-- `payment-ws` - the main service module that contains the Stash domain model, repositories, and API endpoints
+- `payment-ws` - the main service module that contains the Stash Backend domain model, repositories, and API endpoints
 - `payment-commons` - the common module that contains the error handling, project validations and common models and data between the `payment-ws` and PSP modules
 - separate modules for every PSP - `payment-adyen`, `payment-braintree` and `payment-bs-one`
 - `payment-notifications` - the notification service that contains notification domain model, repositories, and webhook endpoints for each PSP
