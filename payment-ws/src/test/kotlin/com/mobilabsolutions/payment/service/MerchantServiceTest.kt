@@ -127,4 +127,23 @@ class MerchantServiceTest {
     fun `create merchant successfully`() {
         merchantService.createMerchant(MerchantRequestModel(unknownMerchantId, "test", "test@mobilabsolutions.com", "EUR", "Europe/Berlin"))
     }
+
+    @Test
+    fun `delete psp config with wrong psp id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            merchantService.deletePspConfigForMerchant(unknownMerchantId, unknownPspType)
+        }
+    }
+
+    @Test
+    fun `delete psp config with wrong merchant id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            merchantService.deletePspConfigForMerchant(unknownMerchantId, knownPspType)
+        }
+    }
+
+    @Test
+    fun `delete psp config successfully`() {
+        merchantService.deletePspConfigForMerchant(knownMerchantId, knownPspType)
+    }
 }

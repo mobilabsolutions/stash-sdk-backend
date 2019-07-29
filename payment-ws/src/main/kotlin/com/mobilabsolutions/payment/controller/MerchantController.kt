@@ -98,6 +98,22 @@ class MerchantController(
         @Valid @ApiParam(name = "PSP-Config-Info", value = "PSP Config Model") @RequestBody pspConfigRequestModel: PspConfigRequestModel
     ) = merchantService.addPspConfigForMerchant(merchantId, pspConfigRequestModel)
 
+    @ApiOperation(value = "Delete PSP Configuration for the Merchant")
+    @ApiResponses(
+        ApiResponse(code = 204, message = "Successfully deleted PSP Configuration"),
+        ApiResponse(code = 400, message = "Failed to delete PSP Configuration"),
+        ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 403, message = "Forbidden access"),
+        ApiResponse(code = 404, message = "Resource not found")
+    )
+    @RequestMapping(MERCHANT_PSP_CONFIG_URL, method = [RequestMethod.DELETE])
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
+    fun deletePspConfigToMerchant(
+        @PathVariable("Merchant-Id") merchantId: String,
+        @PathVariable("Psp-Id") pspId: String
+    ) = merchantService.deletePspConfigForMerchant(merchantId, pspId)
+
     @ApiOperation(value = "Get List of PSP Configuration for the Merchant")
     @ApiResponses(
         ApiResponse(code = 200, message = "Successfully retrieved PSP Configuration"),
