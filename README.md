@@ -31,7 +31,7 @@ To build this project, you will need to have at least the following:
 
 ## Building the project
 
-The Stash is using `ktlint` formatter. You should first format all the files by running the following command from the project root folder:
+The Stash Backend is using `ktlint` formatter. You should first format all the files by running the following command from the project root folder:
 ```
 mvn antrun:run@ktlint-format
 ```
@@ -82,11 +82,11 @@ After that, you can run the app directly from Maven using the Spring Boot plugin
 mvn spring-boot:run -Dspring.profiles.active=local
 ```
 
-You can now access the Stash here: http://localhost:8080/ 
+You can now access the Stash Backend here: http://localhost:8080/ 
 
 ## Request authentication
 
-In the Stash, there are the `secret` and `publishable` keys that should be generated for the merchants. These keys will later be used for the authentication requests.
+In the Stash Backend, there are the `secret` and `publishable` keys that should be generated for the merchants. These keys will later be used for the authentication requests.
 
 The publishable key is used to authenticate the alias registration requests:
 - Create alias
@@ -102,7 +102,7 @@ The secret key is used to authenticate the transactions requests and the alias d
 
 ## Idempotency
 
-The Stash uses a concept of idempotency for both aliases and transactions. The idempotent operation is the one that produces the same result no matter how many times it is called. The idempotency is performed by sending an `Idempotent-Key` in the header for `Create Alias`, `Preauthorization`, `Authorization` and `Refund` requests. This will avoid adding the same alias more than once or performing the same transaction several times if unintentionally called.
+The Stash SDK uses a concept of idempotency for both aliases and transactions. The idempotent operation is the one that produces the same result no matter how many times it is called. The idempotency is performed by sending an `Idempotent-Key` in the header for `Create Alias`, `Preauthorization`, `Authorization` and `Refund` requests. This will avoid adding the same alias more than once or performing the same transaction several times if unintentionally called.
 
 When a request comes with a new idempotent key, the key and the request body are stored in the Stash backend. If a second request comes with the same idempotent key and the same body, the original response is returned. However, if the second request has the same idempotent key as the original one, but a different body, an appropriate error will be returned.
 
