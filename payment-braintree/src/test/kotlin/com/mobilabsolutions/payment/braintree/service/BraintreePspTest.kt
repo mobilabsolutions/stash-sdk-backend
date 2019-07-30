@@ -19,6 +19,7 @@ import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.AliasExtraModel
+import com.mobilabsolutions.payment.model.CreditCardConfigModel
 import com.mobilabsolutions.payment.model.PayPalConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
@@ -87,6 +88,11 @@ class BraintreePspTest {
     private val transactionId = "some transaction id"
     private val pspTransactionId = "some psp transaction id"
     private val wrongPspTransactionId = "some wrong psp transaction id"
+    private val ccAliasId = "alias id"
+    private val ccPspAlias = "psp alias 2"
+    private val ccNonce = "cc nonce"
+    private val ccPspTransactionId = "another transaction"
+    private val ccTransactionId = "another transaction"
 
     @InjectMocks
     private lateinit var braintreePsp: BraintreePsp
@@ -98,33 +104,50 @@ class BraintreePspTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
-        Mockito.`when`(braintreeClient.registerPayPalAlias(BraintreeRegisterAliasRequestModel(correctAliasId, nonce, deviceData),
+        Mockito.`when`(braintreeClient.registerAlias(BraintreeRegisterAliasRequestModel(correctAliasId, nonce, deviceData),
             PspConfigModel(
                 PaymentServiceProvider.BRAINTREE.toString(), null, null, null, null,
                 merchantId, publicKey, privateKey, null, null, true, null, null, null, null
-            ), BraintreeMode.SANDBOX.mode))
+            ), BraintreeMode.SANDBOX.mode, PaymentMethod.PAY_PAL.name))
             .thenReturn(BraintreeRegisterAliasResponseModel(pspAlias, billingAgreementId))
+
+        Mockito.`when`(braintreeClient.registerAlias(BraintreeRegisterAliasRequestModel(ccAliasId, ccNonce, deviceData),
+            PspConfigModel(
+                PaymentServiceProvider.BRAINTREE.toString(), null, null, null, null,
+                merchantId, publicKey, privateKey, null, null, true, null, null, null, null
+            ), BraintreeMode.SANDBOX.mode, PaymentMethod.CC.name))
+            .thenReturn(BraintreeRegisterAliasResponseModel(ccPspAlias, null))
 
         Mockito.`when`(braintreeClient.preauthorization(BraintreePaymentRequestModel(correctAmount.toString(), pspAlias, deviceData), pspConfig, mode))
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.AUTHORIZED, transactionId = transactionId))
         Mockito.`when`(braintreeClient.preauthorization(BraintreePaymentRequestModel(declinedAmount.toString(), pspAlias, deviceData), pspConfig, mode))
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLEMENT_DECLINED, transactionId = transactionId, errorCode = BraintreeErrors.SETTLEMENT_DECLINED.code))
+        Mockito.`when`(braintreeClient.preauthorization(BraintreePaymentRequestModel(correctAmount.toString(), ccPspAlias, deviceData), pspConfig, mode))
+            .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.AUTHORIZED, transactionId = ccTransactionId))
         Mockito.`when`(braintreeClient.capture(BraintreeCaptureRequestModel(pspTransactionId), pspConfig, mode))
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLING, transactionId = transactionId))
         Mockito.`when`(braintreeClient.capture(BraintreeCaptureRequestModel(wrongPspTransactionId), pspConfig, mode))
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.FAILED, transactionId = wrongPspTransactionId, errorCode = PaymentError.PAYMENT_ERROR.name, errorMessage = BraintreeErrors.ALREADY_CAPTURED.name))
+        Mockito.`when`(braintreeClient.capture(BraintreeCaptureRequestModel(ccPspTransactionId), pspConfig, mode))
+            .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLING, transactionId = ccTransactionId))
         Mockito.`when`(braintreeClient.authorization(BraintreePaymentRequestModel(correctAmount.toString(), pspAlias, deviceData), pspConfig, mode))
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLING, transactionId = transactionId))
         Mockito.`when`(braintreeClient.authorization(BraintreePaymentRequestModel(declinedAmount.toString(), pspAlias, deviceData), pspConfig, mode))
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLEMENT_DECLINED, transactionId = transactionId, errorCode = BraintreeErrors.SETTLEMENT_DECLINED.code))
+        Mockito.`when`(braintreeClient.authorization(BraintreePaymentRequestModel(correctAmount.toString(), ccPspAlias, deviceData), pspConfig, mode))
+            .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLING, transactionId = ccTransactionId))
         Mockito.`when`(braintreeClient.refund(BraintreeRefundRequestModel(pspTransactionId, correctAmount.toString()), pspConfig, mode))
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLING, transactionId = transactionId))
-        Mockito.`when`(braintreeClient.deletePayPalAlias(wrongPspAlias, pspConfig, BraintreeMode.SANDBOX.mode))
+        Mockito.`when`(braintreeClient.refund(BraintreeRefundRequestModel(ccPspTransactionId, correctAmount.toString()), pspConfig, mode))
+            .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.SETTLING, transactionId = ccPspTransactionId))
+        Mockito.`when`(braintreeClient.deleteAlias(wrongPspAlias, pspConfig, BraintreeMode.SANDBOX.mode))
             .thenThrow(ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "PayPal alias doesn't exist at Braintree").asException())
         Mockito.`when`(braintreeClient.reverse(BraintreeReverseRequestModel(pspTransactionId), pspConfig, mode))
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.VOIDED, transactionId = transactionId))
         Mockito.`when`(braintreeClient.reverse(BraintreeReverseRequestModel(wrongPspTransactionId), pspConfig, mode))
             .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.FAILED, transactionId = pspTransactionId, errorCode = PaymentError.PAYMENT_ERROR.name, errorMessage = BraintreeErrors.ALREADY_REVERSED.name))
+        Mockito.`when`(braintreeClient.reverse(BraintreeReverseRequestModel(ccPspTransactionId), pspConfig, mode))
+            .thenReturn(BraintreePaymentResponseModel(status = Transaction.Status.VOIDED, transactionId = ccTransactionId))
     }
 
     @Test
@@ -133,7 +156,7 @@ class BraintreePspTest {
     }
 
     @Test
-    fun `register alias with correct alias id`() {
+    fun `register paypal alias with correct alias id`() {
         braintreePsp.registerAlias(PspRegisterAliasRequestModel(correctAliasId,
             AliasExtraModel(
                 null,
@@ -146,25 +169,30 @@ class BraintreePspTest {
     }
 
     @Test
-    fun `register alias with wrong payment method`() {
-        Assertions.assertThrows(ApiException::class.java) {
-            braintreePsp.registerAlias(PspRegisterAliasRequestModel(correctAliasId,
-                AliasExtraModel(
-                    null,
-                    null,
-                    PayPalConfigModel(nonce, billingAgreementId, deviceData),
-                    null,
-                    PaymentMethod.CC.name,
-                    null
-                ), pspConfig), test)
-        }
+    fun `register cc alias with correct alias id`() {
+        braintreePsp.registerAlias(PspRegisterAliasRequestModel(ccAliasId,
+            AliasExtraModel(
+                CreditCardConfigModel(null, null, null, null, ccNonce, deviceData),
+                null,
+                null,
+                null,
+                PaymentMethod.CC.name,
+                null
+            ), pspConfig), test)
     }
 
     @Test
-    fun `delete alias`() {
+    fun `delete paypal alias`() {
         braintreePsp.deleteAlias(
             PspDeleteAliasRequestModel(
                 null, pspAlias, null, pspConfig, null), test)
+    }
+
+    @Test
+    fun `delete cc alias`() {
+        braintreePsp.deleteAlias(
+            PspDeleteAliasRequestModel(
+                null, ccPspAlias, null, pspConfig, null), test)
     }
 
     @Test
@@ -177,7 +205,7 @@ class BraintreePspTest {
     }
 
     @Test
-    fun `preauthorize successfully`() {
+    fun `preauthorize paypal transaction successfully`() {
         val response = braintreePsp.preauthorize(
             PspPaymentRequestModel(
                 null,
@@ -221,7 +249,29 @@ class BraintreePspTest {
     }
 
     @Test
-    fun `capture successfully`() {
+    fun `preauthorize cc transaction successfully`() {
+        val response = braintreePsp.preauthorize(
+            PspPaymentRequestModel(
+                null,
+                AliasExtraModel(
+                    CreditCardConfigModel(null, null, null, null, ccNonce, deviceData),
+                    null,
+                    null,
+                    null,
+                    PaymentMethod.CC.name,
+                    null
+                ),
+                PaymentDataRequestModel(correctAmount, currency, reason),
+                ccPspAlias,
+                pspConfig,
+                null
+            ), test
+        )
+        Assertions.assertNull(response.error)
+    }
+
+    @Test
+    fun `capture paypal transaction successfully`() {
         val response = braintreePsp.capture(
             PspCaptureRequestModel(
                 pspTransactionId,
@@ -250,7 +300,21 @@ class BraintreePspTest {
     }
 
     @Test
-    fun `authorize successfully`() {
+    fun `capture cc transaction successfully`() {
+        val response = braintreePsp.capture(
+            PspCaptureRequestModel(
+                ccPspTransactionId,
+                null,
+                null,
+                pspConfig,
+                null
+            ), test
+        )
+        Assertions.assertNull(response.error)
+    }
+
+    @Test
+    fun `authorize paypal transaction successfully`() {
         val response = braintreePsp.authorize(
             PspPaymentRequestModel(
                 null,
@@ -294,7 +358,29 @@ class BraintreePspTest {
     }
 
     @Test
-    fun `refund successfully`() {
+    fun `authorize cc transaction successfully`() {
+        val response = braintreePsp.authorize(
+            PspPaymentRequestModel(
+                null,
+                AliasExtraModel(
+                    CreditCardConfigModel(null, null, null, null, ccNonce, deviceData),
+                    null,
+                    null,
+                    null,
+                    PaymentMethod.CC.name,
+                    null
+                ),
+                PaymentDataRequestModel(correctAmount, currency, reason),
+                ccPspAlias,
+                pspConfig,
+                null
+            ), test
+        )
+        Assertions.assertNull(response.error)
+    }
+
+    @Test
+    fun `refund paypal transaction successfully`() {
         val response = braintreePsp.refund(
             PspRefundRequestModel(
                 pspTransactionId,
@@ -310,10 +396,39 @@ class BraintreePspTest {
     }
 
     @Test
-    fun `reverse successfully`() {
+    fun `refund cc transaction successfully`() {
+        val response = braintreePsp.refund(
+            PspRefundRequestModel(
+                ccPspTransactionId,
+                correctAmount,
+                currency,
+                TransactionAction.REFUND.name,
+                pspConfig,
+                null,
+                PaymentMethod.CC.name
+            ), test
+        )
+        Assertions.assertNull(response.error)
+    }
+
+    @Test
+    fun `reverse paypal transaction successfully`() {
         val response = braintreePsp.reverse(
             PspReversalRequestModel(
                 pspTransactionId,
+                currency,
+                pspConfig,
+                null
+            ), test
+        )
+        Assertions.assertNull(response.error)
+    }
+
+    @Test
+    fun `reverse cc transaction successfully`() {
+        val response = braintreePsp.reverse(
+            PspReversalRequestModel(
+                ccPspTransactionId,
                 currency,
                 pspConfig,
                 null
