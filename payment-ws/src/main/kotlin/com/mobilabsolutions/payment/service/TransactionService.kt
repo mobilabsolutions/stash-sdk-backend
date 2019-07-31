@@ -37,6 +37,8 @@ import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -51,11 +53,14 @@ class TransactionService(
     private val merchantRepository: MerchantRepository,
     private val pspRegistry: PspRegistry,
     private val requestHashing: RequestHashing,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val kafkaTemplate: KafkaTemplate<String, Transaction>
 ) {
 
     @Value("\${payment.ws.notification.apiKey:}")
     private lateinit var paymentApiKey: String
+    @Value("\${kafka.transactions.topicName:}")
+    private lateinit var kafkaTopicName: String
 
     /**
      * Authorize transaction
@@ -571,6 +576,8 @@ class TransactionService(
                 )
                 transactionRepository.save(newTransaction)
 
+                sendMessageToKafka(newTransaction)
+
                 return PaymentResponseModel(
                     newTransaction.transactionId, newTransaction.amount,
                     newTransaction.currencyId, newTransaction.status,
@@ -602,6 +609,11 @@ class TransactionService(
         val result = objectMapper.readValue(alias.merchant?.pspConfig, PspConfigListModel::class.java)
         return result.psp.firstOrNull { it.type == alias.psp!!.toString() }
             ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_NOT_FOUND, "PSP configuration for '${alias.psp}' cannot be found from used merchant").asException()
+    }
+
+    private fun sendMessageToKafka(message: Transaction) {
+        logger.info("Sending the message '$message")
+        kafkaTemplate.send(kafkaTopicName, message.merchant.id!!, message)
     }
 
     companion object : KLogging() {

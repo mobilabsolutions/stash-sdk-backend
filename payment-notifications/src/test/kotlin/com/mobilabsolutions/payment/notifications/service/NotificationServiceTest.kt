@@ -18,7 +18,7 @@ import com.mobilabsolutions.payment.notifications.data.Notification
 import com.mobilabsolutions.payment.notifications.data.NotificationId
 import com.mobilabsolutions.payment.notifications.data.repository.NotificationRepository
 import com.mobilabsolutions.payment.service.Psp
-import com.mobilabsolutions.server.commons.CommonConfiguration
+import com.mobilabsolutions.server.commons.configuration.CommonConfiguration
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance

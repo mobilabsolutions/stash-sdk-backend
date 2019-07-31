@@ -2,7 +2,7 @@
  * Copyright © MobiLab Solutions GmbH
  */
 
-package com.mobilabsolutions.server.commons
+package com.mobilabsolutions.server.commons.configuration
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

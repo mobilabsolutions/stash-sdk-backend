@@ -6,7 +6,7 @@ package com.mobilabsolutions.payment.notifications
 
 import com.mobilabsolutions.payment.notifications.configuration.SecurityConfig
 import com.mobilabsolutions.payment.notifications.configuration.SwaggerConfiguration
-import com.mobilabsolutions.server.commons.CommonConfiguration
+import com.mobilabsolutions.server.commons.configuration.CommonConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.http.HttpMessageConvertersAutoConfiguration
 import org.springframework.boot.runApplication
