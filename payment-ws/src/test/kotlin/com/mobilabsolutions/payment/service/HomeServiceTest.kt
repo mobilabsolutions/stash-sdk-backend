@@ -6,6 +6,7 @@ import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
+import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -29,6 +30,7 @@ import org.mockito.Spy
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class HomeServiceTest {
     private val merchantId = "mobilab"
+    private val incorrectMerchantId = "NotMobilab"
     private val pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"123\", \"key\" : \"123\"," +
         " \"merchantId\" : \"mobilab\", \"accountId\" : \"123\", \"default\" : \"true\"}]}"
     private val status = TransactionStatus.SUCCESS
@@ -54,12 +56,11 @@ class HomeServiceTest {
         MockitoAnnotations.initMocks(this)
 
         Mockito.`when`(merchantRepository.getMerchantById(merchantId)).thenReturn(
-            Merchant(merchantId, pspConfig = pspConfig, timezone = "Europe/Berlin")
-        )
-        Mockito.`when`(transactionRepository.getTransactionsByFilters(merchantId, createdAtStart, null, null, action.name, status.name,
-            null, 1000, 0))
-            .thenReturn(listOf(arrayOf(correctTransactionId, amount, currency, status.name, action.name, "some reason", "some customer id", paymentMethod.name,
-                Timestamp.valueOf("2019-07-29 13:00:00.000"), 1.toBigInteger())))
+            Merchant(merchantId, pspConfig = pspConfig, timezone = "Europe/Berlin"))
+        Mockito.`when`(merchantRepository.getMerchantById(incorrectMerchantId)).thenReturn(null)
+        Mockito.`when`(transactionRepository.getTransactionsByFilters(merchantId, createdAtStart, null, null, action.name, status.name, null, 1000, 0))
+            .thenReturn(listOf(arrayOf(correctTransactionId, amount, currency, status.name, action.name, "some reason",
+                "some customer id", paymentMethod.name, Timestamp.valueOf("2019-07-29 13:00:00.000"), 1.toBigInteger())))
     }
 
     @Test
@@ -69,5 +70,20 @@ class HomeServiceTest {
 
         Assertions.assertEquals(refunds.refunds[0].day, "Monday")
         Assertions.assertEquals(refunds.refunds[0].amount, 100)
+    }
+
+    @Test
+    fun `get refunds overview with incorrect merchant id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            homeService.getRefundsOverview(incorrectMerchantId)
+        }
+    }
+
+    @Test
+    fun `get refunds overview with inaccurate start date`() {
+        Mockito.`when`(homeService.getPastDate(1)).thenReturn(createdAtStart)
+        val refunds = homeService.getRefundsOverview(merchantId)
+
+        Assertions.assertEquals(refunds.refunds.size, 0)
     }
 }

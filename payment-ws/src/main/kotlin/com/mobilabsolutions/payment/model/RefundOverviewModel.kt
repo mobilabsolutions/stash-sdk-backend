@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel(value = "Refund Overview Model")
+@ApiModel(value = "Refund overview model")
 data class RefundOverviewModel(
     @ApiModelProperty(value = "Week day", example = "Monday")
     val day: String?,

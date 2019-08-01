@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -40,6 +41,7 @@ class HomeController(
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun getRefundsOverview(
         @PathVariable("Merchant-Id") merchantId: String
     ) = homeService.getRefundsOverview(merchantId)
