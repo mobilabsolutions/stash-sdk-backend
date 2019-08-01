@@ -1,7 +1,10 @@
 package com.mobilabsolutions.payment.service
 
+import com.mobilabsolutions.payment.data.Alias
 import com.mobilabsolutions.payment.data.Merchant
+import com.mobilabsolutions.payment.data.Transaction
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
+import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
@@ -18,9 +21,11 @@ import org.mockito.MockitoAnnotations
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
-import java.sql.Timestamp
 import org.junit.jupiter.api.Assertions
 import org.mockito.Spy
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
@@ -40,6 +45,30 @@ class HomeServiceTest {
     private val currency = "EUR"
     private val correctTransactionId = "12345"
     private val createdAtStart = "2019-07-29T12:00:00Z"
+    private val transaction = Transaction(
+        amount = amount,
+        currencyId = currency,
+        transactionId = correctTransactionId,
+        paymentInfo = null,
+        pspTestMode = true,
+        action = action,
+        status = status,
+        paymentMethod = paymentMethod,
+        merchant = Merchant(
+            merchantId,
+            pspConfig = pspConfig,
+            timezone = "Europe/Berlin"
+        ),
+        alias = Alias(
+            id = null,
+            active = true,
+            extra = null,
+            psp = PaymentServiceProvider.BS_PAYONE,
+            pspAlias = null,
+            merchant = Merchant("1", pspConfig = pspConfig)
+        ),
+        pspResponse = null
+    )
 
     @Spy
     @InjectMocks
@@ -54,13 +83,12 @@ class HomeServiceTest {
     @BeforeAll
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
-
+        transaction.createdDate = LocalDateTime.parse(createdAtStart, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")).atZone(ZoneId.of("Europe/Berlin")).toInstant()
         Mockito.`when`(merchantRepository.getMerchantById(merchantId)).thenReturn(
             Merchant(merchantId, pspConfig = pspConfig, timezone = "Europe/Berlin"))
         Mockito.`when`(merchantRepository.getMerchantById(incorrectMerchantId)).thenReturn(null)
-        Mockito.`when`(transactionRepository.getTransactionsByFilters(merchantId, createdAtStart, null, null, action.name, status.name, null, 1000, 0))
-            .thenReturn(listOf(arrayOf(correctTransactionId, amount, currency, status.name, action.name, "some reason",
-                "some customer id", paymentMethod.name, Timestamp.valueOf("2019-07-29 13:00:00.000"), 1.toBigInteger())))
+        Mockito.`when`(transactionRepository.getTransactionsForRefunds(merchantId, createdAtStart, null))
+            .thenReturn(listOf(transaction))
     }
 
     @Test
