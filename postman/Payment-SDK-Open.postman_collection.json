@@ -1346,6 +1346,18 @@
                         }
                     },
                     "response": []
+                },
+                {
+                    "name": "Get refunds overview",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/refunds"
+                    },
+                    "response": []
                 }
             ]
         }
