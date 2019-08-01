@@ -7,9 +7,9 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel(value = "Refund Overview Response Model")
+@ApiModel(value = "Refund overview response model")
 data class RefundOverviewResponseModel(
-    @ApiModelProperty(value = "Refund Overview Model")
+    @ApiModelProperty(value = "Refund overview model")
     val refunds: MutableList<RefundOverviewModel> = mutableListOf()
 ) {
     constructor(refunds: HashMap<String, Int>) : this(
