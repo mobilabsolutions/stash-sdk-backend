@@ -62,9 +62,8 @@ class HomeController(
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun getNotifications(
-                @PathVariable("Merchant-Id") merchantId: String
+        @PathVariable("Merchant-Id") merchantId: String
     ) = homeService.getNotifications(merchantId)
-
 
     @ApiOperation(value = "Refunds overview")
     @ApiResponses(

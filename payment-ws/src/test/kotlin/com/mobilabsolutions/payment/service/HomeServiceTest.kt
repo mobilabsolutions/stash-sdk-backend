@@ -8,8 +8,10 @@ import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
+import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.server.commons.exception.ApiException
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -18,11 +20,11 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
+import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
-import org.junit.jupiter.api.Assertions
-import org.mockito.Spy
+import org.springframework.messaging.simp.SimpMessagingTemplate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -45,6 +47,7 @@ class HomeServiceTest {
     private val currency = "EUR"
     private val correctTransactionId = "12345"
     private val createdAtStart = "2019-07-29T12:00:00Z"
+    private val merchant = Merchant(merchantId, pspConfig = pspConfig, timezone = "Europe/Berlin")
     private val transaction = Transaction(
         amount = amount,
         currencyId = currency,
@@ -54,11 +57,7 @@ class HomeServiceTest {
         action = action,
         status = status,
         paymentMethod = paymentMethod,
-        merchant = Merchant(
-            merchantId,
-            pspConfig = pspConfig,
-            timezone = "Europe/Berlin"
-        ),
+        merchant = merchant,
         alias = Alias(
             id = null,
             active = true,
@@ -80,12 +79,17 @@ class HomeServiceTest {
     @Mock
     private lateinit var transactionRepository: TransactionRepository
 
+    @Mock
+    private lateinit var merchantUserRepository: MerchantUserRepository
+
+    @Mock
+    private lateinit var simpleMessagingTemplate: SimpMessagingTemplate
+
     @BeforeAll
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
         transaction.createdDate = LocalDateTime.parse(createdAtStart, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")).atZone(ZoneId.of("Europe/Berlin")).toInstant()
-        Mockito.`when`(merchantRepository.getMerchantById(merchantId)).thenReturn(
-            Merchant(merchantId, pspConfig = pspConfig, timezone = "Europe/Berlin"))
+        Mockito.`when`(merchantRepository.getMerchantById(merchantId)).thenReturn(merchant)
         Mockito.`when`(merchantRepository.getMerchantById(incorrectMerchantId)).thenReturn(null)
         Mockito.`when`(transactionRepository.getTransactionsForRefunds(merchantId, createdAtStart, null))
             .thenReturn(listOf(transaction))
@@ -93,7 +97,7 @@ class HomeServiceTest {
 
     @Test
     fun `get refunds overview`() {
-        Mockito.`when`(homeService.getPastDate(6)).thenReturn(createdAtStart)
+        Mockito.`when`(homeService.getPastDate(merchant, 6)).thenReturn(createdAtStart)
         val refunds = homeService.getRefundsOverview(merchantId)
 
         Assertions.assertEquals(refunds.refunds[0].day, "Monday")
@@ -109,7 +113,7 @@ class HomeServiceTest {
 
     @Test
     fun `get refunds overview with inaccurate start date`() {
-        Mockito.`when`(homeService.getPastDate(1)).thenReturn(createdAtStart)
+        Mockito.`when`(homeService.getPastDate(merchant, 1)).thenReturn(createdAtStart)
         val refunds = homeService.getRefundsOverview(merchantId)
 
         Assertions.assertEquals(refunds.refunds.size, 0)
