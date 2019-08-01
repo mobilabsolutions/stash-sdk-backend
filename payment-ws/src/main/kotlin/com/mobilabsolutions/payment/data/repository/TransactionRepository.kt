@@ -89,4 +89,14 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
         @Param("createdAtStart") createdAtStart: String,
         @Param("createdAtEnd") createdAtEnd: String?
     ): List<Transaction>
+
+    @Query("SELECT * FROM transaction_record tr WHERE tr.merchant_id = :merchantId AND tr.status = 'SUCCESS' AND tr.action = 'REFUND'" +
+        " AND tr.created_date >= CASE WHEN :createdAtStart <> '' THEN TO_TIMESTAMP(CAST(:createdAtStart AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END " +
+        "AND tr.created_date <= CASE WHEN :createdAtEnd <> '' THEN TO_TIMESTAMP(CAST(:createdAtEnd AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END ",
+        nativeQuery = true)
+    fun getTransactionsForRefunds(
+        @Param("merchantId") merchantId: String,
+        @Param("createdAtStart") createdAtStart: String?,
+        @Param("createdAtEnd") createdAtEnd: String?
+    ): List<Transaction>
 }

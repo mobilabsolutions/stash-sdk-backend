@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 /**
- * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
+ * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
 @RestController
 @RequestMapping(HomeController.BASE_HOME_URL)
@@ -28,6 +28,7 @@ class HomeController(
         const val BASE_HOME_URL = "home"
         const val KEY_PERFORMANCE_URL = "/{Merchant-Id}/key-performance"
         const val NOTIFICATIONS_URL = "/{Merchant-Id}/notifications"
+        const val REFUND_URL = "/{Merchant-Id}/refunds"
     }
 
     @ApiOperation(value = "Get key performance")
@@ -49,7 +50,7 @@ class HomeController(
 
     @ApiOperation(value = "Get notifications")
     @ApiResponses(
-        ApiResponse(code = 200, message = "Successfully returned key performance"),
+        ApiResponse(code = 200, message = "Successfully returned notifications"),
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 403, message = "Forbidden access"),
         ApiResponse(code = 404, message = "Resource not found")
@@ -61,6 +62,24 @@ class HomeController(
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun getNotifications(
-        @PathVariable("Merchant-Id") merchantId: String
+                @PathVariable("Merchant-Id") merchantId: String
     ) = homeService.getNotifications(merchantId)
+
+
+    @ApiOperation(value = "Refunds overview")
+    @ApiResponses(
+        ApiResponse(code = 200, message = "Successfully retrieved refunds"),
+        ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 403, message = "Forbidden access"),
+        ApiResponse(code = 404, message = "Resource not found")
+    )
+    @RequestMapping(REFUND_URL,
+        method = [RequestMethod.GET],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
+    fun getRefundsOverview(
+        @PathVariable("Merchant-Id") merchantId: String
+    ) = homeService.getRefundsOverview(merchantId)
 }

@@ -12,12 +12,14 @@ import com.mobilabsolutions.payment.model.NotificationsModel
 import com.mobilabsolutions.payment.model.TodaysActivityModel
 import com.mobilabsolutions.payment.model.response.LiveDataResponseModel
 import com.mobilabsolutions.payment.model.response.NotificationsResponseModel
+import com.mobilabsolutions.payment.model.response.RefundOverviewResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -65,6 +67,7 @@ class HomeService(
      * @param merchantId Merchant id
      * @return key performance
      */
+    @Transactional(readOnly = true)
     fun getKeyPerformance(merchantId: String): KeyPerformanceModel {
         val merchant = merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
@@ -81,6 +84,7 @@ class HomeService(
      * @param merchantId Merchant id
      * @return notifications
      */
+    @Transactional(readOnly = true)
     fun getNotifications(merchantId: String): NotificationsResponseModel {
         val merchant = merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
@@ -93,6 +97,27 @@ class HomeService(
             }
         }
         return NotificationsResponseModel(notifications, getTransactionsForYesterday(merchant))
+    }
+
+    /**
+     * Gets total amount refunded on each day for the last 7 days
+     *
+     * @param merchantId Merchant ID
+     * @return Refund overview response model
+     */
+    @Transactional(readOnly = true)
+    fun getRefundsOverview(merchantId: String): RefundOverviewResponseModel {
+        MerchantService.logger.info("Getting refunded transactions for merchant {}", merchantId)
+        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        val transactions = transactionRepository.getTransactionsForRefunds(merchantId, getPastDate(merchant,6), null)
+        val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
+        val refundsMap = HashMap<String, Int>()
+        for (transaction in transactions) {
+            val day = DateTimeFormatter.ofPattern("EEEE").withZone(ZoneId.of(timezone)).format(transaction.createdDate)
+            val amount = refundsMap[day] ?: 0
+            refundsMap[day] = amount.plus(transaction.amount!!)
+        }
+        return RefundOverviewResponseModel(refundsMap)
     }
 
     private fun toLiveData(transaction: Transaction): LiveDataResponseModel {
