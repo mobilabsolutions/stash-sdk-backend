@@ -37,7 +37,6 @@ import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -311,6 +310,8 @@ class TransactionService(
                     notification = true
                 )
                 transactionRepository.save(newTransaction)
+                if (newTransaction.status == TransactionStatus.SUCCESS) sendMessageToKafka(newTransaction)
+
                 logger.info { "PSP transaction '${it.pspTransactionId}' is successfully processed for transaction action '${it.transactionAction}'" }
             } else {
                 logger.info { "There is no transaction for PSP transaction '${it.pspTransactionId}' and transaction action '${it.transactionAction}'" }
@@ -379,6 +380,7 @@ class TransactionService(
                     alias = lastTransaction.alias
                 )
                 transactionRepository.save(newTransaction)
+                if (newTransaction.status == TransactionStatus.SUCCESS) sendMessageToKafka(newTransaction)
 
                 return PaymentResponseModel(
                     newTransaction.transactionId, newTransaction.amount,
@@ -450,6 +452,7 @@ class TransactionService(
                     alias = lastTransaction.alias
                 )
                 transactionRepository.save(newTransaction)
+                if (newTransaction.status == TransactionStatus.SUCCESS) sendMessageToKafka(newTransaction)
 
                 return PaymentResponseModel(
                     newTransaction.transactionId, newTransaction.amount,
@@ -575,8 +578,7 @@ class TransactionService(
                     alias = alias
                 )
                 transactionRepository.save(newTransaction)
-
-                sendMessageToKafka(newTransaction)
+                if (newTransaction.status == TransactionStatus.SUCCESS) sendMessageToKafka(newTransaction)
 
                 return PaymentResponseModel(
                     newTransaction.transactionId, newTransaction.amount,
@@ -611,9 +613,8 @@ class TransactionService(
             ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_NOT_FOUND, "PSP configuration for '${alias.psp}' cannot be found from used merchant").asException()
     }
 
-    private fun sendMessageToKafka(message: Transaction) {
-        logger.info("Sending the message '$message")
-        kafkaTemplate.send(kafkaTopicName, message.merchant.id!!, message)
+    private fun sendMessageToKafka(transaction: Transaction) {
+        kafkaTemplate.send(kafkaTopicName, transaction.merchant.id!!, transaction)
     }
 
     companion object : KLogging() {

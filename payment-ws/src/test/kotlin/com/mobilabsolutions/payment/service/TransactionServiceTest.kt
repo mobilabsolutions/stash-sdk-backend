@@ -31,7 +31,7 @@ import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
 import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
 import com.mobilabsolutions.payment.model.request.ReversalRequestModel
 import com.mobilabsolutions.payment.model.response.PspPaymentResponseModel
-import com.mobilabsolutions.server.commons.configuration.CommonConfiguration
+import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import com.mobilabsolutions.server.commons.util.RequestHashing
 import org.junit.jupiter.api.Assertions

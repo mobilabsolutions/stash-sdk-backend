@@ -6,8 +6,6 @@ package com.mobilabsolutions.payment.data.repository
 
 import com.mobilabsolutions.payment.data.configuration.DataConfiguration
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration
-import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -19,5 +17,4 @@ import org.springframework.test.context.junit4.AbstractTransactionalJUnit4Spring
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(classes = [DataConfiguration::class])
 @TestPropertySource("classpath:test.properties")
-@EnableAutoConfiguration(exclude = [KafkaAutoConfiguration::class])
 class AbstractRepositoryTest : AbstractTransactionalJUnit4SpringContextTests()

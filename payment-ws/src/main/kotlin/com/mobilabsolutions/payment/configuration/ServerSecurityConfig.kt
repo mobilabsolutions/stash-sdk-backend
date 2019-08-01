@@ -5,7 +5,7 @@
 package com.mobilabsolutions.payment.configuration
 
 import com.mobilabsolutions.payment.service.UserDetailsServiceImpl
-import com.mobilabsolutions.server.commons.configuration.Encoders
+import com.mobilabsolutions.server.commons.Encoders
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean

@@ -18,7 +18,7 @@ import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.validation.ConfigValidator
 import com.mobilabsolutions.payment.validation.PspAliasValidator
 import com.mobilabsolutions.payment.validation.PspValidator
-import com.mobilabsolutions.server.commons.configuration.CommonConfiguration
+import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import com.mobilabsolutions.server.commons.util.RequestHashing

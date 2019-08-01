@@ -80,11 +80,13 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
     @Query("SELECT * FROM transaction_record tr WHERE CAST(tr.psp_response AS json)#>>'{pspTransactionId}' = :pspTransactionId ORDER BY created_date DESC LIMIT 1", nativeQuery = true)
     fun getByPspReference(@Param("pspTransactionId") pspTransactionId: String): Transaction?
 
-    @Query("SELECT * FROM transaction_record tr WHERE tr.merchant_id = :merchantId AND tr.status = 'SUCCESS' AND " +
-        "tr.created_date BETWEEN TO_TIMESTAMP(CAST(:createdAtStart AS text), 'yyyy-MM-dd HH24:MI:SS') AND TO_TIMESTAMP(CAST(:createdAtEnd AS text), 'yyyy-MM-dd HH24:MI:SS')", nativeQuery = true)
+    @Query("SELECT * FROM transaction_record tr WHERE tr.merchant_id = :merchantId AND tr.status = 'SUCCESS' " +
+        "AND tr.created_date >= TO_TIMESTAMP(CAST(:createdAtStart AS text), 'yyyy-MM-dd HH24:MI:SS') " +
+        "AND tr.created_date <= CASE WHEN :createdAtEnd <> '' THEN TO_TIMESTAMP(CAST(:createdAtEnd AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END",
+        nativeQuery = true)
     fun getByMerchantId(
         @Param("merchantId") merchantId: String,
         @Param("createdAtStart") createdAtStart: String,
-        @Param("createdAtEnd") createdAtEnd: String
+        @Param("createdAtEnd") createdAtEnd: String?
     ): List<Transaction>
 }
