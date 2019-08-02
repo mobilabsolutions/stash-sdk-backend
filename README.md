@@ -48,12 +48,16 @@ The resulting jar file will be produced in the directory named `target`.
 
 If you want to start only the ws service, you should run `docker-compose up` from the `payment-ws` folder. It will start the following services :
 - **PostgreSQL** - listens on port 5432, username:password - `payment:payment`
+- **Zookeeper** - listens on port 2181
+- **Kafka** - listens on port 9092, the topic will be created automatically on the application startup
 - **payment-ws** - listens on port 8080
 
 If you want to start both the ws service and the notification service, you should run `docker-compose up` from the root folder. It will start the following services :
 - **2 PostgreSQL databases** 
   - payment db, listens on port 5432, username:password - `payment:payment`
   - notifications db, listens on port 5433, username:password - `notifications:notifications`
+- **Zookeeper** - listens on port 2181
+- **Kafka** - listens on port 9092, the topic will be created automatically on the application startup
 - **2 services** 
   - payment-ws, listens on port 8080
   - payment-notifications, listens on port 8082
