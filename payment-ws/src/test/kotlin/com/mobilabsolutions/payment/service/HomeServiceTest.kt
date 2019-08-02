@@ -70,7 +70,7 @@ class HomeServiceTest {
         notification = true
     )
     private val capturedTransaction = Transaction(
-        amount = amount,
+        amount = 200,
         currencyId = currency,
         transactionId = correctTransactionId,
         paymentInfo = null,

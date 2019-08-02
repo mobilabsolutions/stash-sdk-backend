@@ -73,10 +73,11 @@ class HomeService(
         val merchant = merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transactions = transactionRepository.getTransactionsByMerchantId(merchantId, getPastDate(merchant, 30), null)
-        val salesVolume = transactions.filter { it.action == TransactionAction.AUTH || it.action == TransactionAction.CAPTURE }.sumBy { it.amount!! }
+        val salesVolume = transactions.filter { it.action == TransactionAction.AUTH || it.action == TransactionAction.CAPTURE || it.action == TransactionAction.CHARGEBACK_REVERSED }.sumBy { it.amount!! }
+        val returnedMoney = transactions.filter { it.action == TransactionAction.REFUND || it.action == TransactionAction.CHARGEBACK }.sumBy { it.amount!! }
         val refundedTransactions = transactions.filter { it.action == TransactionAction.REFUND }.size
         val chargedbackTransactions = transactions.filter { it.action == TransactionAction.CHARGEBACK }.size
-        return KeyPerformanceModel(salesVolume, transactions.size, refundedTransactions, chargedbackTransactions)
+        return KeyPerformanceModel(salesVolume - returnedMoney, transactions.size, refundedTransactions, chargedbackTransactions)
     }
 
     /**
@@ -140,6 +141,7 @@ class HomeService(
             TransactionAction.CAPTURE -> getLiveDataForAuthAndCapturedTransaction(transaction)
             TransactionAction.REFUND -> getLiveDataForRefundedTransaction(transaction)
             TransactionAction.CHARGEBACK -> getLiveDataForChargedbackTransaction(transaction)
+            TransactionAction.CHARGEBACK_REVERSED -> getLiveDataForChargebackReversedTransactions(transaction)
             else -> getLiveDataForOtherTransactions()
         }
     }
@@ -163,12 +165,15 @@ class HomeService(
     private fun getLiveDataForRefundedTransaction(transaction: Transaction): LiveDataResponseModel {
         return LiveDataResponseModel(
             keyPerformance = KeyPerformanceModel(
-                salesVolume = 0,
+                salesVolume = transaction.amount?.unaryMinus(),
                 transactions = 1,
                 refundedTransactions = 1,
                 chargebacks = 0
             ),
-            todaysActivity = null,
+            todaysActivity = TodaysActivityModel(
+                time = getTransactionTime(transaction),
+                amount = transaction.amount?.unaryMinus()
+            ),
             notifications = when (transaction.notification) {
                 true -> NotificationsModel(
                     notification = NotificationModel(
@@ -185,12 +190,15 @@ class HomeService(
     private fun getLiveDataForChargedbackTransaction(transaction: Transaction): LiveDataResponseModel {
         return LiveDataResponseModel(
             keyPerformance = KeyPerformanceModel(
-                salesVolume = 0,
+                salesVolume = transaction.amount?.unaryMinus(),
                 transactions = 1,
                 refundedTransactions = 0,
                 chargebacks = 1
             ),
-            todaysActivity = null,
+            todaysActivity = TodaysActivityModel(
+                time = getTransactionTime(transaction),
+                amount = transaction.amount?.unaryMinus()
+            ),
             notifications = when (transaction.notification) {
                 true -> NotificationsModel(
                     notification = NotificationModel(
@@ -201,6 +209,22 @@ class HomeService(
                 )
                 else -> null
             }
+        )
+    }
+
+    private fun getLiveDataForChargebackReversedTransactions(transaction: Transaction): LiveDataResponseModel {
+        return LiveDataResponseModel(
+            keyPerformance = KeyPerformanceModel(
+                salesVolume = transaction.amount,
+                transactions = 1,
+                refundedTransactions = 0,
+                chargebacks = 0
+            ),
+            todaysActivity = TodaysActivityModel(
+                time = getTransactionTime(transaction),
+                amount = transaction.amount
+            ),
+            notifications = null
         )
     }
 
