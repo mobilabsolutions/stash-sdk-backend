@@ -58,8 +58,6 @@ class HomeService(
         val merchantUsers = merchantUserRepository.getMerchantUsers(transaction.merchant.id!!)
         merchantUsers.forEach { user ->
             simpleMessagingTemplate.convertAndSendToUser(user.email, "/topic/transactions", toLiveData(transaction))
-            println("Message sent to ${user.email}")
-            println("Message is ${toLiveData(transaction)}")
         }
     }
 
@@ -228,10 +226,9 @@ class HomeService(
     }
 
     private fun getTransactionsForYesterday(merchant: Merchant): Int? {
-        val yesterdayBeginOfDay = dateFormatter.format(
-            LocalDateTime.now().minusDays(1).with(LocalTime.MIN).atZone(ZoneId.of(merchant.timezone ?: ZoneId.systemDefault().toString())))
-        val yesterdayEndOfDay = dateFormatter.format(
-            LocalDateTime.now().minusDays(1).with(LocalTime.MAX).atZone(ZoneId.of(merchant.timezone ?: ZoneId.systemDefault().toString())))
+        val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
+        val yesterdayBeginOfDay = dateFormatter.format(LocalDateTime.now().minusDays(1).with(LocalTime.MIN).atZone(ZoneId.of(timezone)))
+        val yesterdayEndOfDay = dateFormatter.format(LocalDateTime.now().minusDays(1).with(LocalTime.MAX).atZone(ZoneId.of(timezone)))
         val transactions = transactionRepository.getTransactionsByMerchantId(merchant.id!!, yesterdayBeginOfDay, yesterdayEndOfDay)
         return transactions.size
     }
