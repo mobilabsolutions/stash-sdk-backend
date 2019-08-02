@@ -11,12 +11,12 @@ data class KeyPerformanceModel(
     @ApiModelProperty(value = "The total amount earned in the last month", example = "4560")
     val salesVolume: Int?,
 
-    @ApiModelProperty(value = "The number of nrOfTransactions in the last month", example = "200")
+    @ApiModelProperty(value = "The number of transactions in the last month", example = "200")
     val nrOfTransactions: Int?,
 
-    @ApiModelProperty(value = "The number of refunded nrOfTransactions in the last month", example = "15")
+    @ApiModelProperty(value = "The number of refunded transactions in the last month", example = "15")
     val nrOfRefundedTransactions: Int?,
 
-    @ApiModelProperty(value = "The number of nrOfChargebacks in the last month", example = "10")
+    @ApiModelProperty(value = "The number of chargebacks in the last month", example = "10")
     val nrOfChargebacks: Int?
 )

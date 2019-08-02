@@ -88,7 +88,7 @@ class TransactionDetailsService(
     }
 
     /**
-     * Get nrOfTransactions by given filters
+     * Get transactions by given filters
      *
      * @param merchantId
      * @param createdAtStart created date start

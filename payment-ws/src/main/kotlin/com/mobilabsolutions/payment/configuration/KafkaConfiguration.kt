@@ -15,7 +15,7 @@ class KafkaConfiguration {
 
     @Bean
     fun newTopic(
-        @Value("\${kafka.nrOfTransactions.topicName:}") topicName: String
+        @Value("\${kafka.transactions.topicName:}") topicName: String
     ): NewTopic {
         return NewTopic(topicName, 1, 1)
     }

@@ -53,11 +53,11 @@ class HomeService(
      *
      * @param transaction successful transaction
      */
-    @KafkaListener(topics = ["\${kafka.nrOfTransactions.topicName:}"], groupId = "\${spring.kafka.consumer.group-id:}")
+    @KafkaListener(topics = ["\${kafka.transactions.topicName:}"], groupId = "\${spring.kafka.consumer.group-id:}")
     fun getLiveData(@Payload transaction: Transaction) {
         val merchantUsers = merchantUserRepository.getMerchantUsers(transaction.merchant.id!!)
         merchantUsers.forEach { user ->
-            simpleMessagingTemplate.convertAndSendToUser(user.email, "/topic/nrOfTransactions", toLiveData(transaction))
+            simpleMessagingTemplate.convertAndSendToUser(user.email, "/topic/transactions", toLiveData(transaction))
         }
     }
 
@@ -81,7 +81,7 @@ class HomeService(
     }
 
     /**
-     * Returns the notifications for the last 24h, as well as number of nrOfTransactions for yesterday
+     * Returns the notifications for the last 24h, as well as number of transactions for yesterday
      *
      * @param merchantId Merchant id
      * @return notifications
@@ -110,7 +110,7 @@ class HomeService(
      */
     @Transactional(readOnly = true)
     fun getRefundsOverview(merchantId: String): RefundOverviewResponseModel {
-        logger.info("Getting refunded nrOfTransactions for merchant {}", merchantId)
+        logger.info("Getting refunded transactions for merchant {}", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transactions = transactionRepository.getTransactionsForRefunds(merchantId, getPastDate(merchant, 6), null)
         val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
