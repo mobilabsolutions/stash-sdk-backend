@@ -53,11 +53,11 @@ class HomeService(
      *
      * @param transaction successful transaction
      */
-    @KafkaListener(topics = ["\${kafka.transactions.topicName:}"], groupId = "\${spring.kafka.consumer.group-id:}")
+    @KafkaListener(topics = ["\${kafka.nrOfTransactions.topicName:}"], groupId = "\${spring.kafka.consumer.group-id:}")
     fun getLiveData(@Payload transaction: Transaction) {
         val merchantUsers = merchantUserRepository.getMerchantUsers(transaction.merchant.id!!)
         merchantUsers.forEach { user ->
-            simpleMessagingTemplate.convertAndSendToUser(user.email, "/topic/transactions", toLiveData(transaction))
+            simpleMessagingTemplate.convertAndSendToUser(user.email, "/topic/nrOfTransactions", toLiveData(transaction))
         }
     }
 
@@ -81,7 +81,7 @@ class HomeService(
     }
 
     /**
-     * Returns the notifications for the last 24h, as well as number of transactions for yesterday
+     * Returns the notifications for the last 24h, as well as number of nrOfTransactions for yesterday
      *
      * @param merchantId Merchant id
      * @return notifications
@@ -110,7 +110,7 @@ class HomeService(
      */
     @Transactional(readOnly = true)
     fun getRefundsOverview(merchantId: String): RefundOverviewResponseModel {
-        logger.info("Getting refunded transactions for merchant {}", merchantId)
+        logger.info("Getting refunded nrOfTransactions for merchant {}", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transactions = transactionRepository.getTransactionsForRefunds(merchantId, getPastDate(merchant, 6), null)
         val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
@@ -126,6 +126,7 @@ class HomeService(
     /**
      * Calculates the date in the past for the given number of days
      *
+     * @param merchant Merchant
      * @param days Number of days to subtract
      * @return date as String
      */
@@ -150,9 +151,9 @@ class HomeService(
         return LiveDataResponseModel(
             keyPerformance = KeyPerformanceModel(
                 salesVolume = transaction.amount,
-                transactions = 1,
-                refundedTransactions = 0,
-                chargebacks = 0
+                nrOfTransactions = 1,
+                nrOfRefundedTransactions = 0,
+                nrOfChargebacks = 0
             ),
             todaysActivity = TodaysActivityModel(
                 time = getTransactionTime(transaction),
@@ -166,9 +167,9 @@ class HomeService(
         return LiveDataResponseModel(
             keyPerformance = KeyPerformanceModel(
                 salesVolume = transaction.amount?.unaryMinus(),
-                transactions = 1,
-                refundedTransactions = 1,
-                chargebacks = 0
+                nrOfTransactions = 1,
+                nrOfRefundedTransactions = 1,
+                nrOfChargebacks = 0
             ),
             todaysActivity = TodaysActivityModel(
                 time = getTransactionTime(transaction),
@@ -180,7 +181,7 @@ class HomeService(
                         paymentMethod = transaction.paymentMethod?.name,
                         content = REFUND_NOTIFICATION.format("${transaction.amount}${transaction.currencyId}")
                     ),
-                    transactions = 0
+                    nrOfransactions = 0
                 )
                 else -> null
             }
@@ -191,9 +192,9 @@ class HomeService(
         return LiveDataResponseModel(
             keyPerformance = KeyPerformanceModel(
                 salesVolume = transaction.amount?.unaryMinus(),
-                transactions = 1,
-                refundedTransactions = 0,
-                chargebacks = 1
+                nrOfTransactions = 1,
+                nrOfRefundedTransactions = 0,
+                nrOfChargebacks = 1
             ),
             todaysActivity = TodaysActivityModel(
                 time = getTransactionTime(transaction),
@@ -205,7 +206,7 @@ class HomeService(
                         paymentMethod = transaction.paymentMethod?.name,
                         content = CHARGEBACK_NOTIFICATION.format("${transaction.amount}${transaction.currencyId}")
                     ),
-                    transactions = 0
+                    nrOfransactions = 0
                 )
                 else -> null
             }
@@ -216,9 +217,9 @@ class HomeService(
         return LiveDataResponseModel(
             keyPerformance = KeyPerformanceModel(
                 salesVolume = transaction.amount,
-                transactions = 1,
-                refundedTransactions = 0,
-                chargebacks = 0
+                nrOfTransactions = 1,
+                nrOfRefundedTransactions = 0,
+                nrOfChargebacks = 0
             ),
             todaysActivity = TodaysActivityModel(
                 time = getTransactionTime(transaction),
@@ -232,9 +233,9 @@ class HomeService(
         return LiveDataResponseModel(
             keyPerformance = KeyPerformanceModel(
                 salesVolume = 0,
-                transactions = 1,
-                refundedTransactions = 0,
-                chargebacks = 0
+                nrOfTransactions = 1,
+                nrOfRefundedTransactions = 0,
+                nrOfChargebacks = 0
             ),
             todaysActivity = null,
             notifications = null

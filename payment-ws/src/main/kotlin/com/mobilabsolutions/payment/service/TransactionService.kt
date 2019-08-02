@@ -58,7 +58,7 @@ class TransactionService(
 
     @Value("\${payment.ws.notification.apiKey:}")
     private lateinit var paymentApiKey: String
-    @Value("\${kafka.transactions.topicName:}")
+    @Value("\${kafka.nrOfTransactions.topicName:}")
     private lateinit var kafkaTopicName: String
 
     /**

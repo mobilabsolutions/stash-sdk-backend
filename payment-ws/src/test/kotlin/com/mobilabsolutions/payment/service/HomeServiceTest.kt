@@ -147,9 +147,9 @@ class HomeServiceTest {
         val keyPerformance = homeService.getKeyPerformance(merchantId)
 
         Assertions.assertEquals(keyPerformance.salesVolume, 100)
-        Assertions.assertEquals(keyPerformance.transactions, 2)
-        Assertions.assertEquals(keyPerformance.refundedTransactions, 1)
-        Assertions.assertEquals(keyPerformance.chargebacks, 0)
+        Assertions.assertEquals(keyPerformance.nrOfTransactions, 2)
+        Assertions.assertEquals(keyPerformance.nrOfRefundedTransactions, 1)
+        Assertions.assertEquals(keyPerformance.nrOfChargebacks, 0)
     }
 
     @Test
