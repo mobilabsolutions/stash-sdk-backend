@@ -310,7 +310,7 @@ class TransactionService(
                     notification = true
                 )
                 transactionRepository.save(newTransaction)
-                if (newTransaction.status == TransactionStatus.SUCCESS) sendMessageToKafka(newTransaction)
+                sendMessageToKafka(newTransaction)
 
                 logger.info { "PSP transaction '${it.pspTransactionId}' is successfully processed for transaction action '${it.transactionAction}'" }
             } else {
@@ -380,7 +380,7 @@ class TransactionService(
                     alias = lastTransaction.alias
                 )
                 transactionRepository.save(newTransaction)
-                if (newTransaction.status == TransactionStatus.SUCCESS) sendMessageToKafka(newTransaction)
+                sendMessageToKafka(newTransaction)
 
                 return PaymentResponseModel(
                     newTransaction.transactionId, newTransaction.amount,
@@ -452,7 +452,7 @@ class TransactionService(
                     alias = lastTransaction.alias
                 )
                 transactionRepository.save(newTransaction)
-                if (newTransaction.status == TransactionStatus.SUCCESS) sendMessageToKafka(newTransaction)
+                sendMessageToKafka(newTransaction)
 
                 return PaymentResponseModel(
                     newTransaction.transactionId, newTransaction.amount,
@@ -578,7 +578,7 @@ class TransactionService(
                     alias = alias
                 )
                 transactionRepository.save(newTransaction)
-                if (newTransaction.status == TransactionStatus.SUCCESS) sendMessageToKafka(newTransaction)
+                sendMessageToKafka(newTransaction)
 
                 return PaymentResponseModel(
                     newTransaction.transactionId, newTransaction.amount,
@@ -614,7 +614,8 @@ class TransactionService(
     }
 
     private fun sendMessageToKafka(transaction: Transaction) {
-        kafkaTemplate.send(kafkaTopicName, transaction.merchant.id!!, transaction)
+        if (transaction.status == TransactionStatus.SUCCESS)
+            kafkaTemplate.send(kafkaTopicName, transaction.merchant.id!!, transaction)
     }
 
     companion object : KLogging() {
