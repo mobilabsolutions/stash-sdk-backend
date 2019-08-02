@@ -1,10 +1,39 @@
 version: "3"
 services:
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile-postgres
+    ports:
+      - 5432:5432
+
+  zookeeper:
+    image: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 2181:2181
+
+  kafka:
+    image: confluentinc/cp-kafka
+    hostname: broker
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - 29092:29092
+      - 9092:9092
+    depends_on:
+      - zookeeper
+
   web:
     ports:
       - 8080:8080
     depends_on:
       - db
+      - kafka
     build:
       context: .
       dockerfile: Dockerfile
@@ -20,9 +49,3 @@ services:
       - "OAUTH_CLIENT_PASSWORD=client24"
       - "SIGNING_KEY=zvJcsfK8qsPPp7uP3zKc8WTGhCETgF"
       - "PAYMENT_API_KEY=p7uP3zKc8WTzvJcsfK8qsPPGhCETgF"
-  db:
-    build:
-      context: .
-      dockerfile: Dockerfile-postgres
-    ports:
-      - 5432:5432

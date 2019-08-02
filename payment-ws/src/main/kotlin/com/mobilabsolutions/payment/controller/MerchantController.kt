@@ -54,9 +54,9 @@ class MerchantController(
         const val BASE_MERCHANT_URL = "merchant"
         const val MERCHANT_CONFIG_URL = "/{Merchant-Id}/psp"
         const val MERCHANT_PSP_CONFIG_URL = "/{Merchant-Id}/psp/{Psp-Id}"
-        const val TRANSACTION_DETAILS_URL = "/{Merchant-Id}/transactions/{Transaction-Id}"
-        const val TRANSACTION_URL = "/{Merchant-Id}/transactions"
-        const val TRANSACTION_CSV_URL = "/{Merchant-Id}/transactions/csv"
+        const val TRANSACTION_DETAILS_URL = "/{Merchant-Id}/nrOfTransactions/{Transaction-Id}"
+        const val TRANSACTION_URL = "/{Merchant-Id}/nrOfTransactions"
+        const val TRANSACTION_CSV_URL = "/{Merchant-Id}/nrOfTransactions/csv"
         const val CAPTURE_URL = "/{Merchant-Id}/preauthorization/{Transaction-Id}/capture"
         const val REVERSE_URL = "/{Merchant-Id}/preauthorization/{Transaction-Id}/reverse"
         const val REFUND_URL = "/{Merchant-Id}/authorization/{Transaction-Id}/refund"
@@ -190,9 +190,9 @@ class MerchantController(
         @PathVariable(value = "Transaction-Id") transactionId: String
     ) = transactionDetailsService.getTransactionDetails(merchantId, transactionId)
 
-    @ApiOperation(value = "Filter transactions")
+    @ApiOperation(value = "Filter nrOfTransactions")
     @ApiResponses(
-        ApiResponse(code = 200, message = "Successfully queried transactions"),
+        ApiResponse(code = 200, message = "Successfully queried nrOfTransactions"),
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 403, message = "Forbidden access"),
         ApiResponse(code = 404, message = "Resource not found")
@@ -217,9 +217,9 @@ class MerchantController(
     ) = transactionDetailsService.getTransactionsByFilters(merchantId, createdAtStart, createdAtEnd, paymentMethod,
         action, status, text, limit ?: 10, offset ?: 0)
 
-    @ApiOperation(value = "Export transactions to CSV file")
+    @ApiOperation(value = "Export nrOfTransactions to CSV file")
     @ApiResponses(
-        ApiResponse(code = 200, message = "Successfully exported transactions"),
+        ApiResponse(code = 200, message = "Successfully exported nrOfTransactions"),
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 403, message = "Forbidden access"),
         ApiResponse(code = 404, message = "Resource not found")
