@@ -74,7 +74,7 @@ class HomeService(
         logger.info("Getting key performance for merchant {}", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        val transactions = transactionRepository.getByMerchantId(merchantId, getPastDate(merchant, 30), null)
+        val transactions = transactionRepository.getTransactionsByMerchantId(merchantId, getPastDate(merchant, 30), null)
         val salesVolume = transactions.filter { it.action == TransactionAction.AUTH || it.action == TransactionAction.CAPTURE }.sumBy { it.amount!! }
         val refundedTransactions = transactions.filter { it.action == TransactionAction.REFUND }.size
         val chargedbackTransactions = transactions.filter { it.action == TransactionAction.CHARGEBACK }.size
@@ -92,8 +92,8 @@ class HomeService(
         logger.info("Getting notifications for merchant {}", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        val transactions = transactionRepository.getByMerchantId(merchantId, getPastDate(merchant, 1), null)
-        val notifications = transactions.filter { it.notification == true }.map {
+        val transactions = transactionRepository.getTransactionsWithNotification(merchantId, getPastDate(merchant, 1), null)
+        val notifications = transactions.map {
             when (it.action) {
                 TransactionAction.REFUND -> NotificationModel(it.paymentMethod?.name, REFUND_NOTIFICATION.format("${it.amount}${it.currencyId}"))
                 TransactionAction.CHARGEBACK -> NotificationModel(it.paymentMethod?.name, CHARGEBACK_NOTIFICATION.format("${it.amount}${it.currencyId}"))
@@ -122,6 +122,18 @@ class HomeService(
             refundsMap[day] = amount.plus(transaction.amount!!)
         }
         return RefundOverviewResponseModel(refundsMap)
+    }
+
+    /**
+     * Calculates the date in the past for the given number of days
+     *
+     * @param days Number of days to subtract
+     * @return date as String
+     */
+    fun getPastDate(merchant: Merchant, days: Long): String {
+        return dateFormatter
+            .withZone(ZoneId.of(merchant.timezone ?: ZoneId.systemDefault().toString()))
+            .format(Instant.now().minus(days, ChronoUnit.DAYS))
     }
 
     private fun toLiveData(transaction: Transaction): LiveDataResponseModel {
@@ -220,19 +232,7 @@ class HomeService(
             LocalDateTime.now().minusDays(1).with(LocalTime.MIN).atZone(ZoneId.of(merchant.timezone ?: ZoneId.systemDefault().toString())))
         val yesterdayEndOfDay = dateFormatter.format(
             LocalDateTime.now().minusDays(1).with(LocalTime.MAX).atZone(ZoneId.of(merchant.timezone ?: ZoneId.systemDefault().toString())))
-        val transactions = transactionRepository.getByMerchantId(merchant.id!!, yesterdayBeginOfDay, yesterdayEndOfDay)
+        val transactions = transactionRepository.getTransactionsByMerchantId(merchant.id!!, yesterdayBeginOfDay, yesterdayEndOfDay)
         return transactions.size
-    }
-
-    /**
-     * Calculates the date in the past for the given number of days
-     *
-     * @param days Number of days to subtract
-     * @return date as String
-     */
-    fun getPastDate(merchant: Merchant, days: Long): String {
-        return dateFormatter
-            .withZone(ZoneId.of(merchant.timezone ?: ZoneId.systemDefault().toString()))
-            .format(Instant.now().minus(days, ChronoUnit.DAYS))
     }
 }

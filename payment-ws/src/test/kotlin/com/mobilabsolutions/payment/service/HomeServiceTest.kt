@@ -66,6 +66,27 @@ class HomeServiceTest {
             pspAlias = null,
             merchant = Merchant("1", pspConfig = pspConfig)
         ),
+        pspResponse = null,
+        notification = true
+    )
+    private val capturedTransaction = Transaction(
+        amount = amount,
+        currencyId = currency,
+        transactionId = correctTransactionId,
+        paymentInfo = null,
+        pspTestMode = true,
+        action = TransactionAction.CAPTURE,
+        status = status,
+        paymentMethod = paymentMethod,
+        merchant = merchant,
+        alias = Alias(
+            id = null,
+            active = true,
+            extra = null,
+            psp = PaymentServiceProvider.BS_PAYONE,
+            pspAlias = null,
+            merchant = Merchant("1", pspConfig = pspConfig)
+        ),
         pspResponse = null
     )
 
@@ -91,8 +112,9 @@ class HomeServiceTest {
         transaction.createdDate = LocalDateTime.parse(createdAtStart, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")).atZone(ZoneId.of("Europe/Berlin")).toInstant()
         Mockito.`when`(merchantRepository.getMerchantById(merchantId)).thenReturn(merchant)
         Mockito.`when`(merchantRepository.getMerchantById(incorrectMerchantId)).thenReturn(null)
-        Mockito.`when`(transactionRepository.getTransactionsForRefunds(merchantId, createdAtStart, null))
-            .thenReturn(listOf(transaction))
+        Mockito.`when`(transactionRepository.getTransactionsForRefunds(merchantId, createdAtStart, null)).thenReturn(listOf(transaction))
+        Mockito.`when`(transactionRepository.getTransactionsByMerchantId(merchantId, createdAtStart, null)).thenReturn(listOf(transaction, capturedTransaction))
+        Mockito.`when`(transactionRepository.getTransactionsWithNotification(merchantId, createdAtStart, null)).thenReturn(listOf(transaction))
     }
 
     @Test
@@ -117,5 +139,39 @@ class HomeServiceTest {
         val refunds = homeService.getRefundsOverview(merchantId)
 
         Assertions.assertEquals(refunds.refunds.size, 0)
+    }
+
+    @Test
+    fun `get key performance`() {
+        Mockito.`when`(homeService.getPastDate(merchant, 30)).thenReturn(createdAtStart)
+        val keyPerformance = homeService.getKeyPerformance(merchantId)
+
+        Assertions.assertEquals(keyPerformance.salesVolume, 100)
+        Assertions.assertEquals(keyPerformance.transactions, 2)
+        Assertions.assertEquals(keyPerformance.refundedTransactions, 1)
+        Assertions.assertEquals(keyPerformance.chargebacks, 0)
+    }
+
+    @Test
+    fun `get key performance with incorrect merchant id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            homeService.getKeyPerformance(incorrectMerchantId)
+        }
+    }
+
+    @Test
+    fun `get notifications`() {
+        Mockito.`when`(homeService.getPastDate(merchant, 1)).thenReturn(createdAtStart)
+        val notifications = homeService.getNotifications(merchantId)
+
+        Assertions.assertEquals(notifications.notifications.size, 1)
+        Assertions.assertEquals(notifications.notifications[0]?.paymentMethod, paymentMethod.name)
+    }
+
+    @Test
+    fun `get notifications with incorrect merchant id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            homeService.getNotifications(incorrectMerchantId)
+        }
     }
 }
