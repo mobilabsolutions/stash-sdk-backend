@@ -1351,11 +1351,37 @@
                     "name": "Get refunds overview",
                     "request": {
                         "auth": {
-                            "type": "noauth"
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "GET",
                         "header": [],
                         "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/refunds"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get payment methods overview",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/payment-method"
                     },
                     "response": []
                 }

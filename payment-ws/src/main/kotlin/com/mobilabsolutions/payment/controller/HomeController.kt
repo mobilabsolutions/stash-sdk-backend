@@ -26,6 +26,7 @@ class HomeController(
     companion object {
         const val BASE_HOME_URL = "home"
         const val REFUND_URL = "/{Merchant-Id}/refunds"
+        const val PAYMENT_METHODS_URL = "/{Merchant-Id}/payment-method"
     }
 
     @ApiOperation(value = "Refunds overview")
@@ -45,4 +46,22 @@ class HomeController(
     fun getRefundsOverview(
         @PathVariable("Merchant-Id") merchantId: String
     ) = homeService.getRefundsOverview(merchantId)
+
+    @ApiOperation(value = "Payment methods overview")
+    @ApiResponses(
+        ApiResponse(code = 200, message = "Successfully retrieved transactions"),
+        ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 403, message = "Forbidden access"),
+        ApiResponse(code = 404, message = "Resource not found")
+    )
+    @RequestMapping(
+        HomeController.PAYMENT_METHODS_URL,
+        method = [RequestMethod.GET],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
+    fun getPaymentMethodsOverview(
+        @PathVariable("Merchant-Id") merchantId: String
+    ) = homeService.getPaymentMethodsOverview(merchantId)
 }

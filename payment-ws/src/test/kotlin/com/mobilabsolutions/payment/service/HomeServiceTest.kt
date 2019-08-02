@@ -89,6 +89,8 @@ class HomeServiceTest {
         Mockito.`when`(merchantRepository.getMerchantById(incorrectMerchantId)).thenReturn(null)
         Mockito.`when`(transactionRepository.getTransactionsForRefunds(merchantId, createdAtStart, null))
             .thenReturn(listOf(transaction))
+        Mockito.`when`(transactionRepository.getTransactionsForPaymentMethods(merchantId, createdAtStart, null))
+            .thenReturn(listOf(transaction))
     }
 
     @Test
@@ -113,5 +115,29 @@ class HomeServiceTest {
         val refunds = homeService.getRefundsOverview(merchantId)
 
         Assertions.assertEquals(refunds.refunds.size, 0)
+    }
+
+    @Test
+    fun `get transactions for payment methods overview`() {
+        Mockito.`when`(homeService.getPastDate(6)).thenReturn(createdAtStart)
+        val transactions = homeService.getPaymentMethodsOverview(merchantId)
+
+        Assertions.assertEquals(transactions.transactions[0].day, "Monday")
+        Assertions.assertEquals(transactions.transactions[0].paymentMethodData[0].amount, 100)
+    }
+
+    @Test
+    fun `get transactions for payment methods overview with incorrect merchant id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            homeService.getPaymentMethodsOverview(incorrectMerchantId)
+        }
+    }
+
+    @Test
+    fun `get transactions for payment methods overview with inaccurate start date`() {
+        Mockito.`when`(homeService.getPastDate(1)).thenReturn(createdAtStart)
+        val transactions = homeService.getPaymentMethodsOverview(merchantId)
+
+        Assertions.assertEquals(transactions.transactions.size, 0)
     }
 }
