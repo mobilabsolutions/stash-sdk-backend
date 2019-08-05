@@ -23,11 +23,48 @@ import org.springframework.web.bind.annotation.RestController
 class HomeController(
     private val homeService: HomeService
 ) {
+
     companion object {
         const val BASE_HOME_URL = "home"
+        const val KEY_PERFORMANCE_URL = "/{Merchant-Id}/key-performance"
+        const val NOTIFICATIONS_URL = "/{Merchant-Id}/notifications"
         const val REFUND_URL = "/{Merchant-Id}/refunds"
-        const val PAYMENT_METHODS_URL = "/{Merchant-Id}/payment-method"
+        const val PAYMENT_METHODS_URL = "/{Merchant-Id}/payment-methods"
     }
+
+    @ApiOperation(value = "Get key performance")
+    @ApiResponses(
+        ApiResponse(code = 200, message = "Successfully returned key performance"),
+        ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 403, message = "Forbidden access"),
+        ApiResponse(code = 404, message = "Resource not found")
+    )
+    @RequestMapping(KEY_PERFORMANCE_URL,
+        method = [RequestMethod.GET],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
+    fun getKeyPerformance(
+        @PathVariable("Merchant-Id") merchantId: String
+    ) = homeService.getKeyPerformance(merchantId)
+
+    @ApiOperation(value = "Get notifications")
+    @ApiResponses(
+        ApiResponse(code = 200, message = "Successfully returned notifications"),
+        ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 403, message = "Forbidden access"),
+        ApiResponse(code = 404, message = "Resource not found")
+    )
+    @RequestMapping(NOTIFICATIONS_URL,
+        method = [RequestMethod.GET],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
+    fun getNotifications(
+        @PathVariable("Merchant-Id") merchantId: String
+    ) = homeService.getNotifications(merchantId)
 
     @ApiOperation(value = "Refunds overview")
     @ApiResponses(
@@ -36,8 +73,7 @@ class HomeController(
         ApiResponse(code = 403, message = "Forbidden access"),
         ApiResponse(code = 404, message = "Resource not found")
     )
-    @RequestMapping(
-        HomeController.REFUND_URL,
+    @RequestMapping(REFUND_URL,
         method = [RequestMethod.GET],
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )

@@ -1346,7 +1346,12 @@
                         }
                     },
                     "response": []
-                },
+                }
+            ]
+        },
+        {
+            "name": "Home",
+            "item": [
                 {
                     "name": "Get refunds overview",
                     "request": {
@@ -1363,6 +1368,44 @@
                         "method": "GET",
                         "header": [],
                         "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/refunds"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get key performance",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/key-performance"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get notifications",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/notifications"
                     },
                     "response": []
                 },
@@ -1387,5 +1430,5 @@
                 }
             ]
         }
-	]
+    ]
 }
