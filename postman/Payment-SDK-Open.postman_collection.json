@@ -1408,6 +1408,25 @@
                         "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/notifications"
                     },
                     "response": []
+                },
+                {
+                    "name": "Get payment methods overview",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/payment-methods"
+                    },
+                    "response": []
                 }
             ]
         }

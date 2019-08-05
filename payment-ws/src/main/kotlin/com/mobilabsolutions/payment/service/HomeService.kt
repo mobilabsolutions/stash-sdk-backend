@@ -13,6 +13,7 @@ import com.mobilabsolutions.payment.model.TodaysActivityModel
 import com.mobilabsolutions.payment.model.response.LiveDataResponseModel
 import com.mobilabsolutions.payment.model.response.NotificationsResponseModel
 import com.mobilabsolutions.payment.model.response.RefundOverviewResponseModel
+import com.mobilabsolutions.payment.model.response.PaymentMethodsOverviewResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import mu.KLogging
@@ -103,7 +104,7 @@ class HomeService(
     }
 
     /**
-     * Gets total amount refunded on each day for the last 7 days
+     * Gets total amount of refunded transactions on each day for the last 7 days
      *
      * @param merchantId Merchant ID
      * @return Refund overview response model
@@ -114,13 +115,35 @@ class HomeService(
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transactions = transactionRepository.getTransactionsForRefunds(merchantId, getPastDate(merchant, 6), null)
         val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
-        val refundsMap = HashMap<String, Int>()
+        val refundsMap = LinkedHashMap<String, Int>()
         for (transaction in transactions) {
             val day = DateTimeFormatter.ofPattern(DAY_PATTERN).withZone(ZoneId.of(timezone)).format(transaction.createdDate)
             val amount = refundsMap[day] ?: 0
             refundsMap[day] = amount.plus(transaction.amount!!)
         }
         return RefundOverviewResponseModel(refundsMap)
+    }
+
+    /**
+     * Gets total amount of executed transactions on each day for the last 7 days
+     *
+     * @param merchantId Merchant ID
+     * @return Payment methods overview response model
+     */
+    @Transactional(readOnly = true)
+    fun getPaymentMethodsOverview(merchantId: String): PaymentMethodsOverviewResponseModel {
+        MerchantService.logger.info("Getting payment methods transactions for merchant {}", merchantId)
+        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        val transactions = transactionRepository.getTransactionsForPaymentMethods(merchantId, getPastDate(merchant, 6), null)
+        val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
+        val transactionsMap = LinkedHashMap<String, LinkedHashMap<String, Int>>()
+        for (transaction in transactions) {
+            val day = DateTimeFormatter.ofPattern(DAY_PATTERN).withZone(ZoneId.of(timezone)).format(transaction.createdDate)
+            if (!transactionsMap.containsKey(day)) transactionsMap[day] = LinkedHashMap()
+            val amount = transactionsMap[day]!![transaction.paymentMethod!!.name] ?: 0
+            transactionsMap[day]!![transaction.paymentMethod!!.name] = amount + transaction.amount!!
+        }
+        return PaymentMethodsOverviewResponseModel(transactionsMap)
     }
 
     /**
