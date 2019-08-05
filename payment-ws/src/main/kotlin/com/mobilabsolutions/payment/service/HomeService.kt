@@ -27,7 +27,6 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.HashMap
 import java.time.temporal.ChronoUnit
 
 /**
@@ -116,7 +115,7 @@ class HomeService(
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transactions = transactionRepository.getTransactionsForRefunds(merchantId, getPastDate(merchant, 6), null)
         val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
-        val refundsMap = HashMap<String, Int>()
+        val refundsMap = LinkedHashMap<String, Int>()
         for (transaction in transactions) {
             val day = DateTimeFormatter.ofPattern(DAY_PATTERN).withZone(ZoneId.of(timezone)).format(transaction.createdDate)
             val amount = refundsMap[day] ?: 0
@@ -137,10 +136,10 @@ class HomeService(
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transactions = transactionRepository.getTransactionsForPaymentMethods(merchantId, getPastDate(merchant, 6), null)
         val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
-        val transactionsMap = HashMap<String, HashMap<String, Int>>()
+        val transactionsMap = LinkedHashMap<String, LinkedHashMap<String, Int>>()
         for (transaction in transactions) {
             val day = DateTimeFormatter.ofPattern("EEEE").withZone(ZoneId.of(timezone)).format(transaction.createdDate)
-            if (!transactionsMap.containsKey(day)) transactionsMap.put(day, HashMap<String, Int>())
+            if (!transactionsMap.containsKey(day)) transactionsMap.put(day, LinkedHashMap<String, Int>())
             val amount = transactionsMap[day]!![transaction.paymentMethod!!.name] ?: 0
             transactionsMap[day]!!.put(transaction.paymentMethod!!.name, amount + transaction.amount!!)
         }
