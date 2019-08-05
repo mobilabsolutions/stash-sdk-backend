@@ -12,8 +12,8 @@ import com.mobilabsolutions.payment.model.NotificationsModel
 import com.mobilabsolutions.payment.model.TodaysActivityModel
 import com.mobilabsolutions.payment.model.response.LiveDataResponseModel
 import com.mobilabsolutions.payment.model.response.NotificationsResponseModel
-import com.mobilabsolutions.payment.model.response.RefundOverviewResponseModel
 import com.mobilabsolutions.payment.model.response.PaymentMethodsOverviewResponseModel
+import com.mobilabsolutions.payment.model.response.RefundOverviewResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import mu.KLogging
@@ -78,7 +78,7 @@ class HomeService(
         val returnedMoney = transactions.filter { it.action == TransactionAction.REFUND || it.action == TransactionAction.CHARGEBACK }.sumBy { it.amount!! }
         val refundedTransactions = transactions.filter { it.action == TransactionAction.REFUND }.size
         val chargedbackTransactions = transactions.filter { it.action == TransactionAction.CHARGEBACK }.size
-        return KeyPerformanceModel(salesVolume - returnedMoney, transactions.size, refundedTransactions, chargedbackTransactions)
+        return KeyPerformanceModel(salesVolume - returnedMoney, merchant.defaultCurrency, transactions.size, refundedTransactions, chargedbackTransactions)
     }
 
     /**
@@ -174,6 +174,7 @@ class HomeService(
         return LiveDataResponseModel(
             keyPerformance = KeyPerformanceModel(
                 salesVolume = transaction.amount,
+                currencyId = transaction.merchant.defaultCurrency,
                 nrOfTransactions = 1,
                 nrOfRefundedTransactions = 0,
                 nrOfChargebacks = 0
@@ -190,6 +191,7 @@ class HomeService(
         return LiveDataResponseModel(
             keyPerformance = KeyPerformanceModel(
                 salesVolume = transaction.amount?.unaryMinus(),
+                currencyId = transaction.merchant.defaultCurrency,
                 nrOfTransactions = 1,
                 nrOfRefundedTransactions = 1,
                 nrOfChargebacks = 0
@@ -215,6 +217,7 @@ class HomeService(
         return LiveDataResponseModel(
             keyPerformance = KeyPerformanceModel(
                 salesVolume = transaction.amount?.unaryMinus(),
+                currencyId = transaction.merchant.defaultCurrency,
                 nrOfTransactions = 1,
                 nrOfRefundedTransactions = 0,
                 nrOfChargebacks = 1
@@ -240,6 +243,7 @@ class HomeService(
         return LiveDataResponseModel(
             keyPerformance = KeyPerformanceModel(
                 salesVolume = transaction.amount,
+                currencyId = transaction.merchant.defaultCurrency,
                 nrOfTransactions = 1,
                 nrOfRefundedTransactions = 0,
                 nrOfChargebacks = 0
@@ -256,6 +260,7 @@ class HomeService(
         return LiveDataResponseModel(
             keyPerformance = KeyPerformanceModel(
                 salesVolume = 0,
+                currencyId = null,
                 nrOfTransactions = 1,
                 nrOfRefundedTransactions = 0,
                 nrOfChargebacks = 0

@@ -11,6 +11,9 @@ data class KeyPerformanceModel(
     @ApiModelProperty(value = "The total amount earned in the last month", example = "4560")
     val salesVolume: Int?,
 
+    @ApiModelProperty(value = "The merchant's default currency id", example = "EUR")
+    val currencyId: String?,
+
     @ApiModelProperty(value = "The number of transactions in the last month", example = "200")
     val nrOfTransactions: Int?,
 
