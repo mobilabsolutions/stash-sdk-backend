@@ -138,10 +138,10 @@ class HomeService(
         val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
         val transactionsMap = LinkedHashMap<String, LinkedHashMap<String, Int>>()
         for (transaction in transactions) {
-            val day = DateTimeFormatter.ofPattern("EEEE").withZone(ZoneId.of(timezone)).format(transaction.createdDate)
-            if (!transactionsMap.containsKey(day)) transactionsMap.put(day, LinkedHashMap<String, Int>())
+            val day = DateTimeFormatter.ofPattern(DAY_PATTERN).withZone(ZoneId.of(timezone)).format(transaction.createdDate)
+            if (!transactionsMap.containsKey(day)) transactionsMap[day] = LinkedHashMap()
             val amount = transactionsMap[day]!![transaction.paymentMethod!!.name] ?: 0
-            transactionsMap[day]!!.put(transaction.paymentMethod!!.name, amount + transaction.amount!!)
+            transactionsMap[day]!![transaction.paymentMethod!!.name] = amount + transaction.amount!!
         }
         return PaymentMethodsOverviewResponseModel(transactionsMap)
     }

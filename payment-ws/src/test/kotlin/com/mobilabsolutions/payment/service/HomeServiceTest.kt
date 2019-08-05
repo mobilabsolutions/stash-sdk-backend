@@ -166,6 +166,7 @@ class HomeServiceTest {
         Assertions.assertEquals(transactions.transactions.size, 0)
     }
 
+    @Test
     fun `get key performance`() {
         Mockito.`when`(homeService.getPastDate(merchant, 30)).thenReturn(createdAtStart)
         val keyPerformance = homeService.getKeyPerformance(merchantId)
@@ -183,6 +184,7 @@ class HomeServiceTest {
         }
     }
 
+    @Test
     fun `get notifications`() {
         Mockito.`when`(homeService.getPastDate(merchant, 1)).thenReturn(createdAtStart)
         val notifications = homeService.getNotifications(merchantId)
