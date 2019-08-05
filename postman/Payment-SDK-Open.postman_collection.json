@@ -1424,7 +1424,7 @@
                         },
                         "method": "GET",
                         "header": [],
-                        "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/payment-method"
+                        "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/payment-methods"
                     },
                     "response": []
                 }
