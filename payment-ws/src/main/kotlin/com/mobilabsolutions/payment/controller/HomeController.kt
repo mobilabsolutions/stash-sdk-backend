@@ -2,7 +2,6 @@ package com.mobilabsolutions.payment.controller
 
 import com.mobilabsolutions.payment.service.HomeService
 import io.swagger.annotations.ApiOperation
-import io.swagger.annotations.ApiParam
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
 import org.springframework.http.HttpStatus
@@ -12,6 +11,7 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
@@ -105,7 +105,7 @@ class HomeController(
 
     @ApiOperation(value = "Selected date activity")
     @ApiResponses(
-        ApiResponse(code = 200, message = "Successfully retrieved today's activity"),
+        ApiResponse(code = 200, message = "Successfully retrieved activity for the selected date"),
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 403, message = "Forbidden access"),
         ApiResponse(code = 404, message = "Resource not found")
@@ -118,7 +118,7 @@ class HomeController(
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun getSelectedDateActivity(
         @PathVariable("Merchant-Id") merchantId: String,
-        @ApiParam(value = "fromDate", name = "From date") fromDate: String,
-        @ApiParam(value = "toDate", name = "To date") toDate: String
+        @RequestParam(value = "fromDate", name = "From date") fromDate: String,
+        @RequestParam(value = "toDate", name = "To date") toDate: String
     ) = homeService.getSelectedDateActivity(merchantId, fromDate, toDate)
 }

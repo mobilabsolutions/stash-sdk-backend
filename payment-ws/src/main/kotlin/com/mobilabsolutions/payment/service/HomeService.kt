@@ -46,6 +46,7 @@ class HomeService(
         private const val DAY_PATTERN = "EEEE"
         private const val REFUND_NOTIFICATION = "Refunded %s"
         private const val CHARGEBACK_NOTIFICATION = "Chargeback %s"
+        private const val HOUR_PATTERN = "%02d"
 
         private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_UTC)
     }
@@ -304,7 +305,7 @@ class HomeService(
         val transactionsMap = LinkedHashMap<String, Int>()
         for (transaction in transactions) {
             val hour = transaction.createdDate!!.atZone(ZoneId.of(merchant.timezone)).hour
-            val timeRange = String.format("%02d", hour) + '-' + String.format("%02d", if ((hour + 1) == 24) 0 else hour + 1)
+            val timeRange = String.format(HOUR_PATTERN, hour) + '-' + String.format(HOUR_PATTERN, if ((hour + 1) == 24) 0 else hour + 1)
             val amount = transactionsMap[timeRange] ?: 0
             transactionsMap[timeRange] = amount.plus(transaction.amount!!)
         }
