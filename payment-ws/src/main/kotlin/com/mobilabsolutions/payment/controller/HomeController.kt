@@ -120,6 +120,6 @@ class HomeController(
     fun getSelectedDateActivity(
         @PathVariable("Merchant-Id") merchantId: String,
         @DateValidator @RequestParam(required = false) fromDate: String,
-        @DateValidator @RequestParam(required = false) toDate: String
+        @DateValidator @RequestParam(required = false) toDate: String?
     ) = homeService.getSelectedDateActivity(merchantId, fromDate, toDate)
 }

@@ -12,5 +12,5 @@ data class SelectedDateActivityModel(
     val timeRange: String?,
 
     @ApiModelProperty(value = "Total captured amount", example = "5000")
-    val amount: Number?
+    val amount: Int?
 )

@@ -298,7 +298,7 @@ class HomeService(
      * @return Selected date activity response model
      */
     @Transactional(readOnly = true)
-    fun getSelectedDateActivity(merchantId: String, fromDate: String, toDate: String): SelectedDateActivityResponseModel {
+    fun getSelectedDateActivity(merchantId: String, fromDate: String, toDate: String?): SelectedDateActivityResponseModel {
         logger.info("Getting selected date's activity for merchant {}", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transactions = transactionRepository.getTransactionsForPaymentMethods(merchantId, fromDate, toDate)
