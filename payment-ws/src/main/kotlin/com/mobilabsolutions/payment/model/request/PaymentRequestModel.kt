@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.model.request
 
 import io.swagger.annotations.ApiModel
@@ -8,7 +12,7 @@ import javax.validation.constraints.NotNull
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
-@ApiModel("Payment Request Model")
+@ApiModel(value = "Payment request model")
 data class PaymentRequestModel(
     @ApiModelProperty("Alias ID", example = "JipfjLKL6BkTIREaRGyX")
     @field:NotNull

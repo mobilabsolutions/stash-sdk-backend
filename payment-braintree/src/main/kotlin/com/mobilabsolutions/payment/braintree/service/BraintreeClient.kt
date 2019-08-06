@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.braintree.service
 
 import com.braintreegateway.BraintreeGateway
@@ -17,6 +21,7 @@ import com.mobilabsolutions.payment.braintree.model.request.BraintreeRegisterAli
 import com.mobilabsolutions.payment.braintree.model.request.BraintreeReverseRequestModel
 import com.mobilabsolutions.payment.braintree.model.response.BraintreePaymentResponseModel
 import com.mobilabsolutions.payment.braintree.model.response.BraintreeRegisterAliasResponseModel
+import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
@@ -50,17 +55,18 @@ class BraintreeClient {
     }
 
     /**
-     * Registers PayPal payment method at Braintree.
+     * Registers payment method at Braintree.
      *
      * @param request Braintree register alias request
      * @param pspConfigModel Braintree configuration
      * @param mode sandbox or production mode
      * @return Braintree payment method response
      */
-    fun registerPayPalAlias(
+    fun registerAlias(
         request: BraintreeRegisterAliasRequestModel,
         pspConfigModel: PspConfigModel,
-        mode: String
+        mode: String,
+        paymentMethod: String
     ): BraintreeRegisterAliasResponseModel {
         try {
             val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
@@ -74,35 +80,35 @@ class BraintreeClient {
             val paymentMethodResponse = braintreeGateway.paymentMethod().create(paymentMethodRequest)
 
             if (paymentMethodResponse.target == null)
-                throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "PayPal registration failed, braintree.message: " + paymentMethodResponse.message).asException()
+                throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Registration failed, braintree.message: " + paymentMethodResponse.message).asException()
 
             return BraintreeRegisterAliasResponseModel(
                 paymentMethodResponse.target.token,
-                (paymentMethodResponse.target as PayPalAccount).billingAgreementId
+                if (paymentMethod == PaymentMethod.PAY_PAL.name) (paymentMethodResponse.target as PayPalAccount).billingAgreementId else null
             )
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
-            throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected error during PayPal registration").asException()
+            throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected error during registration").asException()
         }
     }
 
     /**
-     * Deletes PayPal alias at Braintree
+     * Deletes alias at Braintree
      *
-     * @param pspAlias Braintree PayPal alias
+     * @param pspAlias Braintree alias
      * @param pspConfigModel Braintree configuration
      * @param mode sandbox or production mode
      */
-    fun deletePayPalAlias(pspAlias: String, pspConfigModel: PspConfigModel, mode: String) {
+    fun deleteAlias(pspAlias: String, pspConfigModel: PspConfigModel, mode: String) {
         try {
             val braintreeGateway = configureBraintreeGateway(pspConfigModel, mode)
             braintreeGateway.paymentMethod().delete(pspAlias)
         } catch (exception: NotFoundException) {
             logger.error { exception.message }
-            throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "PayPal alias doesn't exist at Braintree").asException()
+            throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Alias doesn't exist at Braintree").asException()
         } catch (exception: BraintreeException) {
             logger.error { exception.message }
-            throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Error during PayPal alias deletion").asException()
+            throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Error during alias deletion").asException()
         }
     }
 

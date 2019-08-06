@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.data.configuration
 
 import org.springframework.data.jpa.repository.JpaRepository

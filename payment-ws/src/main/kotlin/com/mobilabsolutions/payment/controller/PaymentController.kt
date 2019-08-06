@@ -1,10 +1,16 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.controller
 
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentRequestModel
+import com.mobilabsolutions.payment.model.request.PspNotificationListRequestModel
 import com.mobilabsolutions.payment.model.request.ReversalRequestModel
 import com.mobilabsolutions.payment.service.TransactionService
 import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
 import org.springframework.http.HttpStatus
@@ -46,7 +52,7 @@ class PaymentController(private val transactionService: TransactionService) {
         @RequestHeader(value = "Secret-Key") secretKey: String,
         @Size(min = 10, max = 40) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
-        @Valid @RequestBody preauthorizeInfo: PaymentRequestModel
+        @Valid @ApiParam(name = "Preauthorize-Info", value = "Payment Model") @RequestBody preauthorizeInfo: PaymentRequestModel
     ) = transactionService.preauthorize(secretKey, idempotentKey, pspTestMode, preauthorizeInfo)
 
     @ApiOperation(value = "Capture transaction")
@@ -82,7 +88,7 @@ class PaymentController(private val transactionService: TransactionService) {
         @RequestHeader(value = "Secret-Key") secretKey: String,
         @Size(min = 10, max = 40) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
-        @Valid @RequestBody authorizeInfo: PaymentRequestModel
+        @Valid @ApiParam(name = "Authorize-Info", value = "Payment Model") @RequestBody authorizeInfo: PaymentRequestModel
     ) = transactionService.authorize(secretKey, idempotentKey, pspTestMode, authorizeInfo)
 
     @ApiOperation(value = "Reverse transaction")
@@ -103,7 +109,7 @@ class PaymentController(private val transactionService: TransactionService) {
         @RequestHeader(value = "Secret-Key") secretKey: String,
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
         @PathVariable(value = "Transaction-Id") transactionId: String,
-        @Valid @RequestBody reverseInfo: ReversalRequestModel
+        @Valid @ApiParam(name = "Reversal-Info", value = "Reversal Model") @RequestBody reverseInfo: ReversalRequestModel
     ) = transactionService.reverse(secretKey, pspTestMode, transactionId, reverseInfo)
 
     @ApiOperation(value = "Refund transaction")
@@ -125,14 +131,33 @@ class PaymentController(private val transactionService: TransactionService) {
         @Size(min = 10, max = 40) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
         @PathVariable(value = "Transaction-Id") transactionId: String,
-        @Valid @RequestBody refundInfo: PaymentDataRequestModel
+        @Valid @ApiParam(name = "Refund-Info", value = "Payment Model") @RequestBody refundInfo: PaymentDataRequestModel
     ) = transactionService.refund(secretKey, idempotentKey, pspTestMode, transactionId, refundInfo)
 
+    @ApiOperation(value = "Create transaction notification")
+    @ApiResponses(
+        ApiResponse(code = 201, message = "Successfully created transaction notification"),
+        ApiResponse(code = 400, message = "Failed to create transaction notification"),
+        ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 404, message = "Not found")
+    )
+    @RequestMapping(
+        PaymentController.NOTIFICATION_URL,
+        method = [RequestMethod.PUT],
+        consumes = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @ResponseStatus(HttpStatus.CREATED)
+    fun createTransactionNotification(
+        @RequestHeader(value = "API-Key") apiKey: String,
+        @Valid @ApiParam(name = "PSP-Notification-Info", value = "PSP Notification Model") @RequestBody pspNotificationListRequestModel: PspNotificationListRequestModel
+    ) = transactionService.createNotificationTransactionRecord(pspNotificationListRequestModel, apiKey)
+
     companion object {
-        const val PREAUTH_URL = "preauthorization"
-        const val CAPTURE_URL = "preauthorization/{Transaction-Id}/capture"
-        const val AUTH_URL = "authorization"
-        const val REVERSE_URL = "preauthorization/{Transaction-Id}/reverse"
-        const val REFUND_URL = "authorization/{Transaction-Id}/refund"
+        private const val PREAUTH_URL = "preauthorization"
+        private const val CAPTURE_URL = "preauthorization/{Transaction-Id}/capture"
+        private const val AUTH_URL = "authorization"
+        private const val REVERSE_URL = "preauthorization/{Transaction-Id}/reverse"
+        private const val REFUND_URL = "authorization/{Transaction-Id}/refund"
+        private const val NOTIFICATION_URL = "notification"
     }
 }

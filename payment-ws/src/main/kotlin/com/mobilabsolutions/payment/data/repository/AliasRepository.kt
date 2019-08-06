@@ -1,8 +1,12 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.data.repository
 
+import com.mobilabsolutions.payment.data.Alias
+import com.mobilabsolutions.payment.data.Merchant
 import com.mobilabsolutions.payment.data.configuration.BaseRepository
-import com.mobilabsolutions.payment.data.domain.Alias
-import com.mobilabsolutions.payment.data.domain.Merchant
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query

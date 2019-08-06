@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.notifications.data.repository
 
 import com.mobilabsolutions.payment.data.configuration.BaseRepository
@@ -12,6 +16,6 @@ import org.springframework.stereotype.Repository
 @Repository
 interface NotificationRepository : BaseRepository<Notification, String> {
 
-    @Query("SELECT * FROM notification nt WHERE nt.status IN ('CREATED', 'FAIL') AND nt.psp = :psp ORDER BY nt.created_date DESC LIMIT :limit FOR UPDATE OF nt SKIP LOCKED", nativeQuery = true)
+    @Query("SELECT * FROM notification nt WHERE nt.status IN ('CREATED', 'FAIL') AND nt.psp = :psp ORDER BY nt.created_date ASC LIMIT :limit FOR UPDATE OF nt SKIP LOCKED", nativeQuery = true)
     fun findNotificationByPsp(@Param("psp") psp: String, @Param("limit") limit: Int): List<Notification>
 }

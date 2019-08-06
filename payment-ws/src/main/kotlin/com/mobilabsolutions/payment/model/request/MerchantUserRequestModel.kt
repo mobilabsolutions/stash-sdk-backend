@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.model.request
 
 import io.swagger.annotations.ApiModel
@@ -7,7 +11,7 @@ import javax.validation.constraints.NotNull
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
-@ApiModel(value = "Merchant user create model")
+@ApiModel(value = "Merchant user request model")
 data class MerchantUserRequestModel(
     @ApiModelProperty(value = "Email of the merchant user", example = "test@mblb.net")
     @field:NotNull

@@ -21,6 +21,7 @@ spec:
       containers:
       - name: payment-sdk-notification
         image: eu.gcr.io/payment-server-reloaded/payment-sdk-notification:${KUBE_NOTIF_DEPLOYMENT_IMAGE_TAG}
+        imagePullPolicy: Always
         resources:
           requests:
             cpu: ${KUBE_NOTIF_DEPLOYMENT_CPU_REQUEST}

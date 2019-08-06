@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.model
 
 import io.swagger.annotations.ApiModel
@@ -7,7 +11,7 @@ import javax.validation.constraints.NotNull
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "PSP Configuration")
+@ApiModel(value = "PSP config model")
 data class PspConfigModel(
     @ApiModelProperty(value = "Payment service provider type", example = "BS_PAYONE")
     @field:NotNull

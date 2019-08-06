@@ -1,18 +1,21 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.model.request
 
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.validation.PaymentMethodEnumValidator
+import com.mobilabsolutions.payment.validation.TransactionActionEnumValidator
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
 
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "PSP Refund Request")
+@ApiModel(value = "PSP refund request model")
 data class PspRefundRequestModel(
     @ApiModelProperty(value = "PSP transaction id", example = "42949")
     val pspTransactionId: String?,
@@ -24,8 +27,8 @@ data class PspRefundRequestModel(
     val currency: String?,
 
     @ApiModelProperty(value = "Transaction action", example = "Values: PREAUTH, AUTH, REVERSAL, REFUND, CAPTURE")
-    @field:Enumerated(EnumType.STRING)
-    val action: TransactionAction?,
+    @TransactionActionEnumValidator(TransactionAction = TransactionAction::class)
+    val action: String?,
 
     @ApiModelProperty(value = "PSP config")
     val pspConfig: PspConfigModel?,

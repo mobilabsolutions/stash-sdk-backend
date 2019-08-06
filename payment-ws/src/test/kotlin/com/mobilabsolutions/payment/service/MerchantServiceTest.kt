@@ -1,8 +1,12 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.mobilabsolutions.payment.data.domain.Authority
-import com.mobilabsolutions.payment.data.domain.Merchant
+import com.mobilabsolutions.payment.data.Authority
+import com.mobilabsolutions.payment.data.Merchant
 import com.mobilabsolutions.payment.data.repository.AuthorityRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.model.request.MerchantRequestModel
@@ -39,9 +43,11 @@ class MerchantServiceTest {
     private val unknownPspType = "BS"
     private val knownMerchantId = "mobilab"
     private val unknownMerchantId = "test"
-    private var merchant = Merchant(id = knownMerchantId,
+    private var merchant = Merchant(
+        id = knownMerchantId,
         pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
-        " {\"type\" : \"other\", \"merchantId\" : \"test merchant\", \"default\" : \"true\"}]}")
+            " {\"type\" : \"other\", \"merchantId\" : \"test merchant\", \"default\" : \"true\"}]}"
+    )
 
     @Spy
     val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
@@ -120,5 +126,24 @@ class MerchantServiceTest {
     @Test
     fun `create merchant successfully`() {
         merchantService.createMerchant(MerchantRequestModel(unknownMerchantId, "test", "test@mobilabsolutions.com", "EUR", "Europe/Berlin"))
+    }
+
+    @Test
+    fun `delete psp config with wrong psp id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            merchantService.deletePspConfigForMerchant(unknownMerchantId, unknownPspType)
+        }
+    }
+
+    @Test
+    fun `delete psp config with wrong merchant id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            merchantService.deletePspConfigForMerchant(unknownMerchantId, knownPspType)
+        }
+    }
+
+    @Test
+    fun `delete psp config successfully`() {
+        merchantService.deletePspConfigForMerchant(knownMerchantId, knownPspType)
     }
 }

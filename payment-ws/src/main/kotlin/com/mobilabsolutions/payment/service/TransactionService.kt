@@ -1,9 +1,13 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.mobilabsolutions.payment.data.domain.Alias
-import com.mobilabsolutions.payment.data.domain.Merchant
-import com.mobilabsolutions.payment.data.domain.Transaction
+import com.mobilabsolutions.payment.data.Alias
+import com.mobilabsolutions.payment.data.Merchant
+import com.mobilabsolutions.payment.data.Transaction
 import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.TransactionAction
@@ -19,6 +23,7 @@ import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
+import com.mobilabsolutions.payment.model.request.PspNotificationListRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
 import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
@@ -31,6 +36,8 @@ import com.mobilabsolutions.server.commons.util.RequestHashing
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.StringUtils
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -38,7 +45,6 @@ import org.springframework.transaction.annotation.Transactional
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
 @Service
-@Transactional
 class TransactionService(
     private val transactionRepository: TransactionRepository,
     private val merchantApiKeyRepository: MerchantApiKeyRepository,
@@ -46,8 +52,14 @@ class TransactionService(
     private val merchantRepository: MerchantRepository,
     private val pspRegistry: PspRegistry,
     private val requestHashing: RequestHashing,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val kafkaTemplate: KafkaTemplate<String, Transaction>
 ) {
+
+    @Value("\${payment.ws.notification.apiKey:}")
+    private lateinit var paymentApiKey: String
+    @Value("\${kafka.transactions.topicName:}")
+    private lateinit var kafkaTopicName: String
 
     /**
      * Authorize transaction
@@ -58,6 +70,7 @@ class TransactionService(
      * @param authorizeInfo Payment information
      * @return Payment response model
      */
+    @Transactional
     fun authorize(
         secretKey: String,
         idempotentKey: String,
@@ -97,6 +110,7 @@ class TransactionService(
      * @param preauthorizeInfo Payment information
      * @return Payment response model
      */
+    @Transactional
     fun preauthorize(
         secretKey: String,
         idempotentKey: String,
@@ -138,6 +152,7 @@ class TransactionService(
      * @param transactionId Transaction ID
      * @return Payment response model
      */
+    @Transactional
     fun dashboardCapture(
         merchantId: String,
         pspTestMode: Boolean?,
@@ -156,6 +171,7 @@ class TransactionService(
      * @param transactionId Transaction ID
      * @return Payment response model
      */
+    @Transactional
     fun capture(
         secretKey: String,
         pspTestMode: Boolean?,
@@ -164,6 +180,143 @@ class TransactionService(
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asException()
         return capture(pspTestMode, transactionId, apiKey.merchant)
+    }
+
+    /**
+     * Reverse transaction from a dashboard
+     *
+     * @param merchantId Merchant Id
+     * @param pspTestMode indicator whether is the test mode or not
+     * @param transactionId Transaction ID
+     * @param reverseInfo Reversion request model
+     * @return Payment response model
+     */
+    @Transactional
+    fun dashboardReverse(
+        merchantId: String,
+        pspTestMode: Boolean?,
+        transactionId: String,
+        reverseInfo: ReversalRequestModel
+    ): PaymentResponseModel {
+        val merchant = merchantRepository.getMerchantById(merchantId)
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        return reverse(pspTestMode, transactionId, reverseInfo, merchant)
+    }
+
+    /**
+     * Reverse transaction
+     *
+     * @param secretKey Secret Key
+     * @param pspTestMode indicator whether is the test mode or not
+     * @param transactionId Transaction ID
+     * @param reverseInfo Reversion request model
+     * @return Payment response model
+     */
+    @Transactional
+    fun reverse(
+        secretKey: String,
+        pspTestMode: Boolean?,
+        transactionId: String,
+        reverseInfo: ReversalRequestModel
+    ): PaymentResponseModel {
+        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asException()
+        return reverse(pspTestMode, transactionId, reverseInfo, apiKey.merchant)
+    }
+
+    /**
+     * Refund transaction from a dashboard
+     *
+     * @param merchantId Merchant Id
+     * @param idempotentKey Idempotent key
+     * @param pspTestMode indicator whether is the test mode or not
+     * @param transactionId Transaction ID
+     * @param refundInfo Payment information
+     * @return Payment response model
+     */
+    @Transactional
+    fun dashboardRefund(
+        merchantId: String,
+        idempotentKey: String,
+        pspTestMode: Boolean?,
+        transactionId: String,
+        refundInfo: PaymentDataRequestModel
+    ): PaymentResponseModel {
+        val merchant = merchantRepository.getMerchantById(merchantId)
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        return refund(idempotentKey, pspTestMode, transactionId, refundInfo, merchant)
+    }
+
+    /**
+     * Refund transaction
+     *
+     * @param secretKey Secret Key
+     * @param idempotentKey Idempotent key
+     * @param pspTestMode indicator whether is the test mode or not
+     * @param transactionId Transaction ID
+     * @param refundInfo Payment information
+     * @return Payment response model
+     */
+    @Transactional
+    fun refund(
+        secretKey: String,
+        idempotentKey: String,
+        pspTestMode: Boolean?,
+        transactionId: String,
+        refundInfo: PaymentDataRequestModel
+    ): PaymentResponseModel {
+        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asException()
+        return refund(idempotentKey, pspTestMode, transactionId, refundInfo, apiKey.merchant)
+    }
+
+    /**
+     * Creates transaction record from given psp notification
+     *
+     * @param pspNotificationListRequestModel Psp notification model
+     * @param apiKey Api key for notification service authentication
+     */
+    @Transactional
+    fun createNotificationTransactionRecord(pspNotificationListRequestModel: PspNotificationListRequestModel, apiKey: String) {
+        // TODO This is pure evil, we need to come up with a proper authentication mechanism for requests from notification service
+        if (paymentApiKey != apiKey) throw ApiError.ofErrorCode(ApiErrorCode.AUTHENTICATION_ERROR).asException()
+        pspNotificationListRequestModel.notifications.forEach {
+            val transactionNotificationAction = TransactionAction.valueOf(it.transactionAction!!)
+            val transaction = if (TransactionAction.mainTransactionActions.contains(transactionNotificationAction)) {
+                transactionRepository.getByPspReferenceAndActions(
+                    it.pspTransactionId!!,
+                    it.transactionAction!!,
+                    if (it.transactionAction == TransactionAction.AUTH.name) TransactionAction.PREAUTH.name else it.transactionAction!!
+                )
+            } else {
+                transactionRepository.getByPspReference(it.pspTransactionId!!)
+            }
+            if (transaction != null) {
+                val newTransaction = Transaction(
+                    transactionId = transaction.transactionId,
+                    currencyId = it.paymentData?.currency,
+                    amount = it.paymentData?.amount,
+                    reason = if (TransactionAction.mainTransactionActions.contains(transactionNotificationAction)) transaction.reason else it.paymentData?.reason,
+                    status = TransactionStatus.valueOf(it.transactionStatus!!),
+                    action = if (TransactionAction.mainTransactionActions.contains(transactionNotificationAction)) transaction.action else transactionNotificationAction,
+                    paymentMethod = transaction.paymentMethod,
+                    paymentInfo = transaction.paymentInfo,
+                    merchantTransactionId = transaction.merchantTransactionId,
+                    merchantCustomerId = transaction.merchantCustomerId,
+                    pspTestMode = transaction.pspTestMode,
+                    pspResponse = transaction.pspResponse,
+                    merchant = transaction.merchant,
+                    alias = transaction.alias,
+                    notification = true
+                )
+                transactionRepository.save(newTransaction)
+                sendMessageToKafka(newTransaction)
+
+                logger.info { "PSP transaction '${it.pspTransactionId}' is successfully processed for transaction action '${it.transactionAction}'" }
+            } else {
+                logger.info { "There is no transaction for PSP transaction '${it.pspTransactionId}' and transaction action '${it.transactionAction}'" }
+            }
+        }
     }
 
     private fun capture(
@@ -227,6 +380,7 @@ class TransactionService(
                     alias = lastTransaction.alias
                 )
                 transactionRepository.save(newTransaction)
+                sendMessageToKafka(newTransaction)
 
                 return PaymentResponseModel(
                     newTransaction.transactionId, newTransaction.amount,
@@ -235,46 +389,6 @@ class TransactionService(
                 )
             }
         }
-    }
-
-    /**
-     * Reverse transaction from a dashboard
-     *
-     * @param merchantId Merchant Id
-     * @param pspTestMode indicator whether is the test mode or not
-     * @param transactionId Transaction ID
-     * @param reverseInfo Reversion request model
-     * @return Payment response model
-     */
-    fun dashboardReverse(
-        merchantId: String,
-        pspTestMode: Boolean?,
-        transactionId: String,
-        reverseInfo: ReversalRequestModel
-    ): PaymentResponseModel {
-        val merchant = merchantRepository.getMerchantById(merchantId)
-            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        return reverse(pspTestMode, transactionId, reverseInfo, merchant)
-    }
-
-    /**
-     * Reverse transaction
-     *
-     * @param secretKey Secret Key
-     * @param pspTestMode indicator whether is the test mode or not
-     * @param transactionId Transaction ID
-     * @param reverseInfo Reversion request model
-     * @return Payment response model
-     */
-    fun reverse(
-        secretKey: String,
-        pspTestMode: Boolean?,
-        transactionId: String,
-        reverseInfo: ReversalRequestModel
-    ): PaymentResponseModel {
-        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
-            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asException()
-        return reverse(pspTestMode, transactionId, reverseInfo, apiKey.merchant)
     }
 
     private fun reverse(
@@ -338,6 +452,7 @@ class TransactionService(
                     alias = lastTransaction.alias
                 )
                 transactionRepository.save(newTransaction)
+                sendMessageToKafka(newTransaction)
 
                 return PaymentResponseModel(
                     newTransaction.transactionId, newTransaction.amount,
@@ -346,50 +461,6 @@ class TransactionService(
                 )
             }
         }
-    }
-
-    /**
-     * Refund transaction from a dashboard
-     *
-     * @param merchantId Merchant Id
-     * @param idempotentKey Idempotent key
-     * @param pspTestMode indicator whether is the test mode or not
-     * @param transactionId Transaction ID
-     * @param refundInfo Payment information
-     * @return Payment response model
-     */
-    fun dashboardRefund(
-        merchantId: String,
-        idempotentKey: String,
-        pspTestMode: Boolean?,
-        transactionId: String,
-        refundInfo: PaymentDataRequestModel
-    ): PaymentResponseModel {
-        val merchant = merchantRepository.getMerchantById(merchantId)
-            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        return refund(idempotentKey, pspTestMode, transactionId, refundInfo, merchant)
-    }
-
-    /**
-     * Refund transaction
-     *
-     * @param secretKey Secret Key
-     * @param idempotentKey Idempotent key
-     * @param pspTestMode indicator whether is the test mode or not
-     * @param transactionId Transaction ID
-     * @param refundInfo Payment information
-     * @return Payment response model
-     */
-    fun refund(
-        secretKey: String,
-        idempotentKey: String,
-        pspTestMode: Boolean?,
-        transactionId: String,
-        refundInfo: PaymentDataRequestModel
-    ): PaymentResponseModel {
-        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.SECRET, secretKey)
-            ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asException()
-        return refund(idempotentKey, pspTestMode, transactionId, refundInfo, apiKey.merchant)
     }
 
     private fun refund(
@@ -427,7 +498,7 @@ class TransactionService(
             pspTransactionId = getPspPaymentResponse(originalTransaction).pspTransactionId,
             amount = refundInfo.amount,
             currency = prevTransaction.currencyId,
-            action = prevTransaction.action,
+            action = prevTransaction.action?.name,
             pspConfig = getPspConfig(prevTransaction.alias!!),
             purchaseId = prevTransaction.merchantTransactionId,
             paymentMethod = prevTransaction.paymentMethod!!.name
@@ -469,7 +540,7 @@ class TransactionService(
                 getPspConfig(alias)
             )
 
-        val transaction = transactionRepository.getByIdempotentKeyAndActionAndMerchantAndAlias(idempotentKey, transactionAction, merchant, alias)
+        val transaction = transactionRepository.getByIdempotentKeyAndMerchant(idempotentKey, merchant)
         val requestHash = requestHashing.hashRequest(paymentInfo)
 
         when {
@@ -488,7 +559,8 @@ class TransactionService(
             else -> {
                 val pspPaymentResponse = pspAction.invoke()
                 val newTransaction = Transaction(
-                    transactionId = transactionId ?: RandomStringUtils.randomAlphanumeric(TransactionService.TRANSACTION_ID_LENGTH),
+                    transactionId = transactionId
+                        ?: RandomStringUtils.randomAlphanumeric(TRANSACTION_ID_LENGTH),
                     idempotentKey = idempotentKey,
                     currencyId = paymentInfo.paymentData!!.currency,
                     amount = paymentInfo.paymentData.amount,
@@ -506,6 +578,7 @@ class TransactionService(
                     alias = alias
                 )
                 transactionRepository.save(newTransaction)
+                sendMessageToKafka(newTransaction)
 
                 return PaymentResponseModel(
                     newTransaction.transactionId, newTransaction.amount,
@@ -538,6 +611,11 @@ class TransactionService(
         val result = objectMapper.readValue(alias.merchant?.pspConfig, PspConfigListModel::class.java)
         return result.psp.firstOrNull { it.type == alias.psp!!.toString() }
             ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_NOT_FOUND, "PSP configuration for '${alias.psp}' cannot be found from used merchant").asException()
+    }
+
+    private fun sendMessageToKafka(transaction: Transaction) {
+        if (transaction.status == TransactionStatus.SUCCESS)
+            kafkaTemplate.send(kafkaTopicName, transaction.merchant.id!!, transaction)
     }
 
     companion object : KLogging() {

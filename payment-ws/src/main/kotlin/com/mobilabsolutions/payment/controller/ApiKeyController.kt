@@ -1,9 +1,14 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.controller
 
+import com.mobilabsolutions.payment.model.request.ApiKeyEditRequestModel
 import com.mobilabsolutions.payment.model.request.ApiKeyRequestModel
-import com.mobilabsolutions.payment.model.request.EditApiKeyRequestModel
 import com.mobilabsolutions.payment.service.ApiKeyService
 import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
 import org.springframework.http.HttpStatus
@@ -53,7 +58,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService) {
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun createApiKey(
         @PathVariable("Merchant-Id") merchantId: String,
-        @Valid @RequestBody apiKeyInfo: ApiKeyRequestModel
+        @Valid @ApiParam(name = "Api-Key-Info", value = "Api Key Model") @RequestBody apiKeyInfo: ApiKeyRequestModel
     ) = apiKeyService.createMerchantApiKey(merchantId, apiKeyInfo)
 
     @ApiOperation(value = "Get api for specific merchant using id")
@@ -88,7 +93,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService) {
     fun editApiKeyById(
         @PathVariable("Merchant-Id") merchantId: String,
         @PathVariable("API-Key-Id") apiKeyId: Long,
-        @RequestBody apiKeyInfo: EditApiKeyRequestModel
+        @Valid @ApiParam(name = "Api-Key-Info", value = "Api Key Edit Model") @RequestBody apiKeyInfo: ApiKeyEditRequestModel
     ) = apiKeyService.editMerchantApiKeyInfoById(apiKeyId, apiKeyInfo)
 
     @ApiOperation(value = "Delete merchant api key")

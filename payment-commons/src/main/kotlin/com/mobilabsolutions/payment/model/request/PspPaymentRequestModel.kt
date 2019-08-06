@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.model.request
 
 import com.mobilabsolutions.payment.model.AliasExtraModel
@@ -9,7 +13,7 @@ import javax.validation.Valid
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "PSP Payment Request Model")
+@ApiModel(value = "PSP payment request model")
 data class PspPaymentRequestModel(
     @ApiModelProperty("Alias ID", example = "JipfjLKL6BkTIREaRGyX")
     val aliasId: String?,

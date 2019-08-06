@@ -1,11 +1,15 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.service
 
-import com.mobilabsolutions.payment.data.domain.Merchant
-import com.mobilabsolutions.payment.data.domain.MerchantApiKey
+import com.mobilabsolutions.payment.data.Merchant
+import com.mobilabsolutions.payment.data.MerchantApiKey
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
+import com.mobilabsolutions.payment.model.request.ApiKeyEditRequestModel
 import com.mobilabsolutions.payment.model.request.ApiKeyRequestModel
-import com.mobilabsolutions.payment.model.request.EditApiKeyRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -50,7 +54,11 @@ class ApiKeyServiceTest {
         Mockito.`when`(merchantRepository.getMerchantById(unknownMerchantId)).thenReturn(null)
         Mockito.`when`(merchantRepository.getMerchantById(knownMerchantId)).thenReturn(Mockito.mock(Merchant::class.java))
         Mockito.`when`(merchantApiKeyRepository.getFirstById(unknownApiKeyId)).thenReturn(null)
-        Mockito.`when`(merchantApiKeyRepository.getFirstById(knownApiKeyId)).thenReturn(MerchantApiKey(merchant = Merchant()))
+        Mockito.`when`(merchantApiKeyRepository.getFirstById(knownApiKeyId)).thenReturn(
+            MerchantApiKey(
+                merchant = Merchant()
+            )
+        )
         Mockito.`when`(merchantApiKeyRepository.editApiKey(null, unknownApiKeyId)).thenReturn(0)
         Mockito.`when`(merchantApiKeyRepository.editApiKey(null, knownApiKeyId)).thenReturn(1)
         Mockito.`when`(merchantApiKeyRepository.deleteMerchantApiKeyById(unknownApiKeyId)).thenReturn(0)
@@ -97,13 +105,13 @@ class ApiKeyServiceTest {
     @Test
     fun `edit merchant api key info with wrong api key id`() {
         Assertions.assertThrows(ApiException::class.java) {
-            apiKeyService.editMerchantApiKeyInfoById(unknownApiKeyId, Mockito.mock(EditApiKeyRequestModel::class.java))
+            apiKeyService.editMerchantApiKeyInfoById(unknownApiKeyId, Mockito.mock(ApiKeyEditRequestModel::class.java))
         }
     }
 
     @Test
     fun `edit merchant api key info with api key id successfully`() {
-        apiKeyService.editMerchantApiKeyInfoById(knownApiKeyId, Mockito.mock(EditApiKeyRequestModel::class.java))
+        apiKeyService.editMerchantApiKeyInfoById(knownApiKeyId, Mockito.mock(ApiKeyEditRequestModel::class.java))
     }
 
     @Test

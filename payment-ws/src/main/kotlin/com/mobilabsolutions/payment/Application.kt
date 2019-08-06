@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment
 
 import com.mobilabsolutions.payment.configuration.AuthServerOAuth2Config

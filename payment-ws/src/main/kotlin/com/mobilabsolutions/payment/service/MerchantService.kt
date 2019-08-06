@@ -1,8 +1,12 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.mobilabsolutions.payment.data.domain.Authority
-import com.mobilabsolutions.payment.data.domain.Merchant
+import com.mobilabsolutions.payment.data.Authority
+import com.mobilabsolutions.payment.data.Merchant
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.repository.AuthorityRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
@@ -22,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
 **/
 @Service
-@Transactional
 class MerchantService(
     private val merchantRepository: MerchantRepository,
     private val objectMapper: ObjectMapper,
@@ -38,6 +41,7 @@ class MerchantService(
      * @param pspConfigRequestModel PSP Config Request Model
      * @return psp config response model
      */
+    @Transactional
     fun addPspConfigForMerchant(merchantId: String, pspConfigRequestModel: PspConfigRequestModel): PspConfigResponseModel {
         logger.info("Adding PSP config for merchant {}", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
@@ -71,11 +75,28 @@ class MerchantService(
     }
 
     /**
+     * Deletes PSP configuration for the merchant based on the given merchant id and psp type.
+     *
+     * @param merchantId Merchant Id
+     * @param pspId PSP Id
+     */
+    @Transactional
+    fun deletePspConfigForMerchant(merchantId: String, pspId: String) {
+        logger.info("Deleting {} PSP config for merchant {}", pspId, merchantId)
+        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        val configList = if (merchant.pspConfig != null) objectMapper.readValue(merchant.pspConfig, PspConfigListModel::class.java) else PspConfigListModel()
+        val pspConfig = configList.psp.firstOrNull { it.type == pspId }
+        configList.psp.remove(pspConfig ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_NOT_FOUND, "PSP configuration for '$pspId' cannot be found from given merchant").asException())
+        merchantRepository.updateMerchant(objectMapper.writeValueAsString(configList), merchantId)
+    }
+
+    /**
      * Returns the PSP configuration list for the given merchant id.
      *
      * @param merchantId Merchant Id
      * @return PSP configuration list
      */
+    @Transactional(readOnly = true)
     fun getMerchantConfiguration(merchantId: String): PspConfigListModel {
         logger.info("Retrieving PSP config for merchant {}", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
@@ -89,6 +110,7 @@ class MerchantService(
      * @param pspId Psp Id
      * @return PSP configuration
      */
+    @Transactional(readOnly = true)
     fun getMerchantPspConfiguration(merchantId: String, pspId: String): PspConfigModel? {
         logger.info("Adding {} PSP config for merchant {}", pspId, merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
@@ -105,6 +127,7 @@ class MerchantService(
      * @param pspId Psp Id
      * @param pspUpsertConfigRequestModel PSP Upsert Config Request Model
      */
+    @Transactional
     fun updatePspConfig(merchantId: String, pspId: String, pspUpsertConfigRequestModel: PspUpsertConfigRequestModel) {
         logger.info("Updating {} PSP config for merchant {}", pspId, merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
@@ -144,6 +167,7 @@ class MerchantService(
      * @param merchantInfo Merchant specific details
      *
      */
+    @Transactional
     fun createMerchant(merchantInfo: MerchantRequestModel) {
         if (!checkMerchantAndAuthority(merchantInfo.id)) throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_ALREADY_EXISTS, "Merchant with id '${merchantInfo.id}' already exists").asException()
         merchantRepository.save(
@@ -192,10 +216,10 @@ class MerchantService(
             sandboxPrivateKey,
             publicKey,
             privateKey,
-            default = default,
-            currency = null,
-            country = null,
-            locale = null,
-            urlPrefix = null
+            default,
+            currency,
+            country,
+            locale,
+            urlPrefix
         )
 }

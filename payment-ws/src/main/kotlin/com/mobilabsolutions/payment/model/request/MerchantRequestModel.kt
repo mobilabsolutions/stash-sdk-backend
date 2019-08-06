@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.model.request
 
 import com.mobilabsolutions.payment.validation.TimeZoneValidator
@@ -10,7 +14,7 @@ import javax.validation.constraints.Pattern
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel(value = "Merchant Creation Request")
+@ApiModel(value = "Merchant request model")
 data class MerchantRequestModel(
     @ApiModelProperty(value = "Merchant id", example = "Mobilab")
     @field:NotNull

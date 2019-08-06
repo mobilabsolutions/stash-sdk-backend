@@ -1,12 +1,16 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.service
 
-import com.mobilabsolutions.payment.data.domain.Authority
-import com.mobilabsolutions.payment.data.domain.MerchantUser
+import com.mobilabsolutions.payment.data.Authority
+import com.mobilabsolutions.payment.data.MerchantUser
 import com.mobilabsolutions.payment.data.repository.AuthorityRepository
 import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
-import com.mobilabsolutions.payment.model.request.MerchantUserPasswordRequestModel
+import com.mobilabsolutions.payment.model.request.MerchantUserEditPasswordRequestModel
+import com.mobilabsolutions.payment.model.request.MerchantUserEditRequestModel
 import com.mobilabsolutions.payment.model.request.MerchantUserRequestModel
-import com.mobilabsolutions.payment.model.request.EditMerchantUserRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -92,13 +96,13 @@ class UserDetailsServiceTest {
         userDetailsService.updateMerchantUser(
             "some email",
             "some email",
-            Mockito.mock(EditMerchantUserRequestModel::class.java)
+            Mockito.mock(MerchantUserEditRequestModel::class.java)
         )
     }
 
     @Test
     fun `update successfully with admin merchant user`() {
-        userDetailsService.updateMerchantUser("some email", "admin", Mockito.mock(EditMerchantUserRequestModel::class.java))
+        userDetailsService.updateMerchantUser("some email", "admin", Mockito.mock(MerchantUserEditRequestModel::class.java))
     }
 
     @Test
@@ -107,7 +111,7 @@ class UserDetailsServiceTest {
             userDetailsService.updateMerchantUser(
                 "some email",
                 "other email",
-                Mockito.mock(EditMerchantUserRequestModel::class.java)
+                Mockito.mock(MerchantUserEditRequestModel::class.java)
             )
         }
     }
@@ -117,7 +121,7 @@ class UserDetailsServiceTest {
         userDetailsService.changePasswordMerchantUser(
             knownEmail,
             knownEmail,
-            MerchantUserPasswordRequestModel(userPassword, "new password")
+            MerchantUserEditPasswordRequestModel(userPassword, "new password")
         )
     }
 
@@ -127,7 +131,7 @@ class UserDetailsServiceTest {
             userDetailsService.changePasswordMerchantUser(
                 knownEmail,
                 knownEmail,
-                MerchantUserPasswordRequestModel(anotherUserPassword, "new password")
+                MerchantUserEditPasswordRequestModel(anotherUserPassword, "new password")
             )
         }
     }
@@ -137,7 +141,7 @@ class UserDetailsServiceTest {
         userDetailsService.changePasswordMerchantUser(
             knownEmail,
             "admin",
-            MerchantUserPasswordRequestModel(userPassword, "new password")
+            MerchantUserEditPasswordRequestModel(userPassword, "new password")
         )
     }
 

@@ -1,10 +1,12 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.data.repository
 
+import com.mobilabsolutions.payment.data.Merchant
+import com.mobilabsolutions.payment.data.Transaction
 import com.mobilabsolutions.payment.data.configuration.BaseRepository
-import com.mobilabsolutions.payment.data.domain.Alias
-import com.mobilabsolutions.payment.data.domain.Merchant
-import com.mobilabsolutions.payment.data.domain.Transaction
-import com.mobilabsolutions.payment.data.enum.TransactionAction
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
@@ -15,8 +17,8 @@ import org.springframework.stereotype.Repository
 @Repository
 interface TransactionRepository : BaseRepository<Transaction, Long> {
 
-    @Query("SELECT DISTINCT tr FROM Transaction tr WHERE tr.idempotentKey = :idempotentKey AND tr.action = :action AND tr.merchant = :merchant AND (tr.alias = :alias OR :alias IS NULL)")
-    fun getByIdempotentKeyAndActionAndMerchantAndAlias(@Param("idempotentKey") idempotentKey: String, @Param("action") action: TransactionAction, @Param("merchant") merchant: Merchant, @Param("alias") alias: Alias?): Transaction?
+    @Query("SELECT DISTINCT tr FROM Transaction tr WHERE tr.idempotentKey = :idempotentKey AND tr.merchant = :merchant")
+    fun getByIdempotentKeyAndMerchant(@Param("idempotentKey") idempotentKey: String, @Param("merchant") merchant: Merchant): Transaction?
 
     @Query("SELECT * FROM transaction_record tr WHERE tr.transaction_id = :transactionId AND tr.status = :status GROUP BY :transactionId, tr.id ORDER BY tr.created_date DESC LIMIT 1", nativeQuery = true)
     fun getByTransactionIdAndStatus(@Param("transactionId") transactionId: String, @Param("status") status: String): Transaction?
@@ -35,7 +37,7 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
             "COALESCE(CAST(tr.payment_info AS json)#>>'{extra, ccConfig, ccType}', tr.payment_method), tr.created_date, count(*) OVER() AS full_count FROM transaction_record tr " +
             "JOIN (" +
             "SELECT transaction_id, max(created_date) max_created_date " +
-            "FROM transaction_record " +
+            "FROM transaction_record WHERE action != 'ADDITIONAL'" +
             "GROUP BY transaction_id" +
             ") tr1 ON tr.transaction_id = tr1.transaction_id AND tr.created_date = tr1.max_created_date " +
             "WHERE tr.merchant_id = :merchantId " +
@@ -69,4 +71,52 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
         @Param("limit") limit: Int?,
         @Param("offset") offset: Int?
     ): List<Array<Any>>
+
+    @Query("SELECT * FROM transaction_record tr WHERE CAST(tr.psp_response AS json)#>>'{pspTransactionId}' = :pspTransactionId AND (tr.action = :action1 OR tr.action = :action2) ORDER BY created_date DESC LIMIT 1", nativeQuery = true)
+    fun getByPspReferenceAndActions(@Param("pspTransactionId") pspTransactionId: String, @Param("action1") action1: String, @Param("action2") action2: String): Transaction?
+
+    @Query("SELECT * FROM transaction_record tr WHERE CAST(tr.psp_response AS json)#>>'{pspTransactionId}' = :pspTransactionId ORDER BY created_date DESC LIMIT 1", nativeQuery = true)
+    fun getByPspReference(@Param("pspTransactionId") pspTransactionId: String): Transaction?
+
+    @Query("SELECT * FROM transaction_record tr WHERE tr.merchant_id = :merchantId AND tr.status = 'SUCCESS' " +
+        "AND tr.created_date >= TO_TIMESTAMP(CAST(:createdAtStart AS text), 'yyyy-MM-dd HH24:MI:SS') " +
+        "AND tr.created_date <= CASE WHEN :createdAtEnd <> '' THEN TO_TIMESTAMP(CAST(:createdAtEnd AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END",
+        nativeQuery = true)
+    fun getTransactionsByMerchantId(
+        @Param("merchantId") merchantId: String,
+        @Param("createdAtStart") createdAtStart: String,
+        @Param("createdAtEnd") createdAtEnd: String?
+    ): List<Transaction>
+
+    @Query("SELECT * FROM transaction_record tr WHERE tr.merchant_id = :merchantId AND tr.status = 'SUCCESS' AND tr.notification = true " +
+        "AND tr.created_date >= TO_TIMESTAMP(CAST(:createdAtStart AS text), 'yyyy-MM-dd HH24:MI:SS') " +
+        "AND tr.created_date <= CASE WHEN :createdAtEnd <> '' THEN TO_TIMESTAMP(CAST(:createdAtEnd AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END",
+        nativeQuery = true)
+    fun getTransactionsWithNotification(
+        @Param("merchantId") merchantId: String,
+        @Param("createdAtStart") createdAtStart: String,
+        @Param("createdAtEnd") createdAtEnd: String?
+    ): List<Transaction>
+
+    @Query("SELECT * FROM transaction_record tr WHERE tr.merchant_id = :merchantId AND tr.status = 'SUCCESS' AND tr.action = 'REFUND'" +
+        " AND tr.created_date >= CASE WHEN :createdAtStart <> '' THEN TO_TIMESTAMP(CAST(:createdAtStart AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END " +
+        "AND tr.created_date <= CASE WHEN :createdAtEnd <> '' THEN TO_TIMESTAMP(CAST(:createdAtEnd AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END " +
+        "ORDER BY tr.created_date",
+        nativeQuery = true)
+    fun getTransactionsForRefunds(
+        @Param("merchantId") merchantId: String,
+        @Param("createdAtStart") createdAtStart: String?,
+        @Param("createdAtEnd") createdAtEnd: String?
+    ): List<Transaction>
+
+    @Query("SELECT * FROM transaction_record tr WHERE tr.merchant_id = :merchantId AND tr.status = 'SUCCESS' AND (tr.action = 'AUTH'  OR tr.action = 'CAPTURE')" +
+        " AND tr.created_date >= CASE WHEN :createdAtStart <> '' THEN TO_TIMESTAMP(CAST(:createdAtStart AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END " +
+        "AND tr.created_date <= CASE WHEN :createdAtEnd <> '' THEN TO_TIMESTAMP(CAST(:createdAtEnd AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END " +
+        "ORDER BY tr.created_date",
+        nativeQuery = true)
+    fun getTransactionsForPaymentMethods(
+        @Param("merchantId") merchantId: String,
+        @Param("createdAtStart") createdAtStart: String?,
+        @Param("createdAtEnd") createdAtEnd: String?
+    ): List<Transaction>
 }

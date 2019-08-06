@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.model
 
 import com.mobilabsolutions.payment.validation.CountryCodeValidator
@@ -8,7 +12,7 @@ import javax.validation.constraints.Email
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "Personal Data")
+@ApiModel(value = "Personal data model")
 data class PersonalDataModel(
     @ApiModelProperty(value = "Email address", example = "test@test.com")
     @field:Email

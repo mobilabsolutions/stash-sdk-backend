@@ -1,9 +1,13 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.mobilabsolutions.payment.data.domain.Alias
-import com.mobilabsolutions.payment.data.domain.Merchant
-import com.mobilabsolutions.payment.data.domain.Transaction
+import com.mobilabsolutions.payment.data.Alias
+import com.mobilabsolutions.payment.data.Merchant
+import com.mobilabsolutions.payment.data.Transaction
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.enum.TransactionAction
@@ -62,9 +66,21 @@ class TransactionDetailsServiceTest {
         action = action,
         status = status,
         paymentMethod = paymentMethod,
-        merchant = Merchant(merchantId, pspConfig = pspConfig, timezone = "Europe/Berlin"),
-        alias = Alias(id = correctAliasId, active = true, extra = extra, psp = PaymentServiceProvider.BS_PAYONE, pspAlias = pspAlias, merchant = Merchant("1", pspConfig = pspConfig)),
-        pspResponse = pspResponse)
+        merchant = Merchant(
+            merchantId,
+            pspConfig = pspConfig,
+            timezone = "Europe/Berlin"
+        ),
+        alias = Alias(
+            id = correctAliasId,
+            active = true,
+            extra = extra,
+            psp = PaymentServiceProvider.BS_PAYONE,
+            pspAlias = pspAlias,
+            merchant = Merchant("1", pspConfig = pspConfig)
+        ),
+        pspResponse = pspResponse
+    )
     private val response = MockHttpServletResponse()
 
     @Spy

@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.bspayone.service
 
 import com.mobilabsolutions.payment.bspayone.configuration.BsPayoneProperties
@@ -15,6 +19,7 @@ import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
+import com.mobilabsolutions.payment.model.PspNotificationModel
 import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
@@ -161,7 +166,7 @@ class BsPayonePsp(
         logger.info("BS Payone refund for {} mode", getPspMode(pspTestMode))
         val bsPayoneRefundRequest = BsPayoneRefundRequestModel(
             pspTransactionId = pspRefundRequestModel.pspTransactionId,
-            sequenceNumber = if (pspRefundRequestModel.action == TransactionAction.CAPTURE) 2 else 1,
+            sequenceNumber = if (pspRefundRequestModel.action == TransactionAction.CAPTURE.name) 2 else 1,
             amount = (pspRefundRequestModel.amount!! * -1).toString(),
             currency = pspRefundRequestModel.currency
         )
@@ -188,6 +193,10 @@ class BsPayonePsp(
         if (response.hasError()) {
             logger.error("Error during BS Payone alias deletion. Error code: {}, error message: {}", response.errorCode, response.errorMessage)
         }
+    }
+
+    override fun getPspNotification(pspTransactionId: String?, pspEvent: String?, pspMessage: String?): PspNotificationModel {
+        TODO("not implemented")
     }
 
     private fun getPspMode(test: Boolean?): String {

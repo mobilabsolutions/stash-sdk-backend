@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.model.response
 
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
@@ -8,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "PSP Payment Response")
+@ApiModel(value = "PSP payment response model")
 data class PspPaymentResponseModel(
     @ApiModelProperty(value = "PSP transaction id", example = "jdhcjdhc")
     val pspTransactionId: String?,

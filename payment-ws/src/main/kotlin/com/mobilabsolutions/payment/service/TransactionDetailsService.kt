@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -28,7 +32,6 @@ import javax.servlet.http.HttpServletResponse
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
 @Service
-@Transactional
 class TransactionDetailsService(
     private val transactionRepository: TransactionRepository,
     private val merchantRepository: MerchantRepository,
@@ -56,6 +59,7 @@ class TransactionDetailsService(
      * @param transactionId Transaction ID
      * @return transaction details by id response
      */
+    @Transactional(readOnly = true)
     fun getTransactionDetails(merchantId: String, transactionId: String): TransactionDetailsResponseModel {
         val merchant = merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
@@ -97,6 +101,7 @@ class TransactionDetailsService(
      * @param offset requested transaction list offset
      * @return filtered transaction list
      */
+    @Transactional(readOnly = true)
     fun getTransactionsByFilters(
         merchantId: String,
         createdAtStart: String?,
@@ -133,6 +138,7 @@ class TransactionDetailsService(
      * @param limit requested transaction list limit
      * @param offset requested transaction list offset
      */
+    @Transactional(readOnly = true)
     fun writeTransactionsToCsv(
         response: HttpServletResponse,
         merchantId: String,

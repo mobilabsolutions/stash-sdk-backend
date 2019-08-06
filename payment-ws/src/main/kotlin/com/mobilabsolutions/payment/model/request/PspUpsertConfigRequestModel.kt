@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.model.request
 
 import com.mobilabsolutions.payment.validation.CountryCodeValidator
@@ -7,7 +11,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "PSP Upsert Configuration Request")
+@ApiModel(value = "PSP upsert config request model")
 data class PspUpsertConfigRequestModel(
     @ApiModelProperty(value = "Merchant ID", example = "42865")
     val merchantId: String?,

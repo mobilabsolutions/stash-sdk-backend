@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.validation
 
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
@@ -29,6 +33,9 @@ class ConfigValidator {
             }
             PaymentServiceProvider.ADYEN.name -> {
                 (aliasExtra.personalData?.firstName != null && aliasExtra.personalData.lastName != null && checkCcConfig(aliasExtra.ccConfig))
+            }
+            PaymentServiceProvider.BRAINTREE.name -> {
+                ((aliasExtra.ccConfig?.nonce != null && aliasExtra.ccConfig.deviceData != null))
             }
             else -> false
         }

@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.data.enum
 
 /**
@@ -5,5 +9,6 @@ package com.mobilabsolutions.payment.data.enum
  */
 enum class TransactionStatus {
     SUCCESS,
-    FAIL
+    FAIL,
+    PENDING
 }

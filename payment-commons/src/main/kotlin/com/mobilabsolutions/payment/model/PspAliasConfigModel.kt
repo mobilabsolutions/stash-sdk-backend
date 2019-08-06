@@ -1,9 +1,13 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.model
 
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
-@ApiModel(value = "PSP Alias Configuration")
+@ApiModel(value = "PSP alias config model")
 data class PspAliasConfigModel(
     @ApiModelProperty(value = "Payment service provider type", example = "BS_PAYONE")
     val type: String?,

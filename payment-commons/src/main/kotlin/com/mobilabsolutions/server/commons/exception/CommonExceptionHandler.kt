@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.server.commons.exception
 
 import mu.KLogging
@@ -208,7 +212,7 @@ class CommonExceptionHandler {
         )
         return ApiError.builder()
             .withErrorCode(ApiErrorCode.SDK_GENERAL_ERROR)
-            .withMessage(if (exception != null) exception.message!! else "Unknown exception occurred.")
+            .withMessage(if (exception?.message != null) exception.message!! else "Unknown exception occurred.")
             .build()
     }
 

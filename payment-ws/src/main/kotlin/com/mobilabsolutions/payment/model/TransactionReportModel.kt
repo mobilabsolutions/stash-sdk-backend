@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.model
 
 import io.swagger.annotations.ApiModel
@@ -6,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "Transaction Report")
+@ApiModel(value = "Transaction report model")
 class TransactionReportModel(
     @ApiModelProperty(value = "Line number", example = "1")
     val no: Int?,

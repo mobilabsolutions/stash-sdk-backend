@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.braintree.exception
 
 import com.mobilabsolutions.server.commons.exception.PaymentError

@@ -21,6 +21,7 @@ spec:
       containers:
       - name: payment-sdk-backend
         image: eu.gcr.io/payment-server-reloaded/payment-sdk-backend:${KUBE_WS_DEPLOYMENT_IMAGE_TAG}
+        imagePullPolicy: Always
         resources:
           requests:
             cpu: ${KUBE_WS_DEPLOYMENT_CPU_REQUEST}

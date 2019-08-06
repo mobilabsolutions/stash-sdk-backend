@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.braintree.model.response
 
 import io.swagger.annotations.ApiModel

@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.server.commons.exception
 
 import org.springframework.http.HttpStatus
@@ -45,6 +49,7 @@ enum class ApiErrorCode(val code: String, val message: String, val httpStatus: H
     DYNAMIC_CONFIG_NOT_FOUND("3022", "Dynamic configuration (token, returnUrl, channel) must be supplied when using Adyen as a PSP.", HttpStatus.BAD_REQUEST),
     CONFIG_NOT_FOUND("3023", "Required configurations for specified payment method are not complete", HttpStatus.BAD_REQUEST),
     PSP_ALIAS_NOT_FOUND("3024", "PSP alias is required for this PSP", HttpStatus.BAD_REQUEST),
+    PSP_TRANSACTION_NOT_FOUND("3025", "There is no transaction for given PSP transaction ID and action", HttpStatus.BAD_REQUEST),
 
     PSP_MODULE_ERROR("4000", "Unexpected PSP operation error.", HttpStatus.INTERNAL_SERVER_ERROR),
 

@@ -1,8 +1,12 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.data.configuration
 
-import com.mobilabsolutions.payment.data.domain.Authority
-import com.mobilabsolutions.payment.data.domain.MerchantUser
-import com.mobilabsolutions.payment.data.domain.OAuthClientDetails
+import com.mobilabsolutions.payment.data.Authority
+import com.mobilabsolutions.payment.data.MerchantUser
+import com.mobilabsolutions.payment.data.OAuthClientDetails
 import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
 import com.mobilabsolutions.payment.data.repository.OAuthClientDetailsRepository
 import mu.KLogging

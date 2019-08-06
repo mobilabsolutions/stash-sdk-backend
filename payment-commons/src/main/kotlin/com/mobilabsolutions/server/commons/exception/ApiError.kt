@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.server.commons.exception
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter

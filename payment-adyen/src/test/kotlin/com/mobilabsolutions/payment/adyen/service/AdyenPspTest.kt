@@ -1,5 +1,10 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.adyen.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
 import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
@@ -28,6 +33,7 @@ import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
+import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import com.mobilabsolutions.server.commons.exception.ApiException
@@ -41,6 +47,7 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
+import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
@@ -117,6 +124,9 @@ class AdyenPspTest {
 
     @Mock
     private lateinit var randomStringGenerator: RandomStringGenerator
+
+    @Spy
+    val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
 
     @BeforeAll
     fun beforeAll() {
@@ -299,7 +309,7 @@ class AdyenPspTest {
                 pspReference,
                 amountValue,
                 currency,
-                TransactionAction.AUTH,
+                TransactionAction.AUTH.name,
                 pspConfig,
                 null,
                 PaymentMethod.CC.name
@@ -314,7 +324,7 @@ class AdyenPspTest {
                 pspReference,
                 null,
                 null,
-                TransactionAction.AUTH,
+                TransactionAction.AUTH.name,
                 pspConfig,
                 null,
                 PaymentMethod.SEPA.name
@@ -330,7 +340,7 @@ class AdyenPspTest {
                     pspReference,
                     amountValue,
                     currency,
-                    TransactionAction.AUTH,
+                    TransactionAction.AUTH.name,
                     pspConfig,
                     null,
                     PaymentMethod.PAY_PAL.name

@@ -657,7 +657,49 @@
 						}
 					},
 					"response": []
-				}
+				},
+                {
+                    "name": "Delete Merchant PSP Configuration",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": ""
+                        },
+                        "url": {
+                            "raw": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/psp/:Psp-Id",
+                            "host": [
+                                "{{wsEndpoint}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "merchant",
+                                "{Merchant-Id}",
+                                "psp",
+                                "{Psp-Id}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
 			]
 		},
 		{
@@ -1306,6 +1348,87 @@
                     "response": []
                 }
             ]
+        },
+        {
+            "name": "Home",
+            "item": [
+                {
+                    "name": "Get refunds overview",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/refunds"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get key performance",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/key-performance"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get notifications",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/notifications"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get payment methods overview",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/payment-methods"
+                    },
+                    "response": []
+                }
+            ]
         }
-	]
+    ]
 }

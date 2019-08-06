@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.server.commons
 
 import com.fasterxml.jackson.databind.ObjectMapper

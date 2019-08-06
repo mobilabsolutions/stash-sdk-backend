@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.model
 
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
@@ -10,7 +14,7 @@ import javax.validation.constraints.NotNull
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
-@ApiModel(value = "Alias Extra")
+@ApiModel(value = "Alias extra model")
 data class AliasExtraModel(
     @ApiModelProperty(value = "Credit card configuration")
     @field:Valid

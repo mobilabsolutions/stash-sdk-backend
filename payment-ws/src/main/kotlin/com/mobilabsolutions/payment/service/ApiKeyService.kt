@@ -1,14 +1,18 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.service
 
-import com.mobilabsolutions.payment.data.domain.MerchantApiKey
+import com.mobilabsolutions.payment.data.MerchantApiKey
 import com.mobilabsolutions.payment.data.enum.KeyType
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
-import com.mobilabsolutions.payment.model.ApiKeyReturnInfoModel
+import com.mobilabsolutions.payment.model.ApiKeyInfoModel
+import com.mobilabsolutions.payment.model.request.ApiKeyEditRequestModel
 import com.mobilabsolutions.payment.model.request.ApiKeyRequestModel
-import com.mobilabsolutions.payment.model.request.EditApiKeyRequestModel
-import com.mobilabsolutions.payment.model.response.CreateApiKeyResponseModel
-import com.mobilabsolutions.payment.model.response.GetApiKeyResponseModel
+import com.mobilabsolutions.payment.model.response.ApiKeyListResponseModel
+import com.mobilabsolutions.payment.model.response.ApiKeyResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import mu.KLogging
@@ -20,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
 @Service
-@Transactional
 class ApiKeyService(
     private val merchantApiKeyRepository: MerchantApiKeyRepository,
     private val merchantRepository: MerchantRepository
@@ -31,22 +34,23 @@ class ApiKeyService(
      * @param merchantId Merchant Id
      * @return api key method response
      */
-    fun getMerchantApiKeyInfo(merchantId: String): GetApiKeyResponseModel {
+    @Transactional(readOnly = true)
+    fun getMerchantApiKeyInfo(merchantId: String): ApiKeyListResponseModel {
         logger.info("Retrieving merchant {} keys", merchantId)
         val merchantApiKeyList = merchantApiKeyRepository.getAllByMerchantId(merchantId)
         if (merchantApiKeyList.isEmpty()) throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_EMPTY).asException()
         val apiKeyList = merchantApiKeyList.map {
             when (it.keyType) {
-                KeyType.PUBLISHABLE -> ApiKeyReturnInfoModel(
+                KeyType.PUBLISHABLE -> ApiKeyInfoModel(
                     it.id,
                     it.name,
                     it.keyType,
                     it.key
                 )
-                else -> ApiKeyReturnInfoModel(it.id, it.name, it.keyType)
+                else -> ApiKeyInfoModel(it.id, it.name, it.keyType)
             }
         }
-        return GetApiKeyResponseModel(apiKeyList)
+        return ApiKeyListResponseModel(apiKeyList)
     }
 
     /**
@@ -56,22 +60,23 @@ class ApiKeyService(
      * @param apiKeyInfo Api key info request model
      * @return merchant api key method response
      */
-    fun createMerchantApiKey(merchantId: String, apiKeyInfo: ApiKeyRequestModel): CreateApiKeyResponseModel {
+    @Transactional
+    fun createMerchantApiKey(merchantId: String, apiKeyInfo: ApiKeyRequestModel): ApiKeyResponseModel {
         logger.info("Creating merchant {} key", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId)
                 ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val generatedKey = merchantId + "-" + RandomStringUtils.randomAlphanumeric(ApiKeyService.STRING_LENGTH)
 
         val merchantApiKey = MerchantApiKey(
-                name = apiKeyInfo.name,
-                key = generatedKey,
-                active = true,
-                keyType = KeyType.valueOf(apiKeyInfo.type!!),
-                merchant = merchant
+            name = apiKeyInfo.name,
+            key = generatedKey,
+            active = true,
+            keyType = KeyType.valueOf(apiKeyInfo.type!!),
+            merchant = merchant
         )
         merchantApiKeyRepository.save(merchantApiKey)
 
-        return CreateApiKeyResponseModel(merchantApiKey.id, generatedKey)
+        return ApiKeyResponseModel(merchantApiKey.id, generatedKey)
     }
 
     /**
@@ -80,18 +85,19 @@ class ApiKeyService(
      * @param apiKeyId Api Key Id
      * @return merchant api key by id method response
      */
-    fun getMerchantApiKeyInfoById(apiKeyId: Long): ApiKeyReturnInfoModel {
+    @Transactional(readOnly = true)
+    fun getMerchantApiKeyInfoById(apiKeyId: Long): ApiKeyInfoModel {
         val merchantApiKey = merchantApiKeyRepository.getFirstById(apiKeyId)
                 ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asException()
 
         return when (merchantApiKey.keyType) {
-            KeyType.PUBLISHABLE -> ApiKeyReturnInfoModel(
+            KeyType.PUBLISHABLE -> ApiKeyInfoModel(
                 merchantApiKey.id,
                 merchantApiKey.name,
                 merchantApiKey.keyType,
                 merchantApiKey.key
             )
-            else -> ApiKeyReturnInfoModel(
+            else -> ApiKeyInfoModel(
                 merchantApiKey.id,
                 merchantApiKey.name,
                 merchantApiKey.keyType
@@ -106,7 +112,8 @@ class ApiKeyService(
      * @param apiKeyInfo Api key info request model
      * @return none
      */
-    fun editMerchantApiKeyInfoById(apiKeyId: Long, apiKeyInfo: EditApiKeyRequestModel) {
+    @Transactional
+    fun editMerchantApiKeyInfoById(apiKeyId: Long, apiKeyInfo: ApiKeyEditRequestModel) {
         if (merchantApiKeyRepository.editApiKey(apiKeyInfo.name, apiKeyId) == 0)
             throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asException()
     }
@@ -117,6 +124,7 @@ class ApiKeyService(
      * @param apiKeyId
      * @return none
      */
+    @Transactional
     fun deleteMerchantApiKeyById(apiKeyId: Long) {
         if (merchantApiKeyRepository.deleteMerchantApiKeyById(apiKeyId) == 0)
             throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_API_KEY_NOT_FOUND).asException()

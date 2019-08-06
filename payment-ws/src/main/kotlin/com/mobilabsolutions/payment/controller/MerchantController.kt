@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.controller
 
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
@@ -73,7 +77,7 @@ class MerchantController(
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('admin')")
     fun createMerchant(
-        @Valid @RequestBody merchantInfo: MerchantRequestModel
+        @Valid @ApiParam(name = "Merchant-Info", value = "Merchant Model") @RequestBody merchantInfo: MerchantRequestModel
     ) = merchantService.createMerchant(merchantInfo)
 
     @ApiOperation(value = "Add PSP Configuration for the Merchant")
@@ -91,8 +95,24 @@ class MerchantController(
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun createPspConfigToMerchant(
         @PathVariable("Merchant-Id") merchantId: String,
-        @Valid @RequestBody pspConfigRequestModel: PspConfigRequestModel
+        @Valid @ApiParam(name = "PSP-Config-Info", value = "PSP Config Model") @RequestBody pspConfigRequestModel: PspConfigRequestModel
     ) = merchantService.addPspConfigForMerchant(merchantId, pspConfigRequestModel)
+
+    @ApiOperation(value = "Delete PSP Configuration for the Merchant")
+    @ApiResponses(
+        ApiResponse(code = 204, message = "Successfully deleted PSP Configuration"),
+        ApiResponse(code = 400, message = "Failed to delete PSP Configuration"),
+        ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 403, message = "Forbidden access"),
+        ApiResponse(code = 404, message = "Resource not found")
+    )
+    @RequestMapping(MERCHANT_PSP_CONFIG_URL, method = [RequestMethod.DELETE])
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
+    fun deletePspConfigToMerchant(
+        @PathVariable("Merchant-Id") merchantId: String,
+        @PathVariable("Psp-Id") pspId: String
+    ) = merchantService.deletePspConfigForMerchant(merchantId, pspId)
 
     @ApiOperation(value = "Get List of PSP Configuration for the Merchant")
     @ApiResponses(
@@ -148,7 +168,7 @@ class MerchantController(
     fun updateMerchantPspConfiguration(
         @PathVariable("Merchant-Id") merchantId: String,
         @PathVariable("Psp-Id") pspId: String,
-        @Valid @RequestBody pspUpsertConfigRequestModel: PspUpsertConfigRequestModel
+        @Valid @ApiParam(name = "PSP-Config-Info", value = "PSP Config Edit Model") @RequestBody pspUpsertConfigRequestModel: PspUpsertConfigRequestModel
     ) = merchantService.updatePspConfig(merchantId, pspId, pspUpsertConfigRequestModel)
 
     @ApiOperation(value = "Get transaction details")
@@ -259,7 +279,7 @@ class MerchantController(
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
         @PathVariable(value = "Merchant-Id") merchantId: String,
         @PathVariable(value = "Transaction-Id") transactionId: String,
-        @Valid @RequestBody reverseInfo: ReversalRequestModel
+        @Valid @ApiParam(name = "Reverse-Info", value = "Reverse Info Model") @RequestBody reverseInfo: ReversalRequestModel
     ) = transactionService.dashboardReverse(merchantId, pspTestMode, transactionId, reverseInfo)
 
     @ApiOperation(value = "Refund transaction")
@@ -277,6 +297,6 @@ class MerchantController(
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
         @PathVariable(value = "Merchant-Id") merchantId: String,
         @PathVariable(value = "Transaction-Id") transactionId: String,
-        @Valid @RequestBody refundInfo: PaymentDataRequestModel
+        @Valid @ApiParam(name = "Refund-Info", value = "Refund Info Model") @RequestBody refundInfo: PaymentDataRequestModel
     ) = transactionService.dashboardRefund(merchantId, idempotentKey, pspTestMode, transactionId, refundInfo)
 }

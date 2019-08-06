@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.bspayone.service
 
 import com.mobilabsolutions.payment.bspayone.configuration.BsPayoneProperties
@@ -193,7 +197,7 @@ class BsPayonePspTest {
 
     @Test
     fun `refund transaction with correct transaction id`() {
-        bsPayonePsp.refund(PspRefundRequestModel(pspTransactionId, amount, currency, TransactionAction.CAPTURE, pspConfig, null, PaymentMethod.CC.name), test)
+        bsPayonePsp.refund(PspRefundRequestModel(pspTransactionId, amount, currency, TransactionAction.CAPTURE.name, pspConfig, null, PaymentMethod.CC.name), test)
     }
 
     @Test
