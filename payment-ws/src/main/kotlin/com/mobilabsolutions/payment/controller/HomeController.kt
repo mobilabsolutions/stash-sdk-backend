@@ -119,7 +119,7 @@ class HomeController(
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun getSelectedDateActivity(
         @PathVariable("Merchant-Id") merchantId: String,
-        @DateValidator @RequestParam(value = "fromDate", name = "From date") fromDate: String,
-        @DateValidator @RequestParam(value = "toDate", name = "To date") toDate: String
+        @DateValidator @RequestParam(required = false) fromDate: String,
+        @DateValidator @RequestParam(required = false) toDate: String
     ) = homeService.getSelectedDateActivity(merchantId, fromDate, toDate)
 }
