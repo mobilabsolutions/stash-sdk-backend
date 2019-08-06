@@ -179,7 +179,7 @@ class BraintreePspTest {
                     PayPalConfigModel(nonce, billingAgreementId, deviceData),
                     null,
                     null,
-                    PaymentMethod.CC.name,
+                    PaymentMethod.SEPA.name,
                     null
                 ), pspConfig), test)
         }
