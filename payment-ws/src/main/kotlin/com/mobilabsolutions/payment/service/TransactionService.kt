@@ -540,7 +540,7 @@ class TransactionService(
                 getPspConfig(alias)
             )
 
-        val transaction = transactionRepository.getByIdempotentKeyAndActionAndMerchantAndAlias(idempotentKey, transactionAction, merchant, alias)
+        val transaction = transactionRepository.getByIdempotentKeyAndMerchant(idempotentKey, merchant)
         val requestHash = requestHashing.hashRequest(paymentInfo)
 
         when {

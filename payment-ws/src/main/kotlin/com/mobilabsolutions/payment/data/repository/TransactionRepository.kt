@@ -4,11 +4,9 @@
 
 package com.mobilabsolutions.payment.data.repository
 
-import com.mobilabsolutions.payment.data.Alias
 import com.mobilabsolutions.payment.data.Merchant
 import com.mobilabsolutions.payment.data.Transaction
 import com.mobilabsolutions.payment.data.configuration.BaseRepository
-import com.mobilabsolutions.payment.data.enum.TransactionAction
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
@@ -19,8 +17,8 @@ import org.springframework.stereotype.Repository
 @Repository
 interface TransactionRepository : BaseRepository<Transaction, Long> {
 
-    @Query("SELECT DISTINCT tr FROM Transaction tr WHERE tr.idempotentKey = :idempotentKey AND tr.action = :action AND tr.merchant = :merchant AND (tr.alias = :alias OR :alias IS NULL)")
-    fun getByIdempotentKeyAndActionAndMerchantAndAlias(@Param("idempotentKey") idempotentKey: String, @Param("action") action: TransactionAction, @Param("merchant") merchant: Merchant, @Param("alias") alias: Alias?): Transaction?
+    @Query("SELECT DISTINCT tr FROM Transaction tr WHERE tr.idempotentKey = :idempotentKey AND tr.merchant = :merchant")
+    fun getByIdempotentKeyAndMerchant(@Param("idempotentKey") idempotentKey: String, @Param("merchant") merchant: Merchant): Transaction?
 
     @Query("SELECT * FROM transaction_record tr WHERE tr.transaction_id = :transactionId AND tr.status = :status GROUP BY :transactionId, tr.id ORDER BY tr.created_date DESC LIMIT 1", nativeQuery = true)
     fun getByTransactionIdAndStatus(@Param("transactionId") transactionId: String, @Param("status") status: String): Transaction?
