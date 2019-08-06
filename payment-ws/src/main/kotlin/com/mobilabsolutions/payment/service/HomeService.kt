@@ -302,9 +302,10 @@ class HomeService(
         logger.info("Getting selected date's activity for merchant {}", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transactions = transactionRepository.getTransactionsForPaymentMethods(merchantId, fromDate, toDate)
+        val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
         val transactionsMap = LinkedHashMap<String, Int>()
         for (transaction in transactions) {
-            val hour = transaction.createdDate!!.atZone(ZoneId.of(merchant.timezone)).hour
+            val hour = transaction.createdDate!!.atZone(ZoneId.of(timezone)).hour
             val timeRange = String.format(HOUR_PATTERN, hour) + '-' + String.format(HOUR_PATTERN, if ((hour + 1) == 24) 0 else hour + 1)
             val amount = transactionsMap[timeRange] ?: 0
             transactionsMap[timeRange] = amount.plus(transaction.amount!!)

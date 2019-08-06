@@ -1,6 +1,7 @@
 package com.mobilabsolutions.payment.controller
 
 import com.mobilabsolutions.payment.service.HomeService
+import com.mobilabsolutions.payment.validation.DateValidator
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
@@ -118,7 +119,7 @@ class HomeController(
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun getSelectedDateActivity(
         @PathVariable("Merchant-Id") merchantId: String,
-        @RequestParam(value = "fromDate", name = "From date") fromDate: String,
-        @RequestParam(value = "toDate", name = "To date") toDate: String
+        @DateValidator @RequestParam(value = "fromDate", name = "From date") fromDate: String,
+        @DateValidator @RequestParam(value = "toDate", name = "To date") toDate: String
     ) = homeService.getSelectedDateActivity(merchantId, fromDate, toDate)
 }
