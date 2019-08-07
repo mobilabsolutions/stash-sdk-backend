@@ -153,7 +153,7 @@ class BraintreePspTest {
 
     @Test
     fun `calculate PSP config`() {
-        braintreePsp.calculatePspConfig(pspConfig, null, test)
+        braintreePsp.calculatePspConfig(pspConfig, test)
     }
 
     @Test

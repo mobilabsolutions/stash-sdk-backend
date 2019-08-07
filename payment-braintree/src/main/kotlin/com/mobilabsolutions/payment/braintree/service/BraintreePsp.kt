@@ -17,7 +17,6 @@ import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.PspNotificationModel
-import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
@@ -44,7 +43,7 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
         return PaymentServiceProvider.BRAINTREE
     }
 
-    override fun calculatePspConfig(pspConfigModel: PspConfigModel?, dynamicPspConfig: DynamicPspConfigRequestModel?, pspTestMode: Boolean?): PspAliasConfigModel? {
+    override fun calculatePspConfig(pspConfigModel: PspConfigModel?, pspTestMode: Boolean?): PspAliasConfigModel? {
         logger.info { "Braintree config calculation has been called..." }
         val braintreeMode = getBraintreeMode(pspTestMode)
         return if (pspConfigModel != null) PspAliasConfigModel(
@@ -61,7 +60,6 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
             publicKey = null,
             privateKey = null,
             clientToken = braintreeClient.generateClientToken(pspConfigModel, braintreeMode),
-            paymentSession = null,
             clientEncryptionKey = null
         ) else null
     }

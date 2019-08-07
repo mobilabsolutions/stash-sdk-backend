@@ -28,7 +28,6 @@ import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.PspNotificationModel
-import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
@@ -65,7 +64,7 @@ class AdyenPsp(
         return PaymentServiceProvider.ADYEN
     }
 
-    override fun calculatePspConfig(pspConfigModel: PspConfigModel?, dynamicPspConfig: DynamicPspConfigRequestModel?, pspTestMode: Boolean?): PspAliasConfigModel? {
+    override fun calculatePspConfig(pspConfigModel: PspConfigModel?, pspTestMode: Boolean?): PspAliasConfigModel? {
         logger.info { "Adyen config calculation has been called..." }
         val adyenMode = getAdyenMode(pspTestMode)
         return if (pspConfigModel != null) PspAliasConfigModel(
@@ -82,8 +81,6 @@ class AdyenPsp(
             publicKey = null,
             privateKey = null,
             clientToken = null,
-            paymentSession = if (dynamicPspConfig != null)
-                adyenClient.requestPaymentSession(pspConfigModel, dynamicPspConfig, adyenMode) else null,
             clientEncryptionKey = pspConfigModel.clientEncryptionKey
         ) else null
     }
@@ -93,8 +90,7 @@ class AdyenPsp(
         val adyenMode = getAdyenMode(pspTestMode)
         val pspConfig = pspRegisterAliasRequestModel.pspConfig
         return when (pspRegisterAliasRequestModel.aliasExtra?.paymentMethod) {
-            PaymentMethod.CC.name -> registerCreditCard(pspConfig, pspRegisterAliasRequestModel, adyenMode)
-            PaymentMethod.THREE_D_SECURE.name -> register3DSecure(pspConfig, pspRegisterAliasRequestModel, adyenMode)
+            PaymentMethod.CC.name -> register3DSecure(pspConfig, pspRegisterAliasRequestModel, adyenMode)
             else -> null
         }
     }

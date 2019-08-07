@@ -134,8 +134,6 @@ class AdyenPspTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
-        Mockito.`when`(adyenClient.requestPaymentSession(pspConfig, dynamicPspConfig, AdyenMode.TEST.mode))
-            .thenReturn(paymentSession)
         Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(20)).thenReturn(reference)
         Mockito.`when`(adyenClient.preauthorization(
             AdyenPaymentRequestModel(amount, email, customerIP, null, pspAlias,
@@ -170,7 +168,7 @@ class AdyenPspTest {
 
     @Test
     fun `calculate PSP config`() {
-        adyenPsp.calculatePspConfig(pspConfig, dynamicPspConfig, true)
+        adyenPsp.calculatePspConfig(pspConfig, true)
     }
 
     @Test

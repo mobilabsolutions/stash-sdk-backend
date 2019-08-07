@@ -13,8 +13,8 @@ import com.mobilabsolutions.payment.model.TodaysActivityModel
 import com.mobilabsolutions.payment.model.response.LiveDataResponseModel
 import com.mobilabsolutions.payment.model.response.NotificationsResponseModel
 import com.mobilabsolutions.payment.model.response.PaymentMethodsOverviewResponseModel
-import com.mobilabsolutions.payment.model.response.SelectedDateActivityResponseModel
 import com.mobilabsolutions.payment.model.response.RefundOverviewResponseModel
+import com.mobilabsolutions.payment.model.response.SelectedDateActivityResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import mu.KLogging
@@ -61,7 +61,6 @@ class HomeService(
         val merchantUsers = merchantUserRepository.getMerchantUsers(transaction.merchant.id!!)
         merchantUsers.forEach { user ->
             simpleMessagingTemplate.convertAndSendToUser(user.email, "/topic/transactions", toLiveData(transaction))
-            println("Message is ${toLiveData(transaction)}")
         }
     }
 
