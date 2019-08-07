@@ -13,6 +13,7 @@ import com.mobilabsolutions.payment.model.TodaysActivityModel
 import com.mobilabsolutions.payment.model.response.LiveDataResponseModel
 import com.mobilabsolutions.payment.model.response.NotificationsResponseModel
 import com.mobilabsolutions.payment.model.response.PaymentMethodsOverviewResponseModel
+import com.mobilabsolutions.payment.model.response.SelectedDateActivityResponseModel
 import com.mobilabsolutions.payment.model.response.RefundOverviewResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
@@ -45,6 +46,7 @@ class HomeService(
         private const val DAY_PATTERN = "EEEE"
         private const val REFUND_NOTIFICATION = "Refunded %s"
         private const val CHARGEBACK_NOTIFICATION = "Chargeback %s"
+        private const val HOUR_PATTERN = "%02d"
 
         private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_UTC)
     }
@@ -284,5 +286,30 @@ class HomeService(
         val yesterdayEndOfDay = dateFormatter.format(LocalDateTime.now().minusDays(1).with(LocalTime.MAX).atZone(ZoneId.of(timezone)))
         val transactions = transactionRepository.getTransactionsByMerchantId(merchant.id!!, yesterdayBeginOfDay, yesterdayEndOfDay)
         return transactions.size
+    }
+
+    /**
+     * Gets selected date activity for all captured transactions
+     *
+     * @param merchantId Merchant ID
+     * @param fromDate Start date
+     * @param endDate End date
+     *
+     * @return Selected date activity response model
+     */
+    @Transactional(readOnly = true)
+    fun getSelectedDateActivity(merchantId: String, fromDate: String, toDate: String?): SelectedDateActivityResponseModel {
+        logger.info("Getting selected date's activity for merchant {}", merchantId)
+        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        val transactions = transactionRepository.getTransactionsForPaymentMethods(merchantId, fromDate, toDate)
+        val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
+        val transactionsMap = LinkedHashMap<String, Int>()
+        for (transaction in transactions) {
+            val hour = transaction.createdDate!!.atZone(ZoneId.of(timezone)).hour
+            val timeRange = String.format(HOUR_PATTERN, hour) + '-' + String.format(HOUR_PATTERN, if ((hour + 1) == 24) 0 else hour + 1)
+            val amount = transactionsMap[timeRange] ?: 0
+            transactionsMap[timeRange] = amount.plus(transaction.amount!!)
+        }
+        return SelectedDateActivityResponseModel(transactionsMap)
     }
 }

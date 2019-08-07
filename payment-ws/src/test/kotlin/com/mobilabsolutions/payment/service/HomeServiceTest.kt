@@ -47,6 +47,7 @@ class HomeServiceTest {
     private val currency = "EUR"
     private val correctTransactionId = "12345"
     private val createdAtStart = "2019-07-29T12:00:00Z"
+    private val endDate = "2019-07-29T23:00:00Z"
     private val merchant = Merchant(merchantId, pspConfig = pspConfig, timezone = "Europe/Berlin")
     private val transaction = Transaction(
         amount = amount,
@@ -116,6 +117,7 @@ class HomeServiceTest {
         Mockito.`when`(transactionRepository.getTransactionsForRefunds(merchantId, createdAtStart, null)).thenReturn(listOf(transaction))
         Mockito.`when`(transactionRepository.getTransactionsByMerchantId(merchantId, createdAtStart, null)).thenReturn(listOf(transaction, capturedTransaction))
         Mockito.`when`(transactionRepository.getTransactionsWithNotification(merchantId, createdAtStart, null)).thenReturn(listOf(transaction))
+        Mockito.`when`(transactionRepository.getTransactionsForPaymentMethods(merchantId, createdAtStart, endDate)).thenReturn(listOf(transaction))
     }
 
     @Test
@@ -197,6 +199,21 @@ class HomeServiceTest {
     fun `get notifications with incorrect merchant id`() {
         Assertions.assertThrows(ApiException::class.java) {
             homeService.getNotifications(incorrectMerchantId)
+        }
+    }
+
+    @Test
+    fun `get selected date activity`() {
+        val transactions = homeService.getSelectedDateActivity(merchantId, createdAtStart, endDate)
+
+        Assertions.assertEquals(transactions.transactions[0].timeRange, "12-13")
+        Assertions.assertEquals(transactions.transactions[0].amount, 100)
+    }
+
+    @Test
+    fun `get selected date activity with incorrect merchant id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            homeService.getSelectedDateActivity(incorrectMerchantId, createdAtStart, endDate)
         }
     }
 }
