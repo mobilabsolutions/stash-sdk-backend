@@ -74,7 +74,8 @@ class BsPayonePsp(
             publicKey = null,
             privateKey = null,
             clientToken = null,
-            paymentSession = null
+            paymentSession = null,
+            clientEncryptionKey = null
         ) else null
     }
 

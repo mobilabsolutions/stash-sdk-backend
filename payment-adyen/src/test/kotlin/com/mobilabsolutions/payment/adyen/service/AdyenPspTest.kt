@@ -71,6 +71,7 @@ class AdyenPspTest {
         "some channel"
     )
     private val amountValue = 300
+    private val clientToken = "testtoken"
     private val amount = AdyenAmountRequestModel(
         value = amountValue,
         currency = currency
@@ -90,7 +91,8 @@ class AdyenPspTest {
         currency,
         country,
         locale,
-        urlPrefix
+        urlPrefix,
+        clientToken
     )
     private val paymentSession = "123"
     private val email = "test@test.com"
@@ -137,21 +139,21 @@ class AdyenPspTest {
         Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(20)).thenReturn(reference)
         Mockito.`when`(adyenClient.preauthorization(
             AdyenPaymentRequestModel(amount, email, customerIP, null, pspAlias,
-                AdyenRecurringRequestModel(adyenProperties.contract), adyenProperties.shopperInteraction, reference, sandboxMerchantId, null, null, null, null, null),
+                AdyenRecurringRequestModel(adyenProperties.contract), adyenProperties.shopperInteraction, reference, sandboxMerchantId, null, null, null, null, null, null),
             pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, null, null))
         Mockito.`when`(adyenClient.verifyPayment(verifyRequest, urlPrefix, AdyenMode.TEST.mode))
-            .thenReturn(AdyenVerifyPaymentResponseModel(recurringDetailReference, pspAlias, null, null))
+            .thenReturn(AdyenVerifyPaymentResponseModel(recurringDetailReference, pspAlias, null, null, null, null, null))
         Mockito.`when`(randomStringGenerator.generateRandomAlphanumeric(20)).thenReturn(reference)
         Mockito.`when`(adyenClient.authorization(
             AdyenPaymentRequestModel(amount, email, customerIP, customerReference, pspAlias,
-                AdyenRecurringRequestModel(adyenProperties.contract), adyenProperties.shopperInteraction, reference, sandboxMerchantId, 0, null, null, null, null),
+                AdyenRecurringRequestModel(adyenProperties.contract), adyenProperties.shopperInteraction, reference, sandboxMerchantId, 0, null, null, null, null, null),
             pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, null, null))
         Mockito.`when`(adyenClient.sepaPayment(
             AdyenPaymentRequestModel(amount, null, null, null, null,
                 null, null, reference, sandboxMerchantId, null,
-                AdyenPaymentMethodRequestModel(adyenProperties.sepaPaymentMethod, holderName, iban, null, null, null, null), null, null, null),
+                AdyenPaymentMethodRequestModel(adyenProperties.sepaPaymentMethod, holderName, iban, null, null, null, null), null, null, null, null),
             pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, null, null))
         Mockito.`when`(adyenClient.reverse(AdyenReverseRequestModel(pspTransactionId, purchaseId, sandboxMerchantId), pspConfig, "test"))
@@ -190,7 +192,7 @@ class AdyenPspTest {
                     null,
                     null,
                     customerReference),
-                PaymentMethod.CC.name, null),
+                PaymentMethod.CC.name, null, null),
             PaymentDataRequestModel(amountValue, currency, "Book"),
             pspAlias, pspConfig, null), true)
     }
@@ -214,7 +216,7 @@ class AdyenPspTest {
                     null,
                     null,
                     null),
-                PaymentMethod.SEPA.name, null),
+                PaymentMethod.SEPA.name, null, null),
             PaymentDataRequestModel(amountValue, currency, "Book"),
             null, pspConfig, null), true)
     }
@@ -239,7 +241,7 @@ class AdyenPspTest {
                         null,
                         null,
                         customerReference),
-                    PaymentMethod.PAY_PAL.name, null),
+                    PaymentMethod.PAY_PAL.name, null, null),
                 PaymentDataRequestModel(amountValue, currency, "Book"),
                 pspAlias, pspConfig, null), true)
         }
@@ -264,7 +266,7 @@ class AdyenPspTest {
                     country,
                     null
                 ),
-                PaymentMethod.CC.name, correctPayload), pspConfig), true)
+                PaymentMethod.CC.name, correctPayload, null), pspConfig), true)
     }
 
     @Test
@@ -297,7 +299,7 @@ class AdyenPspTest {
                     null,
                     null,
                     null),
-                PaymentMethod.CC.name, null),
+                PaymentMethod.CC.name, null, null),
             PaymentDataRequestModel(amountValue, currency, "Book"),
             pspAlias, pspConfig, null), true)
     }

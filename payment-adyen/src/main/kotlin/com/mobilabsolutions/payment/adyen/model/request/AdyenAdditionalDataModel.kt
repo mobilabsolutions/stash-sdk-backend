@@ -9,5 +9,5 @@ import io.swagger.annotations.ApiModelProperty
 @ApiModel(value = "Adyen Additional Data")
 data class AdyenAdditionalDataModel(
     @ApiModelProperty(value = "Whether 3D Secure should be executed or not", example = "true")
-    val executeThreeD: String?
+    val allow3DS2: Boolean?
 )

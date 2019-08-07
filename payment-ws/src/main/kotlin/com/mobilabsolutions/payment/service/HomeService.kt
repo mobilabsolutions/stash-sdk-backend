@@ -59,6 +59,7 @@ class HomeService(
         val merchantUsers = merchantUserRepository.getMerchantUsers(transaction.merchant.id!!)
         merchantUsers.forEach { user ->
             simpleMessagingTemplate.convertAndSendToUser(user.email, "/topic/transactions", toLiveData(transaction))
+            println("Message is ${toLiveData(transaction)}")
         }
     }
 

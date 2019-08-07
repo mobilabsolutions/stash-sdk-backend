@@ -18,6 +18,13 @@ data class AdyenVerifyPaymentResponseModel(
     @ApiModelProperty(value = "Shopper reference", example = "oIXHpTAfEPSleWXT6Khe")
     val shopperReference: String?,
 
+    @ApiModelProperty(value = "Payload needed to verify the payment", example = "Ab02b4c0!BQABAgCYHYurjVnu8GRyhy1ZsGj...")
+    val paymentData: String?,
+
+    val resultCode: String?,
+
+    val challengeToken: String?,
+
     @ApiModelProperty(value = "Adyen reason of refused payment", example = "Bad amount")
     val refusalReason: String?,
 
@@ -28,6 +35,10 @@ data class AdyenVerifyPaymentResponseModel(
         const val ADDITIONAL_DATA = "additionalData"
         const val RECURRING_REFERENCE = "recurring.recurringDetailReference"
         const val SHOPPER_REFERENCE = "recurring.shopperReference"
+        const val PAYMENT_DATA = "paymentData"
+        const val RESULT_CODE = "resultCode"
+        const val AUTHENTICATION = "authentication"
+        const val CHALLENGE_TOKEN = "threeds2.challengeToken"
         const val REFUSAL_REASON = "refusalReason"
         const val ERROR_MESSAGE = "message"
     }
@@ -35,6 +46,9 @@ data class AdyenVerifyPaymentResponseModel(
     constructor(jsonObject: JSONObject) : this(
         jsonObject.getJsonObjectSafe(ADDITIONAL_DATA)?.getStringSafe(RECURRING_REFERENCE),
         jsonObject.getJsonObjectSafe(ADDITIONAL_DATA)?.getStringSafe(SHOPPER_REFERENCE),
+        jsonObject.getStringSafe(PAYMENT_DATA),
+        jsonObject.getStringSafe(RESULT_CODE),
+        jsonObject.getJsonObjectSafe(AUTHENTICATION)?.getStringSafe(CHALLENGE_TOKEN),
         jsonObject.getStringSafe(REFUSAL_REASON),
         jsonObject.getStringSafe(ERROR_MESSAGE)
     )

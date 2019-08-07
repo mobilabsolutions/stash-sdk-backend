@@ -7,9 +7,9 @@ package com.mobilabsolutions.payment.adyen.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
+import com.mobilabsolutions.payment.adyen.model.AdyenNotificationItemModel
 import com.mobilabsolutions.payment.adyen.model.request.Adyen3DSecureDetailsModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenAdditionalDataModel
-import com.mobilabsolutions.payment.adyen.model.AdyenNotificationItemModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenCaptureRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenDeleteAliasRequestModel
@@ -57,6 +57,8 @@ class AdyenPsp(
 ) : Psp {
     companion object : KLogging() {
         const val REFERENCE_LENGTH = 20
+        const val IDENTIFY_SHOPPER_RESULT = "IdentifyShopper"
+        const val CHALLENGE_SHOPPER_RESULT = "ChallengeShopper"
     }
 
     override fun getProvider(): PaymentServiceProvider {
@@ -81,7 +83,8 @@ class AdyenPsp(
             privateKey = null,
             clientToken = null,
             paymentSession = if (dynamicPspConfig != null)
-                adyenClient.requestPaymentSession(pspConfigModel, dynamicPspConfig, adyenMode) else null
+                adyenClient.requestPaymentSession(pspConfigModel, dynamicPspConfig, adyenMode) else null,
+            clientEncryptionKey = pspConfigModel.clientEncryptionKey
         ) else null
     }
 
@@ -104,8 +107,8 @@ class AdyenPsp(
         val request = AdyenVerify3DSecureRequestModel(
             paymentData = threeDSecureConfig?.paymentData,
             details = Adyen3DSecureDetailsModel(
-                md = threeDSecureConfig?.md,
-                paRes = threeDSecureConfig?.paRes
+                fingerprintResult = threeDSecureConfig?.fingerprintResult,
+                challengeResult = threeDSecureConfig?.challengeResult
             )
         )
 
@@ -118,7 +121,17 @@ class AdyenPsp(
                 .withError(response.errorMessage ?: response.refusalReason!!).build().asException()
         }
 
-        return PspRegisterAliasResponseModel(response.recurringDetailReference, null, response.shopperReference, null, null, null, null, null)
+        return PspRegisterAliasResponseModel(
+            pspAlias = response.recurringDetailReference,
+            billingAgreementId = null,
+            registrationReference = response.shopperReference,
+            paymentData = response.paymentData,
+            resultCode = response.resultCode,
+            authenticationToken = when (response.resultCode) {
+                CHALLENGE_SHOPPER_RESULT -> response.challengeToken
+                else -> null
+            }
+        )
     }
 
     override fun preauthorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
@@ -277,6 +290,7 @@ class AdyenPsp(
             captureDelayHours = if (executeCapture) 0 else null,
             paymentMethod = null,
             additionalData = null,
+            channel = null,
             returnUrl = null,
             enableRecurring = null)
         return if (executeCapture) adyenClient.authorization(request, pspPaymentRequestModel.pspConfig!!, adyenMode) else adyenClient.preauthorization(request, pspPaymentRequestModel.pspConfig!!, adyenMode)
@@ -309,6 +323,7 @@ class AdyenPsp(
                 encryptedSecurityCode = null
             ),
             additionalData = null,
+            channel = null,
             returnUrl = null,
             enableRecurring = null
         )
@@ -354,7 +369,7 @@ class AdyenPsp(
                 .withError(response.errorMessage ?: response.refusalReason!!).build().asException()
         }
 
-        return PspRegisterAliasResponseModel(response.recurringDetailReference, null, response.shopperReference, null, null, null, null, null)
+        return PspRegisterAliasResponseModel(response.recurringDetailReference, null, response.shopperReference, null, null, null)
     }
 
     private fun register3DSecure(pspConfig: PspConfigModel?, pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, adyenMode: String): PspRegisterAliasResponseModel {
@@ -383,8 +398,9 @@ class AdyenPsp(
                 encryptedSecurityCode = pspRegisterAliasRequestModel.aliasExtra?.ccConfig?.encryptedSecurityCode
             ),
             additionalData = AdyenAdditionalDataModel(
-                executeThreeD = true.toString()
+                allow3DS2 = true
             ),
+            channel = pspRegisterAliasRequestModel.aliasExtra?.channel,
             returnUrl = pspRegisterAliasRequestModel.aliasExtra?.ccConfig?.returnUrl,
             enableRecurring = true
         )
@@ -398,7 +414,17 @@ class AdyenPsp(
                 .withError(response.errorMessage ?: response.refusalReason!!).build().asException()
         }
 
-        return PspRegisterAliasResponseModel(null, null, null, response.paymentData, response.paReq, response.termUrl, response.md, response.url)
+        return PspRegisterAliasResponseModel(
+            pspAlias = null,
+            billingAgreementId = null,
+            registrationReference = null,
+            paymentData = response.paymentData,
+            resultCode = response.resultCode,
+            authenticationToken = when (response.resultCode) {
+                IDENTIFY_SHOPPER_RESULT -> response.fingerprintToken
+                CHALLENGE_SHOPPER_RESULT -> response.challengeToken
+                else -> null
+            })
     }
 
         private fun adyenActionToTransactionAction(adyenStatus: String?): String {

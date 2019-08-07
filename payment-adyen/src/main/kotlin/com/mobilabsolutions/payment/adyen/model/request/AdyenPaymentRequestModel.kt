@@ -48,6 +48,9 @@ data class AdyenPaymentRequestModel(
     @ApiModelProperty(value = "Additional data")
     val additionalData: AdyenAdditionalDataModel?,
 
+    @ApiModelProperty(value = "The used platform", example = "iOS, Android")
+    val channel: String?,
+
     @ApiModelProperty(value = "Return URL", example = "payment-dev.mblb.net")
     val returnUrl: String?,
 

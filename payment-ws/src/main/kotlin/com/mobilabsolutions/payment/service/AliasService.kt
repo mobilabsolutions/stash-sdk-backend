@@ -68,7 +68,7 @@ class AliasService(
     @Transactional
     fun createAlias(publishableKey: String, pspType: String, idempotentKey: String, userAgent: String?, dynamicPspConfig: DynamicPspConfigRequestModel?, pspTestMode: Boolean?): AliasResponseModel {
         logger.info("Creating alias for {} psp", pspType)
-        if (!pspValidator.validate(pspType, dynamicPspConfig)) throw ApiError.ofErrorCode(ApiErrorCode.DYNAMIC_CONFIG_NOT_FOUND).asException()
+//        if (!pspValidator.validate(pspType, dynamicPspConfig)) throw ApiError.ofErrorCode(ApiErrorCode.DYNAMIC_CONFIG_NOT_FOUND).asException()
         val merchantApiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofErrorCode(ApiErrorCode.PUBLISHABLE_KEY_NOT_FOUND).asException()
         val result = objectMapper.readValue(merchantApiKey.merchant.pspConfig ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_EMPTY).asException(), PspConfigListModel::class.java)
         val pspConfig = result.psp.firstOrNull { it.type == pspType }
@@ -122,14 +122,14 @@ class AliasService(
         val aliasExtraModel = aliasRequestModel.extra?.copy(
             payPalConfig = paypalConfig,
             personalData = personalConfig,
-            threeDSecureConfig = ThreeDSecureConfigModel(paymentData = pspRegisterAliasResponse?.paymentData, md = null, paRes = null))
+            threeDSecureConfig = ThreeDSecureConfigModel(paymentData = pspRegisterAliasResponse?.paymentData, fingerprintResult = null, challengeResult = null))
 
         println(objectMapper.writeValueAsString(pspRegisterAliasResponse))
 
         val pspAlias = aliasRequestModel.pspAlias ?: pspRegisterAliasResponse?.pspAlias
         val extra = if (aliasExtraModel != null) objectMapper.writeValueAsString(aliasExtraModel) else null
         aliasRepository.updateAlias(pspAlias, extra, aliasId, userAgent)
-        return ExchangeAliasResponseModel(pspRegisterAliasResponse?.paReq, pspRegisterAliasResponse?.termUrl, pspRegisterAliasResponse?.md, pspRegisterAliasResponse?.url)
+        return ExchangeAliasResponseModel(pspRegisterAliasResponse?.authenticationToken)
     }
 
     fun verifyAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, verifyAliasRequest: VerifyAliasRequestModel) {
@@ -146,7 +146,7 @@ class AliasService(
             ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_IMPL_NOT_FOUND, "PSP implementation '${alias.psp}' cannot be found").asException()
 
         val extra = objectMapper.readValue(alias.extra, AliasExtraModel::class.java)
-        val threeDSecureConfig = extra?.threeDSecureConfig?.copy(paRes = verifyAliasRequest.paRes, md = verifyAliasRequest.md)
+        val threeDSecureConfig = extra?.threeDSecureConfig?.copy(fingerprintResult = verifyAliasRequest.fingerprintResult)
         val aliasExtraModel = extra?.copy(threeDSecureConfig = threeDSecureConfig)
 
         val pspRegisterAliasRequest = PspRegisterAliasRequestModel(
@@ -156,7 +156,12 @@ class AliasService(
         )
 
         val pspResponse = psp.verifyThreeDSecure(pspRegisterAliasRequest, pspTestMode)
-        aliasRepository.updateAlias(pspResponse?.pspAlias, objectMapper.writeValueAsString(aliasExtraModel), aliasId, userAgent)
+        val aliasExtra = when (pspResponse?.paymentData != null) {
+            true -> aliasExtraModel?.copy(threeDSecureConfig = threeDSecureConfig?.copy(paymentData = pspResponse?.paymentData))
+            else -> aliasExtraModel
+        }
+
+        aliasRepository.updateAlias(pspResponse?.pspAlias, objectMapper.writeValueAsString(aliasExtra), aliasId, userAgent)
     }
 
     /**
