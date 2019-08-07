@@ -12,5 +12,5 @@ data class RefundOverviewModel(
     val day: String?,
 
     @ApiModelProperty(value = "Total refunded amount", example = "5000")
-    val amount: Number?
+    val amount: Int?
 )

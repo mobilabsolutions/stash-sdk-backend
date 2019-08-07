@@ -1427,6 +1427,25 @@
                         "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/payment-methods"
                     },
                     "response": []
+                },
+                {
+                    "name": "Get selected date activity",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/activity?fromDate=:fromDate&toDate=:toDate"
+                    },
+                    "response": []
                 }
             ]
         }
