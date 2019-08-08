@@ -138,7 +138,7 @@ class AliasService(
             ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_IMPL_NOT_FOUND, "PSP implementation '${alias.psp}' cannot be found").asException()
 
         val extra = objectMapper.readValue(alias.extra, AliasExtraModel::class.java)
-        val threeDSecureConfig = extra?.threeDSecureConfig?.copy(fingerprintResult = verifyAliasRequest.fingerprintResult)
+        val threeDSecureConfig = extra?.threeDSecureConfig?.copy(fingerprintResult = verifyAliasRequest.fingerprintResult, challengeResult = verifyAliasRequest.challengeResult)
         val aliasExtraModel = extra?.copy(threeDSecureConfig = threeDSecureConfig)
 
         val pspRegisterAliasRequest = PspRegisterAliasRequestModel(
@@ -149,7 +149,7 @@ class AliasService(
 
         val pspResponse = psp.verifyThreeDSecure(pspRegisterAliasRequest, pspTestMode)
         val aliasExtra = when {
-            pspResponse?.paymentData != null -> aliasExtraModel?.copy(threeDSecureConfig = threeDSecureConfig?.copy(paymentData = pspResponse?.paymentData))
+            pspResponse?.paymentData != null -> aliasExtraModel?.copy(threeDSecureConfig = threeDSecureConfig?.copy(paymentData = pspResponse.paymentData))
             else -> aliasExtraModel
         }
 
