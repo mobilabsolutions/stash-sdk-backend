@@ -25,13 +25,11 @@ import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.SepaConfigModel
-import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspPaymentRequestModel
 import com.mobilabsolutions.payment.model.request.PspRefundRequestModel
-import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspReversalRequestModel
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiError
@@ -65,11 +63,6 @@ class AdyenPspTest {
     private val country = "DE"
     private val locale = "de-DE"
     private val urlPrefix = "random-mobilab"
-    private val dynamicPspConfig = DynamicPspConfigRequestModel(
-        "some token",
-        "some url",
-        "some channel"
-    )
     private val amountValue = 300
     private val clientToken = "testtoken"
     private val amount = AdyenAmountRequestModel(
@@ -94,7 +87,6 @@ class AdyenPspTest {
         urlPrefix,
         clientToken
     )
-    private val paymentSession = "123"
     private val email = "test@test.com"
     private val customerIP = "61.294.12.12"
     private val aliasId = "alias id"
@@ -164,6 +156,9 @@ class AdyenPspTest {
             .thenReturn(AdyenPaymentResponseModel(pspReference, null, null))
         Mockito.`when`(adyenClient.deleteAlias(AdyenDeleteAliasRequestModel(deletedCustomerReference, pspAlias, sandboxMerchantId), pspConfig, "true"))
             .thenThrow(ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Alias doesn't exist at Adyen").asException())
+//        Mockito.`when`(adyenClient.registerThreeDSecure(
+//            AdyenPaymentRequestModel(AdyenAmountRequestModel(0, currency), email, customerIP, reference, null, null, null, reference, sandboxMerchantId, null), pspConfig, AdyenMode.TEST.mode))
+//            .thenReturn(AdyenPaymentResponseModel(pspReference, null, null))
     }
 
     @Test
@@ -245,27 +240,31 @@ class AdyenPspTest {
         }
     }
 
-    @Test
-    fun `register alias`() {
-        adyenPsp.registerAlias(PspRegisterAliasRequestModel(correctAliasId,
-            AliasExtraModel(
-                null,
-                null,
-                null,
-                null,
-                PersonalDataModel(
-                    null,
-                    null,
-                    null,
-                    "lastName",
-                    null,
-                    null,
-                    "Berlin",
-                    country,
-                    null
-                ),
-                PaymentMethod.CC.name, correctPayload, null), pspConfig), true)
-    }
+//    @Test
+//    fun `register alias`() {
+//        adyenPsp.registerAlias(PspRegisterAliasRequestModel(correctAliasId,
+//            AliasExtraModel(
+//                null,
+//                null,
+//                null,
+//                ThreeDSecureConfigModel(
+//                    "paymentdata",
+//                    "result",
+//                    null
+//                ),
+//                PersonalDataModel(
+//                    null,
+//                    null,
+//                    null,
+//                    "lastName",
+//                    null,
+//                    null,
+//                    "Berlin",
+//                    country,
+//                    null
+//                ),
+//                PaymentMethod.CC.name, correctPayload, null), pspConfig), true)
+//    }
 
     @Test
     fun `capture successfully`() {

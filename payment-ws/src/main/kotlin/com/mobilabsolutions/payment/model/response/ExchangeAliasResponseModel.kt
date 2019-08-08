@@ -8,6 +8,9 @@ import io.swagger.annotations.ApiModelProperty
  */
 @ApiModel(value = "Exchange Alias Response")
 data class ExchangeAliasResponseModel(
+    @ApiModelProperty(value = "Result code", example = "IdentifyShopper")
+    val resultCode: String?,
+
     @ApiModelProperty(value = "Fingerptint or challenge token", example = "eyJ0aH...")
     val authenticationToken: String?
 )
