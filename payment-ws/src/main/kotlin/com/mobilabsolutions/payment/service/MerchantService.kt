@@ -19,8 +19,19 @@ import com.mobilabsolutions.payment.model.response.PspConfigResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import mu.KLogging
+import org.springframework.core.io.ByteArrayResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.nio.file.Files
+import java.nio.file.Paths
+import org.springframework.core.io.ClassPathResource
+import org.springframework.core.io.Resource
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
+import org.springframework.util.StringUtils
+import org.springframework.web.multipart.MultipartFile
+import org.springframework.util.StringUtils.cleanPath
 
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
@@ -181,6 +192,30 @@ class MerchantService(
         )
 
         authorityRepository.save(Authority(name = merchantInfo.id))
+    }
+
+    /**
+     * Save logo to merchant based on the given merchant id
+     *
+     * @param merchantId Merchant ID
+     * @param file File to save
+     */
+    @Transactional
+    fun saveLogo(merchantId: String, file: MultipartFile) {
+        merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        merchantRepository.saveLogo(file.bytes, merchantId)
+    }
+
+    /**
+     * Query logo from merchant based on the given merchant id
+     *
+     * @param merchantId Merchant ID
+     * @return Response entity of byte array (image)
+     */
+    @Transactional(readOnly = true)
+    fun getLogo(merchantId: String): ResponseEntity<ByteArray> {
+        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(merchant.logo!!)
     }
 
     private fun checkMerchantAndAuthority(merchantId: String): Boolean {
