@@ -46,7 +46,6 @@ class HomeService(
         private const val DAY_PATTERN = "EEEE"
         private const val REFUND_NOTIFICATION = "Refunded %s"
         private const val CHARGEBACK_NOTIFICATION = "Chargeback %s"
-        private const val HOUR_PATTERN = "%02d"
 
         private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_UTC)
     }
