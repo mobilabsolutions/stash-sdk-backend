@@ -57,11 +57,10 @@ class HomeService(
      */
     @KafkaListener(topics = ["\${kafka.transactions.topicName:}"], groupId = "\${spring.kafka.consumer.group-id:}")
     fun getLiveData(@Payload transaction: Transaction) {
-        logger.info("Sending the live data..")
+        logger.info("Sending the live data to the merchant {}", transaction.merchant.id)
         val merchantUsers = merchantUserRepository.getMerchantUsers(transaction.merchant.id!!)
         merchantUsers.forEach { user ->
             simpleMessagingTemplate.convertAndSendToUser(user.email, "/topic/transactions", toLiveData(transaction))
-            logger.info("Returned live data ${toLiveData(transaction)}")
         }
     }
 
