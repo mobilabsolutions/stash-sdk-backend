@@ -292,20 +292,22 @@ class HomeService(
      * Gets selected date activity for all captured transactions
      *
      * @param merchantId Merchant ID
-     * @param fromDate Start date
-     * @param endDate End date
+     * @param date Date
      *
      * @return Selected date activity response model
      */
     @Transactional(readOnly = true)
-    fun getSelectedDateActivity(merchantId: String, fromDate: String, toDate: String?): SelectedDateActivityResponseModel {
+    fun getSelectedDateActivity(merchantId: String, date: String?): SelectedDateActivityResponseModel {
         logger.info("Getting selected date's activity for merchant {}", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        val transactions = transactionRepository.getTransactionsForPaymentMethods(merchantId, fromDate, toDate)
+
         val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
+        val startOfDay = dateFormatter.format(LocalDateTime.parse(date, dateFormatter).with(LocalTime.MIN).atZone(ZoneId.of(timezone)))
+        val endOfDay = dateFormatter.format(LocalDateTime.parse(date, dateFormatter).with(LocalTime.MAX).atZone(ZoneId.of(timezone)))
+        val transactions = transactionRepository.getTransactionsForPaymentMethods(merchantId, startOfDay, endOfDay)
         val transactionsMap = LinkedHashMap<String, Int>()
         for (transaction in transactions) {
-            val hour = transaction.createdDate!!.atZone(ZoneId.of(timezone)).hour
+            val hour = transaction.createdDate!!.atZone(ZoneId.of(timezone)).hour + 1
             val timeRange = String.format(HOUR_PATTERN, hour) + '-' + String.format(HOUR_PATTERN, if ((hour + 1) == 24) 0 else hour + 1)
             val amount = transactionsMap[timeRange] ?: 0
             transactionsMap[timeRange] = amount.plus(transaction.amount!!)

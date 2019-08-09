@@ -46,8 +46,8 @@ class HomeServiceTest {
     private val amount = 100
     private val currency = "EUR"
     private val correctTransactionId = "12345"
-    private val createdAtStart = "2019-07-29T12:00:00Z"
-    private val endDate = "2019-07-29T23:00:00Z"
+    private val createdAtStart = "2019-07-29T00:00:00Z"
+    private val endDate = "2019-07-29T23:59:59Z"
     private val merchant = Merchant(merchantId, pspConfig = pspConfig, timezone = "Europe/Berlin")
     private val transaction = Transaction(
         amount = amount,
@@ -204,16 +204,16 @@ class HomeServiceTest {
 
     @Test
     fun `get selected date activity`() {
-        val transactions = homeService.getSelectedDateActivity(merchantId, createdAtStart, endDate)
+        val transactions = homeService.getSelectedDateActivity(merchantId, createdAtStart)
 
-        Assertions.assertEquals(transactions.transactions[0].timeRange, "12-13")
+        Assertions.assertEquals(transactions.transactions[0].timeRange, "01-02")
         Assertions.assertEquals(transactions.transactions[0].amount, 100)
     }
 
     @Test
     fun `get selected date activity with incorrect merchant id`() {
         Assertions.assertThrows(ApiException::class.java) {
-            homeService.getSelectedDateActivity(incorrectMerchantId, createdAtStart, endDate)
+            homeService.getSelectedDateActivity(incorrectMerchantId, createdAtStart)
         }
     }
 }
