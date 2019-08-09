@@ -6,6 +6,8 @@ source ./k8s/setDemoEnv.sh
 
 gcloud container clusters get-credentials ${CLUSTER_NAME} --region ${REGION} --project ${PROJECT_ID}
 
+envsubst < k8s/resources/gke-backendconfig.yaml | kubectl apply -f -
+
 envsubst < k8s/resources/ws-deployment.yaml | kubectl apply -f -
 envsubst < k8s/resources/ws-configmap.yaml | kubectl apply -f -
 envsubst < k8s/resources/ws-service.yaml | kubectl apply -f -
