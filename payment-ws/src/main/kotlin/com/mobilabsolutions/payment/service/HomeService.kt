@@ -161,6 +161,32 @@ class HomeService(
             .format(Instant.now().minus(days, ChronoUnit.DAYS))
     }
 
+    /**
+     * Gets selected date activity for all captured transactions
+     *
+     * @param merchantId Merchant ID
+     * @param date Date
+     *
+     * @return Selected date activity response model
+     */
+    @Transactional(readOnly = true)
+    fun getSelectedDateActivity(merchantId: String, date: String?): SelectedDateActivityResponseModel {
+        logger.info("Getting selected date's activity for merchant {}", merchantId)
+        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+
+        val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
+        val startOfDay = dateFormatter.format(LocalDateTime.parse(date, dateFormatter).with(LocalTime.MIN).atZone(ZoneId.of(timezone)))
+        val endOfDay = dateFormatter.format(LocalDateTime.parse(date, dateFormatter).with(LocalTime.MAX).atZone(ZoneId.of(timezone)))
+        val transactions = transactionRepository.getTransactionsForPaymentMethods(merchantId, startOfDay, endOfDay)
+        val transactionsMap = LinkedHashMap<String, Int>()
+        for (transaction in transactions) {
+            val hour = (transaction.createdDate!!.atZone(ZoneId.of(timezone)).hour + 1).toString()
+            val amount = transactionsMap[hour] ?: 0
+            transactionsMap[hour] = amount.plus(transaction.amount!!)
+        }
+        return SelectedDateActivityResponseModel(transactionsMap)
+    }
+
     private fun toLiveData(transaction: Transaction): LiveDataResponseModel {
         return when (transaction.action) {
             TransactionAction.AUTH -> getLiveDataForAuthAndCapturedTransaction(transaction)
@@ -286,32 +312,5 @@ class HomeService(
         val yesterdayEndOfDay = dateFormatter.format(LocalDateTime.now().minusDays(1).with(LocalTime.MAX).atZone(ZoneId.of(timezone)))
         val transactions = transactionRepository.getTransactionsByMerchantId(merchant.id!!, yesterdayBeginOfDay, yesterdayEndOfDay)
         return transactions.size
-    }
-
-    /**
-     * Gets selected date activity for all captured transactions
-     *
-     * @param merchantId Merchant ID
-     * @param date Date
-     *
-     * @return Selected date activity response model
-     */
-    @Transactional(readOnly = true)
-    fun getSelectedDateActivity(merchantId: String, date: String?): SelectedDateActivityResponseModel {
-        logger.info("Getting selected date's activity for merchant {}", merchantId)
-        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-
-        val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
-        val startOfDay = dateFormatter.format(LocalDateTime.parse(date, dateFormatter).with(LocalTime.MIN).atZone(ZoneId.of(timezone)))
-        val endOfDay = dateFormatter.format(LocalDateTime.parse(date, dateFormatter).with(LocalTime.MAX).atZone(ZoneId.of(timezone)))
-        val transactions = transactionRepository.getTransactionsForPaymentMethods(merchantId, startOfDay, endOfDay)
-        val transactionsMap = LinkedHashMap<String, Int>()
-        for (transaction in transactions) {
-            val hour = transaction.createdDate!!.atZone(ZoneId.of(timezone)).hour + 1
-            val timeRange = String.format(HOUR_PATTERN, hour) + '-' + String.format(HOUR_PATTERN, if ((hour + 1) == 24) 0 else hour + 1)
-            val amount = transactionsMap[timeRange] ?: 0
-            transactionsMap[timeRange] = amount.plus(transaction.amount!!)
-        }
-        return SelectedDateActivityResponseModel(transactionsMap)
     }
 }
