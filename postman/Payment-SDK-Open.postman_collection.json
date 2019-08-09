@@ -1443,7 +1443,7 @@
                         },
                         "method": "GET",
                         "header": [],
-                        "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/activity?fromDate=:fromDate&toDate=:toDate"
+                        "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/activity?date=:date"
                     },
                     "response": []
                 }
