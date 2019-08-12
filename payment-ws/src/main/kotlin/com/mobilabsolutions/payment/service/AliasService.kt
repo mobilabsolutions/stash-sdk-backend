@@ -127,6 +127,7 @@ class AliasService(
             pspRegisterAliasResponse?.paymentMethodType)
     }
 
+    @Transactional
     fun verifyAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, verifyAliasRequest: VerifyAliasRequestModel): VerifyAliasResponseModel {
         logger.info("Verifying alias {}", aliasId)
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofErrorCode(ApiErrorCode.PUBLISHABLE_KEY_NOT_FOUND).asException()
