@@ -12,5 +12,14 @@ data class VerifyAliasResponseModel(
     val resultCode: String?,
 
     @ApiModelProperty(value = "Token for performing 3DS 2 challenge", example = "eyJ0aH...")
-    val challengeToken: String?
+    val challengeToken: String?,
+
+    @ApiModelProperty(value = "Payment data", example = "eyJ0aH...")
+    val paymentData: String?,
+
+    @ApiModelProperty(value = "Adyen action type", example = "threeDS2Fingerprint")
+    val actionType: String?,
+
+    @ApiModelProperty(value = "Adyen payment method type", example = "scheme")
+    val paymentMethodType: String?
 )

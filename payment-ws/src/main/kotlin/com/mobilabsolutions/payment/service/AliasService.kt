@@ -158,7 +158,7 @@ class AliasService(
         }
 
         aliasRepository.updateAlias(pspResponse?.pspAlias, objectMapper.writeValueAsString(aliasExtra), aliasId, userAgent)
-        return VerifyAliasResponseModel(pspResponse?.resultCode, pspResponse?.authenticationToken)
+        return VerifyAliasResponseModel(pspResponse?.resultCode, pspResponse?.authenticationToken, pspResponse?.paymentData, pspResponse?.type, pspResponse?.paymentMethodType)
     }
 
     /**

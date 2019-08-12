@@ -13,7 +13,6 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRefundRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerify3DSecureRequestModel
-import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.Adyen3DSecureResponseModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
@@ -34,9 +33,7 @@ class AdyenClient(
     private val objectMapper: ObjectMapper
 ) {
     companion object : KLogging() {
-        const val VERIFY_URL = "/payments/result"
         const val API_KEY = "X-API-Key"
-        const val PAYLOAD = "payload"
         const val PREAUTH_URL = "/authorise"
         const val AUTHORIZATION_URL = "/authorise"
         const val PAYMENT_URL = "/payments"
@@ -47,31 +44,6 @@ class AdyenClient(
         const val SEPA_REFUND_URL = "/cancelOrRefund"
         const val DELETE_ALIAS_URL = "/disable"
         const val ERROR_MESSAGE = "message"
-    }
-
-    /** Verifies Adyen payment result
-     *
-     * @param verifyRequest Adyen verify payment request
-     * @param urlPrefix URL prefix
-     * @param mode test or live mode
-     * @return Adyen verify payment response
-     */
-    fun verifyPayment(
-        verifyRequest: AdyenVerifyPaymentRequestModel,
-        urlPrefix: String?,
-        mode: String
-    ): AdyenVerifyPaymentResponseModel {
-        val verifyUrl =
-            if (mode == AdyenMode.TEST.mode) adyenProperties.testCheckoutBaseUrl + VERIFY_URL
-            else adyenProperties.liveCheckoutBaseUrl.format(urlPrefix) + VERIFY_URL
-
-        val response = khttp.post(
-            url = verifyUrl,
-            headers = mapOf(API_KEY to verifyRequest.apiKey!!),
-            json = mapOf(PAYLOAD to verifyRequest.payload)
-        )
-
-        return AdyenVerifyPaymentResponseModel(response.jsonObject)
     }
 
     /**

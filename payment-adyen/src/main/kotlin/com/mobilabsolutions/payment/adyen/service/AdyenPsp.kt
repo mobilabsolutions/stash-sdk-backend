@@ -126,8 +126,8 @@ class AdyenPsp(
                 CHALLENGE_SHOPPER_RESULT -> response.challengeToken
                 else -> null
             },
-            type = null,
-            paymentMethodType = null
+            type = response.type,
+            paymentMethodType = response.paymentMethodType
         )
     }
 
@@ -384,13 +384,14 @@ class AdyenPsp(
             returnUrl = pspRegisterAliasRequestModel.aliasExtra?.ccConfig?.returnUrl,
             enableRecurring = true
         )
+
         val response = adyenClient.registerThreeDSecure(request, pspConfig!!, adyenMode)
 
         if (response.errorMessage != null || response.refusalReason != null) {
-            logger.error("Adyen payment session verification is failed, reason {}", response.errorMessage
+            logger.error("Adyen payment method registration failed, reason {}", response.errorMessage
                 ?: response.refusalReason)
             throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
-                .withMessage("Error during verifying Adyen payment session")
+                .withMessage("Error during registering Adyen payment method")
                 .withError(response.errorMessage ?: response.refusalReason!!).build().asException()
         }
 
