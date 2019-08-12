@@ -29,6 +29,10 @@ class Merchant(
     var email: String? = null,
 
     @Lob
+    @Column(name = "logo")
+    var logo: ByteArray? = null,
+
+    @Lob
     @Type(type = "org.hibernate.type.TextType")
     @Column(name = "psp_config")
     var pspConfig: String? = null,
