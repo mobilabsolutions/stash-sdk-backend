@@ -32,8 +32,6 @@ import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
 import org.springframework.mock.web.MockMultipartFile
 
-
-
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
@@ -156,13 +154,13 @@ class MerchantServiceTest {
 
     @Test
     fun `save logo to merchant`() {
-        merchantService.updateAndSaveLogo(knownMerchantId, mockMultipartFile)
+        merchantService.uploadAndSaveLogo(knownMerchantId, mockMultipartFile)
     }
 
     @Test
     fun `save logo to incorrect merchant`() {
         Assertions.assertThrows(ApiException::class.java) {
-            merchantService.updateAndSaveLogo(unknownMerchantId, mockMultipartFile)
+            merchantService.uploadAndSaveLogo(unknownMerchantId, mockMultipartFile)
         }
     }
 

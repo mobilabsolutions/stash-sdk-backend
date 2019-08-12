@@ -315,10 +315,10 @@ class MerchantController(
     )
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
-    fun saveLogo(
+    fun uploadAndSaveLogo(
         @PathVariable("Merchant-Id") merchantId: String,
         @RequestParam file: MultipartFile
-    ) = merchantService.updateAndSaveLogo(merchantId, file)
+    ) = merchantService.uploadAndSaveLogo(merchantId, file)
 
     @ApiOperation(value = "Get merchant logo")
     @ApiResponses(

@@ -193,7 +193,7 @@ class MerchantService(
      * @param file File to save
      */
     @Transactional
-    fun updateAndSaveLogo(merchantId: String, file: MultipartFile) {
+    fun uploadAndSaveLogo(merchantId: String, file: MultipartFile) {
         merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         merchantRepository.saveLogo(file.bytes, merchantId)
     }
