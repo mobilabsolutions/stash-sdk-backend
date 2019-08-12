@@ -69,7 +69,7 @@ class AliasController(private val aliasService: AliasService) {
         ApiResponse(code = 204, message = "Successfully verified an Alias"),
         ApiResponse(code = 400, message = "Request model validation is failed")
     )
-    @RequestMapping(VERIFY_ALIAS_URL, method = [RequestMethod.PUT],
+    @RequestMapping(VERIFY_ALIAS_URL, method = [RequestMethod.POST],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseStatus(HttpStatus.OK)
