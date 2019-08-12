@@ -80,7 +80,7 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
             }
         )
         val braintreeResponse = braintreeClient.registerAlias(braintreeRequest, pspRegisterAliasRequestModel.pspConfig!!, getBraintreeMode(pspTestMode), pspRegisterAliasRequestModel.aliasExtra?.paymentMethod!!)
-        return PspRegisterAliasResponseModel(braintreeResponse.token, braintreeResponse.billingAgreementId, null, null, null, null)
+        return PspRegisterAliasResponseModel(braintreeResponse.token, braintreeResponse.billingAgreementId, null, null, null, null, null, null)
     }
 
     override fun verifyThreeDSecure(pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, pspTestMode: Boolean?): PspRegisterAliasResponseModel? {

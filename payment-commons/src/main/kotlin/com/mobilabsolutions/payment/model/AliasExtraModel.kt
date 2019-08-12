@@ -41,9 +41,6 @@ data class AliasExtraModel(
     @field:NotNull
     val paymentMethod: String?,
 
-    @ApiModelProperty(value = "Payload")
-    val payload: String?,
-
     @ApiModelProperty(value = "Used platform", example = "iOS, Android")
     val channel: String?
 )

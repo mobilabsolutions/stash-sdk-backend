@@ -166,7 +166,6 @@ class BraintreePspTest {
                 null,
                 null,
                 PaymentMethod.PAY_PAL.name,
-                null,
                 null
             ), pspConfig), test)
     }
@@ -182,7 +181,6 @@ class BraintreePspTest {
                     null,
                     null,
                     PaymentMethod.SEPA.name,
-                    null,
                     null
                 ), pspConfig), test)
         }
@@ -198,7 +196,6 @@ class BraintreePspTest {
                     null,
                     null,
                     PaymentMethod.CC.name,
-                    null,
                     null
                 ), pspConfig), test)
         }
@@ -238,7 +235,6 @@ class BraintreePspTest {
                         null,
                         null,
                         PaymentMethod.PAY_PAL.name,
-                        null,
                         null
                     ),
                     PaymentDataRequestModel(correctAmount, currency, reason),
@@ -262,7 +258,6 @@ class BraintreePspTest {
                         null,
                         null,
                         PaymentMethod.PAY_PAL.name,
-                        null,
                         null
                     ),
                     PaymentDataRequestModel(declinedAmount, currency, reason),
@@ -286,7 +281,6 @@ class BraintreePspTest {
                         null,
                         null,
                         PaymentMethod.CC.name,
-                        null,
                         null
                     ),
                     PaymentDataRequestModel(correctAmount, currency, reason),
@@ -353,7 +347,6 @@ class BraintreePspTest {
                         null,
                         null,
                         PaymentMethod.PAY_PAL.name,
-                        null,
                         null
                     ),
                     PaymentDataRequestModel(correctAmount, currency, reason),
@@ -377,7 +370,6 @@ class BraintreePspTest {
                         null,
                         null,
                         PaymentMethod.PAY_PAL.name,
-                        null,
                         null
                     ),
                     PaymentDataRequestModel(declinedAmount, currency, reason),
@@ -401,7 +393,6 @@ class BraintreePspTest {
                         null,
                         null,
                         PaymentMethod.CC.name,
-                        null,
                         null
                     ),
                     PaymentDataRequestModel(correctAmount, currency, reason),

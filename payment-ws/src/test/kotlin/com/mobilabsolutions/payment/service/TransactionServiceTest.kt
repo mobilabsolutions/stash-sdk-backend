@@ -95,7 +95,7 @@ class TransactionServiceTest {
     private val pspConfigModel = PspConfigModel(
         PaymentServiceProvider.BS_PAYONE.name, "mobilab", "123", "123", "123", null, null, null, null, null, true, null, null, null, null, null
     )
-    private val aliasExtra = AliasExtraModel(null, null, null, null, PersonalDataModel(null, null, null, "Mustermann", null, null, "Berlin", "DE", null), PaymentMethod.CC.name, null, null)
+    private val aliasExtra = AliasExtraModel(null, null, null, null, PersonalDataModel(null, null, null, "Mustermann", null, null, "Berlin", "DE", null), PaymentMethod.CC.name, null)
     private val merchantTransactionId = "12345"
     private val requestHash = "17b7f62ccd46abba2576714496908760"
     private val differentRequestHash = "different hash"

@@ -19,7 +19,6 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestMod
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRefundRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerify3DSecureRequestModel
-import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
@@ -126,7 +125,9 @@ class AdyenPsp(
             authenticationToken = when (response.resultCode) {
                 CHALLENGE_SHOPPER_RESULT -> response.challengeToken
                 else -> null
-            }
+            },
+            type = null,
+            paymentMethodType = null
         )
     }
 
@@ -351,23 +352,6 @@ class AdyenPsp(
         return adyenClient.sepaRefund(request, pspRefundRequestModel.pspConfig!!, adyenMode)
     }
 
-    private fun registerCreditCard(pspConfig: PspConfigModel?, pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, adyenMode: String): PspRegisterAliasResponseModel {
-        val request = AdyenVerifyPaymentRequestModel(
-            apiKey = if (adyenMode == AdyenMode.TEST.mode) pspConfig!!.sandboxPublicKey else pspConfig!!.publicKey,
-            payload = pspRegisterAliasRequestModel.aliasExtra!!.payload
-        )
-        val response = adyenClient.verifyPayment(request, pspConfig.urlPrefix, adyenMode)
-
-        if (response.errorMessage != null || response.refusalReason != null) {
-            logger.error("Adyen payment session verification is failed, reason {}", response.errorMessage ?: response.refusalReason)
-            throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
-                .withMessage("Error during verifying Adyen payment session")
-                .withError(response.errorMessage ?: response.refusalReason!!).build().asException()
-        }
-
-        return PspRegisterAliasResponseModel(response.recurringDetailReference, null, response.shopperReference, null, null, null)
-    }
-
     private fun register3DSecure(pspConfig: PspConfigModel?, pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, adyenMode: String): PspRegisterAliasResponseModel {
         val request = AdyenPaymentRequestModel(
             amount = AdyenAmountRequestModel(
@@ -420,7 +404,10 @@ class AdyenPsp(
                 IDENTIFY_SHOPPER_RESULT -> response.fingerprintToken
                 CHALLENGE_SHOPPER_RESULT -> response.challengeToken
                 else -> null
-            })
+            },
+            type = response.type,
+            paymentMethodType = response.paymentMethodType
+        )
     }
 
         private fun adyenActionToTransactionAction(adyenStatus: String?): String {

@@ -12,5 +12,14 @@ data class ExchangeAliasResponseModel(
     val resultCode: String?,
 
     @ApiModelProperty(value = "Fingerptint or challenge token", example = "eyJ0aH...")
-    val authenticationToken: String?
+    val authenticationToken: String?,
+
+    @ApiModelProperty(value = "Payment data", example = "eyJ0aH...")
+    val paymentData: String?,
+
+    @ApiModelProperty(value = "Adyen action type", example = "threeDS2Fingerprint")
+    val actionType: String?,
+
+    @ApiModelProperty(value = "Adyen payment method type", example = "scheme")
+    val paymentMethodType: String?
 )

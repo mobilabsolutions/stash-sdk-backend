@@ -96,6 +96,7 @@ class AdyenClient(
             headers = mapOf(API_KEY to apiKey!!),
             json = JSONObject(objectMapper.writeValueAsString(request))
         )
+        println(response.jsonObject)
         return Adyen3DSecureResponseModel(response.jsonObject)
     }
 

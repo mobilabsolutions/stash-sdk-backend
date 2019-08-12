@@ -185,7 +185,7 @@ class AdyenPspTest {
                     null,
                     null,
                     customerReference),
-                PaymentMethod.CC.name, null, null),
+                PaymentMethod.CC.name, null),
             PaymentDataRequestModel(amountValue, currency, "Book"),
             pspAlias, pspConfig, null), true)
     }
@@ -209,7 +209,7 @@ class AdyenPspTest {
                     null,
                     null,
                     null),
-                PaymentMethod.SEPA.name, null, null),
+                PaymentMethod.SEPA.name, null),
             PaymentDataRequestModel(amountValue, currency, "Book"),
             null, pspConfig, null), true)
     }
@@ -234,7 +234,7 @@ class AdyenPspTest {
                         null,
                         null,
                         customerReference),
-                    PaymentMethod.PAY_PAL.name, null, null),
+                    PaymentMethod.PAY_PAL.name, null),
                 PaymentDataRequestModel(amountValue, currency, "Book"),
                 pspAlias, pspConfig, null), true)
         }
@@ -296,7 +296,7 @@ class AdyenPspTest {
                     null,
                     null,
                     null),
-                PaymentMethod.CC.name, null, null),
+                PaymentMethod.CC.name, null),
             PaymentDataRequestModel(amountValue, currency, "Book"),
             pspAlias, pspConfig, null), true)
     }

@@ -25,5 +25,9 @@ data class PspRegisterAliasResponseModel(
 
     val resultCode: String?,
 
-    val authenticationToken: String?
+    val authenticationToken: String?,
+
+    val type: String?,
+
+    val paymentMethodType: String?
 )

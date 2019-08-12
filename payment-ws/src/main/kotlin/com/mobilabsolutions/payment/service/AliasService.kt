@@ -116,12 +116,15 @@ class AliasService(
             personalData = personalConfig,
             threeDSecureConfig = ThreeDSecureConfigModel(paymentData = pspRegisterAliasResponse?.paymentData, fingerprintResult = null, challengeResult = null))
 
-        println(objectMapper.writeValueAsString(pspRegisterAliasResponse))
-
         val pspAlias = aliasRequestModel.pspAlias ?: pspRegisterAliasResponse?.pspAlias
         val extra = if (aliasExtraModel != null) objectMapper.writeValueAsString(aliasExtraModel) else null
         aliasRepository.updateAlias(pspAlias, extra, aliasId, userAgent)
-        return ExchangeAliasResponseModel(pspRegisterAliasResponse?.resultCode, pspRegisterAliasResponse?.authenticationToken)
+        return ExchangeAliasResponseModel(
+            pspRegisterAliasResponse?.resultCode,
+            pspRegisterAliasResponse?.authenticationToken,
+            pspRegisterAliasResponse?.paymentData,
+            pspRegisterAliasResponse?.type,
+            pspRegisterAliasResponse?.paymentMethodType)
     }
 
     fun verifyAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, verifyAliasRequest: VerifyAliasRequestModel): VerifyAliasResponseModel {

@@ -20,6 +20,10 @@ data class Adyen3DSecureResponseModel(
 
     val challengeToken: String?,
 
+    val type: String?,
+
+    val paymentMethodType: String?,
+
     @ApiModelProperty(value = "Adyen reason of refused payment", example = "Bad amount")
     val refusalReason: String?,
 
@@ -32,6 +36,9 @@ data class Adyen3DSecureResponseModel(
         const val AUTHENTICATION = "authentication"
         const val FINGERPRINT_TOKEN = "threeds2.fingerprintToken"
         const val CHALLENGE_TOKEN = "threeds2.challengeToken"
+        const val ACTION = "action"
+        const val TYPE = "type"
+        const val PAYMENT_METHOD_TYPE = "paymentMethodType"
         const val REFUSAL_REASON = "refusalReason"
         const val ERROR_MESSAGE = "message"
     }
@@ -41,6 +48,8 @@ data class Adyen3DSecureResponseModel(
         jsonObject.getStringSafe(RESULT_CODE),
         jsonObject.getJsonObjectSafe(AUTHENTICATION)?.getStringSafe(FINGERPRINT_TOKEN),
         jsonObject.getJsonObjectSafe(AUTHENTICATION)?.getStringSafe(CHALLENGE_TOKEN),
+        jsonObject.getJsonObjectSafe(ACTION)?.getStringSafe(TYPE),
+        jsonObject.getJsonObjectSafe(ACTION)?.getStringSafe(PAYMENT_METHOD_TYPE),
         jsonObject.getStringSafe(REFUSAL_REASON),
         jsonObject.getStringSafe(ERROR_MESSAGE)
     )
