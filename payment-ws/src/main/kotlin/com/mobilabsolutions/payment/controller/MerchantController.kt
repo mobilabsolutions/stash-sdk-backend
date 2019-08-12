@@ -318,7 +318,7 @@ class MerchantController(
     fun saveLogo(
         @PathVariable("Merchant-Id") merchantId: String,
         @RequestParam file: MultipartFile
-    ) = merchantService.saveLogo(merchantId, file)
+    ) = merchantService.updateAndSaveLogo(merchantId, file)
 
     @ApiOperation(value = "Get merchant logo")
     @ApiResponses(

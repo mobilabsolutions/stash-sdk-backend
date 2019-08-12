@@ -156,13 +156,13 @@ class MerchantServiceTest {
 
     @Test
     fun `save logo to merchant`() {
-        merchantService.saveLogo(knownMerchantId, mockMultipartFile)
+        merchantService.updateAndSaveLogo(knownMerchantId, mockMultipartFile)
     }
 
     @Test
     fun `save logo to incorrect merchant`() {
         Assertions.assertThrows(ApiException::class.java) {
-            merchantService.saveLogo(unknownMerchantId, mockMultipartFile)
+            merchantService.updateAndSaveLogo(unknownMerchantId, mockMultipartFile)
         }
     }
 
