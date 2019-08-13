@@ -14,6 +14,7 @@ import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.request.AliasRequestModel
+import com.mobilabsolutions.payment.model.request.VerifyAliasRequestModel
 import com.mobilabsolutions.payment.validation.ConfigValidator
 import com.mobilabsolutions.payment.validation.PspAliasValidator
 import com.mobilabsolutions.server.commons.CommonConfiguration
@@ -177,6 +178,18 @@ class AliasServiceTest {
     @Test
     fun `exchange alias successfully`() {
         aliasService.exchangeAlias(knownPublishableKey, true, userAgent, knownAliasId, AliasRequestModel(pspAlias, objectMapper.readValue(extra, AliasExtraModel::class.java)))
+    }
+
+    @Test
+    fun `verify alias with wrong alias id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            aliasService.verifyAlias(knownPublishableKey, true, userAgent, unknownAliasId, Mockito.mock(VerifyAliasRequestModel::class.java))
+        }
+    }
+
+    @Test
+    fun `verify alias successfully`() {
+        aliasService.verifyAlias(knownPublishableKey, true, userAgent, knownAliasId, VerifyAliasRequestModel("fingerptint", null))
     }
 
     @Test

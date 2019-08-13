@@ -81,7 +81,7 @@ class BsPayonePsp(
         return null
     }
 
-    override fun verifyThreeDSecure(pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, pspTestMode: Boolean?): PspRegisterAliasResponseModel? {
+    override fun verify3DSAlias(pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, pspTestMode: Boolean?): PspRegisterAliasResponseModel? {
         TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 

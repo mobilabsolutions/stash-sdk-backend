@@ -7,8 +7,8 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "Adyen 3D Secure Details")
-data class Adyen3DSecureDetailsModel(
+@ApiModel(value = "Adyen 3DS Details")
+data class Adyen3DSDetailsModel(
     @ApiModelProperty(value = "Fingerprint result from the client", example = "eyJ0aHJlZURTQ29tcEluZCI6ICJZIn0=")
     @JsonProperty(value = "threeds2.fingerprint")
     val fingerprintResult: String?,

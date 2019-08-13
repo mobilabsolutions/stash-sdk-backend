@@ -12,8 +12,8 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenDeleteAliasRequestM
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRefundRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
-import com.mobilabsolutions.payment.adyen.model.request.AdyenVerify3DSecureRequestModel
-import com.mobilabsolutions.payment.adyen.model.response.Adyen3DSecureResponseModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenVerify3DSRequestModel
+import com.mobilabsolutions.payment.adyen.model.response.Adyen3DSResponseModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
 import com.mobilabsolutions.payment.model.PspConfigModel
@@ -54,11 +54,11 @@ class AdyenClient(
      * @param mode test or live mode
      * @return Adyen 3D secure response
      */
-    fun registerThreeDSecure(
+    fun registerCreditCardWith3DS(
         request: AdyenPaymentRequestModel,
         pspConfig: PspConfigModel,
         mode: String
-    ): Adyen3DSecureResponseModel {
+    ): Adyen3DSResponseModel {
         val apiKey = if (mode == AdyenMode.TEST.mode) pspConfig.sandboxPublicKey else pspConfig.publicKey
         val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testCheckoutBaseUrl + PAYMENT_URL
         else adyenProperties.liveCheckoutBaseUrl.format(pspConfig.urlPrefix) + PAYMENT_URL
@@ -69,7 +69,7 @@ class AdyenClient(
             json = JSONObject(objectMapper.writeValueAsString(request))
         )
         println(response.jsonObject)
-        return Adyen3DSecureResponseModel(response.jsonObject)
+        return Adyen3DSResponseModel(response.jsonObject)
     }
 
     /**
@@ -80,8 +80,8 @@ class AdyenClient(
      * @param mode test or live mode
      * @return Adyen verify payment response
      */
-    fun verifyThreeDSecure(
-        request: AdyenVerify3DSecureRequestModel,
+    fun verify3DS(
+        request: AdyenVerify3DSRequestModel,
         pspConfig: PspConfigModel,
         mode: String
     ): AdyenVerifyPaymentResponseModel {

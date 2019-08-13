@@ -148,7 +148,7 @@ class AliasService(
             pspConfig = pspConfig
         )
 
-        val pspResponse = psp.verifyThreeDSecure(pspRegisterAliasRequest, pspTestMode)
+        val pspResponse = psp.verify3DSAlias(pspRegisterAliasRequest, pspTestMode)
         val aliasExtra = when {
             pspResponse?.paymentData != null -> aliasExtraModel?.copy(threeDSecureConfig = threeDSecureConfig?.copy(paymentData = pspResponse.paymentData))
             else -> aliasExtraModel
@@ -217,8 +217,7 @@ class AliasService(
                     idempotentKey = idempotentKey,
                     merchant = merchant,
                     psp = pspConfigType,
-                    userAgent = userAgent,
-                    requestHash = null
+                    userAgent = userAgent
                 )
                 aliasRepository.save(newAlias)
 

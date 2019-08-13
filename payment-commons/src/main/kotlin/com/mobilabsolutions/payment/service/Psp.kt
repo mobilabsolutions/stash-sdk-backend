@@ -50,7 +50,7 @@ interface Psp {
      * @param pspTestMode indicator whether is the test mode or not
      * @return PSP register alias response
      */
-    fun verifyThreeDSecure(pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, pspTestMode: Boolean?): PspRegisterAliasResponseModel?
+    fun verify3DSAlias(pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, pspTestMode: Boolean?): PspRegisterAliasResponseModel?
 
     /**
      * Returns psp preauthorization payment response {@link PspPaymentResponseModel} for the given psp preauthorization payment request {@link PspPaymentRequestModel}

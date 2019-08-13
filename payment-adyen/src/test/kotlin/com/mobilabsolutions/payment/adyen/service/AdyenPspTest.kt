@@ -7,6 +7,7 @@ package com.mobilabsolutions.payment.adyen.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
+import com.mobilabsolutions.payment.adyen.model.request.Adyen3DSDetailsModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenAdditionalDataModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenAmountRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenCaptureRequestModel
@@ -16,8 +17,10 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRefundRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
-import com.mobilabsolutions.payment.adyen.model.response.Adyen3DSecureResponseModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenVerify3DSRequestModel
+import com.mobilabsolutions.payment.adyen.model.response.Adyen3DSResponseModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
+import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
 import com.mobilabsolutions.payment.data.enum.TransactionAction
@@ -26,6 +29,7 @@ import com.mobilabsolutions.payment.model.CreditCardConfigModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.SepaConfigModel
+import com.mobilabsolutions.payment.model.ThreeDSecureConfigModel
 import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PspCaptureRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
@@ -109,6 +113,7 @@ class AdyenPspTest {
     private val channel = "iOS"
     private val returnUrl = "www.mblb.net"
     private val paymentData = "test payment data"
+    private val fingerprintResult = "fingerprint"
 
     @InjectMocks
     private lateinit var adyenPsp: AdyenPsp
@@ -157,9 +162,11 @@ class AdyenPspTest {
             .thenReturn(AdyenPaymentResponseModel(pspReference, null, null))
         Mockito.`when`(adyenClient.deleteAlias(AdyenDeleteAliasRequestModel(deletedCustomerReference, pspAlias, sandboxMerchantId), pspConfig, "true"))
             .thenThrow(ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Alias doesn't exist at Adyen").asException())
-        Mockito.`when`(adyenClient.registerThreeDSecure(AdyenPaymentRequestModel(AdyenAmountRequestModel(0, currency), email, customerIP, correctAliasId, null, null, null, reference, sandboxMerchantId, null,
+        Mockito.`when`(adyenClient.registerCreditCardWith3DS(AdyenPaymentRequestModel(AdyenAmountRequestModel(0, currency), email, customerIP, correctAliasId, null, null, null, reference, sandboxMerchantId, null,
                 AdyenPaymentMethodRequestModel(adyenProperties.threeDSecure, null, null, encryptedCCNumber, encryptedExpiryMonth, encryptedExpiryYear, encryptedSecurityCode, true), AdyenAdditionalDataModel(true), channel, returnUrl, true), pspConfig, AdyenMode.TEST.mode))
-            .thenReturn(Adyen3DSecureResponseModel(paymentData, "IdentifyShopper", "fingerprint", null, "fingerprint3DS2", "scheme", null, null))
+            .thenReturn(Adyen3DSResponseModel(paymentData, "IdentifyShopper", "fingerprint", null, "fingerprint3DS2", "scheme", null, null))
+        Mockito.`when`(adyenClient.verify3DS(AdyenVerify3DSRequestModel(paymentData, Adyen3DSDetailsModel(fingerprintResult, null)), pspConfig, AdyenMode.TEST.mode))
+            .thenReturn(AdyenVerifyPaymentResponseModel(pspAlias, correctAliasId, paymentData, "ChallengeShopper", "token", "fingerprint3DS2", "scheme", null, null))
     }
 
     @Test
@@ -272,6 +279,22 @@ class AdyenPspTest {
                     null,
                     customerReference
                 ),
+                PaymentMethod.CC.name, channel), pspConfig), true)
+    }
+
+    @Test
+    fun `verify 3DS alias`() {
+        adyenPsp.verify3DSAlias(PspRegisterAliasRequestModel(correctAliasId,
+            AliasExtraModel(
+                null,
+                null,
+                null,
+                ThreeDSecureConfigModel(
+                    paymentData,
+                    fingerprintResult,
+                    null
+                ),
+                null,
                 PaymentMethod.CC.name, channel), pspConfig), true)
     }
 

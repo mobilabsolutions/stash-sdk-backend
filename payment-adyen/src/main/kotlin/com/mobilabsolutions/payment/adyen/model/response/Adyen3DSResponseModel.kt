@@ -10,7 +10,7 @@ import org.json.JSONObject
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
 @ApiModel(value = "Adyen 3D Secure Response")
-data class Adyen3DSecureResponseModel(
+data class Adyen3DSResponseModel(
     @ApiModelProperty(value = "Payload needed to verify the payment", example = "Ab02b4c0!BQABAgCYHYurjVnu8GRyhy1ZsGj...")
     val paymentData: String?,
 

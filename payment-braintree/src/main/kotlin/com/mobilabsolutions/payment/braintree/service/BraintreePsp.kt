@@ -83,7 +83,7 @@ class BraintreePsp(private val braintreeClient: BraintreeClient) : Psp {
         return PspRegisterAliasResponseModel(braintreeResponse.token, braintreeResponse.billingAgreementId, null, null, null, null, null, null)
     }
 
-    override fun verifyThreeDSecure(pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, pspTestMode: Boolean?): PspRegisterAliasResponseModel? {
+    override fun verify3DSAlias(pspRegisterAliasRequestModel: PspRegisterAliasRequestModel, pspTestMode: Boolean?): PspRegisterAliasResponseModel? {
         TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
