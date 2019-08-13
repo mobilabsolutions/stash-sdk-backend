@@ -205,5 +205,10 @@
         </addColumn>
         <addDefaultValue columnDataType="BOOLEAN" columnName="notification" defaultValueBoolean="false" tableName="transaction_record"/>
     </changeSet>
+    <changeSet author="mohamed.osman" id="PSOS-467_1">
+        <addColumn tableName="merchant">
+            <column name="logo" type="oid"/>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

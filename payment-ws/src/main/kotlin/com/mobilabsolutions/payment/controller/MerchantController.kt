@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.multipart.MultipartFile
 import javax.servlet.http.HttpServletResponse
 import javax.validation.Valid
 import javax.validation.constraints.Size
@@ -60,6 +61,7 @@ class MerchantController(
         const val CAPTURE_URL = "/{Merchant-Id}/preauthorization/{Transaction-Id}/capture"
         const val REVERSE_URL = "/{Merchant-Id}/preauthorization/{Transaction-Id}/reverse"
         const val REFUND_URL = "/{Merchant-Id}/authorization/{Transaction-Id}/refund"
+        const val LOGO_URL = "/{Merchant-Id}/logo"
 
         const val CSV_CONTENT_TYPE = "text/csv"
         const val CSV_HEADER_KEY = "Content-Disposition"
@@ -179,7 +181,7 @@ class MerchantController(
         ApiResponse(code = 404, message = "Resource not found")
     )
     @RequestMapping(
-        MerchantController.TRANSACTION_DETAILS_URL,
+        TRANSACTION_DETAILS_URL,
         method = [RequestMethod.GET],
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
@@ -198,7 +200,7 @@ class MerchantController(
         ApiResponse(code = 404, message = "Resource not found")
     )
     @RequestMapping(
-        MerchantController.TRANSACTION_URL,
+        TRANSACTION_URL,
         method = [RequestMethod.GET],
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
@@ -225,7 +227,7 @@ class MerchantController(
         ApiResponse(code = 404, message = "Resource not found")
     )
     @RequestMapping(
-        MerchantController.TRANSACTION_CSV_URL,
+        TRANSACTION_CSV_URL,
         method = [RequestMethod.GET],
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
@@ -256,7 +258,7 @@ class MerchantController(
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 404, message = "Not found")
     )
-    @RequestMapping(MerchantController.CAPTURE_URL, method = [RequestMethod.PUT])
+    @RequestMapping(CAPTURE_URL, method = [RequestMethod.PUT])
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun captureTransaction(
@@ -272,7 +274,7 @@ class MerchantController(
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 404, message = "Not found")
     )
-    @RequestMapping(MerchantController.REVERSE_URL, method = [RequestMethod.PUT])
+    @RequestMapping(REVERSE_URL, method = [RequestMethod.PUT])
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun reverseTransaction(
@@ -289,7 +291,7 @@ class MerchantController(
         ApiResponse(code = 401, message = "Unauthorized access"),
         ApiResponse(code = 404, message = "Not found")
     )
-    @RequestMapping(MerchantController.REFUND_URL, method = [RequestMethod.PUT])
+    @RequestMapping(REFUND_URL, method = [RequestMethod.PUT])
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun refundTransaction(
@@ -299,4 +301,39 @@ class MerchantController(
         @PathVariable(value = "Transaction-Id") transactionId: String,
         @Valid @ApiParam(name = "Refund-Info", value = "Refund Info Model") @RequestBody refundInfo: PaymentDataRequestModel
     ) = transactionService.dashboardRefund(merchantId, idempotentKey, pspTestMode, transactionId, refundInfo)
+
+    @ApiOperation(value = "Save merchant logo")
+    @ApiResponses(
+        ApiResponse(code = 200, message = "Successfully saved merchant logo"),
+        ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 403, message = "Forbidden access"),
+        ApiResponse(code = 404, message = "Resource not found")
+    )
+    @RequestMapping(
+        LOGO_URL,
+        method = [RequestMethod.POST]
+    )
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
+    fun uploadAndSaveLogo(
+        @PathVariable("Merchant-Id") merchantId: String,
+        @RequestParam file: MultipartFile
+    ) = merchantService.uploadAndSaveLogo(merchantId, file)
+
+    @ApiOperation(value = "Get merchant logo")
+    @ApiResponses(
+        ApiResponse(code = 200, message = "Successfully queried merchant logo"),
+        ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 403, message = "Forbidden access"),
+        ApiResponse(code = 404, message = "Resource not found")
+    )
+    @RequestMapping(
+        LOGO_URL,
+        method = [RequestMethod.GET],
+        produces = [MediaType.IMAGE_PNG_VALUE]
+    )
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
+    fun getLogo(
+        @PathVariable("Merchant-Id") merchantId: String
+    ) = merchantService.getLogo(merchantId)
 }

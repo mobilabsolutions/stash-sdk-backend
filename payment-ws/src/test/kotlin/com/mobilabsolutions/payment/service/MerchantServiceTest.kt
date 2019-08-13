@@ -30,6 +30,7 @@ import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
+import org.springframework.mock.web.MockMultipartFile
 
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
@@ -43,11 +44,14 @@ class MerchantServiceTest {
     private val unknownPspType = "BS"
     private val knownMerchantId = "mobilab"
     private val unknownMerchantId = "test"
+    private val logoBytes = ByteArray(1)
     private var merchant = Merchant(
         id = knownMerchantId,
         pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
-            " {\"type\" : \"other\", \"merchantId\" : \"test merchant\", \"default\" : \"true\"}]}"
+            " {\"type\" : \"other\", \"merchantId\" : \"test merchant\", \"default\" : \"true\"}]}",
+        logo = logoBytes
     )
+    private val mockMultipartFile = MockMultipartFile("file", "excel.xlsx", "multipart/form-data", logoBytes)
 
     @Spy
     val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
@@ -75,6 +79,7 @@ class MerchantServiceTest {
             Mockito.mock(Authority::class.java)
         )
         Mockito.`when`(authorityRepository.getAuthorityByName(unknownMerchantId)).thenReturn(null)
+        doNothing().`when`(merchantRepository).saveLogo(logoBytes, knownMerchantId)
     }
 
     @Test
@@ -145,5 +150,29 @@ class MerchantServiceTest {
     @Test
     fun `delete psp config successfully`() {
         merchantService.deletePspConfigForMerchant(knownMerchantId, knownPspType)
+    }
+
+    @Test
+    fun `save logo to merchant`() {
+        merchantService.uploadAndSaveLogo(knownMerchantId, mockMultipartFile)
+    }
+
+    @Test
+    fun `save logo to incorrect merchant`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            merchantService.uploadAndSaveLogo(unknownMerchantId, mockMultipartFile)
+        }
+    }
+
+    @Test
+    fun `get logo`() {
+        Assertions.assertEquals(merchantService.getLogo(knownMerchantId).statusCodeValue, 200)
+    }
+
+    @Test
+    fun `get logo from incorrect merchant`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            merchantService.getLogo(unknownMerchantId)
+        }
     }
 }

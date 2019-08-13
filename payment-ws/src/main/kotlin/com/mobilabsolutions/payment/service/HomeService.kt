@@ -57,6 +57,7 @@ class HomeService(
      */
     @KafkaListener(topics = ["\${kafka.transactions.topicName:}"], groupId = "\${spring.kafka.consumer.group-id:}")
     fun getLiveData(@Payload transaction: Transaction) {
+        logger.info { "Started listening the live data" }
         val merchantUsers = merchantUserRepository.getMerchantUsers(transaction.merchant.id!!)
         merchantUsers.forEach { user ->
             simpleMessagingTemplate.convertAndSendToUser(user.email, "/topic/transactions", toLiveData(transaction))
@@ -165,6 +166,7 @@ class HomeService(
         val endOfDay = dateFormatter.format(LocalDateTime.parse(date, dateFormatter).with(LocalTime.MAX).atZone(ZoneId.of(timezone)))
         val transactions = transactionRepository.getTransactionsForPaymentMethods(merchantId, startOfDay, endOfDay)
         val transactionsMap = LinkedHashMap<String, Int>()
+        initHourlyMap(transactionsMap)
         for (transaction in transactions) {
             val hour = (transaction.createdDate!!.atZone(ZoneId.of(timezone)).hour + 1).toString()
             val amount = transactionsMap[hour] ?: 0
@@ -184,6 +186,12 @@ class HomeService(
         return dateFormatter
             .withZone(ZoneId.of(merchant.timezone ?: ZoneId.systemDefault().toString()))
             .format(Instant.now().minus(days, ChronoUnit.DAYS))
+    }
+
+    private fun initHourlyMap(transactionsMap: LinkedHashMap<String, Int>) {
+        for (hour in 0..23) {
+            transactionsMap[hour.toString()] = 0
+        }
     }
 
     private fun toLiveData(transaction: Transaction): LiveDataResponseModel {
