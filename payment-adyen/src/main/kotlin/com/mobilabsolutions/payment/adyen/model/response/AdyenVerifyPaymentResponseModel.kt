@@ -21,12 +21,16 @@ data class AdyenVerifyPaymentResponseModel(
     @ApiModelProperty(value = "Payload needed to verify the payment", example = "Ab02b4c0!BQABAgCYHYurjVnu8GRyhy1ZsGj...")
     val paymentData: String?,
 
+    @ApiModelProperty(value = "Result code", example = "ChallengeShopper")
     val resultCode: String?,
 
+    @ApiModelProperty(value = "Challenge token", example = "eyJ0aH...")
     val challengeToken: String?,
 
+    @ApiModelProperty(value = "Action type", example = "threeDS2Fingerprint")
     val type: String?,
 
+    @ApiModelProperty(value = "Payment method type", example = "scheme")
     val paymentMethodType: String?,
 
     @ApiModelProperty(value = "Adyen reason of refused payment", example = "Bad amount")
