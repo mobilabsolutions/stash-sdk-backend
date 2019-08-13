@@ -179,12 +179,19 @@ class HomeService(
         val endOfDay = dateFormatter.format(LocalDateTime.parse(date, dateFormatter).with(LocalTime.MAX).atZone(ZoneId.of(timezone)))
         val transactions = transactionRepository.getTransactionsForPaymentMethods(merchantId, startOfDay, endOfDay)
         val transactionsMap = LinkedHashMap<String, Int>()
+        initHourlyMap(transactionsMap)
         for (transaction in transactions) {
             val hour = (transaction.createdDate!!.atZone(ZoneId.of(timezone)).hour + 1).toString()
             val amount = transactionsMap[hour] ?: 0
             transactionsMap[hour] = amount.plus(transaction.amount!!)
         }
         return SelectedDateActivityResponseModel(transactionsMap)
+    }
+
+    private fun initHourlyMap(transactionsMap: LinkedHashMap<String, Int>) {
+        for (hour in 0..23) {
+            transactionsMap[hour.toString()] = 0
+        }
     }
 
     private fun toLiveData(transaction: Transaction): LiveDataResponseModel {

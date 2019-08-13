@@ -206,8 +206,8 @@ class HomeServiceTest {
     fun `get selected date activity`() {
         val transactions = homeService.getSelectedDateActivity(merchantId, createdAtStart)
 
-        Assertions.assertEquals(transactions.transactions[0].hour, "1")
-        Assertions.assertEquals(transactions.transactions[0].amount, 100)
+        Assertions.assertEquals(transactions.transactions[1].hour, "1")
+        Assertions.assertEquals(transactions.transactions[1].amount, 100)
     }
 
     @Test
