@@ -20,9 +20,8 @@ import com.mobilabsolutions.payment.model.request.AliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
 import com.mobilabsolutions.payment.model.request.VerifyAliasRequestModel
+import com.mobilabsolutions.payment.model.response.Alias3DSResponseModel
 import com.mobilabsolutions.payment.model.response.AliasResponseModel
-import com.mobilabsolutions.payment.model.response.ExchangeAliasResponseModel
-import com.mobilabsolutions.payment.model.response.VerifyAliasResponseModel
 import com.mobilabsolutions.payment.validation.ConfigValidator
 import com.mobilabsolutions.payment.validation.PspAliasValidator
 import com.mobilabsolutions.server.commons.exception.ApiError
@@ -88,7 +87,7 @@ class AliasService(
      * @param aliasRequestModel Alias Request Model
      */
     @Transactional
-    fun exchangeAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, aliasRequestModel: AliasRequestModel): ExchangeAliasResponseModel {
+    fun exchangeAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, aliasRequestModel: AliasRequestModel): Alias3DSResponseModel {
         logger.info("Exchanging alias {}", aliasId)
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofErrorCode(ApiErrorCode.PUBLISHABLE_KEY_NOT_FOUND).asException()
         val alias = aliasRepository.getFirstByIdAndActive(aliasId, true) ?: throw ApiError.ofErrorCode(ApiErrorCode.ALIAS_NOT_FOUND).asException()
@@ -119,7 +118,7 @@ class AliasService(
         val pspAlias = aliasRequestModel.pspAlias ?: pspRegisterAliasResponse?.pspAlias
         val extra = if (aliasExtraModel != null) objectMapper.writeValueAsString(aliasExtraModel) else null
         aliasRepository.updateAlias(pspAlias, extra, aliasId, userAgent)
-        return ExchangeAliasResponseModel(
+        return Alias3DSResponseModel(
             pspRegisterAliasResponse?.resultCode,
             pspRegisterAliasResponse?.authenticationToken,
             pspRegisterAliasResponse?.paymentData,
@@ -128,7 +127,7 @@ class AliasService(
     }
 
     @Transactional
-    fun verifyAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, verifyAliasRequest: VerifyAliasRequestModel): VerifyAliasResponseModel {
+    fun verifyAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, verifyAliasRequest: VerifyAliasRequestModel): Alias3DSResponseModel {
         logger.info("Verifying alias {}", aliasId)
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofErrorCode(ApiErrorCode.PUBLISHABLE_KEY_NOT_FOUND).asException()
         val alias = aliasRepository.getFirstByIdAndActive(aliasId, true) ?: throw ApiError.ofErrorCode(ApiErrorCode.ALIAS_NOT_FOUND).asException()
@@ -158,7 +157,7 @@ class AliasService(
         }
 
         aliasRepository.updateAlias(pspResponse?.pspAlias, objectMapper.writeValueAsString(aliasExtra), aliasId, userAgent)
-        return VerifyAliasResponseModel(pspResponse?.resultCode, pspResponse?.authenticationToken, pspResponse?.paymentData, pspResponse?.type, pspResponse?.paymentMethodType)
+        return Alias3DSResponseModel(pspResponse?.resultCode, pspResponse?.authenticationToken, pspResponse?.paymentData, pspResponse?.type, pspResponse?.paymentMethodType)
     }
 
     /**

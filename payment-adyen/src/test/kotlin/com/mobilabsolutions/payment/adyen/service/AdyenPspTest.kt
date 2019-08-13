@@ -144,7 +144,7 @@ class AdyenPspTest {
         Mockito.`when`(adyenClient.sepaPayment(
             AdyenPaymentRequestModel(amount, null, null, null, null,
                 null, null, reference, sandboxMerchantId, null,
-                AdyenPaymentMethodRequestModel(adyenProperties.sepaPaymentMethod, holderName, iban, null, null, null, null), null, null, null, null),
+                AdyenPaymentMethodRequestModel(adyenProperties.sepaPaymentMethod, holderName, iban, null, null, null, null, null), null, null, null, null),
             pspConfig, AdyenMode.TEST.mode))
             .thenReturn(AdyenPaymentResponseModel(pspReference, null, null))
         Mockito.`when`(adyenClient.reverse(AdyenReverseRequestModel(pspTransactionId, purchaseId, sandboxMerchantId), pspConfig, "test"))
@@ -157,8 +157,8 @@ class AdyenPspTest {
             .thenReturn(AdyenPaymentResponseModel(pspReference, null, null))
         Mockito.`when`(adyenClient.deleteAlias(AdyenDeleteAliasRequestModel(deletedCustomerReference, pspAlias, sandboxMerchantId), pspConfig, "true"))
             .thenThrow(ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Alias doesn't exist at Adyen").asException())
-        Mockito.`when`(adyenClient.registerThreeDSecure(AdyenPaymentRequestModel(AdyenAmountRequestModel(0, currency), email, customerIP, customerReference, null, null, null, reference, sandboxMerchantId, null,
-                AdyenPaymentMethodRequestModel(adyenProperties.threeDSecure, null, null, encryptedCCNumber, encryptedExpiryMonth, encryptedExpiryYear, encryptedSecurityCode), AdyenAdditionalDataModel(true), channel, returnUrl, true), pspConfig, AdyenMode.TEST.mode))
+        Mockito.`when`(adyenClient.registerThreeDSecure(AdyenPaymentRequestModel(AdyenAmountRequestModel(0, currency), email, customerIP, correctAliasId, null, null, null, reference, sandboxMerchantId, null,
+                AdyenPaymentMethodRequestModel(adyenProperties.threeDSecure, null, null, encryptedCCNumber, encryptedExpiryMonth, encryptedExpiryYear, encryptedSecurityCode, true), AdyenAdditionalDataModel(true), channel, returnUrl, true), pspConfig, AdyenMode.TEST.mode))
             .thenReturn(Adyen3DSecureResponseModel(paymentData, "IdentifyShopper", "fingerprint", null, "fingerprint3DS2", "scheme", null, null))
     }
 

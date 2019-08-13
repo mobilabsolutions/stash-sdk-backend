@@ -317,7 +317,8 @@ class AdyenPsp(
                 encryptedCardNumber = null,
                 encryptedExpiryMonth = null,
                 encryptedExpiryYear = null,
-                encryptedSecurityCode = null
+                encryptedSecurityCode = null,
+                storeDetails = null
             ),
             additionalData = null,
             channel = null,
@@ -360,7 +361,7 @@ class AdyenPsp(
             ),
             shopperEmail = pspRegisterAliasRequestModel.aliasExtra?.personalData?.email,
             shopperIP = pspRegisterAliasRequestModel.aliasExtra?.personalData?.customerIP,
-            shopperReference = pspRegisterAliasRequestModel.aliasExtra?.personalData?.customerReference,
+            shopperReference = pspRegisterAliasRequestModel.aliasId,
             selectedRecurringDetailReference = null,
             recurring = null,
             shopperInteraction = null,
@@ -375,7 +376,8 @@ class AdyenPsp(
                 encryptedCardNumber = pspRegisterAliasRequestModel.aliasExtra?.ccConfig?.encryptedCardNumber,
                 encryptedExpiryMonth = pspRegisterAliasRequestModel.aliasExtra?.ccConfig?.encryptedExpiryMonth,
                 encryptedExpiryYear = pspRegisterAliasRequestModel.aliasExtra?.ccConfig?.encryptedExpiryYear,
-                encryptedSecurityCode = pspRegisterAliasRequestModel.aliasExtra?.ccConfig?.encryptedSecurityCode
+                encryptedSecurityCode = pspRegisterAliasRequestModel.aliasExtra?.ccConfig?.encryptedSecurityCode,
+                storeDetails = true
             ),
             additionalData = AdyenAdditionalDataModel(
                 allow3DS2 = true

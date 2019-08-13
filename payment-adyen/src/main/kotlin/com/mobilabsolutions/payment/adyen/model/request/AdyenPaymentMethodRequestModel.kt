@@ -34,5 +34,8 @@ data class AdyenPaymentMethodRequestModel(
     val encryptedExpiryYear: String?,
 
     @ApiModelProperty(value = "Encrypted security code", example = "adyenjs_0_1_18MT6ppy0FAMVMLH...")
-    val encryptedSecurityCode: String?
+    val encryptedSecurityCode: String?,
+
+    @ApiModelProperty(value = "Should card details be stored", example = "true")
+    val storeDetails: Boolean?
 )
