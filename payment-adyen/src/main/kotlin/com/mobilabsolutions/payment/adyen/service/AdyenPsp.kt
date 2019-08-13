@@ -136,8 +136,7 @@ class AdyenPsp(
         logger.info("Adyen preauthorization payment has been called for alias {} for {} mode", pspPaymentRequestModel.aliasId, adyenMode)
 
         val response = when {
-            pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.CC.name
-                || pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.THREE_D_SECURE.name -> makeCreditCardPayment(pspPaymentRequestModel, adyenMode, false)
+            pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.CC.name -> makeCreditCardPayment(pspPaymentRequestModel, adyenMode, false)
             else -> throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected payment method").asException()
         }
         if (response.errorMessage != null || response.refusalReason != null) {
@@ -153,8 +152,7 @@ class AdyenPsp(
         logger.info("Adyen authorize payment has been called for alias {} for {} mode", pspPaymentRequestModel.aliasId, adyenMode)
 
         val response = when {
-            pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.CC.name
-                || pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.THREE_D_SECURE.name -> makeCreditCardPayment(pspPaymentRequestModel, adyenMode)
+            pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.CC.name -> makeCreditCardPayment(pspPaymentRequestModel, adyenMode)
             pspPaymentRequestModel.extra?.paymentMethod == PaymentMethod.SEPA.name -> makeSepaPayment(pspPaymentRequestModel, adyenMode)
             else -> throw ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Unexpected payment method").asException()
         }
@@ -275,7 +273,7 @@ class AdyenPsp(
             ),
             shopperEmail = pspPaymentRequestModel.extra?.personalData?.email,
             shopperIP = pspPaymentRequestModel.extra?.personalData?.customerIP,
-            shopperReference = pspPaymentRequestModel.extra?.personalData?.customerReference,
+            shopperReference = pspPaymentRequestModel.extra?.personalData?.customerReference ?: pspPaymentRequestModel.aliasId,
             selectedRecurringDetailReference = pspPaymentRequestModel.pspAlias,
             recurring = AdyenRecurringRequestModel(
                 contract = adyenProperties.contract

@@ -109,10 +109,8 @@ class AliasService(
         )
         val pspRegisterAliasResponse = psp.registerAlias(pspRegisterAliasRequest, pspTestMode)
         val paypalConfig = aliasRequestModel.extra?.payPalConfig?.copy(billingAgreementId = pspRegisterAliasResponse?.billingAgreementId)
-        val personalConfig = aliasRequestModel.extra?.personalData?.copy(customerReference = pspRegisterAliasResponse?.registrationReference)
         val aliasExtraModel = aliasRequestModel.extra?.copy(
             payPalConfig = paypalConfig,
-            personalData = personalConfig,
             threeDSecureConfig = ThreeDSecureConfigModel(paymentData = pspRegisterAliasResponse?.paymentData, fingerprintResult = null, challengeResult = null))
 
         val pspAlias = aliasRequestModel.pspAlias ?: pspRegisterAliasResponse?.pspAlias
@@ -189,7 +187,7 @@ class AliasService(
             pspAlias = alias.pspAlias,
             paymentMethod = aliasExtra.paymentMethod,
             pspConfig = pspConfig,
-            customerReference = aliasExtra.personalData?.customerReference
+            customerReference = aliasExtra.personalData?.customerReference ?: aliasId
         )
         psp.deleteAlias(pspDeleteAliasRequest, pspTestMode)
 
