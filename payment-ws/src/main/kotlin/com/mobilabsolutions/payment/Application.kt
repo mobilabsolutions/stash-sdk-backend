@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.http.HttpMessageConvertersAutoConfiguration
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Import
+import org.springframework.scheduling.annotation.EnableScheduling
 
 @Import(CommonConfiguration::class, AuthServerOAuth2Config::class, ResourceServerConfiguration::class, SwaggerConfiguration::class)
 @SpringBootApplication(
@@ -19,6 +20,7 @@ import org.springframework.context.annotation.Import
         HttpMessageConvertersAutoConfiguration::class
     ]
 )
+@EnableScheduling
 class Application
 
 fun main(args: Array<String>) {

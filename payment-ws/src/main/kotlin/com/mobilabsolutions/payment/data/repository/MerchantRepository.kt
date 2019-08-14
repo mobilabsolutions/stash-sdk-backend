@@ -25,4 +25,10 @@ interface MerchantRepository : BaseRepository<Merchant, String> {
     @Modifying
     @Query("UPDATE Merchant m SET m.logo = :logo WHERE m.id = :merchantId")
     fun saveLogo(@Param("logo") logo: ByteArray?, @Param("merchantId") merchantId: String)
+
+    @Query("UPDATE Merchant m SET m.webhookUrl = :webhookUrl, m.webhookUsername = :webhookUsername, m.webhookPassword = :webhookPassword WHERE m.id = :merchantId")
+    fun updateMerchantWebookCredentials(@Param("merchantId") merchantId: String, @Param("webhookUrl") webhookUrl: String, @Param("webhookUsername") webhookUsername: String, @Param("webhookPassword") webhookPassword: String)
+
+    @Query("SELECT * FROM Merchant m WHERE m.webhook_url IS NOT NULL", nativeQuery = true)
+    fun getMerchantsByWebhookUrl(): List<Merchant>
 }

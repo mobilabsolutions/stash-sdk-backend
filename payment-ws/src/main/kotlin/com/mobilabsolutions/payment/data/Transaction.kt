@@ -85,6 +85,9 @@ class Transaction(
     @Column(name = "notification")
     var notification: Boolean? = false,
 
+    @Column(name = "processed_notification")
+    var processedNotification: Boolean? = false,
+
     @ManyToOne
     @JoinColumn(name = "merchant_id", nullable = false, foreignKey = ForeignKey(name = "fk_merchant_transactionrecord"))
     var merchant: Merchant = Merchant(),
