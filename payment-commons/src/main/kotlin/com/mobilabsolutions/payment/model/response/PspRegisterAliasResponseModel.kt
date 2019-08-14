@@ -27,8 +27,8 @@ data class PspRegisterAliasResponseModel(
     @ApiModelProperty(value = "Result code", example = "IdentifyShopper")
     val resultCode: String?,
 
-    @ApiModelProperty(value = "Registration reference")
-    val authenticationToken: String?,
+    @ApiModelProperty(value = "Fingerprint or challenge token")
+    val token: String?,
 
     @ApiModelProperty(value = "Action type", example = "threeDS2Fingerprint")
     val type: String?,

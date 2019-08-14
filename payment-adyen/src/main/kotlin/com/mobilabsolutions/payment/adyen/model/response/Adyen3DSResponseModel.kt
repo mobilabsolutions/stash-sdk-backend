@@ -11,6 +11,12 @@ import org.json.JSONObject
  */
 @ApiModel(value = "Adyen 3D Secure Response")
 data class Adyen3DSResponseModel(
+    @ApiModelProperty(value = "Recurring detail reference", example = "8415568838266087")
+    val recurringDetailReference: String?,
+
+    @ApiModelProperty(value = "Shopper reference", example = "oIXHpTAfEPSleWXT6Khe")
+    val shopperReference: String?,
+
     @ApiModelProperty(value = "Payload needed to verify the payment", example = "Ab02b4c0!BQABAgCYHYurjVnu8GRyhy1ZsGj...")
     val paymentData: String?,
 
@@ -36,6 +42,9 @@ data class Adyen3DSResponseModel(
     val errorMessage: String?
 ) {
     companion object {
+        const val ADDITIONAL_DATA = "additionalData"
+        const val RECURRING_REFERENCE = "recurring.recurringDetailReference"
+        const val SHOPPER_REFERENCE = "recurring.shopperReference"
         const val PAYMENT_DATA = "paymentData"
         const val RESULT_CODE = "resultCode"
         const val AUTHENTICATION = "authentication"
@@ -49,6 +58,8 @@ data class Adyen3DSResponseModel(
     }
 
     constructor(jsonObject: JSONObject) : this(
+        jsonObject.getJsonObjectSafe(ADDITIONAL_DATA)?.getStringSafe(RECURRING_REFERENCE),
+        jsonObject.getJsonObjectSafe(ADDITIONAL_DATA)?.getStringSafe(SHOPPER_REFERENCE),
         jsonObject.getStringSafe(PAYMENT_DATA),
         jsonObject.getStringSafe(RESULT_CODE),
         jsonObject.getJsonObjectSafe(AUTHENTICATION)?.getStringSafe(FINGERPRINT_TOKEN),

@@ -19,6 +19,7 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenRecurringRequestMod
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRefundRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerify3DSRequestModel
+import com.mobilabsolutions.payment.adyen.model.response.Adyen3DSResponseModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
@@ -116,19 +117,7 @@ class AdyenPsp(
                 .withError(response.errorMessage ?: response.refusalReason!!).build().asException()
         }
 
-        return PspRegisterAliasResponseModel(
-            pspAlias = response.recurringDetailReference,
-            billingAgreementId = null,
-            registrationReference = response.shopperReference,
-            paymentData = response.paymentData,
-            resultCode = response.resultCode,
-            authenticationToken = when (response.resultCode) {
-                CHALLENGE_SHOPPER_RESULT -> response.challengeToken
-                else -> null
-            },
-            type = response.type,
-            paymentMethodType = response.paymentMethodType
-        )
+        return verifyAndRegisterCreditCardWith3DSResponse(response)
     }
 
     override fun preauthorize(pspPaymentRequestModel: PspPaymentRequestModel, pspTestMode: Boolean?): PspPaymentResponseModel {
@@ -309,20 +298,7 @@ class AdyenPsp(
                 .withError(response.errorMessage ?: response.refusalReason!!).build().asException()
         }
 
-        return PspRegisterAliasResponseModel(
-            pspAlias = null,
-            billingAgreementId = null,
-            registrationReference = null,
-            paymentData = response.paymentData,
-            resultCode = response.resultCode,
-            authenticationToken = when (response.resultCode) {
-                IDENTIFY_SHOPPER_RESULT -> response.fingerprintToken
-                CHALLENGE_SHOPPER_RESULT -> response.challengeToken
-                else -> null
-            },
-            type = response.type,
-            paymentMethodType = response.paymentMethodType
-        )
+        return verifyAndRegisterCreditCardWith3DSResponse(response)
     }
 
     private fun makeCreditCardPayment(pspPaymentRequestModel: PspPaymentRequestModel, adyenMode: String, executeCapture: Boolean = true): AdyenPaymentResponseModel {
@@ -411,7 +387,24 @@ class AdyenPsp(
         return adyenClient.sepaRefund(request, pspRefundRequestModel.pspConfig!!, adyenMode)
     }
 
-        private fun adyenActionToTransactionAction(adyenStatus: String?): String {
+    private fun verifyAndRegisterCreditCardWith3DSResponse(response: Adyen3DSResponseModel): PspRegisterAliasResponseModel {
+        return PspRegisterAliasResponseModel(
+            pspAlias = response.recurringDetailReference,
+            billingAgreementId = null,
+            registrationReference = response.shopperReference,
+            paymentData = response.paymentData,
+            resultCode = response.resultCode,
+            token = when (response.resultCode) {
+                IDENTIFY_SHOPPER_RESULT -> response.fingerprintToken
+                CHALLENGE_SHOPPER_RESULT -> response.challengeToken
+                else -> null
+            },
+            type = response.type,
+            paymentMethodType = response.paymentMethodType
+        )
+    }
+
+    private fun adyenActionToTransactionAction(adyenStatus: String?): String {
         return when (adyenStatus) {
             "AUTHORISATION" -> TransactionAction.AUTH.name
             "CAPTURE" -> TransactionAction.CAPTURE.name

@@ -15,7 +15,6 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenVerify3DSRequestModel
 import com.mobilabsolutions.payment.adyen.model.response.Adyen3DSResponseModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
-import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
@@ -84,7 +83,7 @@ class AdyenClient(
         request: AdyenVerify3DSRequestModel,
         pspConfig: PspConfigModel,
         mode: String
-    ): AdyenVerifyPaymentResponseModel {
+    ): Adyen3DSResponseModel {
         val apiKey = if (mode == AdyenMode.TEST.mode) pspConfig.sandboxPublicKey else pspConfig.publicKey
         val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testCheckoutBaseUrl + VERIFY_PAYMENT_URL
         else adyenProperties.liveCheckoutBaseUrl.format(pspConfig.urlPrefix) + VERIFY_PAYMENT_URL
@@ -95,7 +94,7 @@ class AdyenClient(
             json = JSONObject(objectMapper.writeValueAsString(request))
         )
 
-        return AdyenVerifyPaymentResponseModel(response.jsonObject)
+        return Adyen3DSResponseModel(response.jsonObject)
     }
 
     /**

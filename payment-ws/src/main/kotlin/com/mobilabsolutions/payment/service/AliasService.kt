@@ -118,7 +118,7 @@ class AliasService(
         aliasRepository.updateAlias(pspAlias, extra, aliasId, userAgent)
         return Alias3DSResponseModel(
             pspRegisterAliasResponse?.resultCode,
-            pspRegisterAliasResponse?.authenticationToken,
+            pspRegisterAliasResponse?.token,
             pspRegisterAliasResponse?.paymentData,
             pspRegisterAliasResponse?.type,
             pspRegisterAliasResponse?.paymentMethodType)
@@ -155,7 +155,10 @@ class AliasService(
         }
 
         aliasRepository.updateAlias(pspResponse?.pspAlias, objectMapper.writeValueAsString(aliasExtra), aliasId, userAgent)
-        return Alias3DSResponseModel(pspResponse?.resultCode, pspResponse?.authenticationToken, pspResponse?.paymentData, pspResponse?.type, pspResponse?.paymentMethodType)
+        return Alias3DSResponseModel(
+            pspResponse?.resultCode, pspResponse?.token,
+            pspResponse?.paymentData, pspResponse?.type,
+            pspResponse?.paymentMethodType)
     }
 
     /**
