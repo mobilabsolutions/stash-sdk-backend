@@ -181,7 +181,7 @@ class HomeService(
         val transactionsMap = LinkedHashMap<String, Int>()
         initHourlyMap(transactionsMap)
         for (transaction in transactions) {
-            val hour = (transaction.createdDate!!.atZone(ZoneId.of(timezone)).hour + 1).toString()
+            val hour = (transaction.createdDate!!.atZone(ZoneId.of(timezone)).hour).toString()
             val amount = transactionsMap[hour] ?: 0
             transactionsMap[hour] = amount.plus(transaction.amount!!)
         }
