@@ -65,7 +65,7 @@ class ApiKeyService(
         logger.info("Creating merchant {} key", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId)
                 ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        val generatedKey = merchantId + "-" + RandomStringUtils.randomAlphanumeric(ApiKeyService.STRING_LENGTH)
+        val generatedKey = merchantId + "-" + RandomStringUtils.randomAlphanumeric(API_KEY_LENGTH)
 
         val merchantApiKey = MerchantApiKey(
             name = apiKeyInfo.name,
@@ -131,6 +131,6 @@ class ApiKeyService(
     }
 
     companion object : KLogging() {
-        const val STRING_LENGTH = 20
+        const val API_KEY_LENGTH = 20
     }
 }

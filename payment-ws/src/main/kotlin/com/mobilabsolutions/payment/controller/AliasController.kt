@@ -66,7 +66,7 @@ class AliasController(private val aliasService: AliasService) {
 
     @ApiOperation(value = "Verify the given Alias for payment operations")
     @ApiResponses(
-        ApiResponse(code = 204, message = "Successfully verified an Alias"),
+        ApiResponse(code = 200, message = "Successfully verified an Alias"),
         ApiResponse(code = 400, message = "Request model validation is failed")
     )
     @RequestMapping(VERIFY_ALIAS_URL, method = [RequestMethod.POST],

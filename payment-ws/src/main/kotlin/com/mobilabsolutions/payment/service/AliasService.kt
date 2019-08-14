@@ -45,7 +45,7 @@ class AliasService(
     private val objectMapper: ObjectMapper
 ) {
     companion object : KLogging() {
-        const val STRING_LENGTH = 20
+        const val ALIAS_ID_LENGTH = 20
     }
 
     /**
@@ -87,7 +87,7 @@ class AliasService(
      * @param aliasRequestModel Alias Request Model
      */
     @Transactional
-    fun exchangeAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, aliasRequestModel: AliasRequestModel): Alias3DSResponseModel {
+    fun exchangeAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, aliasRequestModel: AliasRequestModel): Alias3DSResponseModel? {
         logger.info("Exchanging alias {}", aliasId)
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofErrorCode(ApiErrorCode.PUBLISHABLE_KEY_NOT_FOUND).asException()
         val alias = aliasRepository.getFirstByIdAndActive(aliasId, true) ?: throw ApiError.ofErrorCode(ApiErrorCode.ALIAS_NOT_FOUND).asException()
@@ -203,7 +203,7 @@ class AliasService(
         userAgent: String?
     ): AliasResponseModel {
         val alias = aliasRepository.getByIdempotentKeyAndActiveAndMerchantAndPspTypeAndUserAgent(idempotentKey, true, merchant, pspConfigType, userAgent)
-        val generatedAliasId = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
+        val generatedAliasId = randomStringGenerator.generateRandomAlphanumeric(ALIAS_ID_LENGTH)
 
         when {
             alias != null -> return AliasResponseModel(
