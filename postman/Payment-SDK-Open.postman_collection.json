@@ -1506,6 +1506,25 @@
                         "url": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/logo"
                     },
                     "response": []
+                },
+                {
+                    "name": "Create webhook credentials",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": {
+                                "token": "{{access_token}}"
+                            }
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"webhook\" : \"https://test.mblb.net/notifications\",\n  \"username\": \"notificator\",\n  \"password\": \"password\"\n}"
+                        },
+                        "url": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/notifications"
+                    },
+                    "response": []
                 }
             ]
         }
