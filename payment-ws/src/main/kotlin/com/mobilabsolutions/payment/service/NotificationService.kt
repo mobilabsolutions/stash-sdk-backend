@@ -17,7 +17,7 @@ class NotificationService(
         TransactionService.logger.info("Forwarding notifications to the following url: $webhookUrl")
         val notificationsObject = JSONObject()
         notificationsObject.put("notifications", JSONArray(objectMapper.writeValueAsString(merchantNotifications)))
-        return khttp.post(
+        return khttp.put(
             url = webhookUrl,
             json = notificationsObject
         ).statusCode
