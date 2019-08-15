@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 class NotificationService(
     private val objectMapper: ObjectMapper
 ) {
-    companion object : KLogging() {}
+    companion object : KLogging()
 
     fun sendNotificationToMerchant(webhookUrl: String, merchantNotifications: MutableList<MerchantNotificationsModel>): Int {
         logger.info("Forwarding notifications to the following url: $webhookUrl")
