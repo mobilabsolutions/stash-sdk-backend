@@ -37,8 +37,6 @@ import com.mobilabsolutions.server.commons.util.RequestHashing
 import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.StringUtils
-import org.json.JSONArray
-import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.kafka.core.KafkaTemplate
@@ -57,7 +55,8 @@ class TransactionService(
     private val pspRegistry: PspRegistry,
     private val requestHashing: RequestHashing,
     private val objectMapper: ObjectMapper,
-    private val kafkaTemplate: KafkaTemplate<String, Transaction>
+    private val kafkaTemplate: KafkaTemplate<String, Transaction>,
+    private val notificationService: NotificationService
 ) {
 
     @Value("\${payment.ws.notification.apiKey:}")
@@ -337,20 +336,11 @@ class TransactionService(
         val transactions = transactionRepository.getTransactionsByUnprocessedNotifications(merchantId)
         val merchantNotifications = transactions.asSequence().map { MerchantNotificationsModel(it.transactionId, it.status!!.name,
             it.action!!.name, it.paymentMethod!!.name, it.amount, it.currencyId, it.reason, it.createdDate.toString()) }.toMutableList()
-        val statusCode = sendNotificationToMerchant(merchant.webhookUrl!!, merchantNotifications)
+        val statusCode = notificationService.sendNotificationToMerchant(merchant.webhookUrl!!, merchantNotifications)
         transactions.forEach {
             it.processedNotification = (statusCode == HttpStatus.CREATED.value())
             transactionRepository.save(it)
         }
-    }
-
-    private fun sendNotificationToMerchant(webhookUrl: String, merchantNotifications: MutableList<MerchantNotificationsModel>): Int {
-        logger.info("Forwarding notifications to the following url: $webhookUrl")
-        val notificationsObject = JSONObject()
-        notificationsObject.put("notifications", JSONArray(objectMapper.writeValueAsString(merchantNotifications)))
-        logger.info("Notifications: $notificationsObject")
-        // TODO Send notifications to webhookUrl and return statuscode from the post request
-        return HttpStatus.CREATED.value()
     }
 
     private fun capture(

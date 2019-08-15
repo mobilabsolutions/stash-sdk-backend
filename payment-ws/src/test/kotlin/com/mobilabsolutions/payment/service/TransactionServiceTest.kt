@@ -19,6 +19,7 @@ import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
+import com.mobilabsolutions.payment.model.MerchantNotificationsModel
 import com.mobilabsolutions.payment.model.PersonalDataModel
 import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.PspNotificationModel
@@ -160,6 +161,9 @@ class TransactionServiceTest {
 
     @Mock
     private lateinit var kafkaTemplate: KafkaTemplate<String, String>
+
+    @Mock
+    private lateinit var notificationService: NotificationService
 
     @Spy
     val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
@@ -448,6 +452,7 @@ class TransactionServiceTest {
         ).thenReturn(differentRequestHash)
         Mockito.`when`(requestHashing.hashRequest(PaymentRequestModel(correctAliasId, correctPaymentData, null, null))
         ).thenReturn(requestHash)
+        Mockito.`when`(notificationService.sendNotificationToMerchant(webhookUrl, mutableListOf((Mockito.mock(MerchantNotificationsModel::class.java))))).thenReturn(201)
         Mockito.`when`(transactionRepository.getTransactionsByUnprocessedNotifications(correctMerchantId)).thenReturn(listOf(notificationTransaction))
     }
 

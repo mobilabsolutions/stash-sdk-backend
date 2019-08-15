@@ -17,16 +17,11 @@ class ScheduledTasks(
     private val transactionService: TransactionService,
     private val merchantRepository: MerchantRepository
 ) {
-    companion object {
-        const val PARALLELISM = "5"
-        const val INTERVAL = "5000"
-    }
-
-    @Value(PARALLELISM)
+    @Value("\${payment.notification.processing.parallelism:}")
     private lateinit var parallelism: String
 
     @Transactional
-    @Scheduled(fixedRateString = INTERVAL)
+    @Scheduled(fixedRateString = "\${payment.notification.processing.interval:}")
     fun processNotifications() {
         val merchants = merchantRepository.getMerchantsByWebhookUrl()
 
