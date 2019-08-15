@@ -1,10 +1,12 @@
 package com.mobilabsolutions.payment.model
 
+import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
+@ApiModel("Merchant notifications model")
 data class MerchantNotificationsModel(
     @ApiModelProperty(value = "Transaction id", example = "frtdqw7m")
     val transactionId: String?,
