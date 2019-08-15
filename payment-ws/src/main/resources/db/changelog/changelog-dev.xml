@@ -210,5 +210,20 @@
             <column name="logo" type="oid"/>
         </addColumn>
     </changeSet>
+    <changeSet author="mohamed.osman" id="PSOS-476_1">
+        <addColumn tableName="merchant">
+            <column name="webhook_url" type="VARCHAR(255)"/>
+        </addColumn>
+        <addColumn tableName="merchant">
+            <column name="webhook_username" type="VARCHAR(255)"/>
+        </addColumn>
+        <addColumn tableName="merchant">
+            <column name="webhook_password" type="VARCHAR(255)"/>
+        </addColumn>
+        <addColumn tableName="transaction_record">
+            <column name="processed_notification" type="BOOLEAN"/>
+        </addColumn>
+        <addDefaultValue columnDataType="BOOLEAN" columnName="processed_notification" defaultValueBoolean="false" tableName="transaction_record"/>
+    </changeSet>
 
 </databaseChangeLog>

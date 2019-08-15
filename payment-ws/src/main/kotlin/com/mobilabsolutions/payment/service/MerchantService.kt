@@ -15,6 +15,7 @@ import com.mobilabsolutions.payment.model.PspConfigModel
 import com.mobilabsolutions.payment.model.request.MerchantRequestModel
 import com.mobilabsolutions.payment.model.request.PspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspUpsertConfigRequestModel
+import com.mobilabsolutions.payment.model.request.WebhookCredentialsRequestModel
 import com.mobilabsolutions.payment.model.response.PspConfigResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
@@ -208,6 +209,19 @@ class MerchantService(
     fun getLogo(merchantId: String): ResponseEntity<ByteArray> {
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(merchant.logo!!)
+    }
+
+    /**
+     * Create webhook credentials for a merchant
+     *
+     * @param merchantId Merchant ID
+     * @param webhookCredentialsRequest Webhook credentials request model
+     */
+    @Transactional
+    fun createWebhookCredentials(merchantId: String, webhookCredentialsRequest: WebhookCredentialsRequestModel) {
+        logger.info("Creating webhookUrl credentials for merchant {}", merchantId)
+        merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        merchantRepository.updateMerchantWebookCredentials(merchantId, webhookCredentialsRequest.webhookUrl!!, webhookCredentialsRequest.webhookUsername!!, webhookCredentialsRequest.webhookPassword!!)
     }
 
     private fun checkMerchantAndAuthority(merchantId: String): Boolean {

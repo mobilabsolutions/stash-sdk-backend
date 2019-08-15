@@ -12,6 +12,7 @@ import com.mobilabsolutions.payment.model.request.PaymentDataRequestModel
 import com.mobilabsolutions.payment.model.request.PspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspUpsertConfigRequestModel
 import com.mobilabsolutions.payment.model.request.ReversalRequestModel
+import com.mobilabsolutions.payment.model.request.WebhookCredentialsRequestModel
 import com.mobilabsolutions.payment.service.MerchantService
 import com.mobilabsolutions.payment.service.TransactionDetailsService
 import com.mobilabsolutions.payment.service.TransactionService
@@ -62,6 +63,7 @@ class MerchantController(
         const val REVERSE_URL = "/{Merchant-Id}/preauthorization/{Transaction-Id}/reverse"
         const val REFUND_URL = "/{Merchant-Id}/authorization/{Transaction-Id}/refund"
         const val LOGO_URL = "/{Merchant-Id}/logo"
+        const val NOTIFICATIONS_URL = "/{Merchant-Id}/notifications"
 
         const val CSV_CONTENT_TYPE = "text/csv"
         const val CSV_HEADER_KEY = "Content-Disposition"
@@ -336,4 +338,19 @@ class MerchantController(
     fun getLogo(
         @PathVariable("Merchant-Id") merchantId: String
     ) = merchantService.getLogo(merchantId)
+
+    @ApiOperation(value = "Create merchant webhook credentials")
+    @ApiResponses(
+        ApiResponse(code = 201, message = "Successfully created merchant webhook credentials"),
+        ApiResponse(code = 400, message = "Failed to create merchant webhook credentials"),
+        ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 403, message = "Forbidden access")
+    )
+    @RequestMapping(MerchantController.NOTIFICATIONS_URL, method = [RequestMethod.POST])
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
+    fun createWebhookCredentials(
+        @PathVariable(value = "Merchant-Id") merchantId: String,
+        @ApiParam(name = "Webhook-Credentials", value = "Webhook credentials model") @RequestBody webhookCredentialsRequest: WebhookCredentialsRequestModel
+    ) = merchantService.createWebhookCredentials(merchantId, webhookCredentialsRequest)
 }

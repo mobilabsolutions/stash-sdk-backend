@@ -13,6 +13,7 @@ import com.mobilabsolutions.payment.model.request.MerchantRequestModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.payment.model.request.PspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspUpsertConfigRequestModel
+import com.mobilabsolutions.payment.model.request.WebhookCredentialsRequestModel
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
@@ -45,11 +46,17 @@ class MerchantServiceTest {
     private val knownMerchantId = "mobilab"
     private val unknownMerchantId = "test"
     private val logoBytes = ByteArray(1)
+    private val webhookUrl = "https://test.mblb.net/notifications"
+    private val webhookUsername = "username"
+    private val webhookPassword = "password"
     private var merchant = Merchant(
         id = knownMerchantId,
         pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"test portal\"}," +
             " {\"type\" : \"other\", \"merchantId\" : \"test merchant\", \"default\" : \"true\"}]}",
-        logo = logoBytes
+        logo = logoBytes,
+        webhookUrl = webhookUrl,
+        webhookUsername = webhookUsername,
+        webhookPassword = webhookPassword
     )
     private val mockMultipartFile = MockMultipartFile("file", "excel.xlsx", "multipart/form-data", logoBytes)
 
@@ -80,6 +87,7 @@ class MerchantServiceTest {
         )
         Mockito.`when`(authorityRepository.getAuthorityByName(unknownMerchantId)).thenReturn(null)
         doNothing().`when`(merchantRepository).saveLogo(logoBytes, knownMerchantId)
+        doNothing().`when`(merchantRepository).updateMerchantWebookCredentials(knownMerchantId, webhookUrl, webhookUsername, webhookPassword)
     }
 
     @Test
@@ -174,5 +182,10 @@ class MerchantServiceTest {
         Assertions.assertThrows(ApiException::class.java) {
             merchantService.getLogo(unknownMerchantId)
         }
+    }
+
+    @Test
+    fun `save merchant webhook credentials`() {
+        merchantService.createWebhookCredentials(knownMerchantId, webhookCredentialsRequest = WebhookCredentialsRequestModel(webhookUrl, webhookUsername, webhookPassword))
     }
 }

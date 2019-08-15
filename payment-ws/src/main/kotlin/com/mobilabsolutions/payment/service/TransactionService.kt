@@ -17,6 +17,7 @@ import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
+import com.mobilabsolutions.payment.model.MerchantNotificationsModel
 import com.mobilabsolutions.payment.model.PaymentInfoModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
 import com.mobilabsolutions.payment.model.PspConfigModel
@@ -37,6 +38,7 @@ import mu.KLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpStatus
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -53,7 +55,8 @@ class TransactionService(
     private val pspRegistry: PspRegistry,
     private val requestHashing: RequestHashing,
     private val objectMapper: ObjectMapper,
-    private val kafkaTemplate: KafkaTemplate<String, Transaction>
+    private val kafkaTemplate: KafkaTemplate<String, Transaction>,
+    private val notificationService: NotificationService
 ) {
 
     @Value("\${payment.ws.notification.apiKey:}")
@@ -307,7 +310,8 @@ class TransactionService(
                     pspResponse = transaction.pspResponse,
                     merchant = transaction.merchant,
                     alias = transaction.alias,
-                    notification = true
+                    notification = true,
+                    processedNotification = false
                 )
                 transactionRepository.save(newTransaction)
                 sendMessageToKafka(newTransaction)
@@ -316,6 +320,26 @@ class TransactionService(
             } else {
                 logger.info { "There is no transaction for PSP transaction '${it.pspTransactionId}' and transaction action '${it.transactionAction}'" }
             }
+        }
+    }
+
+    /**
+     * Processes notification for transactions for specific merchant and forward the notifications
+     * to the merchant
+     *
+     * @param merchantId Merchant ID
+     */
+    @Transactional
+    fun processNotifications(merchantId: String) {
+        logger.info("Picking notifications for $merchantId")
+        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        val transactions = transactionRepository.getTransactionsByUnprocessedNotifications(merchantId)
+        val merchantNotifications = transactions.asSequence().map { MerchantNotificationsModel(it.transactionId, it.status!!.name,
+            it.action!!.name, it.paymentMethod!!.name, it.amount, it.currencyId, it.reason, it.createdDate.toString()) }.toMutableList()
+        val statusCode = notificationService.sendNotificationToMerchant(merchant.webhookUrl!!, merchantNotifications)
+        transactions.forEach {
+            it.processedNotification = (statusCode == HttpStatus.CREATED.value())
+            transactionRepository.save(it)
         }
     }
 

@@ -119,4 +119,7 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
         @Param("createdAtStart") createdAtStart: String?,
         @Param("createdAtEnd") createdAtEnd: String?
     ): List<Transaction>
+
+    @Query("SELECT * FROM transaction_record tr WHERE tr.merchant_id = :merchantId AND tr.processed_notification = FALSE ORDER BY tr.created_date FOR UPDATE OF tr SKIP LOCKED", nativeQuery = true)
+    fun getTransactionsByUnprocessedNotifications(@Param("merchantId") merchantId: String): List<Transaction>
 }
