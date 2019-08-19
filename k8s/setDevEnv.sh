@@ -43,5 +43,6 @@ export KUBE_NOTIF_CONFIGMAP_INTERVAL="\"5000\""
 
 # ingress variables
 export KUBE_INGRESS_STATIC_IP_NAME="payment-backend-dev"
-export KUBE_INGRESS_HOST_NAME="payment-dev.mblb.net/v1"
+export KUBE_INGRESS_HOST_NAME="payment-dev.mblb.net"
 export KUBE_INGRESS_CERT_NAME="payment-dev"
+export KUBE_INGRESS_VERSION="/v1"
