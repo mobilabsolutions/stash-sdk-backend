@@ -17,19 +17,19 @@ spec:
     - host: "${KUBE_INGRESS_HOST_NAME}"
       http:
         paths:
-          - path: /${KUBE_INGRESS_VERSION}/*
+          - path: /*
             backend:
               serviceName: payment-dashboard
               servicePort: 80
-          - path: /${KUBE_INGRESS_VERSION}/api/*
+          - path: /api/${KUBE_INGRESS_VERSION}/*
             backend:
               serviceName: payment-sdk-backend
               servicePort: 80
-          - path: /${KUBE_INGRESS_VERSION}/notification/*
+          - path: /notification/${KUBE_INGRESS_VERSION}/*
             backend:
               serviceName: payment-sdk-notification
               servicePort: 80
-          - path: /${KUBE_INGRESS_VERSION}/merchant/*
+          - path: /merchant/${KUBE_INGRESS_VERSION}/*
             backend:
               serviceName: payment-merchant-backend
               servicePort: 80
