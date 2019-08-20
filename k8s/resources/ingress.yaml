@@ -17,10 +17,6 @@ spec:
     - host: "${KUBE_INGRESS_HOST_NAME}"
       http:
         paths:
-          - path: /*
-            backend:
-              serviceName: payment-dashboard
-              servicePort: 80
           - path: /api/${KUBE_INGRESS_VERSION}/*
             backend:
               serviceName: payment-sdk-backend
