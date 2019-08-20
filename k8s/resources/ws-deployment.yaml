@@ -39,7 +39,7 @@ spec:
           name: api
         readinessProbe:
           httpGet:
-            path: "/v1/api/actuator/health"
+            path: "/api/v1/actuator/health"
             port: api
           initialDelaySeconds: 60
           periodSeconds: 15
