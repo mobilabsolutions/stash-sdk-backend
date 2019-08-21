@@ -15,6 +15,7 @@ branches:
   only:
     - master
     - /^(\d+\.)?(\d+\.)?\d+(-\w+)?$/
+    - /^(\d+\.)?(\d+\.)?\d+(-demo)?$/
 
 install: true
 
