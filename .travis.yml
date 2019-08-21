@@ -14,7 +14,7 @@ env:
 branches:
   only:
     - master
-    - /^(\d+\.)?(\d+\.)?\d+(-\w+)?$/
+    - /^(\d+\.)?(\d+\.)?\d+(-demo)?$/
 
 install: true
 
@@ -51,6 +51,4 @@ deploy:
     # deploy to kube demo namespace
     script: ${TRAVIS_BUILD_DIR}/k8s/gcp-demo-deploy.sh
     on:
-      all_branches: true
       tags: true
-      condition: tag =~ /^(\d+\.)?(\d+\.)?\d+(-demo)?$/
