@@ -14,7 +14,7 @@ env:
 branches:
   only:
     - master
-    - /^(\d+\.)?(\d+\.)?\d+(-demo)?$/
+    - /^(\d+\.)?(\d+\.)?\d+(-\w+)?$/
 
 install: true
 
@@ -31,6 +31,13 @@ deploy:
     skip_cleanup: true
     api_key:
       secure: bxKlGuLuPvyz43DSNRM1Ba6CJJMbp477gneKameX7BFvD9p5FSxvfVmKjtLaLzBt5WHlm4PGEOGNUyPr1kDeT0Q9i3yy+nsfdIwMOlKtY6E72CfgwqMPh1LADtYI5+kamLy9qTMd91iKQa+yXo/E7UHDF09DYU3hcF3XxwLXrFckx0kEbQckjVLuOvAnWUaea08YtEYvs5Y2Af9JyfsTRm8yiQ0v0Byy9utXZgB4MsdVkLYvhnMjsCEg+VMypx9WjNuuo7zGIiB3rQ23OTtpSFNCrg+JUmFjixqYtmuY4oSoR8ZlvwABzLD9yDJJsl9lZ4/TKVWGDdBdhpGurFhJ9PwreUhRfD2vrY/0Hc9Gq685lydTS+5gPzmrQirwlR57dkTZFVTb7rXJRMg0rd5D3o9u2jqcXjsIUWfuWXrrDbWruRtiZ8WEmxEVVAQh0FnH/BbyUoEwKQQGKv1wwzqqcGdpOtOY2ac5iOwKcMfBdknpFR1W8/WJoLgzQDZ6fxIvE0u6fFIeoxrnESwBOSBP4vouM2bxk00hmcjHR7mdC6oIJIlrf3tdWkBoRW8RkYa0U+1vt7KOpjhMfdef6RPBD6zJ6hDiUZx6AP95IDC38Jc4mowQQXqsr/uF+BHs7rZvnteSWsw6XY4zHOktkG+48TqOQe8mZKS6hCHP7k1ZtD4=
+    file:
+      - payment-adyen/target/payment-adyen-$TRAVIS_TAG.jar
+      - payment-braintree/target/payment-braintree-$TRAVIS_TAG.jar
+      - payment-bs-one/target/payment-bs-one-$TRAVIS_TAG.jar
+      - payment-commons/target/payment-commons-$TRAVIS_TAG.jar
+      - payment-notifications/target/payment-notifications-$TRAVIS_TAG.jar
+      - payment-ws/target/payment-ws-$TRAVIS_TAG.jar
     on:
       tags: true
   - provider: script
@@ -45,3 +52,4 @@ deploy:
     script: ${TRAVIS_BUILD_DIR}/k8s/gcp-demo-deploy.sh
     on:
       tags: true
+      branch: /^(\d+\.)?(\d+\.)?\d+(-demo)?$/
