@@ -31,8 +31,14 @@ export KUBE_WS_CONFIGMAP_KAFKA_TOPIC_NAME="transactions"
 
 # notif configmap variables
 export KUBE_NOTIF_CONFIGMAP_JAVA_OPTS="-Xmx200m -XX:+ExitOnOutOfMemoryError"
-export KUBE_NOTIF_CONFIGMAP_SPRING_PROFILE="dev"
+export KUBE_NOTIF_CONFIGMAP_SPRING_PROFILE="demo"
 export KUBE_NOTIF_CONFIGMAP_SQL_JDBC_URL="jdbc:postgresql://localhost/payment-sdk-notif-demo"
+export KUBE_NOTIF_CONFIGMAP_PAYMENT_WS_URL="https://payment-demo.mblb.net/v1/api/notification"
+export KUBE_NOTIF_CONFIGMAP_PSP="ADYEN;BRAINTREE;BS_PAYONE"
+export KUBE_NOTIF_CONFIGMAP_SEPARATOR=";"
+export KUBE_NOTIF_CONFIGMAP_PARALLELISM="\"5\""
+export KUBE_NOTIF_CONFIGMAP_INTERVAL="\"5000\""
+
 
 # service variables
 
