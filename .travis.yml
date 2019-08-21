@@ -51,4 +51,5 @@ deploy:
     # deploy to kube demo namespace
     script: ${TRAVIS_BUILD_DIR}/k8s/gcp-demo-deploy.sh
     on:
+      tags: true
       branch: /^(\d+\.)?(\d+\.)?\d+(-demo)?$/
