@@ -52,4 +52,4 @@ deploy:
     script: ${TRAVIS_BUILD_DIR}/k8s/gcp-demo-deploy.sh
     on:
       tags: true
-      condition: $TRAVIS_TAG =~ /^(\d+\.)?(\d+\.)?\d+(-demo)?$/
+      condition: tag =~ /^(\d+\.)?(\d+\.)?\d+(-demo)?$/
