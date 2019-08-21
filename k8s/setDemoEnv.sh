@@ -39,7 +39,6 @@ export KUBE_NOTIF_CONFIGMAP_SEPARATOR=";"
 export KUBE_NOTIF_CONFIGMAP_PARALLELISM="\"5\""
 export KUBE_NOTIF_CONFIGMAP_INTERVAL="\"5000\""
 
-
 # service variables
 
 # ingress variables
