@@ -15,6 +15,10 @@
 
     <artifactId>payment-ws</artifactId>
 
+    <properties>
+        <reactive.pg.version>0.11.4</reactive.pg.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -59,10 +63,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -116,6 +116,11 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.reactiverse</groupId>
+            <artifactId>reactive-pg-client</artifactId>
+            <version>${reactive.pg.version}</version>
         </dependency>
         <dependency>
             <groupId>org.liquibase</groupId>

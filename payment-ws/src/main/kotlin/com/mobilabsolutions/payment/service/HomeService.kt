@@ -4,7 +4,6 @@ import com.mobilabsolutions.payment.data.Merchant
 import com.mobilabsolutions.payment.data.Transaction
 import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
-import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.KeyPerformanceModel
 import com.mobilabsolutions.payment.model.NotificationModel
@@ -18,9 +17,6 @@ import com.mobilabsolutions.payment.model.response.SelectedDateActivityResponseM
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import mu.KLogging
-import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.messaging.handler.annotation.Payload
-import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -36,9 +32,7 @@ import java.time.temporal.ChronoUnit
 @Service
 class HomeService(
     private val transactionRepository: TransactionRepository,
-    private val merchantUserRepository: MerchantUserRepository,
-    private val merchantRepository: MerchantRepository,
-    private val simpleMessagingTemplate: SimpMessagingTemplate
+    private val merchantRepository: MerchantRepository
 ) {
 
     companion object : KLogging() {
@@ -48,20 +42,6 @@ class HomeService(
         private const val CHARGEBACK_NOTIFICATION = "Chargeback %s"
 
         private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_UTC)
-    }
-
-    /**
-     * Sends the live data to the client (Web dashboard) via WebSocket
-     *
-     * @param transaction successful transaction
-     */
-    @KafkaListener(topics = ["\${kafka.transactions.topicName:}"], groupId = "\${spring.kafka.consumer.group-id:}")
-    fun getLiveData(@Payload transaction: Transaction) {
-        logger.info { "Started listening the live data" }
-        val merchantUsers = merchantUserRepository.getMerchantUsers(transaction.merchant.id!!)
-        merchantUsers.forEach { user ->
-            simpleMessagingTemplate.convertAndSendToUser(user.email, "/topic/transactions", toLiveData(transaction))
-        }
     }
 
     /**
@@ -149,19 +129,6 @@ class HomeService(
     }
 
     /**
-     * Calculates the date in the past for the given number of days
-     *
-     * @param merchant Merchant
-     * @param days Number of days to subtract
-     * @return date as String
-     */
-    fun getPastDate(merchant: Merchant, days: Long): String {
-        return dateFormatter
-            .withZone(ZoneId.of(merchant.timezone ?: ZoneId.systemDefault().toString()))
-            .format(Instant.now().minus(days, ChronoUnit.DAYS))
-    }
-
-    /**
      * Gets selected date activity for all captured transactions
      *
      * @param merchantId Merchant ID
@@ -188,13 +155,13 @@ class HomeService(
         return SelectedDateActivityResponseModel(transactionsMap)
     }
 
-    private fun initHourlyMap(transactionsMap: LinkedHashMap<String, Int>) {
-        for (hour in 0..23) {
-            transactionsMap[hour.toString()] = 0
-        }
-    }
-
-    private fun toLiveData(transaction: Transaction): LiveDataResponseModel {
+    /**
+     * Maps transaction to the live data model
+     *
+     * @param transaction Transaction
+     * @return live data response model
+     */
+    fun toLiveData(transaction: Transaction): LiveDataResponseModel {
         return when (transaction.action) {
             TransactionAction.AUTH -> getLiveDataForAuthAndCapturedTransaction(transaction)
             TransactionAction.CAPTURE -> getLiveDataForAuthAndCapturedTransaction(transaction)
@@ -202,6 +169,25 @@ class HomeService(
             TransactionAction.CHARGEBACK -> getLiveDataForChargedbackTransaction(transaction)
             TransactionAction.CHARGEBACK_REVERSED -> getLiveDataForChargebackReversedTransactions(transaction)
             else -> getLiveDataForOtherTransactions()
+        }
+    }
+
+    /**
+     * Calculates the date in the past for the given number of days
+     *
+     * @param merchant Merchant
+     * @param days Number of days to subtract
+     * @return date as String
+     */
+    fun getPastDate(merchant: Merchant, days: Long): String {
+        return dateFormatter
+            .withZone(ZoneId.of(merchant.timezone ?: ZoneId.systemDefault().toString()))
+            .format(Instant.now().minus(days, ChronoUnit.DAYS))
+    }
+
+    private fun initHourlyMap(transactionsMap: LinkedHashMap<String, Int>) {
+        for (hour in 0..23) {
+            transactionsMap[hour.toString()] = 0
         }
     }
 

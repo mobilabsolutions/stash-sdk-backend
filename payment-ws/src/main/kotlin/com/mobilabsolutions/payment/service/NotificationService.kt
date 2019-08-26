@@ -16,6 +16,12 @@ class NotificationService(
 ) {
     companion object : KLogging()
 
+    /**
+     * Sends notification to the merchant
+     *
+     * @param webhookUrl url to send the notification to
+     * @param merchantNotifications the list of merchant notifications
+     */
     fun sendNotificationToMerchant(webhookUrl: String, merchantNotifications: MutableList<MerchantNotificationsModel>): Int {
         logger.info("Forwarding notifications to the following url: $webhookUrl")
         val notificationsObject = JSONObject()
