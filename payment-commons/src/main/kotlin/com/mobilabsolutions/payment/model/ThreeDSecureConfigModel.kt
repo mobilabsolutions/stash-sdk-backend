@@ -15,5 +15,11 @@ data class ThreeDSecureConfigModel(
     val fingerprintResult: String?,
 
     @ApiModelProperty(value = "Challenge result from the client", example = "eyJ0cmFuc1N0YXR1cyI6IlkifQ==")
-    val challengeResult: String?
+    val challengeResult: String?,
+
+    @ApiModelProperty(value = "Value received when the shopper was redirected back to your website", example = "djIhMF...")
+    val md: String?,
+
+    @ApiModelProperty(value = "Value received when the shopper was redirected back to your website", example = "eNpVU...")
+    val paRes: String?
 )

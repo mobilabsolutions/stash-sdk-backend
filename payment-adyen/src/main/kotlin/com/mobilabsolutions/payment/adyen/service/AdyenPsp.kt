@@ -104,7 +104,9 @@ class AdyenPsp(
             paymentData = threeDSecureConfig?.paymentData,
             details = Adyen3DSDetailsModel(
                 fingerprintResult = threeDSecureConfig?.fingerprintResult,
-                challengeResult = threeDSecureConfig?.challengeResult
+                challengeResult = threeDSecureConfig?.challengeResult,
+                md = threeDSecureConfig?.md,
+                paRes = threeDSecureConfig?.paRes
             )
         )
 
@@ -400,7 +402,11 @@ class AdyenPsp(
                 else -> null
             },
             type = response.type,
-            paymentMethodType = response.paymentMethodType
+            paymentMethodType = response.paymentMethodType,
+            paReq = response.paReq,
+            termUrl = response.termUrl,
+            md = response.md,
+            url = response.url
         )
     }
 

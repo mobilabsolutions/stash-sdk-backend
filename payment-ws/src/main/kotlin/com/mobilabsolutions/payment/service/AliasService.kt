@@ -111,7 +111,7 @@ class AliasService(
         val paypalConfig = aliasRequestModel.extra?.payPalConfig?.copy(billingAgreementId = pspRegisterAliasResponse?.billingAgreementId)
         val aliasExtraModel = aliasRequestModel.extra?.copy(
             payPalConfig = paypalConfig,
-            threeDSecureConfig = ThreeDSecureConfigModel(paymentData = pspRegisterAliasResponse?.paymentData, fingerprintResult = null, challengeResult = null))
+            threeDSecureConfig = ThreeDSecureConfigModel(pspRegisterAliasResponse?.paymentData, null, null, null, null))
 
         val pspAlias = aliasRequestModel.pspAlias ?: pspRegisterAliasResponse?.pspAlias
         val extra = if (aliasExtraModel != null) objectMapper.writeValueAsString(aliasExtraModel) else null
@@ -121,7 +121,11 @@ class AliasService(
             pspRegisterAliasResponse?.token,
             pspRegisterAliasResponse?.paymentData,
             pspRegisterAliasResponse?.type,
-            pspRegisterAliasResponse?.paymentMethodType)
+            pspRegisterAliasResponse?.paymentMethodType,
+            pspRegisterAliasResponse?.paReq,
+            pspRegisterAliasResponse?.termUrl,
+            pspRegisterAliasResponse?.md,
+            pspRegisterAliasResponse?.url)
     }
 
     @Transactional
@@ -139,7 +143,9 @@ class AliasService(
             ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_IMPL_NOT_FOUND, "PSP implementation '${alias.psp}' cannot be found").asException()
 
         val extra = objectMapper.readValue(alias.extra, AliasExtraModel::class.java)
-        val threeDSecureConfig = extra?.threeDSecureConfig?.copy(fingerprintResult = verifyAliasRequest.fingerprintResult, challengeResult = verifyAliasRequest.challengeResult)
+        val threeDSecureConfig = extra?.threeDSecureConfig?.copy(
+            fingerprintResult = verifyAliasRequest.fingerprintResult, challengeResult = verifyAliasRequest.challengeResult,
+            md = verifyAliasRequest.md, paRes = verifyAliasRequest.paRes)
         val aliasExtraModel = extra?.copy(threeDSecureConfig = threeDSecureConfig)
 
         val pspRegisterAliasRequest = PspRegisterAliasRequestModel(
@@ -158,7 +164,11 @@ class AliasService(
         return Alias3DSResponseModel(
             pspResponse?.resultCode, pspResponse?.token,
             pspResponse?.paymentData, pspResponse?.type,
-            pspResponse?.paymentMethodType)
+            pspResponse?.paymentMethodType,
+            pspResponse?.paReq,
+            pspResponse?.termUrl,
+            pspResponse?.md,
+            pspResponse?.url)
     }
 
     /**

@@ -34,5 +34,17 @@ data class PspRegisterAliasResponseModel(
     val type: String?,
 
     @ApiModelProperty(value = "Payment method type", example = "scheme")
-    val paymentMethodType: String?
+    val paymentMethodType: String?,
+
+    @ApiModelProperty(value = "Payload needed when redirecting the shopper", example = "eyJ0aH...")
+    val paReq: String?,
+
+    @ApiModelProperty(value = "The return url provided in the request", example = "https://payment-dev.mblb.net")
+    val termUrl: String?,
+
+    @ApiModelProperty(value = "Payload needed to complete the payment", example = "OEVudmZVMUlkWjd0MDNwUWs2bmhSdz09...")
+    val md: String?,
+
+    @ApiModelProperty(value = "Url where shopper will be redirected", example = "https://test.adyen.com/hpp/3d/validate.shtml")
+    val url: String?
 )

@@ -15,5 +15,13 @@ data class Adyen3DSDetailsModel(
 
     @ApiModelProperty(value = "Challenge result from the client", example = "eyJ0cmFuc1N0YXR1cyI6IlkifQ==")
     @JsonProperty(value = "threeds2.challengeResult")
-    val challengeResult: String?
+    val challengeResult: String?,
+
+    @ApiModelProperty(value = "Value received when the shopper was redirected back to your website", example = "djIhMF...")
+    @JsonProperty(value = "MD")
+    val md: String?,
+
+    @ApiModelProperty(value = "Value received when the shopper was redirected back to your website", example = "eNpVU...")
+    @JsonProperty(value = "PaRes")
+    val paRes: String?
 )

@@ -189,7 +189,7 @@ class AliasServiceTest {
 
     @Test
     fun `verify alias successfully`() {
-        aliasService.verifyAlias(knownPublishableKey, true, userAgent, knownAliasId, VerifyAliasRequestModel("fingerptint", null))
+        aliasService.verifyAlias(knownPublishableKey, true, userAgent, knownAliasId, VerifyAliasRequestModel("fingerptint", null, null, null))
     }
 
     @Test

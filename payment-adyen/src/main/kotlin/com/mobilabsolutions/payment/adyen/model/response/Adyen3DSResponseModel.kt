@@ -35,6 +35,18 @@ data class Adyen3DSResponseModel(
     @ApiModelProperty(value = "Payment method type", example = "scheme")
     val paymentMethodType: String?,
 
+    @ApiModelProperty(value = "Payload needed when redirecting the shopper", example = "eyJ0aH...")
+    val paReq: String?,
+
+    @ApiModelProperty(value = "The return url provided in the request", example = "https://payment-dev.mblb.net")
+    val termUrl: String?,
+
+    @ApiModelProperty(value = "Payload needed to complete the payment", example = "OEVudmZVMUlkWjd0MDNwUWs2bmhSdz09...")
+    val md: String?,
+
+    @ApiModelProperty(value = "Url where shopper will be redirected", example = "https://test.adyen.com/hpp/3d/validate.shtml")
+    val url: String?,
+
     @ApiModelProperty(value = "Adyen reason of refused payment", example = "Bad amount")
     val refusalReason: String?,
 
@@ -53,6 +65,12 @@ data class Adyen3DSResponseModel(
         const val ACTION = "action"
         const val TYPE = "type"
         const val PAYMENT_METHOD_TYPE = "paymentMethodType"
+        const val REDIRECT = "redirect"
+        const val DATA = "data"
+        const val PA_REQ = "PaReq"
+        const val TERM_URL = "TermUrl"
+        const val MD = "MD"
+        const val URL = "url"
         const val REFUSAL_REASON = "refusalReason"
         const val ERROR_MESSAGE = "message"
     }
@@ -66,6 +84,10 @@ data class Adyen3DSResponseModel(
         jsonObject.getJsonObjectSafe(AUTHENTICATION)?.getStringSafe(CHALLENGE_TOKEN),
         jsonObject.getJsonObjectSafe(ACTION)?.getStringSafe(TYPE),
         jsonObject.getJsonObjectSafe(ACTION)?.getStringSafe(PAYMENT_METHOD_TYPE),
+        jsonObject.getJsonObjectSafe(REDIRECT)?.getJsonObjectSafe(DATA)?.getStringSafe(PA_REQ),
+        jsonObject.getJsonObjectSafe(REDIRECT)?.getJsonObjectSafe(DATA)?.getStringSafe(TERM_URL),
+        jsonObject.getJsonObjectSafe(REDIRECT)?.getJsonObjectSafe(DATA)?.getStringSafe(MD),
+        jsonObject.getJsonObjectSafe(REDIRECT)?.getJsonObjectSafe(DATA)?.getStringSafe(URL),
         jsonObject.getStringSafe(REFUSAL_REASON),
         jsonObject.getStringSafe(ERROR_MESSAGE)
     )

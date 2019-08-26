@@ -163,9 +163,9 @@ class AdyenPspTest {
             .thenThrow(ApiError.ofErrorCode(ApiErrorCode.PSP_MODULE_ERROR, "Alias doesn't exist at Adyen").asException())
         Mockito.`when`(adyenClient.registerCreditCardWith3DS(AdyenPaymentRequestModel(AdyenAmountRequestModel(0, currency), email, customerIP, correctAliasId, null, null, null, reference, sandboxMerchantId, null,
                 AdyenPaymentMethodRequestModel(adyenProperties.threeDSecure, null, null, encryptedCCNumber, encryptedExpiryMonth, encryptedExpiryYear, encryptedSecurityCode, true), AdyenAdditionalDataModel(true), channel, returnUrl, true), pspConfig, AdyenMode.TEST.mode))
-            .thenReturn(Adyen3DSResponseModel(pspAlias, correctAliasId, paymentData, "IdentifyShopper", "fingerprint", null, "fingerprint3DS2", "scheme", null, null))
-        Mockito.`when`(adyenClient.verify3DS(AdyenVerify3DSRequestModel(paymentData, Adyen3DSDetailsModel(fingerprintResult, null)), pspConfig, AdyenMode.TEST.mode))
-            .thenReturn(Adyen3DSResponseModel(pspAlias, correctAliasId, paymentData, "ChallengeShopper", null, "token", "fingerprint3DS2", "scheme", null, null))
+            .thenReturn(Adyen3DSResponseModel(pspAlias, correctAliasId, paymentData, "IdentifyShopper", "fingerprint", null, "fingerprint3DS2", "scheme", null, null, null, null, null, null))
+        Mockito.`when`(adyenClient.verify3DS(AdyenVerify3DSRequestModel(paymentData, Adyen3DSDetailsModel(fingerprintResult, null, null, null)), pspConfig, AdyenMode.TEST.mode))
+            .thenReturn(Adyen3DSResponseModel(pspAlias, correctAliasId, paymentData, "ChallengeShopper", null, "token", "fingerprint3DS2", "scheme", null, null, null, null, null, null))
     }
 
     @Test
@@ -291,6 +291,8 @@ class AdyenPspTest {
                 ThreeDSecureConfigModel(
                     paymentData,
                     fingerprintResult,
+                    null,
+                    null,
                     null
                 ),
                 null,

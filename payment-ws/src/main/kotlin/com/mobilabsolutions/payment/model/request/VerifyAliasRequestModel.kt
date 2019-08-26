@@ -12,5 +12,11 @@ data class VerifyAliasRequestModel(
     val fingerprintResult: String?,
 
     @ApiModelProperty(value = "Challenge result from the client", example = "eyJ0aHJlZURTQ29tcEluZCI6ICJZIn0=")
-    val challengeResult: String?
+    val challengeResult: String?,
+
+    @ApiModelProperty(value = "Value received when the shopper was redirected back to your website", example = "djIhMF...")
+    val md: String?,
+
+    @ApiModelProperty(value = "Value received when the shopper was redirected back to your website", example = "eNpVU...")
+    val paRes: String?
 )
