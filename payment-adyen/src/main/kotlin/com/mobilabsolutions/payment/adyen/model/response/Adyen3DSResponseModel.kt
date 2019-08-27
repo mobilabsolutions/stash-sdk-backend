@@ -63,6 +63,7 @@ data class Adyen3DSResponseModel(
         const val FINGERPRINT_TOKEN = "threeds2.fingerprintToken"
         const val CHALLENGE_TOKEN = "threeds2.challengeToken"
         const val ACTION = "action"
+        const val DATA = "data"
         const val TYPE = "type"
         const val PAYMENT_METHOD_TYPE = "paymentMethodType"
         const val PA_REQ = "PaReq"
@@ -82,9 +83,9 @@ data class Adyen3DSResponseModel(
         jsonObject.getJsonObjectSafe(AUTHENTICATION)?.getStringSafe(CHALLENGE_TOKEN),
         jsonObject.getJsonObjectSafe(ACTION)?.getStringSafe(TYPE),
         jsonObject.getJsonObjectSafe(ACTION)?.getStringSafe(PAYMENT_METHOD_TYPE),
-        jsonObject.getJsonObjectSafe(ACTION)?.getStringSafe(PA_REQ),
-        jsonObject.getJsonObjectSafe(ACTION)?.getStringSafe(TERM_URL),
-        jsonObject.getJsonObjectSafe(ACTION)?.getStringSafe(MD),
+        jsonObject.getJsonObjectSafe(ACTION)?.getJsonObjectSafe(DATA)?.getStringSafe(PA_REQ),
+        jsonObject.getJsonObjectSafe(ACTION)?.getJsonObjectSafe(DATA)?.getStringSafe(TERM_URL),
+        jsonObject.getJsonObjectSafe(ACTION)?.getJsonObjectSafe(DATA)?.getStringSafe(MD),
         jsonObject.getJsonObjectSafe(ACTION)?.getStringSafe(URL),
         jsonObject.getStringSafe(REFUSAL_REASON),
         jsonObject.getStringSafe(ERROR_MESSAGE)
