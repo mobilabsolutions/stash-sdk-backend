@@ -283,7 +283,8 @@ class AdyenPsp(
                 storeDetails = true
             ),
             additionalData = AdyenAdditionalDataModel(
-                allow3DS2 = true
+                allow3DS2 = true,
+                executeThreeD = true.toString()
             ),
             channel = pspRegisterAliasRequestModel.aliasExtra?.channel,
             returnUrl = pspRegisterAliasRequestModel.aliasExtra?.ccConfig?.returnUrl,
@@ -401,7 +402,7 @@ class AdyenPsp(
                 CHALLENGE_SHOPPER_RESULT -> response.challengeToken
                 else -> null
             },
-            type = response.type,
+            actionType = response.actionType,
             paymentMethodType = response.paymentMethodType,
             paReq = response.paReq,
             termUrl = response.termUrl,

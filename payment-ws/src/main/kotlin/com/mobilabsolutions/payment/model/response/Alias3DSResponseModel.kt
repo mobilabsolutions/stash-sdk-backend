@@ -11,7 +11,7 @@ data class Alias3DSResponseModel(
     @ApiModelProperty(value = "Result code", example = "IdentifyShopper")
     val resultCode: String?,
 
-    @ApiModelProperty(value = "Fingerptint or challenge token", example = "eyJ0aH...")
+    @ApiModelProperty(value = "Fingerprint or challenge token", example = "eyJ0aH...")
     val token: String?,
 
     @ApiModelProperty(value = "Payment data", example = "eyJ0aH...")

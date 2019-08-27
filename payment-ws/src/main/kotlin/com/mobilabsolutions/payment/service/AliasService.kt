@@ -120,7 +120,7 @@ class AliasService(
             pspRegisterAliasResponse?.resultCode,
             pspRegisterAliasResponse?.token,
             pspRegisterAliasResponse?.paymentData,
-            pspRegisterAliasResponse?.type,
+            pspRegisterAliasResponse?.actionType,
             pspRegisterAliasResponse?.paymentMethodType,
             pspRegisterAliasResponse?.paReq,
             pspRegisterAliasResponse?.termUrl,
@@ -128,6 +128,15 @@ class AliasService(
             pspRegisterAliasResponse?.url)
     }
 
+    /**
+     * Verifies alias after the 3D Secure check
+     *
+     * @param publishableKey Publishable Key
+     * @param pspTestMode indicator whether is the test mode or not
+     * @param userAgent User Agent
+     * @param aliasId Alias ID
+     * @param verifyAliasRequest Verify Alias Request Model
+     */
     @Transactional
     fun verifyAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, verifyAliasRequest: VerifyAliasRequestModel): Alias3DSResponseModel {
         logger.info("Verifying alias {}", aliasId)
@@ -163,7 +172,7 @@ class AliasService(
         aliasRepository.updateAlias(pspResponse?.pspAlias, objectMapper.writeValueAsString(aliasExtra), aliasId, userAgent)
         return Alias3DSResponseModel(
             pspResponse?.resultCode, pspResponse?.token,
-            pspResponse?.paymentData, pspResponse?.type,
+            pspResponse?.paymentData, pspResponse?.actionType,
             pspResponse?.paymentMethodType,
             pspResponse?.paReq,
             pspResponse?.termUrl,

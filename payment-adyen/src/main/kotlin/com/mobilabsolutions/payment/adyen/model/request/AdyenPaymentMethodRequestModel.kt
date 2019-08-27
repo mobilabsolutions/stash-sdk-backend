@@ -13,7 +13,7 @@ import io.swagger.annotations.ApiModelProperty
  */
 @ApiModel(value = "Adyen Payment Method")
 data class AdyenPaymentMethodRequestModel(
-    @ApiModelProperty(value = "Adyen payment method type", example = "sepadirectdebit")
+    @ApiModelProperty(value = "Adyen payment method typr", example = "sepadirectdebit")
     val type: String?,
 
     @ApiModelProperty(value = "Account holder name", example = "M. Mustermann")

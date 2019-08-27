@@ -31,7 +31,7 @@ data class PspRegisterAliasResponseModel(
     val token: String?,
 
     @ApiModelProperty(value = "Action type", example = "threeDS2Fingerprint")
-    val type: String?,
+    val actionType: String?,
 
     @ApiModelProperty(value = "Payment method type", example = "scheme")
     val paymentMethodType: String?,

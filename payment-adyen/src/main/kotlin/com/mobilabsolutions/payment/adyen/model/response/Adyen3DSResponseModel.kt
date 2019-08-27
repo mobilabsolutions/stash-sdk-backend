@@ -30,7 +30,7 @@ data class Adyen3DSResponseModel(
     val challengeToken: String?,
 
     @ApiModelProperty(value = "Action type", example = "threeDS2Fingerprint")
-    val type: String?,
+    val actionType: String?,
 
     @ApiModelProperty(value = "Payment method type", example = "scheme")
     val paymentMethodType: String?,
@@ -65,8 +65,6 @@ data class Adyen3DSResponseModel(
         const val ACTION = "action"
         const val TYPE = "type"
         const val PAYMENT_METHOD_TYPE = "paymentMethodType"
-        const val REDIRECT = "redirect"
-        const val DATA = "data"
         const val PA_REQ = "PaReq"
         const val TERM_URL = "TermUrl"
         const val MD = "MD"
@@ -84,10 +82,10 @@ data class Adyen3DSResponseModel(
         jsonObject.getJsonObjectSafe(AUTHENTICATION)?.getStringSafe(CHALLENGE_TOKEN),
         jsonObject.getJsonObjectSafe(ACTION)?.getStringSafe(TYPE),
         jsonObject.getJsonObjectSafe(ACTION)?.getStringSafe(PAYMENT_METHOD_TYPE),
-        jsonObject.getJsonObjectSafe(REDIRECT)?.getJsonObjectSafe(DATA)?.getStringSafe(PA_REQ),
-        jsonObject.getJsonObjectSafe(REDIRECT)?.getJsonObjectSafe(DATA)?.getStringSafe(TERM_URL),
-        jsonObject.getJsonObjectSafe(REDIRECT)?.getJsonObjectSafe(DATA)?.getStringSafe(MD),
-        jsonObject.getJsonObjectSafe(REDIRECT)?.getJsonObjectSafe(DATA)?.getStringSafe(URL),
+        jsonObject.getJsonObjectSafe(ACTION)?.getStringSafe(PA_REQ),
+        jsonObject.getJsonObjectSafe(ACTION)?.getStringSafe(TERM_URL),
+        jsonObject.getJsonObjectSafe(ACTION)?.getStringSafe(MD),
+        jsonObject.getJsonObjectSafe(ACTION)?.getStringSafe(URL),
         jsonObject.getStringSafe(REFUSAL_REASON),
         jsonObject.getStringSafe(ERROR_MESSAGE)
     )
