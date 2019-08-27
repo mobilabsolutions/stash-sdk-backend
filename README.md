@@ -110,10 +110,6 @@ The Stash SDK uses a concept of idempotency for both aliases and transactions. T
 
 When a request comes with a new idempotent key, the key and the request body are stored in the Stash backend. If a second request comes with the same idempotent key and the same body, the original response is returned. However, if the second request has the same idempotent key as the original one, but a different body, an appropriate error will be returned.
 
-## Kafka
-
-The Stash Backend uses [Kafka](https://kafka.apache.org/) and WebSockets to handle the live data for the Dashboard home page.
-
 ## Feedback
 
 The Stash Backend is in active development. We welcome your feedback! Please write to us at payment-sdk@mobilabsolutions.com to report any issues or give feedback.

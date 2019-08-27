@@ -87,7 +87,6 @@ class TransactionServiceTest {
     private val correctPaymentData = PaymentDataRequestModel(1, "EUR", "reason")
     private val wrongPaymentData = PaymentDataRequestModel(2, "EUR", "reason")
     private val notifApiKey = "test-key"
-    private val kafkaTopicName = "test-topic"
     private val pspTransId = "325105132"
     private val pspResponse = "{\"pspTransactionId\":\"$pspTransId\",\"status\":\"SUCCESS\",\"customerId\":\"160624370\"}"
     private val pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"123\", \"key\" : \"123\"," +
