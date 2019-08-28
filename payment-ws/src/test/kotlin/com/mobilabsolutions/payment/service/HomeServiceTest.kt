@@ -125,8 +125,8 @@ class HomeServiceTest {
         Mockito.`when`(homeService.getPastDate(merchant, 6)).thenReturn(createdAtStart)
         val refunds = homeService.getRefundsOverview(merchantId)
 
-        Assertions.assertEquals(refunds.refunds[0].day, "Monday")
-        Assertions.assertEquals(refunds.refunds[0].amount, 100)
+        Assertions.assertEquals(refunds.refunds[0].day, "Thursday")
+        Assertions.assertEquals(refunds.refunds[0].amount, 0)
     }
 
     @Test
@@ -141,7 +141,7 @@ class HomeServiceTest {
         Mockito.`when`(homeService.getPastDate(merchant, 1)).thenReturn(createdAtStart)
         val refunds = homeService.getRefundsOverview(merchantId)
 
-        Assertions.assertEquals(refunds.refunds.size, 0)
+        Assertions.assertEquals(refunds.refunds.size, 7)
     }
 
     @Test
@@ -149,8 +149,8 @@ class HomeServiceTest {
         Mockito.`when`(homeService.getPastDate(merchant, 6)).thenReturn(createdAtStart)
         val transactions = homeService.getPaymentMethodsOverview(merchantId)
 
-        Assertions.assertEquals(transactions.transactions[0].day, "Monday")
-        Assertions.assertEquals(transactions.transactions[0].paymentMethodData[0].amount, 100)
+        Assertions.assertEquals(transactions.transactions[4].day, "Monday")
+        Assertions.assertEquals(transactions.transactions[4].paymentMethodData[0].amount, 100)
     }
 
     @Test
@@ -165,7 +165,7 @@ class HomeServiceTest {
         Mockito.`when`(homeService.getPastDate(merchant, 1)).thenReturn(createdAtStart)
         val transactions = homeService.getPaymentMethodsOverview(merchantId)
 
-        Assertions.assertEquals(transactions.transactions.size, 0)
+        Assertions.assertEquals(transactions.transactions.size, 7)
     }
 
     @Test
