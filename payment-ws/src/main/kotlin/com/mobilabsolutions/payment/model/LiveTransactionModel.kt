@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+*/
+
 package com.mobilabsolutions.payment.model
 
 import io.swagger.annotations.ApiModel

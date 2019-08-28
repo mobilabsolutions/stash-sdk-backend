@@ -13,7 +13,6 @@ import mu.KLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Component
-import javax.annotation.PostConstruct
 
 /**
  * Listens to postgres notifications, and sends them via WebSocket to the client.
@@ -25,28 +24,17 @@ class PgListener(
     private val merchantUserRepository: MerchantUserRepository,
     private val simpleMessagingTemplate: SimpMessagingTemplate,
     private val homeService: HomeService,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    @Value("\${postgres.db.port:}") private val port: String,
+    @Value("\${postgres.db.host:}") private val host: String,
+    @Value("\${postgres.db.name:}") private val database: String,
+    @Value("\${spring.datasource.username:}") private val username: String,
+    @Value("\${spring.datasource.password:}") private val password: String
 ) {
 
     companion object : KLogging()
 
-    @Value("\${postgres.db.port:}")
-    private lateinit var port: String
-
-    @Value("\${postgres.db.host:}")
-    private lateinit var host: String
-
-    @Value("\${postgres.db.name:}")
-    private lateinit var database: String
-
-    @Value("\${spring.datasource.username:}")
-    private lateinit var username: String
-
-    @Value("\${spring.datasource.password:}")
-    private lateinit var password: String
-
-    @PostConstruct
-    fun startListening() {
+    init {
         val options = PgPoolOptions()
             .setPort(port.toInt())
             .setHost(host)
@@ -56,16 +44,15 @@ class PgListener(
         val client = PgClient.pool(options)
         client.getConnection { ar1 ->
             if (ar1.succeeded()) {
-                println("CONNECTED")
                 val connection = ar1.result()
 
                 connection.notificationHandler { notification ->
                     run {
-                        println("Received ${notification.payload}")
+                        logger.info { "Listening to live data." }
                         val transaction = objectMapper.readValue(notification.payload, LiveTransactionModel::class.java)
                         val merchantUsers = merchantUserRepository.getMerchantUsers(transaction.merchantId!!)
                         merchantUsers.forEach { user ->
-                            simpleMessagingTemplate.convertAndSendToUser(user.email, "/topic/transactions", homeService.toLiveData(transaction, transaction.merchantId)!!)
+                            simpleMessagingTemplate.convertAndSendToUser(user.email, "/topic/transactions", homeService.toLiveData(transaction, transaction.merchantId))
                             println(homeService.toLiveData(transaction, transaction.merchantId))
                         }
                     }

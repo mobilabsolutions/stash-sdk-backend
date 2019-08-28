@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+*/
+
 package com.mobilabsolutions.payment.service
 
 import com.mobilabsolutions.payment.data.Merchant
@@ -170,7 +174,7 @@ class HomeService(
      * @return live data response model
      */
     @Transactional(readOnly = true)
-    fun toLiveData(transaction: LiveTransactionModel, merchantId: String): LiveDataResponseModel? {
+    fun toLiveData(transaction: LiveTransactionModel, merchantId: String): LiveDataResponseModel {
         logger.info("Sending the live data for merchant {}", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
 
@@ -203,7 +207,7 @@ class HomeService(
         }
     }
 
-    private fun getLiveDataForAuthAndCapturedTransaction(transaction: LiveTransactionModel, merchant: Merchant): LiveDataResponseModel? {
+    private fun getLiveDataForAuthAndCapturedTransaction(transaction: LiveTransactionModel, merchant: Merchant): LiveDataResponseModel {
         return when (transaction.status) {
             TransactionStatus.SUCCESS.name -> LiveDataResponseModel(
                 keyPerformance = KeyPerformanceModel(
@@ -219,7 +223,7 @@ class HomeService(
                 ),
                 notifications = null
             )
-            else -> null
+            else -> LiveDataResponseModel(null, null, null)
         }
     }
 
@@ -303,7 +307,7 @@ class HomeService(
         )
     }
 
-    private fun getLiveDataForChargebackReversedTransactions(transaction: LiveTransactionModel, merchant: Merchant): LiveDataResponseModel? {
+    private fun getLiveDataForChargebackReversedTransactions(transaction: LiveTransactionModel, merchant: Merchant): LiveDataResponseModel {
         return when (transaction.status) {
             TransactionStatus.SUCCESS.name -> LiveDataResponseModel(
                 keyPerformance = KeyPerformanceModel(
@@ -319,11 +323,11 @@ class HomeService(
                 ),
                 notifications = null
             )
-            else -> null
+            else -> LiveDataResponseModel(null, null, null)
         }
     }
 
-    private fun getLiveDataForOtherTransactions(transaction: LiveTransactionModel): LiveDataResponseModel? {
+    private fun getLiveDataForOtherTransactions(transaction: LiveTransactionModel): LiveDataResponseModel {
         return when (transaction.status) {
             TransactionStatus.SUCCESS.name -> LiveDataResponseModel(
                 keyPerformance = KeyPerformanceModel(
@@ -336,7 +340,7 @@ class HomeService(
                 todaysActivity = null,
                 notifications = null
             )
-            else -> null
+            else -> LiveDataResponseModel(null, null, null)
         }
     }
 
