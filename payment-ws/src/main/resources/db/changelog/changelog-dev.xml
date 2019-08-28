@@ -242,11 +242,11 @@
         </rollback>
     </changeSet>
     <changeSet author="veskovic.jovana" id="PSOS-477_2">
-        <createProcedure>
+        <sql>
             DROP TRIGGER IF EXISTS transaction_notify_insert ON transaction_record;
             CREATE TRIGGER transaction_notify_insert AFTER INSERT ON
             transaction_record FOR EACH ROW EXECUTE PROCEDURE transaction_insert_notify();
-        </createProcedure>
+        </sql>
         <rollback>
             DROP TRIGGER transaction_notify_insert ON transaction_record;
         </rollback>
