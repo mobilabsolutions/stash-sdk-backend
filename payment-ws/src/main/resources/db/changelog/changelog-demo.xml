@@ -225,5 +225,31 @@
         </addColumn>
         <addDefaultValue columnDataType="BOOLEAN" columnName="processed_notification" defaultValueBoolean="false" tableName="transaction_record"/>
     </changeSet>
+    <changeSet author="veskovic.jovana" id="PSOS-477_1">
+        <createProcedure>
+            CREATE OR REPLACE FUNCTION transaction_insert_notify()
+            RETURNS trigger
+            LANGUAGE plpgsql
+            AS $function$
+            BEGIN
+            PERFORM pg_notify('transaction_record', json_build_object('createdDate', new.created_date, 'transactionId', new.transaction_id,
+            'amount', new.amount, 'currencyId', new.currency_id, 'paymentMethod', new.payment_method, 'status', new.status, 'action', new.action,
+            'merchantId', new.merchant_id, 'notification', new.notification)::text);
+            RETURN NEW; END;$function$;
+        </createProcedure>
+        <rollback>
+            DROP FUNCTION transaction_insert_notify();
+        </rollback>
+    </changeSet>
+    <changeSet author="veskovic.jovana" id="PSOS-477_2">
+        <createProcedure>
+            DROP TRIGGER IF EXISTS transaction_notify_insert ON transaction_record;
+            CREATE TRIGGER transaction_notify_insert AFTER INSERT ON
+            transaction_record FOR EACH ROW EXECUTE PROCEDURE transaction_insert_notify();
+        </createProcedure>
+        <rollback>
+            DROP TRIGGER transaction_notify_insert ON transaction_record;
+        </rollback>
+    </changeSet>
 
 </databaseChangeLog>

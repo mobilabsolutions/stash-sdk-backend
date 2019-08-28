@@ -71,7 +71,7 @@ class PgListener(
                     }
                 }
 
-                connection.query("LISTEN transaction_record") { logger.info { "Subscribed to channel" } }
+                connection.query("LISTEN transaction_record") { logger.info { "Subscribed to the channel." } }
             }
         }
     }
