@@ -23,6 +23,7 @@ import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -199,21 +200,20 @@ class HomeService(
     }
 
     private fun initDailyMap(transactionsMap: LinkedHashMap<String, LinkedHashMap<String, Int>>) {
-        val currentDate = LocalDate.now()
-        val day = currentDate.dayOfWeek
-
         for (index in 6 downTo 0) {
-            transactionsMap[(day - index.toLong()).getDisplayName(TextStyle.FULL, Locale.getDefault())] = LinkedHashMap()
+            transactionsMap[(getCurrentDay() - index.toLong()).getDisplayName(TextStyle.FULL, Locale.getDefault())] = LinkedHashMap()
         }
     }
 
     private fun initRefundsMap(refundsMap: LinkedHashMap<String, Int>) {
-        val currentDate = LocalDate.now()
-        val day = currentDate.dayOfWeek
-
         for (index in 6 downTo 0) {
-            refundsMap[(day - index.toLong()).getDisplayName(TextStyle.FULL, Locale.getDefault())] = 0
+            refundsMap[(getCurrentDay() - index.toLong()).getDisplayName(TextStyle.FULL, Locale.getDefault())] = 0
         }
+    }
+
+    private fun getCurrentDay(): DayOfWeek {
+        return LocalDate.now().dayOfWeek
+
     }
 
     private fun toLiveData(transaction: Transaction): LiveDataResponseModel {
