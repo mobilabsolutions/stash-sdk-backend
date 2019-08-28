@@ -23,7 +23,6 @@ class NotificationService(
      * @param merchantNotifications the list of merchant notifications
      */
     fun sendNotificationToMerchant(webhookUrl: String, merchantNotifications: MutableList<MerchantNotificationsModel>): Int {
-        logger.info("Forwarding notifications to the following url: $webhookUrl")
         val notificationsObject = JSONObject()
         notificationsObject.put("notifications", JSONArray(objectMapper.writeValueAsString(merchantNotifications)))
         return khttp.put(

@@ -326,7 +326,6 @@ class TransactionService(
      */
     @Transactional
     fun processNotifications(merchantId: String) {
-        logger.info("Picking notifications for $merchantId")
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transactions = transactionRepository.getTransactionsByUnprocessedNotifications(merchantId)
         val merchantNotifications = transactions.asSequence().map { MerchantNotificationsModel(it.transactionId, it.status!!.name,
