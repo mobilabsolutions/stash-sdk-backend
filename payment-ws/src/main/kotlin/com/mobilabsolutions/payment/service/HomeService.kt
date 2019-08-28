@@ -23,8 +23,8 @@ import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.DayOfWeek
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
@@ -199,16 +199,20 @@ class HomeService(
     }
 
     private fun initDailyMap(transactionsMap: LinkedHashMap<String, LinkedHashMap<String, Int>>) {
-        val daysOfWeek = DayOfWeek.values()
-        for (day in daysOfWeek) {
-            transactionsMap[day.getDisplayName(TextStyle.FULL, Locale.getDefault())] = LinkedHashMap()
+        val currentDate = LocalDate.now()
+        val day = currentDate.dayOfWeek
+
+        for (index in 6 downTo 0) {
+            transactionsMap[(day - index.toLong()).getDisplayName(TextStyle.FULL, Locale.getDefault())] = LinkedHashMap()
         }
     }
 
     private fun initRefundsMap(refundsMap: LinkedHashMap<String, Int>) {
-        val daysOfWeek = DayOfWeek.values()
-        for (day in daysOfWeek) {
-            refundsMap[day.getDisplayName(TextStyle.FULL, Locale.getDefault())] = 0
+        val currentDate = LocalDate.now()
+        val day = currentDate.dayOfWeek
+
+        for (index in 6 downTo 0) {
+            refundsMap[(day - index.toLong()).getDisplayName(TextStyle.FULL, Locale.getDefault())] = 0
         }
     }
 
