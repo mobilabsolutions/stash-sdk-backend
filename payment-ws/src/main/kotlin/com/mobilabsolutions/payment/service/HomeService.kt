@@ -213,7 +213,6 @@ class HomeService(
 
     private fun getCurrentDay(): DayOfWeek {
         return LocalDate.now().dayOfWeek
-
     }
 
     private fun toLiveData(transaction: Transaction): LiveDataResponseModel {
