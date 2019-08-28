@@ -23,12 +23,15 @@ import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
@@ -118,6 +121,7 @@ class HomeService(
         val transactions = transactionRepository.getTransactionsForRefunds(merchantId, getPastDate(merchant, 6), null)
         val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
         val refundsMap = LinkedHashMap<String, Int>()
+        initRefundsMap(refundsMap)
         for (transaction in transactions) {
             val day = DateTimeFormatter.ofPattern(DAY_PATTERN).withZone(ZoneId.of(timezone)).format(transaction.createdDate)
             val amount = refundsMap[day] ?: 0
@@ -139,9 +143,9 @@ class HomeService(
         val transactions = transactionRepository.getTransactionsForPaymentMethods(merchantId, getPastDate(merchant, 6), null)
         val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
         val transactionsMap = LinkedHashMap<String, LinkedHashMap<String, Int>>()
+        initDailyMap(transactionsMap)
         for (transaction in transactions) {
             val day = DateTimeFormatter.ofPattern(DAY_PATTERN).withZone(ZoneId.of(timezone)).format(transaction.createdDate)
-            if (!transactionsMap.containsKey(day)) transactionsMap[day] = LinkedHashMap()
             val amount = transactionsMap[day]!![transaction.paymentMethod!!.name] ?: 0
             transactionsMap[day]!![transaction.paymentMethod!!.name] = amount + transaction.amount!!
         }
@@ -191,6 +195,20 @@ class HomeService(
     private fun initHourlyMap(transactionsMap: LinkedHashMap<String, Int>) {
         for (hour in 0..23) {
             transactionsMap[hour.toString()] = 0
+        }
+    }
+
+    private fun initDailyMap(transactionsMap: LinkedHashMap<String, LinkedHashMap<String, Int>>) {
+        val daysOfWeek = DayOfWeek.values()
+        for (day in daysOfWeek) {
+            transactionsMap[day.getDisplayName(TextStyle.FULL, Locale.getDefault())] = LinkedHashMap()
+        }
+    }
+
+    private fun initRefundsMap(refundsMap: LinkedHashMap<String, Int>) {
+        val daysOfWeek = DayOfWeek.values()
+        for (day in daysOfWeek) {
+            refundsMap[day.getDisplayName(TextStyle.FULL, Locale.getDefault())] = 0
         }
     }
 
