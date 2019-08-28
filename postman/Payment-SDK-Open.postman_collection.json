@@ -699,8 +699,68 @@
                         }
                     },
                     "response": []
+                },
+                {
+                    "name": "Save logo",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": {
+                                "token": "{{access_token}}"
+                            }
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "name": "Content-Type",
+                                "value": "application/x-www-form-urlencoded",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": ""
+                                }
+                            ]
+                        },
+                        "url": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/logo"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get logo",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": {
+                                "token": "{{access_token}}"
+                            }
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "im",
+                                "type": "text",
+                                "disabled": true
+                            },
+                            {
+                                "key": "Accept-Encoding",
+                                "value": "",
+                                "type": "text",
+                                "disabled": true
+                            }
+                        ],
+                        "url": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/logo"
+                    },
+                    "response": []
                 }
-			]
+            ]
 		},
 		{
 			"name": "OAuth",
@@ -1444,66 +1504,6 @@
                         "method": "GET",
                         "header": [],
                         "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/activity?date=:date"
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Save logo",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": {
-                                "token": "{{access_token}}"
-                            }
-                        },
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "name": "Content-Type",
-                                "value": "application/x-www-form-urlencoded",
-                                "type": "text"
-                            }
-                        ],
-                        "body": {
-                            "mode": "formdata",
-                            "formdata": [
-                                {
-                                    "key": "file",
-                                    "type": "file",
-                                    "src": ""
-                                }
-                            ]
-                        },
-                        "url": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/logo"
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Get logo",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": {
-                                "token": "{{access_token}}"
-                            }
-                        },
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "im",
-                                "type": "text",
-                                "disabled": true
-                            },
-                            {
-                                "key": "Accept-Encoding",
-                                "value": "",
-                                "type": "text",
-                                "disabled": true
-                            }
-                        ],
-                        "url": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/logo"
                     },
                     "response": []
                 },
