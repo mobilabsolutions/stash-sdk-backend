@@ -53,7 +53,6 @@ class PgListener(
                         val merchantUsers = merchantUserRepository.getMerchantUsers(transaction.merchantId!!)
                         merchantUsers.forEach { user ->
                             simpleMessagingTemplate.convertAndSendToUser(user.email, "/topic/transactions", homeService.toLiveData(transaction, transaction.merchantId))
-                            println(homeService.toLiveData(transaction, transaction.merchantId))
                         }
                     }
                 }
