@@ -4,12 +4,11 @@
 
 package com.mobilabsolutions.payment.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
-import com.mobilabsolutions.payment.model.LiveTransactionModel
 import io.reactiverse.pgclient.PgClient
 import io.reactiverse.pgclient.PgPoolOptions
 import mu.KLogging
+import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Component
@@ -24,7 +23,6 @@ class PgListener(
     private val merchantUserRepository: MerchantUserRepository,
     private val simpleMessagingTemplate: SimpMessagingTemplate,
     private val homeService: HomeService,
-    private val objectMapper: ObjectMapper,
     @Value("\${postgres.db.port:}") private val port: String,
     @Value("\${postgres.db.host:}") private val host: String,
     @Value("\${postgres.db.name:}") private val database: String,
@@ -32,7 +30,10 @@ class PgListener(
     @Value("\${spring.datasource.password:}") private val password: String
 ) {
 
-    companion object : KLogging()
+    companion object : KLogging() {
+        const val MERCHANT_ID = "merchant_id"
+        const val TRANSACTION_ID = "id"
+    }
 
     init {
         val options = PgPoolOptions()
@@ -49,10 +50,11 @@ class PgListener(
                 connection.notificationHandler { notification ->
                     run {
                         logger.info { "Listening to live data." }
-                        val transaction = objectMapper.readValue(notification.payload, LiveTransactionModel::class.java)
-                        val merchantUsers = merchantUserRepository.getMerchantUsers(transaction.merchantId!!)
+                        val transactionNotification = JSONObject(notification.payload)
+                        val merchantUsers = merchantUserRepository.getMerchantUsers(transactionNotification.getString(MERCHANT_ID))
                         merchantUsers.forEach { user ->
-                            simpleMessagingTemplate.convertAndSendToUser(user.email, "/topic/transactions", homeService.toLiveData(transaction, transaction.merchantId))
+                            simpleMessagingTemplate.convertAndSendToUser(user.email, "/topic/transactions",
+                                homeService.toLiveData(transactionNotification.getLong(TRANSACTION_ID)))
                         }
                     }
                 }

@@ -232,9 +232,7 @@
             LANGUAGE plpgsql
             AS $function$
             BEGIN
-            PERFORM pg_notify('transaction_record', json_build_object('createdDate', new.created_date, 'transactionId', new.transaction_id,
-            'amount', new.amount, 'currencyId', new.currency_id, 'paymentMethod', new.payment_method, 'status', new.status, 'action', new.action,
-            'merchantId', new.merchant_id, 'notification', new.notification)::text);
+            PERFORM pg_notify('transaction_record', json_build_object('id', new.id, 'merchant_id', new.merchant_id)::text);
             RETURN NEW; END;$function$;
         </createProcedure>
         <rollback>
