@@ -16,7 +16,7 @@
     <artifactId>payment-ws</artifactId>
 
     <properties>
-        <reactive.pg.version>0.11.4</reactive.pg.version>
+        <pg.client.version>3.8.1</pg.client.version>
     </properties>
 
     <dependencies>
@@ -118,9 +118,9 @@
             <artifactId>postgresql</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.reactiverse</groupId>
-            <artifactId>reactive-pg-client</artifactId>
-            <version>${reactive.pg.version}</version>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-pg-client</artifactId>
+            <version>${pg.client.version}</version>
         </dependency>
         <dependency>
             <groupId>org.liquibase</groupId>
