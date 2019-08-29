@@ -279,8 +279,27 @@
 						}
 					},
 					"response": []
-				}
-			]
+				},
+                {
+                    "name": "Create webhook credentials",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": {
+                                "token": "{{access_token}}"
+                            }
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"webhook\" : \"https://test.mblb.net/notifications\",\n  \"username\": \"notificator\",\n  \"password\": \"password\"\n}"
+                        },
+                        "url": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/notifications"
+                    },
+                    "response": []
+                }
+            ]
 		},
 		{
 			"name": "Merchant Api Key",
@@ -1508,21 +1527,67 @@
                     "response": []
                 },
                 {
-                    "name": "Create webhook credentials",
+                    "name": "Download Reports",
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": {
-                                "token": "{{access_token}}"
-                            }
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "",
+                                    "type": "string"
+                                }
+                            ]
                         },
-                        "method": "POST",
+                        "method": "GET",
                         "header": [],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"webhook\" : \"https://test.mblb.net/notifications\",\n  \"username\": \"notificator\",\n  \"password\": \"password\"\n}"
+                            "raw": ""
                         },
-                        "url": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/notifications"
+                        "url": {
+                            "raw": "{{wsEndpoint}}/api/v1/home/mobilab/reports?reportType:=reportType&fileName=:fileName&createdAtStart=:createdAtStart&createdAtEnd=:createdAtEnd&paymentMethod=:paymentMethod&status=:status&text=:text",
+                            "host": [
+                                "{{wsEndpoint}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "home",
+                                "{Merchant-Id}",
+                                "reports"
+                            ],
+                            "query": [
+                                {
+                                    "key": "reportType",
+                                    "value": "{reportType}"
+                                },
+                                {
+                                    "key": "fileName",
+                                    "value": "fileName"
+                                },
+                                {
+                                    "key": "createdAtStart",
+                                    "value": "{CreatedAtStart}"
+                                },
+                                {
+                                    "key": "createdAtEnd",
+                                    "value": "{CreatedAtEnd}"
+                                },
+                                {
+                                    "key": "paymentMethod",
+                                    "value": "{PaymentMethod}"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "{Status}"
+                                },
+                                {
+                                    "key": "text",
+                                    "value": "{Text}"
+                                }
+                            ]
+                        }
                     },
                     "response": []
                 }
