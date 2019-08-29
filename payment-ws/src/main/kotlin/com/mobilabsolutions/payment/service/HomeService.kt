@@ -98,7 +98,7 @@ class HomeService(
         logger.info("Getting notifications for merchant {}", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        val transactions = transactionRepository.getTransactionsWithNotification(merchantId, getPastDate(merchant, 1), null)
+        val transactions = transactionRepository.getTransactionsWithNotification(merchantId, getPastDate(merchant, 5), null)
         val notifications = transactions.map {
             when (it.action) {
                 TransactionAction.REFUND -> NotificationModel(it.paymentMethod?.name, REFUND_NOTIFICATION.format("${it.amount}${it.currencyId}"))
@@ -106,7 +106,7 @@ class HomeService(
                 else -> null
             }
         }
-        return NotificationsResponseModel(notifications, getTransactionsForYesterday(merchant))
+        return NotificationsResponseModel(notifications, getTransactionsForLastFiveDays(merchant))
     }
 
     /**
@@ -334,11 +334,11 @@ class HomeService(
         return "$hour:$minute:$second"
     }
 
-    private fun getTransactionsForYesterday(merchant: Merchant): Int? {
+    private fun getTransactionsForLastFiveDays(merchant: Merchant): Int? {
         val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
-        val yesterdayBeginOfDay = dateFormatter.format(LocalDateTime.now().minusDays(1).with(LocalTime.MIN).atZone(ZoneId.of(timezone)))
-        val yesterdayEndOfDay = dateFormatter.format(LocalDateTime.now().minusDays(1).with(LocalTime.MAX).atZone(ZoneId.of(timezone)))
-        val transactions = transactionRepository.getTransactionsByMerchantId(merchant.id!!, yesterdayBeginOfDay, yesterdayEndOfDay)
+        val startDate = dateFormatter.format(LocalDateTime.now().minusDays(5).with(LocalTime.MIN).atZone(ZoneId.of(timezone)))
+        val endDate = dateFormatter.format(LocalDateTime.now().with(LocalTime.MIN).atZone(ZoneId.of(timezone)))
+        val transactions = transactionRepository.getTransactionsByMerchantId(merchant.id!!, startDate, endDate)
         return transactions.size
     }
 }
