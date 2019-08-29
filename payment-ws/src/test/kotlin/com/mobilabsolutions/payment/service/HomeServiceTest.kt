@@ -9,7 +9,6 @@ import com.mobilabsolutions.payment.data.enum.ReportType
 import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
-import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.server.commons.exception.ApiException
 import org.junit.jupiter.api.Assertions
@@ -25,7 +24,6 @@ import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
-import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.mock.web.MockHttpServletResponse
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -105,12 +103,6 @@ class HomeServiceTest {
     @Mock
     private lateinit var transactionRepository: TransactionRepository
 
-    @Mock
-    private lateinit var merchantUserRepository: MerchantUserRepository
-
-    @Mock
-    private lateinit var simpleMessagingTemplate: SimpMessagingTemplate
-
     @BeforeAll
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
@@ -129,8 +121,7 @@ class HomeServiceTest {
         Mockito.`when`(homeService.getPastDate(merchant, 6)).thenReturn(createdAtStart)
         val refunds = homeService.getRefundsOverview(merchantId)
 
-        Assertions.assertEquals(refunds.refunds[0].day, "Thursday")
-        Assertions.assertEquals(refunds.refunds[0].amount, 0)
+        Assertions.assertEquals(refunds.refunds.size, 7)
     }
 
     @Test
@@ -153,8 +144,7 @@ class HomeServiceTest {
         Mockito.`when`(homeService.getPastDate(merchant, 6)).thenReturn(createdAtStart)
         val transactions = homeService.getPaymentMethodsOverview(merchantId)
 
-        Assertions.assertEquals(transactions.transactions[4].day, "Monday")
-        Assertions.assertEquals(transactions.transactions[4].paymentMethodData[0].amount, 100)
+        Assertions.assertEquals(transactions.transactions.size, 7)
     }
 
     @Test
