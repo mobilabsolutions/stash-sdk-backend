@@ -253,8 +253,10 @@ class HomeService(
                 time = getTransactionTime(transaction),
                 amount = transaction.amount
             ),
-            notifications = null,
-            nrOfTransaction = 1
+            notifications = NotificationsModel(
+                notification = null,
+                nrOfTransactions = 1
+            )
         )
     }
 
@@ -277,11 +279,10 @@ class HomeService(
                         paymentMethod = transaction.paymentMethod?.name,
                         content = REFUND_NOTIFICATION.format("${transaction.amount}${transaction.currencyId}")
                     ),
-                    nrOfTransactions = 0
+                    nrOfTransactions = 1
                 )
                 else -> null
-            },
-            nrOfTransaction = 1
+            }
         )
     }
 
@@ -304,11 +305,10 @@ class HomeService(
                         paymentMethod = transaction.paymentMethod?.name,
                         content = CHARGEBACK_NOTIFICATION.format("${transaction.amount}${transaction.currencyId}")
                     ),
-                    nrOfTransactions = 0
+                    nrOfTransactions = 1
                 )
                 else -> null
-            },
-            nrOfTransaction = 1
+            }
         )
     }
 
@@ -325,8 +325,10 @@ class HomeService(
                 time = getTransactionTime(transaction),
                 amount = transaction.amount
             ),
-            notifications = null,
-            nrOfTransaction = 1
+            notifications = NotificationsModel(
+                notification = null,
+                nrOfTransactions = 1
+            )
         )
     }
 
@@ -340,8 +342,10 @@ class HomeService(
                 nrOfChargebacks = 0
             ),
             todaysActivity = null,
-            notifications = null,
-            nrOfTransaction = 1
+            notifications = NotificationsModel(
+                notification = null,
+                nrOfTransactions = 1
+            )
         )
     }
 
