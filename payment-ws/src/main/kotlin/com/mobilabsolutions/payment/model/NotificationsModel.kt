@@ -12,5 +12,5 @@ data class NotificationsModel(
     val notification: NotificationModel?,
 
     @ApiModelProperty(value = "The number of transactions from yesterday", example = "20")
-    val nrOfransactions: Int?
+    val nrOfTransactions: Int?
 )

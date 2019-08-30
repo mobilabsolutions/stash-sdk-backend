@@ -178,7 +178,7 @@ class HomeServiceTest {
 
     @Test
     fun `get notifications`() {
-        Mockito.`when`(homeService.getPastDate(merchant, 1)).thenReturn(createdAtStart)
+        Mockito.`when`(homeService.getPastDate(merchant, 7)).thenReturn(createdAtStart)
         val notifications = homeService.getNotifications(merchantId)
 
         Assertions.assertEquals(notifications.notifications.size, 1)
