@@ -5,7 +5,6 @@ import com.mobilabsolutions.payment.data.Merchant
 import com.mobilabsolutions.payment.data.Transaction
 import com.mobilabsolutions.payment.data.enum.PaymentMethod
 import com.mobilabsolutions.payment.data.enum.PaymentServiceProvider
-import com.mobilabsolutions.payment.data.enum.ReportType
 import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
@@ -26,7 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
 import org.springframework.messaging.simp.SimpMessagingTemplate
-import org.springframework.mock.web.MockHttpServletResponse
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -93,8 +91,6 @@ class HomeServiceTest {
         pspResponse = null
     )
 
-    private val response = MockHttpServletResponse()
-
     @Spy
     @InjectMocks
     private lateinit var homeService: HomeService
@@ -118,7 +114,7 @@ class HomeServiceTest {
         Mockito.`when`(merchantRepository.getMerchantById(merchantId)).thenReturn(merchant)
         Mockito.`when`(merchantRepository.getMerchantById(incorrectMerchantId)).thenReturn(null)
         Mockito.`when`(transactionRepository.getTransactionsForPaymentMethods(merchantId, createdAtStart, null)).thenReturn(listOf(transaction))
-        Mockito.`when`(transactionRepository.getTransactionsForRefunds(merchantId, createdAtStart, null)).thenReturn(listOf(transaction))
+        Mockito.`when`(transactionRepository.getTransactionsForRefunds(merchantId, createdAtStart)).thenReturn(listOf(transaction))
         Mockito.`when`(transactionRepository.getTransactionsByMerchantId(merchantId, createdAtStart, null)).thenReturn(listOf(transaction, capturedTransaction))
         Mockito.`when`(transactionRepository.getTransactionsWithNotification(merchantId, createdAtStart, null)).thenReturn(listOf(transaction))
         Mockito.`when`(transactionRepository.getTransactionsForPaymentMethods(merchantId, createdAtStart, endDate)).thenReturn(listOf(transaction))
@@ -216,18 +212,6 @@ class HomeServiceTest {
     fun `get selected date activity with incorrect merchant id`() {
         Assertions.assertThrows(ApiException::class.java) {
             homeService.getSelectedDateActivity(incorrectMerchantId, createdAtStart)
-        }
-    }
-
-    @Test
-    fun `export dashboard transactions to csv successfully`() {
-        homeService.downloadReports(response, ReportType.OVERVIEW.name, merchantId, null, null, null, null, null)
-    }
-
-    @Test
-    fun `export dashboard transactions to csv with incorrect merchant id`() {
-        Assertions.assertThrows(ApiException::class.java) {
-            homeService.downloadReports(response, ReportType.OVERVIEW.name, incorrectMerchantId, null, null, null, null, null)
         }
     }
 }

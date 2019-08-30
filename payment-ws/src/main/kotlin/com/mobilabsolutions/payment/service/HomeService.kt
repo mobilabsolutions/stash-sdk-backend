@@ -2,12 +2,10 @@ package com.mobilabsolutions.payment.service
 
 import com.mobilabsolutions.payment.data.Merchant
 import com.mobilabsolutions.payment.data.Transaction
-import com.mobilabsolutions.payment.data.enum.ReportType
 import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
-import com.mobilabsolutions.payment.model.DashboardReportModel
 import com.mobilabsolutions.payment.model.KeyPerformanceModel
 import com.mobilabsolutions.payment.model.NotificationModel
 import com.mobilabsolutions.payment.model.NotificationsModel
@@ -25,8 +23,6 @@ import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.supercsv.io.CsvBeanWriter
-import org.supercsv.prefs.CsvPreference
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
@@ -36,7 +32,6 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.time.temporal.ChronoUnit
-import javax.servlet.http.HttpServletResponse
 import java.util.Locale
 
 /**
@@ -57,8 +52,6 @@ class HomeService(
         private const val CHARGEBACK_NOTIFICATION = "Chargeback %s"
 
         private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_UTC)
-
-        val csvHeaders = arrayOf("no", "id", "initialAmount", "initialCreatedDate", "reason", "customerId", "status", "paymentMethod", "amount", "createdDate")
     }
 
     /**
@@ -126,7 +119,7 @@ class HomeService(
     fun getRefundsOverview(merchantId: String): RefundOverviewResponseModel {
         logger.info("Getting refunded transactions for merchant {}", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        val transactions = transactionRepository.getTransactionsForRefunds(merchantId, getPastDate(merchant, 6), null)
+        val transactions = transactionRepository.getTransactionsForRefunds(merchantId, getPastDate(merchant, 6))
         val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
         val refundsMap = LinkedHashMap<String, Int>()
         initRefundsMap(refundsMap)
@@ -198,51 +191,6 @@ class HomeService(
             transactionsMap[hour] = amount.plus(transaction.amount!!)
         }
         return SelectedDateActivityResponseModel(transactionsMap)
-    }
-
-    /**
-     * Download transaction specific reports on the dashboard in CSV format
-     *
-     * @param response Response
-     * @param reportType Report type
-     * @param merchantId Merchant ID
-     * @param createdAtStart Creation start date
-     * @param createdAtEnd Creation end date
-     * @param paymentMethod Payment method
-     * @param status Status
-     * @param text Text
-     */
-    @Transactional(readOnly = true)
-    fun downloadReports(response: HttpServletResponse, reportType: String?, merchantId: String, createdAtStart: String?, createdAtEnd: String?, paymentMethod: String?, status: String?, text: String?) {
-        logger.info("Downloading report of type {} for merchant {}", merchantId)
-        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-
-        val transactions = when (reportType) {
-            ReportType.OVERVIEW.name -> transactionRepository.getTransactionsOverview(merchantId, getPastDate(merchant, 30), null)
-            ReportType.REFUND.name -> transactionRepository.getTransactionsForRefunds(merchantId, getPastDate(merchant, 30), null)
-            ReportType.CHARGEBACK.name -> transactionRepository.getTransactionsForChargebacks(merchantId, getPastDate(merchant, 30), null)
-            else -> transactionRepository.getCustomTransactions(merchantId, createdAtStart, createdAtEnd, paymentMethod, status, text)
-        }
-
-        CsvBeanWriter(response.writer, CsvPreference.STANDARD_PREFERENCE).use { csvWriter ->
-            csvWriter.writeHeader(*csvHeaders)
-            for (transaction in transactions) {
-                val originalTransaction = transactionRepository.getOriginalTransaction(merchantId, transaction.transactionId!!)
-                val currentTransaction = DashboardReportModel(
-                    csvWriter.lineNumber,
-                    transaction.transactionId,
-                    if (originalTransaction != null) originalTransaction.amount!!.toDouble().div(100).toString() else "-",
-                    if (originalTransaction != null) originalTransaction.createdDate.toString() else "-",
-                    transaction.reason,
-                    transaction.merchantCustomerId,
-                    transaction.status!!.name,
-                    transaction.paymentMethod!!.name,
-                    transaction.amount!!.toDouble().div(100).toString(),
-                    transaction.createdDate.toString()
-                )
-                csvWriter.write(currentTransaction, *csvHeaders)
-            }
-        }
     }
 
     private fun initHourlyMap(transactionsMap: LinkedHashMap<String, Int>) {
