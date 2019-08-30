@@ -22,6 +22,9 @@ import java.text.SimpleDateFormat
 import javax.servlet.http.HttpServletResponse
 import java.util.Date
 
+/**
+ * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
+ */
 @RestController
 @RequestMapping(BASE_HOME_URL)
 @Validated

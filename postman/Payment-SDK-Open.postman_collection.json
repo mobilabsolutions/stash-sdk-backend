@@ -1525,9 +1525,14 @@
                         "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/activity?date=:date"
                     },
                     "response": []
-                },
+                }
+            ]
+        },
+        {
+            "name": "Reports",
+            "item": [
                 {
-                    "name": "Download Reports",
+                    "name": "Download Default Reports",
                     "request": {
                         "auth": {
                             "type": "bearer",
@@ -1546,16 +1551,16 @@
                             "raw": ""
                         },
                         "url": {
-                            "raw": "{{wsEndpoint}}/api/v1/home/mobilab/reports?reportType:=reportType&fileName=:fileName&createdAtStart=:createdAtStart&createdAtEnd=:createdAtEnd&paymentMethod=:paymentMethod&status=:status&text=:text",
+                            "raw": "{{wsEndpoint}}/api/v1/report/:Merchant-Id/default?reportType:=reportType&fileName=:fileName",
                             "host": [
                                 "{{wsEndpoint}}"
                             ],
                             "path": [
                                 "api",
                                 "v1",
-                                "home",
+                                "report",
                                 "{Merchant-Id}",
-                                "reports"
+                                "default"
                             ],
                             "query": [
                                 {
@@ -1565,26 +1570,6 @@
                                 {
                                     "key": "fileName",
                                     "value": "fileName"
-                                },
-                                {
-                                    "key": "createdAtStart",
-                                    "value": "{CreatedAtStart}"
-                                },
-                                {
-                                    "key": "createdAtEnd",
-                                    "value": "{CreatedAtEnd}"
-                                },
-                                {
-                                    "key": "paymentMethod",
-                                    "value": "{PaymentMethod}"
-                                },
-                                {
-                                    "key": "status",
-                                    "value": "{Status}"
-                                },
-                                {
-                                    "key": "text",
-                                    "value": "{Text}"
                                 }
                             ]
                         }

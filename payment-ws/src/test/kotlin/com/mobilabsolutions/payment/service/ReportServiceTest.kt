@@ -19,6 +19,9 @@ import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
 import org.springframework.mock.web.MockHttpServletResponse
 
+/**
+ * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
+ */
 @ExtendWith(MockitoExtension::class)
 @MockitoSettings(strictness = Strictness.STRICT_STUBS)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
