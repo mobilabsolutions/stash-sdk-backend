@@ -53,6 +53,7 @@ class ReportService(
         HomeService.logger.info("Downloading report of type {} for merchant {}", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
 
+        val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
         val transactions = when (reportType) {
             ReportType.OVERVIEW.name -> transactionRepository.getTransactionsOverview(merchantId, getPastDate(merchant, 30))
             ReportType.REFUND.name -> transactionRepository.getTransactionsForRefunds(merchantId, getPastDate(merchant, 30))
@@ -67,13 +68,13 @@ class ReportService(
                     csvWriter.lineNumber,
                     transaction.transactionId,
                     if (originalTransaction != null) originalTransaction.amount!!.toDouble().div(100).toString() else "-",
-                    if (originalTransaction != null) originalTransaction.createdDate.toString() else "-",
+                    if (originalTransaction != null) originalTransaction.createdDate!!.atZone(ZoneId.of(timezone)).toString() else "-",
                     transaction.reason,
                     transaction.merchantCustomerId,
                     mapStatus(transaction.status!!.name, transaction.action!!.name),
                     transaction.paymentMethod!!.name,
                     transaction.amount!!.toDouble().div(100).toString(),
-                    transaction.createdDate.toString()
+                    transaction.createdDate!!.atZone(ZoneId.of(timezone)).toString()
                 )
                 csvWriter.write(currentTransaction, *csvHeaders)
             }

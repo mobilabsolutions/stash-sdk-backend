@@ -1,6 +1,6 @@
 package com.mobilabsolutions.payment.controller
 
-import com.mobilabsolutions.payment.controller.ReportController.Companion.BASE_HOME_URL
+import com.mobilabsolutions.payment.controller.ReportController.Companion.BASE_REPORT_URL
 import com.mobilabsolutions.payment.data.enum.ReportType
 import com.mobilabsolutions.payment.service.ReportService
 import com.mobilabsolutions.payment.validation.ReportTypeValidator
@@ -26,13 +26,13 @@ import java.util.Date
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
 @RestController
-@RequestMapping(BASE_HOME_URL)
+@RequestMapping(BASE_REPORT_URL)
 @Validated
 class ReportController(
     private val reportService: ReportService
 ) {
     companion object {
-        const val BASE_HOME_URL = "report"
+        const val BASE_REPORT_URL = "report"
         const val EXPORT_REPORT_URL = "/{Merchant-Id}/default"
 
         const val CSV_CONTENT_TYPE = "text/csv"
