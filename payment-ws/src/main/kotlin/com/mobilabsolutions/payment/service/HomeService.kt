@@ -3,6 +3,7 @@ package com.mobilabsolutions.payment.service
 import com.mobilabsolutions.payment.data.Merchant
 import com.mobilabsolutions.payment.data.Transaction
 import com.mobilabsolutions.payment.data.enum.TransactionAction
+import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
@@ -48,7 +49,7 @@ class HomeService(
     companion object : KLogging() {
         private const val DATE_FORMAT_UTC = "yyyy-MM-dd'T'HH:mm:ss'Z'"
         private const val DAY_PATTERN = "EEEE"
-        private const val REFUND_NOTIFICATION = "Refunded %s"
+        private const val REFUND_NOTIFICATION = "refund of %s"
         private const val CHARGEBACK_NOTIFICATION = "Chargeback %s"
 
         private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_UTC)
@@ -98,15 +99,22 @@ class HomeService(
         logger.info("Getting notifications for merchant {}", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        val transactions = transactionRepository.getTransactionsWithNotification(merchantId, getPastDate(merchant, 1), null)
+        val transactions = transactionRepository.getTransactionsWithNotification(merchantId, getPastDate(merchant, 7), null)
+        val transactionsMap = LinkedHashMap<String, Int>()
+        initNotificationsMap(transactionsMap)
         val notifications = transactions.map {
             when (it.action) {
-                TransactionAction.REFUND -> NotificationModel(it.paymentMethod?.name, REFUND_NOTIFICATION.format("${it.amount}${it.currencyId}"))
+                TransactionAction.REFUND ->
+                    when (it.status) {
+                        TransactionStatus.SUCCESS -> NotificationModel(it.paymentMethod?.name, "Successful " + REFUND_NOTIFICATION.format("${it.amount!!.toDouble().div(100)}${it.currencyId}"))
+                        TransactionStatus.FAIL -> NotificationModel(it.paymentMethod?.name, "Failed " + REFUND_NOTIFICATION.format("${it.amount!!.toDouble().div(100)}${it.currencyId}"))
+                        else -> null
+                    }
                 TransactionAction.CHARGEBACK -> NotificationModel(it.paymentMethod?.name, CHARGEBACK_NOTIFICATION.format("${it.amount}${it.currencyId}"))
                 else -> null
             }
         }
-        return NotificationsResponseModel(notifications, getTransactionsForYesterday(merchant))
+        return NotificationsResponseModel(notifications, getTransactionsForLastWeek(merchant, transactionsMap))
     }
 
     /**
@@ -211,6 +219,12 @@ class HomeService(
         }
     }
 
+    private fun initNotificationsMap(transactionsMap: LinkedHashMap<String, Int>) {
+        for (index in 6 downTo 0) {
+            transactionsMap[(getCurrentDay() - index.toLong()).getDisplayName(TextStyle.FULL, Locale.getDefault())] = 0
+        }
+    }
+
     private fun getCurrentDay(): DayOfWeek {
         return LocalDate.now().dayOfWeek
     }
@@ -239,7 +253,10 @@ class HomeService(
                 time = getTransactionTime(transaction),
                 amount = transaction.amount
             ),
-            notifications = null
+            notifications = NotificationsModel(
+                notification = null,
+                nrOfTransactions = 1
+            )
         )
     }
 
@@ -262,7 +279,7 @@ class HomeService(
                         paymentMethod = transaction.paymentMethod?.name,
                         content = REFUND_NOTIFICATION.format("${transaction.amount}${transaction.currencyId}")
                     ),
-                    nrOfransactions = 0
+                    nrOfTransactions = 1
                 )
                 else -> null
             }
@@ -288,7 +305,7 @@ class HomeService(
                         paymentMethod = transaction.paymentMethod?.name,
                         content = CHARGEBACK_NOTIFICATION.format("${transaction.amount}${transaction.currencyId}")
                     ),
-                    nrOfransactions = 0
+                    nrOfTransactions = 1
                 )
                 else -> null
             }
@@ -308,7 +325,10 @@ class HomeService(
                 time = getTransactionTime(transaction),
                 amount = transaction.amount
             ),
-            notifications = null
+            notifications = NotificationsModel(
+                notification = null,
+                nrOfTransactions = 1
+            )
         )
     }
 
@@ -322,7 +342,10 @@ class HomeService(
                 nrOfChargebacks = 0
             ),
             todaysActivity = null,
-            notifications = null
+            notifications = NotificationsModel(
+                notification = null,
+                nrOfTransactions = 1
+            )
         )
     }
 
@@ -334,11 +357,15 @@ class HomeService(
         return "$hour:$minute:$second"
     }
 
-    private fun getTransactionsForYesterday(merchant: Merchant): Int? {
+    private fun getTransactionsForLastWeek(merchant: Merchant, transactionsMap: LinkedHashMap<String, Int>): LinkedHashMap<String, Int> {
         val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
-        val yesterdayBeginOfDay = dateFormatter.format(LocalDateTime.now().minusDays(1).with(LocalTime.MIN).atZone(ZoneId.of(timezone)))
-        val yesterdayEndOfDay = dateFormatter.format(LocalDateTime.now().minusDays(1).with(LocalTime.MAX).atZone(ZoneId.of(timezone)))
-        val transactions = transactionRepository.getTransactionsByMerchantId(merchant.id!!, yesterdayBeginOfDay, yesterdayEndOfDay)
-        return transactions.size
+        val startDate = dateFormatter.format(LocalDateTime.now().minusDays(7).with(LocalTime.MIN).atZone(ZoneId.of(timezone)))
+        val endDate = dateFormatter.format(LocalDateTime.now().with(LocalTime.MIN).atZone(ZoneId.of(timezone)))
+        val transactions = transactionRepository.getTransactionsByMerchantId(merchant.id!!, startDate, endDate)
+        for (transaction in transactions) {
+            val day = DateTimeFormatter.ofPattern(DAY_PATTERN).withZone(ZoneId.of(timezone)).format(transaction.createdDate)
+            transactionsMap.computeIfPresent(day) { _, v -> v + 1 }
+        }
+        return transactionsMap
     }
 }
