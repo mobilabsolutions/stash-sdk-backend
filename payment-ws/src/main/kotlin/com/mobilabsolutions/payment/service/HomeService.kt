@@ -106,8 +106,8 @@ class HomeService(
             when (it.action) {
                 TransactionAction.REFUND ->
                     when (it.status) {
-                        TransactionStatus.SUCCESS -> NotificationModel(it.paymentMethod?.name, "Successful " + REFUND_NOTIFICATION.format("${it.amount}${it.currencyId}"))
-                        TransactionStatus.FAIL -> NotificationModel(it.paymentMethod?.name, "Failed " + REFUND_NOTIFICATION.format("${it.amount}${it.currencyId}"))
+                        TransactionStatus.SUCCESS -> NotificationModel(it.paymentMethod?.name, "Successful " + REFUND_NOTIFICATION.format("${it.amount!!.toDouble().div(100)}${it.currencyId}"))
+                        TransactionStatus.FAIL -> NotificationModel(it.paymentMethod?.name, "Failed " + REFUND_NOTIFICATION.format("${it.amount!!.toDouble().div(100)}${it.currencyId}"))
                         else -> null
                     }
                 TransactionAction.CHARGEBACK -> NotificationModel(it.paymentMethod?.name, CHARGEBACK_NOTIFICATION.format("${it.amount}${it.currencyId}"))
@@ -253,7 +253,8 @@ class HomeService(
                 time = getTransactionTime(transaction),
                 amount = transaction.amount
             ),
-            notifications = null
+            notifications = null,
+            nrOfTransaction = 1
         )
     }
 
@@ -276,10 +277,11 @@ class HomeService(
                         paymentMethod = transaction.paymentMethod?.name,
                         content = REFUND_NOTIFICATION.format("${transaction.amount}${transaction.currencyId}")
                     ),
-                    nrOfransactions = 0
+                    nrOfTransactions = 0
                 )
                 else -> null
-            }
+            },
+            nrOfTransaction = 1
         )
     }
 
@@ -302,10 +304,11 @@ class HomeService(
                         paymentMethod = transaction.paymentMethod?.name,
                         content = CHARGEBACK_NOTIFICATION.format("${transaction.amount}${transaction.currencyId}")
                     ),
-                    nrOfransactions = 0
+                    nrOfTransactions = 0
                 )
                 else -> null
-            }
+            },
+            nrOfTransaction = 1
         )
     }
 
@@ -322,7 +325,8 @@ class HomeService(
                 time = getTransactionTime(transaction),
                 amount = transaction.amount
             ),
-            notifications = null
+            notifications = null,
+            nrOfTransaction = 1
         )
     }
 
@@ -336,7 +340,8 @@ class HomeService(
                 nrOfChargebacks = 0
             ),
             todaysActivity = null,
-            notifications = null
+            notifications = null,
+            nrOfTransaction = 1
         )
     }
 

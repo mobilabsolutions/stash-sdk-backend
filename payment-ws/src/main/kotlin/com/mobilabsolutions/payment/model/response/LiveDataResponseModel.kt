@@ -18,5 +18,8 @@ data class LiveDataResponseModel(
     val todaysActivity: TodaysActivityModel?,
 
     @ApiModelProperty(value = "Notifications")
-    val notifications: NotificationsModel?
+    val notifications: NotificationsModel?,
+
+    @ApiModelProperty(value = "Number of transactions")
+    val nrOfTransaction: Int?
 )
