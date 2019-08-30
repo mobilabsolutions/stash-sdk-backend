@@ -50,7 +50,6 @@ class PgListener(
             if (connection.succeeded()) {
                 subscriber.channel(POSTGRES_CHANNEL).handler { payload ->
                     logger.info { "Listening to live data." }
-                    println("Received $payload")
                     val transactionNotification = JSONObject(payload)
                     val merchantUsers = merchantUserRepository.getMerchantUsers(transactionNotification.getString(MERCHANT_ID))
                     merchantUsers.forEach { user ->
