@@ -49,11 +49,15 @@ class PgListener(
         subscriber.connect { connection ->
             if (connection.succeeded()) {
                 subscriber.channel(POSTGRES_CHANNEL).handler { payload ->
-                    logger.info { "Listening to live data." }
-                    val transactionNotification = JSONObject(payload)
-                    val merchantUsers = merchantUserRepository.getMerchantUsers(transactionNotification.getString(MERCHANT_ID))
-                    merchantUsers.forEach { user ->
-                        simpleMessagingTemplate.convertAndSendToUser(user.email, TOPIC_NAME, homeService.toLiveData(transactionNotification.getLong(TRANSACTION_ID)))
+                    try {
+                        logger.info { "Listening to live data." }
+                        val transactionNotification = JSONObject(payload)
+                        val merchantUsers = merchantUserRepository.getMerchantUsers(transactionNotification.getString(MERCHANT_ID))
+                        merchantUsers.forEach { user ->
+                            simpleMessagingTemplate.convertAndSendToUser(user.email, TOPIC_NAME, homeService.toLiveData(transactionNotification.getLong(TRANSACTION_ID)))
+                        }
+                    } catch (exception: Exception) {
+                        logger.info("An error occurred while listening to live data. Message {}", exception.message)
                     }
                 }
             }

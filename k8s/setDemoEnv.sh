@@ -25,7 +25,6 @@ export KUBE_NOTIF_DEPLOYMENT_SQL_INSTANCE_NAME="payment-backend-demo"
 # ws configmap variables
 export KUBE_WS_CONFIGMAP_JAVA_OPTS="-Xmx300m -XX:+ExitOnOutOfMemoryError"
 export KUBE_WS_CONFIGMAP_SPRING_PROFILE="demo"
-export KUBE_WS_CONFIGMAP_SQL_JDBC_URL="jdbc:postgresql://localhost/payment-sdk-backend-demo"
 export KUBE_WS_CONFIGMAP_DB_PORT="5432"
 export KUBE_WS_CONFIGMAP_DB_HOST="localhost"
 export KUBE_WS_CONFIGMAP_DB_NAME="payment-sdk-backend-demo"
