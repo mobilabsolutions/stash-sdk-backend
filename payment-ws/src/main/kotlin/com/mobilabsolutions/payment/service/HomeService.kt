@@ -47,7 +47,8 @@ class HomeService(
     companion object : KLogging() {
         private const val DATE_FORMAT_UTC = "yyyy-MM-dd'T'HH:mm:ss'Z'"
         private const val DAY_PATTERN = "EEEE"
-        private const val REFUND_NOTIFICATION = "refund of %s"
+        private const val SUCCESSFUL_REFUND_NOTIFICATION = "Refunded %s"
+        private const val FAILED_REFUND_NOTIFICATION = "Failed refund of %s"
         private const val CHARGEBACK_NOTIFICATION = "Chargeback %s"
 
         private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_UTC)
@@ -90,11 +91,11 @@ class HomeService(
             when (it.action) {
                 TransactionAction.REFUND ->
                     when (it.status) {
-                        TransactionStatus.SUCCESS -> NotificationModel(it.paymentMethod?.name, "Successful " + REFUND_NOTIFICATION.format("${it.amount!!.toDouble().div(100)}${it.currencyId}"))
-                        TransactionStatus.FAIL -> NotificationModel(it.paymentMethod?.name, "Failed " + REFUND_NOTIFICATION.format("${it.amount!!.toDouble().div(100)}${it.currencyId}"))
+                        TransactionStatus.SUCCESS -> NotificationModel(it.paymentMethod?.name, SUCCESSFUL_REFUND_NOTIFICATION.format("${it.amount?.toDouble()?.div(100)}${it.currencyId}"))
+                        TransactionStatus.FAIL -> NotificationModel(it.paymentMethod?.name, FAILED_REFUND_NOTIFICATION.format("${it.amount?.toDouble()?.div(100)}${it.currencyId}"))
                         else -> null
                     }
-                TransactionAction.CHARGEBACK -> NotificationModel(it.paymentMethod?.name, CHARGEBACK_NOTIFICATION.format("${it.amount}${it.currencyId}"))
+                TransactionAction.CHARGEBACK -> NotificationModel(it.paymentMethod?.name, CHARGEBACK_NOTIFICATION.format("${it.amount?.toDouble()?.div(100)}${it.currencyId}"))
                 else -> null
             }
         }
@@ -280,7 +281,11 @@ class HomeService(
                 true -> NotificationsModel(
                     notification = NotificationModel(
                         paymentMethod = transaction.paymentMethod?.name,
-                        content = REFUND_NOTIFICATION.format("${transaction.amount}${transaction.currencyId}")
+                        content = when (transaction.status) {
+                            TransactionStatus.SUCCESS -> SUCCESSFUL_REFUND_NOTIFICATION.format("${transaction.amount?.toDouble()?.div(100)}${transaction.currencyId}")
+                            TransactionStatus.FAIL -> FAILED_REFUND_NOTIFICATION.format("${transaction.amount?.toDouble()?.div(100)}${transaction.currencyId}")
+                            else -> null
+                        }
                     ),
                     nrOfTransactions = 1
                 )
@@ -312,7 +317,7 @@ class HomeService(
                 true -> NotificationsModel(
                     notification = NotificationModel(
                         paymentMethod = transaction.paymentMethod?.name,
-                        content = CHARGEBACK_NOTIFICATION.format("${transaction.amount}${transaction.currencyId}")
+                        content = CHARGEBACK_NOTIFICATION.format("${transaction.amount?.toDouble()?.div(100)}${transaction.currencyId}")
                     ),
                     nrOfTransactions = 1
                 )
