@@ -114,7 +114,7 @@ class HomeServiceTest {
         Mockito.`when`(merchantRepository.getMerchantById(merchantId)).thenReturn(merchant)
         Mockito.`when`(merchantRepository.getMerchantById(incorrectMerchantId)).thenReturn(null)
         Mockito.`when`(transactionRepository.getTransactionsForPaymentMethods(merchantId, createdAtStart, null)).thenReturn(listOf(transaction))
-        Mockito.`when`(transactionRepository.getTransactionsForRefunds(merchantId, createdAtStart, null)).thenReturn(listOf(transaction))
+        Mockito.`when`(transactionRepository.getTransactionsForRefunds(merchantId, createdAtStart)).thenReturn(listOf(transaction))
         Mockito.`when`(transactionRepository.getTransactionsByMerchantId(merchantId, createdAtStart, null)).thenReturn(listOf(transaction, capturedTransaction))
         Mockito.`when`(transactionRepository.getTransactionsWithNotification(merchantId, createdAtStart, null)).thenReturn(listOf(transaction))
         Mockito.`when`(transactionRepository.getTransactionsForPaymentMethods(merchantId, createdAtStart, endDate)).thenReturn(listOf(transaction))

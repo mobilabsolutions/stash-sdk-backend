@@ -100,13 +100,11 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
 
     @Query("SELECT * FROM transaction_record tr WHERE tr.merchant_id = :merchantId AND tr.status = 'SUCCESS' AND tr.action = 'REFUND'" +
         " AND tr.created_date >= CASE WHEN :createdAtStart <> '' THEN TO_TIMESTAMP(CAST(:createdAtStart AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END " +
-        "AND tr.created_date <= CASE WHEN :createdAtEnd <> '' THEN TO_TIMESTAMP(CAST(:createdAtEnd AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END " +
         "ORDER BY tr.created_date",
         nativeQuery = true)
     fun getTransactionsForRefunds(
         @Param("merchantId") merchantId: String,
-        @Param("createdAtStart") createdAtStart: String?,
-        @Param("createdAtEnd") createdAtEnd: String?
+        @Param("createdAtStart") createdAtStart: String?
     ): List<Transaction>
 
     @Query("SELECT * FROM transaction_record tr WHERE tr.merchant_id = :merchantId AND tr.status = 'SUCCESS' AND (tr.action = 'AUTH'  OR tr.action = 'CAPTURE')" +
@@ -122,4 +120,28 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
 
     @Query("SELECT * FROM transaction_record tr WHERE tr.merchant_id = :merchantId AND tr.processed_notification = FALSE ORDER BY tr.created_date FOR UPDATE OF tr SKIP LOCKED", nativeQuery = true)
     fun getTransactionsByUnprocessedNotifications(@Param("merchantId") merchantId: String): List<Transaction>
+
+    @Query("SELECT * FROM transaction_record tr WHERE tr.merchant_id = :merchantId AND tr.status = 'SUCCESS' AND tr.action = 'CHARGEBACK'" +
+        " AND tr.created_date >= CASE WHEN :createdAtStart <> '' THEN TO_TIMESTAMP(CAST(:createdAtStart AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END " +
+        "ORDER BY tr.created_date",
+        nativeQuery = true)
+    fun getTransactionsForChargebacks(
+        @Param("merchantId") merchantId: String,
+        @Param("createdAtStart") createdAtStart: String?
+    ): List<Transaction>
+
+    @Query("SELECT * FROM transaction_record tr WHERE tr.merchant_id = :merchantId" +
+        " AND tr.created_date >= CASE WHEN :createdAtStart <> '' THEN TO_TIMESTAMP(CAST(:createdAtStart AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END " +
+        "ORDER BY tr.created_date",
+        nativeQuery = true)
+    fun getTransactionsOverview(
+        @Param("merchantId") merchantId: String,
+        @Param("createdAtStart") createdAtStart: String?
+    ): List<Transaction>
+
+    @Query("SELECT * FROM transaction_record tr WHERE tr.merchant_id = :merchantId AND tr.transaction_id = :transactionId AND tr.status = 'SUCCESS' AND (tr.action = 'AUTH'  OR tr.action = 'PREAUTH')", nativeQuery = true)
+    fun getOriginalTransaction(
+        @Param("merchantId") merchantId: String,
+        @Param("transactionId") transactionId: String
+    ): Transaction?
 }
