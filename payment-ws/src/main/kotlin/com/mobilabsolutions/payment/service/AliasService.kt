@@ -15,20 +15,19 @@ import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.PspAliasConfigModel
 import com.mobilabsolutions.payment.model.PspConfigListModel
+import com.mobilabsolutions.payment.model.ThreeDSecureConfigModel
 import com.mobilabsolutions.payment.model.request.AliasRequestModel
-import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.payment.model.request.PspDeleteAliasRequestModel
 import com.mobilabsolutions.payment.model.request.PspRegisterAliasRequestModel
+import com.mobilabsolutions.payment.model.request.VerifyAliasRequestModel
+import com.mobilabsolutions.payment.model.response.Alias3DSResponseModel
 import com.mobilabsolutions.payment.model.response.AliasResponseModel
 import com.mobilabsolutions.payment.validation.ConfigValidator
 import com.mobilabsolutions.payment.validation.PspAliasValidator
-import com.mobilabsolutions.payment.validation.PspValidator
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
-import com.mobilabsolutions.server.commons.util.RequestHashing
 import mu.KLogging
-import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -40,15 +39,13 @@ class AliasService(
     private val aliasRepository: AliasRepository,
     private val merchantApiKeyRepository: MerchantApiKeyRepository,
     private val pspRegistry: PspRegistry,
-    private val pspValidator: PspValidator,
     private val configValidator: ConfigValidator,
     private val pspAliasValidator: PspAliasValidator,
     private val randomStringGenerator: RandomStringGenerator,
-    private val requestHashing: RequestHashing,
     private val objectMapper: ObjectMapper
 ) {
     companion object : KLogging() {
-        const val STRING_LENGTH = 20
+        const val ALIAS_ID_LENGTH = 20
     }
 
     /**
@@ -58,26 +55,23 @@ class AliasService(
      * @param pspType PSP Type
      * @param idempotentKey Idempotent key
      * @param userAgent User Agent
-     * @param dynamicPspConfig Dynamic PSP config
      * @param pspTestMode indicator whether is the test mode or not
      * @return alias method response
      */
     @Transactional
-    fun createAlias(publishableKey: String, pspType: String, idempotentKey: String, userAgent: String?, dynamicPspConfig: DynamicPspConfigRequestModel?, pspTestMode: Boolean?): AliasResponseModel {
+    fun createAlias(publishableKey: String, pspType: String, idempotentKey: String, userAgent: String?, pspTestMode: Boolean?): AliasResponseModel {
         logger.info("Creating alias for {} psp", pspType)
-        if (!pspValidator.validate(pspType, dynamicPspConfig)) throw ApiError.ofErrorCode(ApiErrorCode.DYNAMIC_CONFIG_NOT_FOUND).asException()
         val merchantApiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofErrorCode(ApiErrorCode.PUBLISHABLE_KEY_NOT_FOUND).asException()
         val result = objectMapper.readValue(merchantApiKey.merchant.pspConfig ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_EMPTY).asException(), PspConfigListModel::class.java)
         val pspConfig = result.psp.firstOrNull { it.type == pspType }
         val pspConfigType = PaymentServiceProvider.valueOf(pspConfig?.type ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_NOT_FOUND, "PSP configuration for '$pspType' cannot be found from given merchant").asException())
         val psp = pspRegistry.find(pspConfigType) ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_IMPL_NOT_FOUND, "PSP implementation '$pspType' cannot be found").asException()
-        val calculatedConfig = psp.calculatePspConfig(pspConfig, dynamicPspConfig, pspTestMode)
+        val calculatedConfig = psp.calculatePspConfig(pspConfig, pspTestMode)
 
         return executeIdempotentAliasOperation(
             merchantApiKey.merchant,
             pspConfigType,
             calculatedConfig,
-            dynamicPspConfig,
             idempotentKey,
             userAgent
         )
@@ -93,7 +87,7 @@ class AliasService(
      * @param aliasRequestModel Alias Request Model
      */
     @Transactional
-    fun exchangeAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, aliasRequestModel: AliasRequestModel) {
+    fun exchangeAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, aliasRequestModel: AliasRequestModel): Alias3DSResponseModel? {
         logger.info("Exchanging alias {}", aliasId)
         val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofErrorCode(ApiErrorCode.PUBLISHABLE_KEY_NOT_FOUND).asException()
         val alias = aliasRepository.getFirstByIdAndActive(aliasId, true) ?: throw ApiError.ofErrorCode(ApiErrorCode.ALIAS_NOT_FOUND).asException()
@@ -115,12 +109,75 @@ class AliasService(
         )
         val pspRegisterAliasResponse = psp.registerAlias(pspRegisterAliasRequest, pspTestMode)
         val paypalConfig = aliasRequestModel.extra?.payPalConfig?.copy(billingAgreementId = pspRegisterAliasResponse?.billingAgreementId)
-        val personalConfig = aliasRequestModel.extra?.personalData?.copy(customerReference = pspRegisterAliasResponse?.registrationReference)
-        val aliasExtraModel = aliasRequestModel.extra?.copy(payPalConfig = paypalConfig, personalData = personalConfig)
+        val aliasExtraModel = aliasRequestModel.extra?.copy(
+            payPalConfig = paypalConfig,
+            threeDSecureConfig = ThreeDSecureConfigModel(pspRegisterAliasResponse?.paymentData, null, null, null, null))
 
         val pspAlias = aliasRequestModel.pspAlias ?: pspRegisterAliasResponse?.pspAlias
         val extra = if (aliasExtraModel != null) objectMapper.writeValueAsString(aliasExtraModel) else null
         aliasRepository.updateAlias(pspAlias, extra, aliasId, userAgent)
+        return Alias3DSResponseModel(
+            pspRegisterAliasResponse?.resultCode,
+            pspRegisterAliasResponse?.token,
+            pspRegisterAliasResponse?.paymentData,
+            pspRegisterAliasResponse?.actionType,
+            pspRegisterAliasResponse?.paymentMethodType,
+            pspRegisterAliasResponse?.paReq,
+            pspRegisterAliasResponse?.termUrl,
+            pspRegisterAliasResponse?.md,
+            pspRegisterAliasResponse?.url)
+    }
+
+    /**
+     * Verifies alias after the 3D Secure check
+     *
+     * @param publishableKey Publishable Key
+     * @param pspTestMode indicator whether is the test mode or not
+     * @param userAgent User Agent
+     * @param aliasId Alias ID
+     * @param verifyAliasRequest Verify Alias Request Model
+     */
+    @Transactional
+    fun verifyAlias(publishableKey: String, pspTestMode: Boolean?, userAgent: String?, aliasId: String, verifyAliasRequest: VerifyAliasRequestModel): Alias3DSResponseModel {
+        logger.info("Verifying alias {}", aliasId)
+        val apiKey = merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, publishableKey) ?: throw ApiError.ofErrorCode(ApiErrorCode.PUBLISHABLE_KEY_NOT_FOUND).asException()
+        val alias = aliasRepository.getFirstByIdAndActive(aliasId, true) ?: throw ApiError.ofErrorCode(ApiErrorCode.ALIAS_NOT_FOUND).asException()
+        if (apiKey.merchant.id != alias.merchant?.id) throw ApiError.ofErrorCode(ApiErrorCode.WRONG_ALIAS_MERCHANT_MAPPING).asException()
+        val result = objectMapper.readValue(apiKey.merchant.pspConfig
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_EMPTY).asException(), PspConfigListModel::class.java)
+        val pspConfig = result.psp.firstOrNull { it.type == alias.psp.toString() }
+        val pspConfigType = PaymentServiceProvider.valueOf(pspConfig?.type
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_NOT_FOUND, "PSP configuration for '${alias.psp}' cannot be found from given merchant").asException())
+        val psp = pspRegistry.find(pspConfigType)
+            ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_IMPL_NOT_FOUND, "PSP implementation '${alias.psp}' cannot be found").asException()
+
+        val extra = objectMapper.readValue(alias.extra, AliasExtraModel::class.java)
+        val threeDSecureConfig = extra?.threeDSecureConfig?.copy(
+            fingerprintResult = verifyAliasRequest.fingerprintResult, challengeResult = verifyAliasRequest.challengeResult,
+            md = verifyAliasRequest.md, paRes = verifyAliasRequest.paRes)
+        val aliasExtraModel = extra?.copy(threeDSecureConfig = threeDSecureConfig)
+
+        val pspRegisterAliasRequest = PspRegisterAliasRequestModel(
+            aliasId = aliasId,
+            aliasExtra = aliasExtraModel,
+            pspConfig = pspConfig
+        )
+
+        val pspResponse = psp.verify3DSAlias(pspRegisterAliasRequest, pspTestMode)
+        val aliasExtra = when {
+            pspResponse?.paymentData != null -> aliasExtraModel?.copy(threeDSecureConfig = threeDSecureConfig?.copy(paymentData = pspResponse.paymentData))
+            else -> aliasExtraModel
+        }
+
+        aliasRepository.updateAlias(pspResponse?.pspAlias, objectMapper.writeValueAsString(aliasExtra), aliasId, userAgent)
+        return Alias3DSResponseModel(
+            pspResponse?.resultCode, pspResponse?.token,
+            pspResponse?.paymentData, pspResponse?.actionType,
+            pspResponse?.paymentMethodType,
+            pspResponse?.paReq,
+            pspResponse?.termUrl,
+            pspResponse?.md,
+            pspResponse?.url)
     }
 
     /**
@@ -152,7 +209,7 @@ class AliasService(
             pspAlias = alias.pspAlias,
             paymentMethod = aliasExtra.paymentMethod,
             pspConfig = pspConfig,
-            customerReference = aliasExtra.personalData?.customerReference
+            customerReference = aliasExtra.personalData?.customerReference ?: aliasId
         )
         psp.deleteAlias(pspDeleteAliasRequest, pspTestMode)
 
@@ -164,23 +221,17 @@ class AliasService(
         merchant: Merchant,
         pspConfigType: PaymentServiceProvider,
         calculatedConfig: PspAliasConfigModel?,
-        dynamicPspConfig: DynamicPspConfigRequestModel?,
         idempotentKey: String,
         userAgent: String?
     ): AliasResponseModel {
         val alias = aliasRepository.getByIdempotentKeyAndActiveAndMerchantAndPspTypeAndUserAgent(idempotentKey, true, merchant, pspConfigType, userAgent)
-        val generatedAliasId = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
-        val requestHash = if (dynamicPspConfig != null)
-            requestHashing.hashRequest(dynamicPspConfig) else null
+        val generatedAliasId = randomStringGenerator.generateRandomAlphanumeric(ALIAS_ID_LENGTH)
 
         when {
-            alias != null && StringUtils.equals(requestHash, alias.requestHash) -> return AliasResponseModel(
+            alias != null -> return AliasResponseModel(
                 alias.id,
                 calculatedConfig
             )
-
-            alias != null && !StringUtils.equals(requestHash, alias.requestHash) ->
-                throw ApiError.ofErrorCode(ApiErrorCode.IDEMPOTENCY_VIOLATION).asException()
 
             else -> {
                 val newAlias = Alias(
@@ -188,8 +239,7 @@ class AliasService(
                     idempotentKey = idempotentKey,
                     merchant = merchant,
                     psp = pspConfigType,
-                    userAgent = userAgent,
-                    requestHash = requestHash
+                    userAgent = userAgent
                 )
                 aliasRepository.save(newAlias)
 

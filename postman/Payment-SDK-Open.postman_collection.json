@@ -98,6 +98,48 @@
 					},
 					"response": []
 				},
+                {
+                    "name": "Verify Alias",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "name": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Publishable-Key",
+                                "value": "",
+                                "type": "text"
+                            },
+                            {
+                                "key": "PSP-Test-Mode",
+                                "value": "true",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"fingerprintResult\": \"fingerptint\",\n  \"challengeResult\": \"challenge\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{wsEndpoint}}/api/v1/alias/:Alias-Id/verify",
+                            "host": [
+                                "{{wsEndpoint}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "alias",
+                                "{Alias-Id}}",
+                                "verify"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
 				{
 					"name": "Delete Alias",
 					"request": {
@@ -279,8 +321,27 @@
 						}
 					},
 					"response": []
-				}
-			]
+				},
+                {
+                    "name": "Create webhook credentials",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": {
+                                "token": "{{access_token}}"
+                            }
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"webhook\" : \"https://test.mblb.net/notifications\",\n  \"username\": \"notificator\",\n  \"password\": \"password\"\n}"
+                        },
+                        "url": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/notifications"
+                    },
+                    "response": []
+                }
+            ]
 		},
 		{
 			"name": "Merchant Api Key",
@@ -1506,23 +1567,54 @@
                         "url": "{{wsEndpoint}}/api/v1/home/:Merchant-Id/activity?date=:date"
                     },
                     "response": []
-                },
+                }
+            ]
+        },
+        {
+            "name": "Reports",
+            "item": [
                 {
-                    "name": "Create webhook credentials",
+                    "name": "Download Default Reports",
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": {
-                                "token": "{{access_token}}"
-                            }
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "",
+                                    "type": "string"
+                                }
+                            ]
                         },
-                        "method": "POST",
+                        "method": "GET",
                         "header": [],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"webhook\" : \"https://test.mblb.net/notifications\",\n  \"username\": \"notificator\",\n  \"password\": \"password\"\n}"
+                            "raw": ""
                         },
-                        "url": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/notifications"
+                        "url": {
+                            "raw": "{{wsEndpoint}}/api/v1/report/:Merchant-Id/default?reportType:=reportType&fileName=:fileName",
+                            "host": [
+                                "{{wsEndpoint}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "report",
+                                "{Merchant-Id}",
+                                "default"
+                            ],
+                            "query": [
+                                {
+                                    "key": "reportType",
+                                    "value": "{reportType}"
+                                },
+                                {
+                                    "key": "fileName",
+                                    "value": "fileName"
+                                }
+                            ]
+                        }
                     },
                     "response": []
                 }

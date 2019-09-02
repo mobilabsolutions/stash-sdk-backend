@@ -112,7 +112,7 @@ class HomeService(
     fun getRefundsOverview(merchantId: String): RefundOverviewResponseModel {
         logger.info("Getting refunded transactions for merchant {}", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        val transactions = transactionRepository.getTransactionsForRefunds(merchantId, getPastDate(merchant, 6), null)
+        val transactions = transactionRepository.getTransactionsForRefunds(merchantId, getPastDate(merchant, 6))
         val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
         val refundsMap = LinkedHashMap<String, Int>()
         initRefundsMap(refundsMap)
