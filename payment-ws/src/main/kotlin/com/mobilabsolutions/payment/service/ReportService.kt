@@ -63,13 +63,13 @@ class ReportService(
                     csvWriter.lineNumber,
                     transaction.transactionId,
                     if (originalTransaction != null) originalTransaction.amount!!.toDouble().div(100).toString() else "-",
-                    if (originalTransaction != null) originalTransaction.createdDate!!.atZone(ZoneId.of(timezone)).toString() else "-",
+                    if (originalTransaction != null) originalTransaction.createdDate!!.atZone(ZoneId.of(timezone)).format(dateFormatter).toString() else "-",
                     transaction.reason,
                     transaction.merchantCustomerId,
                     mapStatus(transaction.status!!.name, transaction.action!!.name),
                     transaction.paymentMethod!!.name,
                     transaction.amount!!.toDouble().div(100).toString(),
-                    transaction.createdDate!!.atZone(ZoneId.of(timezone)).toString()
+                    transaction.createdDate!!.atZone(ZoneId.of(timezone)).format(dateFormatter).toString()
                 )
                 csvWriter.write(currentTransaction, *csvHeaders)
             }
