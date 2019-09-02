@@ -63,6 +63,7 @@ To shut down the services gracefully run `ctrl+c`. To reset the data of the envi
 If you want to create a database instance on your own, you will need to set the configuration properties below. You can either put them in your local `application-properties.local`, or define the environment variables:
 
 ```
+- spring.datasource.url: DB url
 - spring.datasource.username: DB username
 - spring.datasource.password: DB password
 - postgres.db.port: DB port

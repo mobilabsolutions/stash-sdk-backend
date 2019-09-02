@@ -24,10 +24,11 @@ services:
       dockerfile: payment-ws/Dockerfile
     environment:
       - "SPRING_PROFILES_ACTIVE=dev"
-      - "DB_URL=jdbc:postgresql://payment-db:5432/payment"
-      - "DB_NAME=payment"
       - "DB_USERNAME=payment"
       - "DB_PASSWORD=payment"
+      - "DB_PORT=5432"
+      - "DB_HOST=payment-db"
+      - "DB_NAME=payment"
       - "ADMIN_USERNAME=admin"
       - "ADMIN_PASSWORD=admin24"
       - "OAUTH_CLIENT_USERNAME=client"

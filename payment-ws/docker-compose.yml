@@ -17,7 +17,8 @@ services:
       dockerfile: Dockerfile
     environment:
       - "SPRING_PROFILES_ACTIVE=dev"
-      - "DB_URL=jdbc:postgresql://db:5432/payment"
+      - "DB_PORT=5432"
+      - "DB_HOST=db"
       - "DB_NAME=payment"
       - "DB_USERNAME=payment"
       - "DB_PASSWORD=payment"
@@ -27,3 +28,4 @@ services:
       - "OAUTH_CLIENT_PASSWORD=client24"
       - "SIGNING_KEY=zvJcsfK8qsPPp7uP3zKc8WTGhCETgF"
       - "PAYMENT_API_KEY=p7uP3zKc8WTzvJcsfK8qsPPGhCETgF"
+      - "LOGGING_LEVEL_ROOT=info"
