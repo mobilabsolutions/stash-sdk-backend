@@ -42,11 +42,6 @@ class ReportService(
      * @param response Response
      * @param reportType Report type
      * @param merchantId Merchant ID
-     * @param createdAtStart Creation start date
-     * @param createdAtEnd Creation end date
-     * @param paymentMethod Payment method
-     * @param status Status
-     * @param text Text
      */
     @Transactional(readOnly = true)
     fun downloadDefaultReports(response: HttpServletResponse, reportType: String?, merchantId: String) {
