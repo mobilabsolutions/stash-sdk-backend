@@ -162,19 +162,6 @@ class HomeService(
     }
 
     /**
-     * Calculates the date in the past for the given number of days
-     *
-     * @param merchant Merchant
-     * @param days Number of days to subtract
-     * @return date as String
-     */
-    fun getPastDate(merchant: Merchant, days: Long): String {
-        return dateFormatter
-            .withZone(ZoneId.of(merchant.timezone ?: ZoneId.systemDefault().toString()))
-            .format(Instant.now().minus(days, ChronoUnit.DAYS))
-    }
-
-    /**
      * Gets selected date activity for all captured transactions
      *
      * @param merchantId Merchant ID
@@ -199,6 +186,19 @@ class HomeService(
             transactionsMap[hour] = amount.plus(transaction.amount!!)
         }
         return SelectedDateActivityResponseModel(transactionsMap)
+    }
+
+    /**
+     * Calculates the date in the past for the given number of days
+     *
+     * @param merchant Merchant
+     * @param days Number of days to subtract
+     * @return date as String
+     */
+    fun getPastDate(merchant: Merchant, days: Long): String {
+        return dateFormatter
+            .withZone(ZoneId.of(merchant.timezone ?: ZoneId.systemDefault().toString()))
+            .format(Instant.now().minus(days, ChronoUnit.DAYS))
     }
 
     private fun initHourlyMap(transactionsMap: LinkedHashMap<String, Int>) {

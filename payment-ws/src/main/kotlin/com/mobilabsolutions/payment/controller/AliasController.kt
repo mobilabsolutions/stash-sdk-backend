@@ -5,7 +5,7 @@
 package com.mobilabsolutions.payment.controller
 
 import com.mobilabsolutions.payment.model.request.AliasRequestModel
-import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
+import com.mobilabsolutions.payment.model.request.VerifyAliasRequestModel
 import com.mobilabsolutions.payment.service.AliasService
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
@@ -44,19 +44,18 @@ class AliasController(private val aliasService: AliasService) {
         @RequestHeader(value = "PSP-Type") pspType: String,
         @RequestHeader(value = "User-Agent", required = false) userAgent: String?,
         @Size(min = 10, max = 40) @RequestHeader(value = "Idempotent-Key") idempotentKey: String,
-        @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
-        @Valid @ApiParam(name = "PSP-Config", value = "Dynamic PSP Config Model") @RequestBody(required = false) dynamicPspConfig: DynamicPspConfigRequestModel?
-    ) = aliasService.createAlias(publishableKey, pspType, idempotentKey, userAgent, dynamicPspConfig, pspTestMode)
+        @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?
+    ) = aliasService.createAlias(publishableKey, pspType, idempotentKey, userAgent, pspTestMode)
 
     @ApiOperation(value = "Update the given Alias for payment operations")
     @ApiResponses(
-        ApiResponse(code = 204, message = "Successfully updated an Alias"),
+        ApiResponse(code = 200, message = "Successfully updated an Alias"),
         ApiResponse(code = 400, message = "Request model validation is failed")
     )
     @RequestMapping(EXCHANGE_ALIAS_URL, method = [RequestMethod.PUT],
             consumes = [MediaType.APPLICATION_JSON_VALUE],
             produces = [MediaType.APPLICATION_JSON_VALUE])
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.OK)
     fun exchangeAlias(
         @RequestHeader(value = "Publishable-Key") publishableKey: String,
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
@@ -64,6 +63,23 @@ class AliasController(private val aliasService: AliasService) {
         @PathVariable("Alias-Id") aliasId: String,
         @Valid @ApiParam(name = "Alias-Info", value = "Alias Model") @RequestBody alias: AliasRequestModel
     ) = aliasService.exchangeAlias(publishableKey, pspTestMode, userAgent, aliasId, alias)
+
+    @ApiOperation(value = "Verify the given Alias for payment operations")
+    @ApiResponses(
+        ApiResponse(code = 200, message = "Successfully verified an Alias"),
+        ApiResponse(code = 400, message = "Request model validation is failed")
+    )
+    @RequestMapping(VERIFY_ALIAS_URL, method = [RequestMethod.POST],
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    @ResponseStatus(HttpStatus.OK)
+    fun verifyAlias(
+        @RequestHeader(value = "Publishable-Key") publishableKey: String,
+        @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?,
+        @RequestHeader(value = "User-Agent", required = false) userAgent: String?,
+        @PathVariable("Alias-Id") aliasId: String,
+        @Valid @RequestBody verifyAliasRequest: VerifyAliasRequestModel
+    ) = aliasService.verifyAlias(publishableKey, pspTestMode, userAgent, aliasId, verifyAliasRequest)
 
     @ApiOperation(value = "Delete an Alias")
     @ApiResponses(
@@ -82,6 +98,7 @@ class AliasController(private val aliasService: AliasService) {
     companion object {
         const val BASE_URL = "alias"
         const val EXCHANGE_ALIAS_URL = "/{Alias-Id}"
+        const val VERIFY_ALIAS_URL = "/{Alias-Id}/verify"
         const val DELETE_ALIAS_URL = "/{Alias-Id}"
     }
 }

@@ -98,6 +98,48 @@
 					},
 					"response": []
 				},
+                {
+                    "name": "Verify Alias",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "name": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Publishable-Key",
+                                "value": "",
+                                "type": "text"
+                            },
+                            {
+                                "key": "PSP-Test-Mode",
+                                "value": "true",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"fingerprintResult\": \"fingerptint\",\n  \"challengeResult\": \"challenge\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{wsEndpoint}}/api/v1/alias/:Alias-Id/verify",
+                            "host": [
+                                "{{wsEndpoint}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "alias",
+                                "{Alias-Id}}",
+                                "verify"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
 				{
 					"name": "Delete Alias",
 					"request": {

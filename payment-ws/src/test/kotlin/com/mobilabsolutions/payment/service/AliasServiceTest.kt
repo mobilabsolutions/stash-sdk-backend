@@ -14,14 +14,12 @@ import com.mobilabsolutions.payment.data.repository.AliasRepository
 import com.mobilabsolutions.payment.data.repository.MerchantApiKeyRepository
 import com.mobilabsolutions.payment.model.AliasExtraModel
 import com.mobilabsolutions.payment.model.request.AliasRequestModel
-import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
+import com.mobilabsolutions.payment.model.request.VerifyAliasRequestModel
 import com.mobilabsolutions.payment.validation.ConfigValidator
 import com.mobilabsolutions.payment.validation.PspAliasValidator
-import com.mobilabsolutions.payment.validation.PspValidator
 import com.mobilabsolutions.server.commons.CommonConfiguration
 import com.mobilabsolutions.server.commons.exception.ApiException
 import com.mobilabsolutions.server.commons.util.RandomStringGenerator
-import com.mobilabsolutions.server.commons.util.RequestHashing
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -83,9 +81,6 @@ class AliasServiceTest {
     private lateinit var psp: Psp
 
     @Mock
-    private lateinit var pspValidator: PspValidator
-
-    @Mock
     private lateinit var configValidator: ConfigValidator
 
     @Mock
@@ -94,9 +89,6 @@ class AliasServiceTest {
     @Mock
     private lateinit var randomStringGenerator: RandomStringGenerator
 
-    @Mock
-    private lateinit var requestHashing: RequestHashing
-
     @Spy
     val objectMapper: ObjectMapper = CommonConfiguration().jsonMapper()
 
@@ -104,9 +96,8 @@ class AliasServiceTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
 
-        Mockito.`when`(pspValidator.validate(knownPspType, null)).thenReturn(true)
-        Mockito.`when`(pspAliasValidator.validate(objectMapper.readValue(extra, AliasExtraModel::class.java), pspAlias, knownPspType)).thenReturn(true)
         Mockito.`when`(configValidator.validate(objectMapper.readValue(extra, AliasExtraModel::class.java), knownPspType)).thenReturn(true)
+        Mockito.`when`(pspAliasValidator.validate(objectMapper.readValue(extra, AliasExtraModel::class.java), pspAlias, knownPspType)).thenReturn(true)
         Mockito.`when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, unknownPublishableKey))
             .thenReturn(null)
         Mockito.`when`(merchantApiKeyRepository.getFirstByActiveAndKeyTypeAndKey(true, KeyType.PUBLISHABLE, knownPublishableKey))
@@ -144,46 +135,37 @@ class AliasServiceTest {
             aliasRepository.getByIdempotentKeyAndActiveAndMerchantAndPspTypeAndUserAgent(
                 usedIdempotentKey, true, merchant, PaymentServiceProvider.BS_PAYONE, userAgent))
             .thenReturn(Alias(merchant = merchant))
-        Mockito.`when`(requestHashing.hashRequest(DynamicPspConfigRequestModel("test token", null, null)))
-            .thenReturn("different hash")
     }
 
     @Test
     fun `create alias with wrong header parameters`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(unknownPublishableKey, pspType, usedIdempotentKey, userAgent, null, true)
+            aliasService.createAlias(unknownPublishableKey, pspType, usedIdempotentKey, userAgent, true)
         }
     }
 
     @Test
     fun `create alias with unknown pspType`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(knownPublishableKey, pspType, usedIdempotentKey, userAgent, null, true)
+            aliasService.createAlias(knownPublishableKey, pspType, usedIdempotentKey, userAgent, true)
         }
     }
 
     @Test
     fun `create alias with new idempotent key`() {
         Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(knownPublishableKey, pspType, newIdempotentKey, userAgent, null, true)
+            aliasService.createAlias(knownPublishableKey, pspType, newIdempotentKey, userAgent, true)
         }
     }
 
     @Test
     fun `create alias with used idempotent key`() {
-        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, userAgent, null, true)
-    }
-
-    @Test
-    fun `create alias with used idempotent key and different request body`() {
-        Assertions.assertThrows(ApiException::class.java) {
-            aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, userAgent, DynamicPspConfigRequestModel("test token", null, null), true)
-        }
+        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, userAgent, true)
     }
 
     @Test
     fun `create alias successfully`() {
-        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, userAgent, null, true)
+        aliasService.createAlias(knownPublishableKey, knownPspType, usedIdempotentKey, userAgent, true)
     }
 
     @Test
@@ -196,6 +178,18 @@ class AliasServiceTest {
     @Test
     fun `exchange alias successfully`() {
         aliasService.exchangeAlias(knownPublishableKey, true, userAgent, knownAliasId, AliasRequestModel(pspAlias, objectMapper.readValue(extra, AliasExtraModel::class.java)))
+    }
+
+    @Test
+    fun `verify alias with wrong alias id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            aliasService.verifyAlias(knownPublishableKey, true, userAgent, unknownAliasId, Mockito.mock(VerifyAliasRequestModel::class.java))
+        }
+    }
+
+    @Test
+    fun `verify alias successfully`() {
+        aliasService.verifyAlias(knownPublishableKey, true, userAgent, knownAliasId, VerifyAliasRequestModel("fingerptint", null, null, null))
     }
 
     @Test
