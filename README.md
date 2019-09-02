@@ -48,16 +48,12 @@ The resulting jar file will be produced in the directory named `target`.
 
 If you want to start only the ws service, you should run `docker-compose up` from the `payment-ws` folder. It will start the following services :
 - **PostgreSQL** - listens on port 5432, username:password - `payment:payment`
-- **Zookeeper** - listens on port 2181
-- **Kafka** - listens on port 9092, the topic will be created automatically on the application startup
 - **payment-ws** - listens on port 8080
 
 If you want to start both the ws service and the notification service, you should run `docker-compose up` from the root folder. It will start the following services :
 - **2 PostgreSQL databases** 
   - payment db, listens on port 5432, username:password - `payment:payment`
   - notifications db, listens on port 5433, username:password - `notifications:notifications`
-- **Zookeeper** - listens on port 2181
-- **Kafka** - listens on port 9092, the topic will be created automatically on the application startup
 - **2 services** 
   - payment-ws, listens on port 8080
   - payment-notifications, listens on port 8082
@@ -67,9 +63,11 @@ To shut down the services gracefully run `ctrl+c`. To reset the data of the envi
 If you want to create a database instance on your own, you will need to set the configuration properties below. You can either put them in your local `application-properties.local`, or define the environment variables:
 
 ```
-- spring.datasource.url: DB url
 - spring.datasource.username: DB username
 - spring.datasource.password: DB password
+- postgres.db.port: DB port
+- postgres.db.host: DB host
+- postgres.db.name: DB name
 - spring.jpa.show-sql=true
 - authorization.server.signingKey: oauth signing key
 - payment.ws.notification.apiKey= notification service api key
