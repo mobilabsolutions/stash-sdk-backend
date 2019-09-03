@@ -144,4 +144,32 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
         @Param("merchantId") merchantId: String,
         @Param("transactionId") transactionId: String
     ): Transaction?
+
+    @Query("SELECT * FROM transaction_record tr WHERE tr.merchant_id = :merchantId " +
+        "AND tr.status = CASE WHEN :status <> '' THEN CAST(:status AS varchar) ELSE tr.status END " +
+        "AND tr.payment_method = CASE WHEN :paymentMethod <> '' THEN CAST(:paymentMethod AS varchar) ELSE tr.payment_method END " +
+        "AND tr.created_date >= CASE WHEN :createdAtStart <> '' THEN TO_TIMESTAMP(CAST(:createdAtStart AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END " +
+        "AND tr.created_date <= CASE WHEN :createdAtEnd <> '' THEN TO_TIMESTAMP(CAST(:createdAtEnd AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END " +
+        "AND CASE WHEN :text <> '' THEN (CAST(tr.payment_info AS json)#>>'{pspConfig, type}' ~* CAST(:text AS text) " +
+        "OR tr.reason ~* CAST(:text AS varchar) " +
+        "OR tr.transaction_id ~* CAST(:text AS varchar) " +
+        "OR tr.currency_id ~* CAST(:text AS varchar) " +
+        "OR tr.merchant_transaction_id ~* CAST(:text AS varchar) " +
+        "OR tr.merchant_customer_id ~* CAST(:text AS varchar) " +
+        "OR tr.alias_id ~* CAST(:text AS varchar) " +
+        "OR tr.payment_method ~* CASE WHEN CAST(:text AS varchar) ~* 'pay' THEN 'PAY_PAL' WHEN CAST(:text AS varchar) ~* 'credit' THEN 'CC' ELSE CAST(:text AS varchar) END " +
+        "OR CAST(tr.payment_info AS json)#>>'{extra, ccConfig, ccMask}' ~* CAST(:text AS text) " +
+        "OR CAST(tr.payment_info AS json)#>>'{extra, ccConfig, ccExpiryDate}' ~* CAST(:text AS text) " +
+        "OR CAST(tr.payment_info AS json)#>>'{extra, ccConfig, ccType}' ~* CAST(:text AS text) " +
+        "OR CAST(tr.payment_info AS json)#>>'{extra, sepaConfig, iban}' ~* CAST(:text AS text)) ELSE tr.reason = tr.reason END " +
+        "ORDER BY tr.created_date",
+        nativeQuery = true)
+    fun getCustomTransactions(
+        @Param("merchantId") merchantId: String,
+        @Param("createdAtStart") createdAtStart: String?,
+        @Param("createdAtEnd") createdAtEnd: String?,
+        @Param("paymentMethod") paymentMethod: String?,
+        @Param("status") status: String?,
+        @Param("text") text: String?
+    ): List<Transaction>
 }

@@ -1,14 +1,18 @@
 package com.mobilabsolutions.payment.service
 
+import com.mobilabsolutions.payment.data.Filter
 import com.mobilabsolutions.payment.data.Merchant
+import com.mobilabsolutions.payment.data.Transaction
 import com.mobilabsolutions.payment.data.enum.ReportType
 import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
+import com.mobilabsolutions.payment.data.repository.FilterRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.DashboardReportModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
+import mu.KLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.supercsv.io.CsvBeanWriter
@@ -25,10 +29,11 @@ import javax.servlet.http.HttpServletResponse
 @Service
 class ReportService(
     private val transactionRepository: TransactionRepository,
-    private val merchantRepository: MerchantRepository
+    private val merchantRepository: MerchantRepository,
+    private val filterRepository: FilterRepository
 ) {
 
-    companion object {
+    companion object : KLogging() {
         const val DATE_FORMAT_UTC = "yyyy-MM-dd'T'HH:mm:ss'Z'"
 
         private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_UTC)
@@ -37,7 +42,7 @@ class ReportService(
     }
 
     /**
-     * Download transaction specific reports on the dashboard in CSV format
+     * Download default reports on the dashboard in CSV format
      *
      * @param response Response
      * @param reportType Report type
@@ -45,9 +50,8 @@ class ReportService(
      */
     @Transactional(readOnly = true)
     fun downloadDefaultReports(response: HttpServletResponse, reportType: String?, merchantId: String) {
-        HomeService.logger.info("Downloading report of type {} for merchant {}", merchantId)
+        logger.info("Downloading default report of type {} for merchant {}", reportType, merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-
         val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
         val transactions = when (reportType) {
             ReportType.OVERVIEW.name -> transactionRepository.getTransactionsOverview(merchantId, getPastDate(merchant, 30))
@@ -55,6 +59,32 @@ class ReportService(
             else -> transactionRepository.getTransactionsForChargebacks(merchantId, getPastDate(merchant, 30))
         }
 
+        writeToCsv(response, transactions, merchantId, timezone)
+    }
+
+    /**
+     * Download custom reports on the dashboard in CSV format
+     *
+     * @param response Response
+     * @param merchantId Merchant ID
+     * @param filterName Filter name
+     * @param createdAtStart Start date
+     * @param createdAtEnd End date
+     * @param paymentMethod Payment method
+     * @param status Status
+     * @param text Keyword text
+     */
+    fun downloadCustomReports(response: HttpServletResponse, merchantId: String, filterName: String, createdAtStart: String?, createdAtEnd: String?, paymentMethod: String?, status: String?, text: String?) {
+        logger.info("Downloading custom report for merchant {}", merchantId)
+        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
+        val filter = filterRepository.getFilterById(filterName) ?: filterRepository.save(Filter(filterName, createdAtStart, createdAtEnd, status, paymentMethod, text, merchant))
+        val transactions = transactionRepository.getCustomTransactions(merchantId, filter.createdAtStart, filter.createdAtEnd, filter.paymentMethod, filter.status, filter.text)
+
+        writeToCsv(response, transactions, merchantId, timezone)
+    }
+
+    private fun writeToCsv(response: HttpServletResponse, transactions: List<Transaction>, merchantId: String, timezone: String) {
         CsvBeanWriter(response.writer, CsvPreference.STANDARD_PREFERENCE).use { csvWriter ->
             csvWriter.writeHeader(*csvHeaders)
             for (transaction in transactions) {
@@ -83,7 +113,7 @@ class ReportService(
      * @param days Number of days to subtract
      * @return date as String
      */
-    fun getPastDate(merchant: Merchant, days: Long): String {
+    private fun getPastDate(merchant: Merchant, days: Long): String {
         return dateFormatter
             .withZone(ZoneId.of(merchant.timezone ?: ZoneId.systemDefault().toString()))
             .format(Instant.now().minus(days, ChronoUnit.DAYS))
