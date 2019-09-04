@@ -20,10 +20,10 @@ import com.mobilabsolutions.payment.model.response.PspConfigResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import mu.KLogging
-import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 
 /**
@@ -70,7 +70,8 @@ class MerchantService(
                         country = pspConfigRequestModel.pspConfig.country,
                         locale = pspConfigRequestModel.pspConfig.locale,
                         urlPrefix = pspConfigRequestModel.pspConfig.urlPrefix,
-                        clientEncryptionKey = pspConfigRequestModel.pspConfig.clientEncryptionKey
+                        sandboxClientEncryptionKey = pspConfigRequestModel.pspConfig.sandboxClientEncryptionKey,
+                        productionClientEncryptionKey = pspConfigRequestModel.pspConfig.productionClientEncryptionKey
                     )
                 )
             )
@@ -158,7 +159,8 @@ class MerchantService(
                         country = pspUpsertConfigRequestModel.country,
                         locale = pspUpsertConfigRequestModel.locale,
                         urlPrefix = pspUpsertConfigRequestModel.urlPrefix,
-                        clientEncryptionKey = pspUpsertConfigRequestModel.clientEncryptionKey
+                        sandboxClientEncryptionKey = pspUpsertConfigRequestModel.sandboxClientEncryptionKey,
+                        productionClientEncryptionKey = pspUpsertConfigRequestModel.productionClientEncryptionKey
                     )
                 )
             )
@@ -264,6 +266,7 @@ class MerchantService(
             country,
             locale,
             urlPrefix,
-            clientEncryptionKey
+            sandboxClientEncryptionKey,
+            productionClientEncryptionKey
         )
 }
