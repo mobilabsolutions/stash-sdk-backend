@@ -4,6 +4,7 @@
 
 package com.mobilabsolutions.payment.configuration
 
+import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.service.UserDetailsServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -50,6 +51,9 @@ class AuthServerOAuth2Config : AuthorizationServerConfigurerAdapter() {
     @Autowired
     private lateinit var exceptionTranslator: CustomWebResponseExceptionTranslator
 
+    @Autowired
+    private lateinit var merchantRepository: MerchantRepository
+
     lateinit var signingKey: String
 
     @Bean
@@ -64,7 +68,7 @@ class AuthServerOAuth2Config : AuthorizationServerConfigurerAdapter() {
 
     @Bean
     fun jwtTokenEnhancer(): JwtAccessTokenConverter {
-        val converter = JwtAccessTokenConverter()
+        val converter = CustomTokenConverter(merchantRepository)
         converter.setSigningKey(signingKey)
         return converter
     }
