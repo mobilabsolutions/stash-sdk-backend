@@ -4,8 +4,8 @@
 
 package com.mobilabsolutions.payment.data.repository
 
-import com.mobilabsolutions.payment.data.configuration.BaseRepository
 import com.mobilabsolutions.payment.data.Merchant
+import com.mobilabsolutions.payment.data.configuration.BaseRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
@@ -32,4 +32,8 @@ interface MerchantRepository : BaseRepository<Merchant, String> {
 
     @Query("SELECT * FROM Merchant m WHERE m.webhook_url <> ''", nativeQuery = true)
     fun getMerchantsByWebhookUrl(): List<Merchant>
+
+    @Query("SELECT m.name FROM merchant m JOIN authority a ON m.id = a.name JOIN merchant_user_authorities mua ON mua.authority_id = a.id " +
+        "JOIN merchant_user mu ON mu.id = mua.merchant_user_id WHERE mu.id = :userId", nativeQuery = true)
+    fun getMerchantForUser(@Param("userId") userId: String): String?
 }
