@@ -71,7 +71,7 @@ class MerchantService(
                         locale = pspConfigRequestModel.pspConfig.locale,
                         urlPrefix = pspConfigRequestModel.pspConfig.urlPrefix,
                         sandboxClientEncryptionKey = pspConfigRequestModel.pspConfig.sandboxClientEncryptionKey,
-                        productionClientEncryptionKey = pspConfigRequestModel.pspConfig.productionClientEncryptionKey
+                        clientEncryptionKey = pspConfigRequestModel.pspConfig.clientEncryptionKey
                     )
                 )
             )
@@ -160,7 +160,7 @@ class MerchantService(
                         locale = pspUpsertConfigRequestModel.locale,
                         urlPrefix = pspUpsertConfigRequestModel.urlPrefix,
                         sandboxClientEncryptionKey = pspUpsertConfigRequestModel.sandboxClientEncryptionKey,
-                        productionClientEncryptionKey = pspUpsertConfigRequestModel.productionClientEncryptionKey
+                        clientEncryptionKey = pspUpsertConfigRequestModel.clientEncryptionKey
                     )
                 )
             )
@@ -267,6 +267,6 @@ class MerchantService(
             locale,
             urlPrefix,
             sandboxClientEncryptionKey,
-            productionClientEncryptionKey
+            clientEncryptionKey
         )
 }

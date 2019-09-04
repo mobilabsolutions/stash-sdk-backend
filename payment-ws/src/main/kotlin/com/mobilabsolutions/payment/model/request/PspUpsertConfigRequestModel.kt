@@ -60,5 +60,5 @@ data class PspUpsertConfigRequestModel(
     val sandboxClientEncryptionKey: String?,
 
     @ApiModelProperty(value = "Production client encryption key", example = "ABA0B8C5413CD5E0D806DE19CA...")
-    val productionClientEncryptionKey: String?
+    val clientEncryptionKey: String?
 )
