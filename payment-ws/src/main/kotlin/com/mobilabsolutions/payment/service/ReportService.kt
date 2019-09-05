@@ -38,7 +38,8 @@ class ReportService(
 
         private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_UTC)
 
-        private val csvHeaders = arrayOf("no", "id", "initialAmount", "initialCreatedDate", "reason", "customerId", "status", "paymentMethod", "amount", "createdDate")
+        private val defaultCsvHeaders = arrayOf("no", "id", "initialAmount", "initialCreatedDate", "reason", "customerId", "status", "paymentMethod", "amount", "createdDate")
+        private val customCsvHeaders = arrayOf("no", "id", "reason", "customerId", "status", "paymentMethod", "amount", "createdDate")
     }
 
     /**
@@ -59,7 +60,7 @@ class ReportService(
             else -> transactionRepository.getTransactionsForChargebacks(merchantId, getPastDate(merchant, 30))
         }
 
-        writeToCsv(response, transactions, merchantId, timezone)
+        writeToCsv(response, transactions, merchantId, timezone, defaultCsvHeaders)
     }
 
     /**
@@ -102,10 +103,10 @@ class ReportService(
             ?: filterRepository.save(Filter(filterName, createdAtStart, createdAtEnd, status, paymentMethod, text, currency, amount, customerId, transactionId, merchantTransactionId, merchant))
         val transactions = transactionRepository.getCustomTransactions(merchantId, filter.createdAtStart, filter.createdAtEnd, filter.paymentMethod, filter.status, filter.text, filter.currency, filter.amount, filter.customerId, filter.transactionId, filter.merchantTransactionId)
 
-        writeToCsv(response, transactions, merchantId, timezone)
+        writeToCsv(response, transactions, merchantId, timezone, customCsvHeaders)
     }
 
-    private fun writeToCsv(response: HttpServletResponse, transactions: List<Transaction>, merchantId: String, timezone: String) {
+    private fun writeToCsv(response: HttpServletResponse, transactions: List<Transaction>, merchantId: String, timezone: String, csvHeaders: Array<String>) {
         CsvBeanWriter(response.writer, CsvPreference.STANDARD_PREFERENCE).use { csvWriter ->
             csvWriter.writeHeader(*csvHeaders)
             for (transaction in transactions) {
