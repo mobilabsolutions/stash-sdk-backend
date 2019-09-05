@@ -1673,6 +1673,26 @@
                                 {
                                     "key": "text",
                                     "value": "{Text}"
+                                },
+                                {
+                                    "key": "currency",
+                                    "value": "{Currency}"
+                                },
+                                {
+                                    "key": "amount",
+                                    "value": "{Amount}"
+                                },
+                                {
+                                    "key": "customerId",
+                                    "value": "{CustomerId}"
+                                },
+                                {
+                                    "key": "transactionId",
+                                    "value": "{TransactionId}"
+                                },
+                                {
+                                    "key": "merchantTransactionId",
+                                    "value": "{MerchantTransactionId}"
                                 }
                             ]
                         }
