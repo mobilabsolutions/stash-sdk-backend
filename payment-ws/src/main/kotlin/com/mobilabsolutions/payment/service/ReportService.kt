@@ -118,7 +118,7 @@ class ReportService(
     fun getAllReportFilters(merchantId: String): FiltersListResponseModel {
         logger.info("Fetching all report filter names for merchant {}", merchantId)
         merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
-        val filtersList = filterRepository.getFiltersByMerchantId(merchantId).map { FiltersModel(it!!.id) }
+        val filtersList = filterRepository.getFiltersByMerchantId(merchantId).map { FiltersModel(it.id) }
         return FiltersListResponseModel(filtersList)
     }
 
