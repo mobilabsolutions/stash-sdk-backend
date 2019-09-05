@@ -1638,7 +1638,7 @@
                             "raw": ""
                         },
                         "url": {
-                            "raw": "{{wsEndpoint}}/api/v1/report/:Merchant-Id/custom?filterName:=filterName&createdAtStart=:createdAtStart&createdAtEnd=:createdAtEnd&paymentMethod=:paymentMethod&status=:status&text=:text",
+                            "raw": "{{wsEndpoint}}/api/v1/report/:Merchant-Id/custom?filterName:=filterName&createdAtStart=:createdAtStart&createdAtEnd=:createdAtEnd&paymentMethod=:paymentMethod&status=:status&text=:text&currency=:currency&amount=:amount&customerId=:customerId&transactionId=:transactionId&merchantTransactionId=:merchantTransactionId",
                             "host": [
                                 "{{wsEndpoint}}"
                             ],
