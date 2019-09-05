@@ -57,5 +57,11 @@ data class PspConfigModel(
     val locale: String?,
 
     @ApiModelProperty(value = "Live URL prefix", example = "`[random]-[company-name]`")
-    val urlPrefix: String?
+    val urlPrefix: String?,
+
+    @ApiModelProperty(value = "Sandbox client encryption key", example = "ABA0B8C5413CD5E0D806DE19CA...")
+    val sandboxClientEncryptionKey: String?,
+
+    @ApiModelProperty(value = "Production client encryption key", example = "ABA0B8C5413CD5E0D806DE19CA...")
+    val clientEncryptionKey: String?
 )

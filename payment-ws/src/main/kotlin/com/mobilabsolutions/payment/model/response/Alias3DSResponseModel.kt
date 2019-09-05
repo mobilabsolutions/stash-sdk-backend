@@ -1,7 +1,3 @@
-/*
- * Copyright © MobiLab Solutions GmbH
- */
-
 package com.mobilabsolutions.payment.model.response
 
 import io.swagger.annotations.ApiModel
@@ -10,30 +6,21 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "PSP register alias response model")
-data class PspRegisterAliasResponseModel(
-    @ApiModelProperty(value = "Payment service provider alias", example = "jdklaoa")
-    val pspAlias: String?,
-
-    @ApiModelProperty(value = "Billing agreement id")
-    val billingAgreementId: String?,
-
-    @ApiModelProperty(value = "Registration reference")
-    val registrationReference: String?,
-
-    @ApiModelProperty(value = "Payload needed to verify the payment", example = "Ab02b4c0!BQABAgCYHYurjVnu8GRyhy1ZsGj...")
-    val paymentData: String?,
-
+@ApiModel(value = "Exchange Alias Response")
+data class Alias3DSResponseModel(
     @ApiModelProperty(value = "Result code", example = "IdentifyShopper")
     val resultCode: String?,
 
-    @ApiModelProperty(value = "Fingerprint or challenge token")
+    @ApiModelProperty(value = "Fingerprint or challenge token", example = "eyJ0aH...")
     val token: String?,
 
-    @ApiModelProperty(value = "Action type", example = "threeDS2Fingerprint")
+    @ApiModelProperty(value = "Payment data", example = "eyJ0aH...")
+    val paymentData: String?,
+
+    @ApiModelProperty(value = "Adyen action type", example = "threeDS2Fingerprint")
     val actionType: String?,
 
-    @ApiModelProperty(value = "Payment method type", example = "scheme")
+    @ApiModelProperty(value = "Adyen payment method type", example = "scheme")
     val paymentMethodType: String?,
 
     @ApiModelProperty(value = "Payload needed when redirecting the shopper", example = "eyJ0aH...")

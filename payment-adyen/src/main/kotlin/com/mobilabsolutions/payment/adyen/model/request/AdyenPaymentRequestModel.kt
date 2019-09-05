@@ -43,5 +43,17 @@ data class AdyenPaymentRequestModel(
     val captureDelayHours: Int?,
 
     @ApiModelProperty(value = "Adyen payment method")
-    val paymentMethod: AdyenPaymentMethodRequestModel?
+    val paymentMethod: AdyenPaymentMethodRequestModel?,
+
+    @ApiModelProperty(value = "Additional data")
+    val additionalData: AdyenAdditionalDataModel?,
+
+    @ApiModelProperty(value = "The used platform", example = "iOS, Android")
+    val channel: String?,
+
+    @ApiModelProperty(value = "Return URL", example = "payment-dev.mblb.net")
+    val returnUrl: String?,
+
+    @ApiModelProperty(value = "Enable recurring payment", example = "true")
+    val enableRecurring: Boolean?
 )

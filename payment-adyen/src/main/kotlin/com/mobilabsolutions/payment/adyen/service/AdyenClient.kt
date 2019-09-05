@@ -4,13 +4,6 @@
 
 package com.mobilabsolutions.payment.adyen.service
 
-import com.adyen.Client
-import com.adyen.Config
-import com.adyen.enums.Environment
-import com.adyen.model.Amount
-import com.adyen.model.checkout.PaymentSessionRequest
-import com.adyen.service.Checkout
-import com.adyen.service.exception.ApiException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.adyen.configuration.AdyenProperties
 import com.mobilabsolutions.payment.adyen.data.enum.AdyenMode
@@ -19,40 +12,31 @@ import com.mobilabsolutions.payment.adyen.model.request.AdyenDeleteAliasRequestM
 import com.mobilabsolutions.payment.adyen.model.request.AdyenPaymentRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenRefundRequestModel
 import com.mobilabsolutions.payment.adyen.model.request.AdyenReverseRequestModel
-import com.mobilabsolutions.payment.adyen.model.request.AdyenVerifyPaymentRequestModel
+import com.mobilabsolutions.payment.adyen.model.request.AdyenVerify3DSRequestModel
+import com.mobilabsolutions.payment.adyen.model.response.Adyen3DSResponseModel
 import com.mobilabsolutions.payment.adyen.model.response.AdyenPaymentResponseModel
-import com.mobilabsolutions.payment.adyen.model.response.AdyenVerifyPaymentResponseModel
-import com.mobilabsolutions.payment.data.enum.Channel
 import com.mobilabsolutions.payment.model.PspConfigModel
-import com.mobilabsolutions.payment.model.request.DynamicPspConfigRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
-import com.mobilabsolutions.server.commons.util.RandomStringGenerator
 import mu.KLogging
 import org.json.JSONObject
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.text.SimpleDateFormat
-import java.util.Calendar
 
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
 @Service
 class AdyenClient(
-    private val randomStringGenerator: RandomStringGenerator,
     private val adyenProperties: AdyenProperties,
     private val objectMapper: ObjectMapper
 ) {
     companion object : KLogging() {
-        const val STRING_LENGTH = 20
-        const val VERIFY_URL = "/payments/result"
         const val API_KEY = "X-API-Key"
-        const val PAYLOAD = "payload"
-        const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'"
         const val PREAUTH_URL = "/authorise"
         const val AUTHORIZATION_URL = "/authorise"
-        const val SEPA_PAYMENT_URL = "/payments"
+        const val PAYMENT_URL = "/payments"
+        const val VERIFY_PAYMENT_URL = "/payments/details"
         const val REVERSE_URL = "/cancel"
         const val CAPTURE_URL = "/capture"
         const val REFUND_URL = "/refund"
@@ -62,83 +46,54 @@ class AdyenClient(
     }
 
     /**
-     * Requests an Adyen payment session
+     * Makes a payment and registers a credit card with 3D Secure
      *
-     * @param pspConfigModel Adyen configuration
-     * @param dynamicPspConfig Dynamic PSP configuration request
-     * @return payment session
+     * @param request Adyen payment request
+     * @param pspConfig Adyen configuration
+     * @param mode test or live mode
+     * @return Adyen 3D secure response
      */
-    fun requestPaymentSession(
-        pspConfigModel: PspConfigModel,
-        dynamicPspConfig: DynamicPspConfigRequestModel?,
+    fun registerCreditCardWith3DS(
+        request: AdyenPaymentRequestModel,
+        pspConfig: PspConfigModel,
         mode: String
-    ): String {
-        val config = Config()
-        config.apiKey = if (mode == AdyenMode.TEST.mode) pspConfigModel.sandboxPublicKey else pspConfigModel.publicKey
+    ): Adyen3DSResponseModel {
+        val apiKey = if (mode == AdyenMode.TEST.mode) pspConfig.sandboxPublicKey else pspConfig.publicKey
+        val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testCheckoutBaseUrl + PAYMENT_URL
+        else adyenProperties.liveCheckoutBaseUrl.format(pspConfig.urlPrefix) + PAYMENT_URL
 
-        val client = Client(config)
-        if (mode == AdyenMode.TEST.mode) client.setEnvironment(Environment.TEST, null)
-        else client.setEnvironment(Environment.LIVE, pspConfigModel.urlPrefix)
-
-        val checkout = Checkout(client)
-        val amount = Amount()
-        amount.currency = pspConfigModel.currency
-        amount.value = 0
-
-        val paymentSessionRequest = PaymentSessionRequest()
-        paymentSessionRequest.reference = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
-        paymentSessionRequest.shopperReference = randomStringGenerator.generateRandomAlphanumeric(STRING_LENGTH)
-        paymentSessionRequest.channel =
-            if (dynamicPspConfig?.channel.equals(Channel.ANDROID.name, ignoreCase = true))
-                PaymentSessionRequest.ChannelEnum.ANDROID else PaymentSessionRequest.ChannelEnum.IOS
-        paymentSessionRequest.enableRecurring(true)
-        paymentSessionRequest.enableOneClick(true)
-        paymentSessionRequest.token = dynamicPspConfig?.token
-        paymentSessionRequest.returnUrl = dynamicPspConfig?.returnUrl
-        paymentSessionRequest.countryCode = pspConfigModel.country
-        paymentSessionRequest.shopperLocale = pspConfigModel.locale
-        paymentSessionRequest.sessionValidity = SimpleDateFormat(DATE_FORMAT).format(Calendar.getInstance().run {
-            add(Calendar.MINUTE, 5)
-            time
-        }.time)
-        paymentSessionRequest.merchantAccount =
-            if (mode == AdyenMode.TEST.mode) pspConfigModel.sandboxMerchantId else pspConfigModel.merchantId
-        paymentSessionRequest.amount = amount
-
-        val response = try {
-            checkout.paymentSession(paymentSessionRequest)
-        } catch (exception: ApiException) {
-            throw ApiError.builder().withErrorCode(ApiErrorCode.PSP_MODULE_ERROR)
-                .withError(exception.error?.message ?: "adyen_error")
-                .withMessage("Error during requesting Adyen payment session").build().asException()
-        }
-
-        return response.paymentSession.toString()
+        val response = khttp.post(
+            url = paymentUrl,
+            headers = mapOf(API_KEY to apiKey!!),
+            json = JSONObject(objectMapper.writeValueAsString(request))
+        )
+        return Adyen3DSResponseModel(response.jsonObject)
     }
 
-    /** Verifies Adyen payment result
+    /**
+     * Verifies a payment for 3D Secure
      *
-     * @param verifyRequest Adyen verify payment request
-     * @param urlPrefix URL prefix
+     * @param request Adyen verify payment request
+     * @param pspConfig Adyen configuration
      * @param mode test or live mode
      * @return Adyen verify payment response
      */
-    fun verifyPayment(
-        verifyRequest: AdyenVerifyPaymentRequestModel,
-        urlPrefix: String?,
+    fun verify3DS(
+        request: AdyenVerify3DSRequestModel,
+        pspConfig: PspConfigModel,
         mode: String
-    ): AdyenVerifyPaymentResponseModel {
-        val verifyUrl =
-            if (mode == AdyenMode.TEST.mode) adyenProperties.testCheckoutBaseUrl + VERIFY_URL
-            else adyenProperties.liveCheckoutBaseUrl.format(urlPrefix) + VERIFY_URL
+    ): Adyen3DSResponseModel {
+        val apiKey = if (mode == AdyenMode.TEST.mode) pspConfig.sandboxPublicKey else pspConfig.publicKey
+        val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testCheckoutBaseUrl + VERIFY_PAYMENT_URL
+        else adyenProperties.liveCheckoutBaseUrl.format(pspConfig.urlPrefix) + VERIFY_PAYMENT_URL
 
         val response = khttp.post(
-            url = verifyUrl,
-            headers = mapOf(API_KEY to verifyRequest.apiKey!!),
-            json = mapOf(PAYLOAD to verifyRequest.payload)
+            url = paymentUrl,
+            headers = mapOf(API_KEY to apiKey!!),
+            json = JSONObject(objectMapper.writeValueAsString(request))
         )
 
-        return AdyenVerifyPaymentResponseModel(response.jsonObject)
+        return Adyen3DSResponseModel(response.jsonObject)
     }
 
     /**
@@ -259,8 +214,8 @@ class AdyenClient(
         mode: String
     ): AdyenPaymentResponseModel {
         val apiKey = if (mode == AdyenMode.TEST.mode) pspConfig.sandboxPublicKey else pspConfig.publicKey
-        val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testCheckoutBaseUrl + SEPA_PAYMENT_URL
-        else adyenProperties.liveCheckoutBaseUrl.format(pspConfig.urlPrefix) + SEPA_PAYMENT_URL
+        val paymentUrl = if (mode == AdyenMode.TEST.mode) adyenProperties.testCheckoutBaseUrl + PAYMENT_URL
+        else adyenProperties.liveCheckoutBaseUrl.format(pspConfig.urlPrefix) + PAYMENT_URL
 
         val response = khttp.post(
             url = paymentUrl,

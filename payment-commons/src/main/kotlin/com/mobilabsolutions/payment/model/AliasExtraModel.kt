@@ -28,6 +28,10 @@ data class AliasExtraModel(
     @field:Valid
     val payPalConfig: PayPalConfigModel?,
 
+    @ApiModelProperty(value = "3D Secure configuration")
+    @field:Valid
+    val threeDSecureConfig: ThreeDSecureConfigModel?,
+
     @ApiModelProperty(value = "Personal data")
     @field:Valid
     val personalData: PersonalDataModel?,
@@ -37,6 +41,6 @@ data class AliasExtraModel(
     @field:NotNull
     val paymentMethod: String?,
 
-    @ApiModelProperty(value = "Payload")
-    val payload: String?
+    @ApiModelProperty(value = "Used platform", example = "iOS, Android")
+    val channel: String?
 )

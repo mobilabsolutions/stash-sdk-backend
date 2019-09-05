@@ -34,11 +34,11 @@ class ReportService(
 ) {
 
     companion object : KLogging() {
-        const val DATE_FORMAT_UTC = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        private const val DATE_FORMAT_UTC = "yyyy-MM-dd'T'HH:mm:ss'Z'"
 
         private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_UTC)
 
-        val csvHeaders = arrayOf("no", "id", "initialAmount", "initialCreatedDate", "reason", "customerId", "status", "paymentMethod", "amount", "createdDate")
+        private val csvHeaders = arrayOf("no", "id", "initialAmount", "initialCreatedDate", "reason", "customerId", "status", "paymentMethod", "amount", "createdDate")
     }
 
     /**
