@@ -10,6 +10,8 @@ import com.mobilabsolutions.payment.data.repository.FilterRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.DashboardReportModel
+import com.mobilabsolutions.payment.model.FiltersModel
+import com.mobilabsolutions.payment.model.response.FiltersListResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import mu.KLogging
@@ -104,6 +106,20 @@ class ReportService(
         val transactions = transactionRepository.getCustomTransactions(merchantId, filter.createdAtStart, filter.createdAtEnd, filter.paymentMethod, filter.status, filter.text, filter.currency, filter.amount, filter.customerId, filter.transactionId, filter.merchantTransactionId)
 
         writeToCsv(response, transactions, merchantId, timezone, customCsvHeaders)
+    }
+
+    /**
+     * Gets all report filters by merchant ID
+     *
+     * @param merchantId Merchant ID
+     * @return Filters list response model
+     */
+    @Transactional(readOnly = true)
+    fun getAllReportFilters(merchantId: String): FiltersListResponseModel {
+        logger.info("Fetching all report filter names for merchant {}", merchantId)
+        merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        val filtersList = filterRepository.getFiltersByMerchantId(merchantId).map { FiltersModel(it!!.id) }
+        return FiltersListResponseModel(filtersList)
     }
 
     private fun writeToCsv(response: HttpServletResponse, transactions: List<Transaction>, merchantId: String, timezone: String, csvHeaders: Array<String>) {

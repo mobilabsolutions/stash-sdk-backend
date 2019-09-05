@@ -66,6 +66,9 @@ class ReportServiceTest {
         Mockito.`when`(filterRepository.getFilterById(filterName)).thenReturn(
             Filter(filterName, createdAtStart, createdAtEnd, status, paymentMethod, null)
         )
+        Mockito.`when`(filterRepository.getFiltersByMerchantId(merchantId)).thenReturn(
+            listOf(Filter(filterName, createdAtStart, createdAtEnd, status, paymentMethod, null))
+        )
     }
 
     @Test
@@ -89,6 +92,19 @@ class ReportServiceTest {
     fun `export custom dashboard transactions to csv with incorrect merchant id`() {
         Assertions.assertThrows(ApiException::class.java) {
             reportService.downloadCustomReports(response, incorrectMerchantId, filterName, createdAtStart, createdAtEnd, paymentMethod, status, null, currency, amount, customerId, transactionId, merchantTransactionId)
+        }
+    }
+
+    @Test
+    fun `get all report filter names successfully`() {
+        val filtersList = reportService.getAllReportFilters(merchantId)
+        Assertions.assertEquals(filtersList.filters[0].filterName, filterName)
+    }
+
+    @Test
+    fun `get all report filter names with incorrect merchant id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            reportService.getAllReportFilters(incorrectMerchantId)
         }
     }
 }
