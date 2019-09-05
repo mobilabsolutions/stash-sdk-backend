@@ -1,7 +1,9 @@
 package com.mobilabsolutions.payment.service
 
+import com.mobilabsolutions.payment.data.Filter
 import com.mobilabsolutions.payment.data.Merchant
 import com.mobilabsolutions.payment.data.enum.ReportType
+import com.mobilabsolutions.payment.data.repository.FilterRepository
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.server.commons.exception.ApiException
@@ -31,6 +33,16 @@ class ReportServiceTest {
         " \"merchantId\" : \"mobilab\", \"accountId\" : \"123\", \"default\" : \"true\"}]}"
     private val response = MockHttpServletResponse()
     private val incorrectMerchantId = "notMobilab"
+    private val filterName = "filter"
+    private val createdAtStart = "2019-07-29T00:00:00Z"
+    private val createdAtEnd = "2019-07-29T23:59:59Z"
+    private val paymentMethod = "PAY_PAL"
+    private val status = "SUCCESS"
+    private val currency = "EUR"
+    private val amount = "1000"
+    private val customerId = "123"
+    private val transactionId = "123"
+    private val merchantTransactionId = "123"
 
     @InjectMocks
     private lateinit var reportService: ReportService
@@ -41,6 +53,9 @@ class ReportServiceTest {
     @Mock
     private lateinit var merchantRepository: MerchantRepository
 
+    @Mock
+    private lateinit var filterRepository: FilterRepository
+
     @BeforeAll
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
@@ -48,17 +63,32 @@ class ReportServiceTest {
         Mockito.`when`(merchantRepository.getMerchantById(merchantId)).thenReturn(
             Merchant(merchantId, pspConfig = pspConfig, timezone = "Europe/Berlin")
         )
+        Mockito.`when`(filterRepository.getFilterById(filterName)).thenReturn(
+            Filter(filterName, createdAtStart, createdAtEnd, status, paymentMethod, null)
+        )
     }
 
     @Test
-    fun `export dashboard transactions to csv successfully`() {
+    fun `export default dashboard transactions to csv successfully`() {
         reportService.downloadDefaultReports(response, ReportType.OVERVIEW.name, merchantId)
     }
 
     @Test
-    fun `export dashboard transactions to csv with incorrect merchant id`() {
+    fun `export default dashboard transactions to csv with incorrect merchant id`() {
         Assertions.assertThrows(ApiException::class.java) {
             reportService.downloadDefaultReports(response, ReportType.OVERVIEW.name, incorrectMerchantId)
+        }
+    }
+
+    @Test
+    fun `export custom dashboard transactions to csv successfully`() {
+        reportService.downloadCustomReports(response, merchantId, filterName, createdAtStart, createdAtEnd, paymentMethod, status, null, currency, amount, customerId, transactionId, merchantTransactionId)
+    }
+
+    @Test
+    fun `export custom dashboard transactions to csv with incorrect merchant id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            reportService.downloadCustomReports(response, incorrectMerchantId, filterName, createdAtStart, createdAtEnd, paymentMethod, status, null, currency, amount, customerId, transactionId, merchantTransactionId)
         }
     }
 }
