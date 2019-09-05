@@ -16,7 +16,7 @@ import javax.persistence.Table
 @Table(name = "filter")
 class Filter(
     @Id
-    @Column(name = "id", length = 20)
+    @Column(name = "id", length = 255)
     var id: String? = null,
 
     @Column(name = "start_date")

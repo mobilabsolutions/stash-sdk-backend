@@ -151,7 +151,7 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
         "AND tr.created_date >= CASE WHEN :createdAtStart <> '' THEN TO_TIMESTAMP(CAST(:createdAtStart AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END " +
         "AND tr.created_date <= CASE WHEN :createdAtEnd <> '' THEN TO_TIMESTAMP(CAST(:createdAtEnd AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END " +
         "AND tr.currency_id = CASE WHEN :currency <> '' THEN CAST(:currency AS varchar) ELSE tr.currency_id END " +
-        "AND tr.amount = CASE WHEN :amount <> '' THEN CAST(CAST(:amount AS float) AS integer) * 100 ELSE tr.amount END " +
+        "AND tr.amount = CASE WHEN :amount <> '' THEN CAST(CAST(CAST(:amount AS varchar) AS float) AS integer) * 100 ELSE tr.amount END " +
         "AND tr.merchant_customer_id = CASE WHEN :customerId <> '' THEN CAST(:customerId AS varchar) ELSE tr.merchant_customer_id END " +
         "AND tr.transaction_id = CASE WHEN :transactionId <> '' THEN CAST(:transactionId AS varchar) ELSE tr.transaction_id END " +
         "AND tr.merchant_transaction_id = CASE WHEN :merchantTransactionId <> '' THEN CAST(:merchantTransactionId AS varchar) ELSE tr.merchant_transaction_id END " +

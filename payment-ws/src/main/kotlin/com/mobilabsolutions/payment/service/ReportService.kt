@@ -79,6 +79,7 @@ class ReportService(
      * @param transactionId Transaction ID
      * @param merchantTransactionId Merchant transaction ID
      */
+    @Transactional
     fun downloadCustomReports(
         response: HttpServletResponse,
         merchantId: String,
