@@ -91,11 +91,16 @@ class ReportController(
         @DateValidator @RequestParam(required = false) createdAtEnd: String?,
         @ApiParam(value = "Payment method", example = "Values: CC, SEPA, PAY_PAL, GOOGLE_PAY, APPLE_PAY, KLARNA") @PaymentMethodEnumValidator(PaymentMethod = PaymentMethod::class) @RequestParam(required = false) paymentMethod: String?,
         @ApiParam(value = "Transaction status", example = "Values: SUCCESS, FAIL") @TransactionStatusEnumValidator(TransactionStatus = TransactionStatus::class) @RequestParam(required = false) status: String?,
-        @RequestParam(required = false) text: String?
+        @RequestParam(required = false) text: String?,
+        @RequestParam(required = false) currency: String?,
+        @RequestParam(required = false) amount: String?,
+        @RequestParam(required = false) customerId: String?,
+        @RequestParam(required = false) transactionId: String?,
+        @RequestParam(required = false) merchantTransactionId: String?
     ) {
         val fileNameString = filterName + "_" + SimpleDateFormat("yyyyMMdd").format(Date())
         response.contentType = CSV_CONTENT_TYPE
         response.setHeader(CSV_HEADER_KEY, "attachment; filename=$fileNameString.csv")
-        reportService.downloadCustomReports(response, merchantId, filterName, createdAtStart, createdAtEnd, paymentMethod, status, text)
+        reportService.downloadCustomReports(response, merchantId, filterName, createdAtStart, createdAtEnd, paymentMethod, status, text, currency, amount, customerId, transactionId, merchantTransactionId)
     }
 }

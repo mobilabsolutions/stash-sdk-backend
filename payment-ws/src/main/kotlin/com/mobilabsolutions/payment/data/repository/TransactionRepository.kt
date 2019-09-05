@@ -150,6 +150,11 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
         "AND tr.payment_method = CASE WHEN :paymentMethod <> '' THEN CAST(:paymentMethod AS varchar) ELSE tr.payment_method END " +
         "AND tr.created_date >= CASE WHEN :createdAtStart <> '' THEN TO_TIMESTAMP(CAST(:createdAtStart AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END " +
         "AND tr.created_date <= CASE WHEN :createdAtEnd <> '' THEN TO_TIMESTAMP(CAST(:createdAtEnd AS text), 'yyyy-MM-dd HH24:MI:SS') ELSE tr.created_date END " +
+        "AND tr.currency_id = CASE WHEN :currency <> '' THEN CAST(:currency AS varchar) ELSE tr.currency_id END " +
+        "AND tr.amount = CASE WHEN :amount <> '' THEN CAST(CAST(:amount AS float) AS integer) * 100 ELSE tr.amount END " +
+        "AND tr.merchant_customer_id = CASE WHEN :customerId <> '' THEN CAST(:customerId AS varchar) ELSE tr.merchant_customer_id END " +
+        "AND tr.transaction_id = CASE WHEN :transactionId <> '' THEN CAST(:transactionId AS varchar) ELSE tr.transaction_id END " +
+        "AND tr.merchant_transaction_id = CASE WHEN :merchantTransactionId <> '' THEN CAST(:merchantTransactionId AS varchar) ELSE tr.merchant_transaction_id END " +
         "AND CASE WHEN :text <> '' THEN (CAST(tr.payment_info AS json)#>>'{pspConfig, type}' ~* CAST(:text AS text) " +
         "OR tr.reason ~* CAST(:text AS varchar) " +
         "OR tr.transaction_id ~* CAST(:text AS varchar) " +
@@ -170,6 +175,11 @@ interface TransactionRepository : BaseRepository<Transaction, Long> {
         @Param("createdAtEnd") createdAtEnd: String?,
         @Param("paymentMethod") paymentMethod: String?,
         @Param("status") status: String?,
-        @Param("text") text: String?
+        @Param("text") text: String?,
+        @Param("currency") currency: String?,
+        @Param("amount") amount: String?,
+        @Param("customerId") customerId: String?,
+        @Param("transactionId") transactionId: String?,
+        @Param("merchantTransactionId") merchantTransactionId: String?
     ): List<Transaction>
 }

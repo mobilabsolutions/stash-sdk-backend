@@ -73,13 +73,33 @@ class ReportService(
      * @param paymentMethod Payment method
      * @param status Status
      * @param text Keyword text
+     * @param currency Currency
+     * @param amount Amount
+     * @param customerId Customer ID
+     * @param transactionId Transaction ID
+     * @param merchantTransactionId Merchant transaction ID
      */
-    fun downloadCustomReports(response: HttpServletResponse, merchantId: String, filterName: String, createdAtStart: String?, createdAtEnd: String?, paymentMethod: String?, status: String?, text: String?) {
+    fun downloadCustomReports(
+        response: HttpServletResponse,
+        merchantId: String,
+        filterName: String,
+        createdAtStart: String?,
+        createdAtEnd: String?,
+        paymentMethod: String?,
+        status: String?,
+        text: String?,
+        currency: String?,
+        amount: String?,
+        customerId: String?,
+        transactionId: String?,
+        merchantTransactionId: String?
+    ) {
         logger.info("Downloading custom report for merchant {}", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
-        val filter = filterRepository.getFilterById(filterName) ?: filterRepository.save(Filter(filterName, createdAtStart, createdAtEnd, status, paymentMethod, text, merchant))
-        val transactions = transactionRepository.getCustomTransactions(merchantId, filter.createdAtStart, filter.createdAtEnd, filter.paymentMethod, filter.status, filter.text)
+        val filter = filterRepository.getFilterById(filterName)
+            ?: filterRepository.save(Filter(filterName, createdAtStart, createdAtEnd, status, paymentMethod, text, currency, amount, customerId, transactionId, merchantTransactionId, merchant))
+        val transactions = transactionRepository.getCustomTransactions(merchantId, filter.createdAtStart, filter.createdAtEnd, filter.paymentMethod, filter.status, filter.text, filter.currency, filter.amount, filter.customerId, filter.transactionId, filter.merchantTransactionId)
 
         writeToCsv(response, transactions, merchantId, timezone)
     }

@@ -38,6 +38,11 @@ class ReportServiceTest {
     private val createdAtEnd = "2019-07-29T23:59:59Z"
     private val paymentMethod = "PAY_PAL"
     private val status = "SUCCESS"
+    private val currency = "EUR"
+    private val amount = "1000"
+    private val customerId = "123"
+    private val transactionId = "123"
+    private val merchantTransactionId = "123"
 
     @InjectMocks
     private lateinit var reportService: ReportService
@@ -77,13 +82,13 @@ class ReportServiceTest {
 
     @Test
     fun `export custom dashboard transactions to csv successfully`() {
-        reportService.downloadCustomReports(response, merchantId, filterName, createdAtStart, createdAtEnd, paymentMethod, status, null)
+        reportService.downloadCustomReports(response, merchantId, filterName, createdAtStart, createdAtEnd, paymentMethod, status, null, currency, amount, customerId, transactionId, merchantTransactionId)
     }
 
     @Test
     fun `export custom dashboard transactions to csv with incorrect merchant id`() {
         Assertions.assertThrows(ApiException::class.java) {
-            reportService.downloadCustomReports(response, incorrectMerchantId, filterName, createdAtStart, createdAtEnd, paymentMethod, status, null)
+            reportService.downloadCustomReports(response, incorrectMerchantId, filterName, createdAtStart, createdAtEnd, paymentMethod, status, null, currency, amount, customerId, transactionId, merchantTransactionId)
         }
     }
 }

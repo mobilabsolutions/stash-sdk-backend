@@ -34,6 +34,21 @@ class Filter(
     @Column(name = "text")
     var text: String? = null,
 
+    @Column(name = "currency")
+    var currency: String? = null,
+
+    @Column(name = "amount")
+    var amount: String? = null,
+
+    @Column(name = "customer_id")
+    var customerId: String? = null,
+
+    @Column(name = "transaction_id")
+    var transactionId: String? = null,
+
+    @Column(name = "merchant_transaction_id")
+    var merchantTransactionId: String? = null,
+
     @ManyToOne
     @JoinColumn(name = "merchant_id", nullable = false, foreignKey = ForeignKey(name = "fk_merchant_filter"))
     var merchant: Merchant = Merchant()
