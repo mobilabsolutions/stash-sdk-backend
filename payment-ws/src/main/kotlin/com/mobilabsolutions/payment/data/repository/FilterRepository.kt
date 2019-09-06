@@ -2,6 +2,7 @@ package com.mobilabsolutions.payment.data.repository
 
 import com.mobilabsolutions.payment.data.Filter
 import com.mobilabsolutions.payment.data.configuration.BaseRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.stereotype.Repository
 
 /**
@@ -10,4 +11,7 @@ import org.springframework.stereotype.Repository
 @Repository
 interface FilterRepository : BaseRepository<Filter, String> {
     fun getFilterById(id: String): Filter?
+
+    @Modifying
+    fun deleteFilterById(id: String): Int
 }

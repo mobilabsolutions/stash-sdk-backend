@@ -50,6 +50,7 @@ enum class ApiErrorCode(val code: String, val message: String, val httpStatus: H
     CONFIG_NOT_FOUND("3023", "Required configurations for specified payment method are not complete", HttpStatus.BAD_REQUEST),
     PSP_ALIAS_NOT_FOUND("3024", "PSP alias is required for this PSP", HttpStatus.BAD_REQUEST),
     PSP_TRANSACTION_NOT_FOUND("3025", "There is no transaction for given PSP transaction ID and action", HttpStatus.BAD_REQUEST),
+    REPORT_FILTER_NOT_FOUND("3026", "Given report filter name cannot be found", HttpStatus.BAD_REQUEST),
 
     PSP_MODULE_ERROR("4000", "Unexpected PSP operation error.", HttpStatus.INTERNAL_SERVER_ERROR),
 
