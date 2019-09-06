@@ -256,7 +256,7 @@
             LANGUAGE plpgsql
             AS $function$
             BEGIN
-            PERFORM pg_notify('transaction_record', json_build_object('id', new.id, 'merchant_id', new.merchant_id)::text);
+            PERFORM pg_notify('transaction_record', json_build_object('id', new.id, 'merchantId', new.merchant_id)::text);
             RETURN NEW; END;$function$;
         </createProcedure>
         <rollback>
