@@ -1700,6 +1700,40 @@
                     "response": []
                 },
                 {
+                    "name": "Get All Report Filter Names",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": ""
+                        },
+                        "url": {
+                            "raw": "{{wsEndpoint}}/api/v1/report/:Merchant-Id",
+                            "host": [
+                                "{{wsEndpoint}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "report",
+                                "{Merchant-Id}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
                     "name": "Delete Report Filter",
                     "request": {
                         "auth": {

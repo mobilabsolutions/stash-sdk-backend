@@ -12,6 +12,8 @@ import org.springframework.stereotype.Repository
 interface FilterRepository : BaseRepository<Filter, String> {
     fun getFilterById(id: String): Filter?
 
+    fun getFiltersByMerchantId(merchantId: String): List<Filter>
+
     @Modifying
     fun deleteFilterById(id: String): Int
 }
