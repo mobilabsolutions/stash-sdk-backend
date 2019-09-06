@@ -113,7 +113,8 @@ class ReportController(
         ApiResponse(code = 404, message = "Resource not found")
     )
     @RequestMapping(GET_ALL_FILTERS_URL,
-        method = [RequestMethod.GET])
+        method = [RequestMethod.GET],
+        produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun getAllReportFilters(
