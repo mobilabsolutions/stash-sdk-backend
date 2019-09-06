@@ -81,7 +81,7 @@ class AdyenPsp(
             publicKey = null,
             privateKey = null,
             clientToken = null,
-            clientEncryptionKey = pspConfigModel.clientEncryptionKey
+            clientEncryptionKey = if (adyenMode == AdyenMode.TEST.mode) pspConfigModel.sandboxClientEncryptionKey else pspConfigModel.clientEncryptionKey
         ) else null
     }
 

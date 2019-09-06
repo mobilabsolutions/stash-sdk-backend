@@ -20,10 +20,10 @@ import com.mobilabsolutions.payment.model.response.PspConfigResponseModel
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import mu.KLogging
-import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 
 /**
@@ -70,6 +70,7 @@ class MerchantService(
                         country = pspConfigRequestModel.pspConfig.country,
                         locale = pspConfigRequestModel.pspConfig.locale,
                         urlPrefix = pspConfigRequestModel.pspConfig.urlPrefix,
+                        sandboxClientEncryptionKey = pspConfigRequestModel.pspConfig.sandboxClientEncryptionKey,
                         clientEncryptionKey = pspConfigRequestModel.pspConfig.clientEncryptionKey
                     )
                 )
@@ -158,6 +159,7 @@ class MerchantService(
                         country = pspUpsertConfigRequestModel.country,
                         locale = pspUpsertConfigRequestModel.locale,
                         urlPrefix = pspUpsertConfigRequestModel.urlPrefix,
+                        sandboxClientEncryptionKey = pspUpsertConfigRequestModel.sandboxClientEncryptionKey,
                         clientEncryptionKey = pspUpsertConfigRequestModel.clientEncryptionKey
                     )
                 )
@@ -264,6 +266,7 @@ class MerchantService(
             country,
             locale,
             urlPrefix,
+            sandboxClientEncryptionKey,
             clientEncryptionKey
         )
 }

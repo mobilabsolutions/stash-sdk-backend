@@ -90,7 +90,8 @@ class AdyenPspTest {
         country,
         locale,
         urlPrefix,
-        clientToken
+        clientToken,
+        null
     )
     private val email = "test@test.com"
     private val customerIP = "61.294.12.12"

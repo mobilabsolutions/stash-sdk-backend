@@ -225,6 +225,30 @@
         </addColumn>
         <addDefaultValue columnDataType="BOOLEAN" columnName="processed_notification" defaultValueBoolean="false" tableName="transaction_record"/>
     </changeSet>
+    <changeSet author="mohamed.osman" id="PSOS-498_1">
+        <createTable tableName="filter">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_date" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_date" type="VARCHAR(255)"/>
+            <column name="end_date" type="VARCHAR(255)"/>
+            <column name="status" type="VARCHAR(255)"/>
+            <column name="payment_method" type="VARCHAR(255)"/>
+            <column name="text" type="VARCHAR(255)"/>
+            <column name="currency" type="VARCHAR(255)"/>
+            <column name="amount" type="VARCHAR(255)"/>
+            <column name="customer_id" type="VARCHAR(255)"/>
+            <column name="transaction_id" type="VARCHAR(255)"/>
+            <column name="merchant_transaction_id" type="VARCHAR(255)"/>
+            <column name="merchant_id" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
     <changeSet author="veskovic.jovana" id="PSOS-477_1">
         <createProcedure>
             CREATE OR REPLACE FUNCTION transaction_insert_notify()

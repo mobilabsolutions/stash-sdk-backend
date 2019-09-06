@@ -56,6 +56,9 @@ data class PspUpsertConfigRequestModel(
     @ApiModelProperty(value = "Live URL prefix", example = "`[random]-[company-name]`")
     val urlPrefix: String?,
 
-    @ApiModelProperty(value = "Client encryption key", example = "ABA0B8C5413CD5E0D806DE19CA...")
+    @ApiModelProperty(value = "Sandbox client encryption key", example = "ABA0B8C5413CD5E0D806DE19CA...")
+    val sandboxClientEncryptionKey: String?,
+
+    @ApiModelProperty(value = "Production client encryption key", example = "ABA0B8C5413CD5E0D806DE19CA...")
     val clientEncryptionKey: String?
 )
