@@ -40,6 +40,7 @@ class ReportController(
         const val BASE_REPORT_URL = "report"
         const val EXPORT_DEFAULT_REPORT_URL = "/{Merchant-Id}/default"
         const val EXPORT_CUSTOM_REPORT_URL = "/{Merchant-Id}/custom"
+        const val GET_ALL_FILTERS_URL = "/{Merchant-Id}"
 
         const val CSV_CONTENT_TYPE = "text/csv"
         const val CSV_HEADER_KEY = "Content-Disposition"
@@ -103,4 +104,20 @@ class ReportController(
         response.setHeader(CSV_HEADER_KEY, "attachment; filename=$fileNameString.csv")
         reportService.downloadCustomReports(response, merchantId, filterName, createdAtStart, createdAtEnd, paymentMethod, status, text, currency, amount, customerId, transactionId, merchantTransactionId)
     }
+
+    @ApiOperation(value = "Display all report filters")
+    @ApiResponses(
+        ApiResponse(code = 200, message = "Successfully fetched report filters"),
+        ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 403, message = "Forbidden access"),
+        ApiResponse(code = 404, message = "Resource not found")
+    )
+    @RequestMapping(GET_ALL_FILTERS_URL,
+        method = [RequestMethod.GET],
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
+    fun getAllReportFilters(
+        @PathVariable("Merchant-Id") merchantId: String
+    ) = reportService.getAllReportFilters(merchantId)
 }
