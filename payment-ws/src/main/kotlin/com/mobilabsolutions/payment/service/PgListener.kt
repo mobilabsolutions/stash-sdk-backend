@@ -7,6 +7,7 @@ package com.mobilabsolutions.payment.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
 import com.mobilabsolutions.payment.model.TransactionNotificationModel
+import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
 import io.vertx.pgclient.PgConnectOptions
 import io.vertx.pgclient.pubsub.PgSubscriber
@@ -14,6 +15,7 @@ import mu.KLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Component
+import java.util.concurrent.SynchronousQueue
 
 /**
  * Listens to postgres notifications, and sends them via WebSocket to the client.
@@ -45,24 +47,32 @@ class PgListener(
             .setDatabase(database)
             .setUser(username)
             .setPassword(password)
-        val subscriber = PgSubscriber.subscriber(Vertx.vertx(), connectionOptions)
-        subscriber.connect { connection ->
-            if (connection.succeeded()) {
-                subscriber.channel(POSTGRES_CHANNEL).handler { payload ->
-                    logger.info { "Listening to live data." }
-                    try {
-                        val transactionNotification = objectMapper.readValue(payload, TransactionNotificationModel::class.java)
-                        val merchantUsers = merchantUserRepository.getMerchantUsers(transactionNotification.merchantId!!)
-                        merchantUsers.forEach { user ->
-                            simpleMessagingTemplate.convertAndSendToUser(user.email, TOPIC_NAME, homeService.toLiveData(transactionNotification.id!!))
-                        }
-                    } catch (exception: Exception) {
-                        logger.error("An error occurred while listening to live data: {}", exception.message)
-                    }
-                }
-            }
+        val vertx = Vertx.vertx()
+        val subscriber = PgSubscriber.subscriber(vertx, connectionOptions).reconnectPolicy { 5000 }
+
+        val queue = SynchronousQueue<AsyncResult<Void>>()
+        subscriber.connect { result ->
+            queue.put(result)
         }
 
-        subscriber.reconnectPolicy { 5000 }
+        val connectionResult = queue.take()
+        if (connectionResult.succeeded()) {
+            logger.info { "Connection succeeded" }
+            subscriber.channel(PgListener.POSTGRES_CHANNEL).handler { payload ->
+                logger.info { "Listening to live data." }
+                try {
+                    val transactionNotification = objectMapper.readValue(payload, TransactionNotificationModel::class.java)
+                    val merchantUsers = merchantUserRepository.getMerchantUsers(transactionNotification.merchantId!!)
+                    merchantUsers.forEach { user ->
+                        simpleMessagingTemplate.convertAndSendToUser(user.email, PgListener.TOPIC_NAME, homeService.toLiveData(transactionNotification.id!!))
+                    }
+                } catch (exception: Exception) {
+                    logger.error("An error occurred while listening to live data: {}", exception.message)
+                }
+            }
+        } else {
+            vertx.close()
+            throw connectionResult.cause()
+        }
     }
 }
