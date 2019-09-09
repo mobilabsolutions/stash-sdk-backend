@@ -43,6 +43,7 @@ class ReportServiceTest {
     private val customerId = "123"
     private val transactionId = "123"
     private val merchantTransactionId = "123"
+    private val incorrectFilterName = "notAFilter"
 
     @InjectMocks
     private lateinit var reportService: ReportService
@@ -66,6 +67,8 @@ class ReportServiceTest {
         Mockito.`when`(filterRepository.getFilterById(filterName)).thenReturn(
             Filter(filterName, createdAtStart, createdAtEnd, status, paymentMethod, null)
         )
+        Mockito.`when`(filterRepository.deleteFilterById(filterName)).thenReturn(1)
+        Mockito.`when`(filterRepository.deleteFilterById(incorrectFilterName)).thenReturn(0)
         Mockito.`when`(filterRepository.getFiltersByMerchantId(merchantId)).thenReturn(
             listOf(Filter(filterName, createdAtStart, createdAtEnd, status, paymentMethod, null))
         )
@@ -96,6 +99,24 @@ class ReportServiceTest {
     }
 
     @Test
+    fun `delete report filter successfully`() {
+        reportService.deleteReportFilter(merchantId, filterName)
+    }
+
+    @Test
+    fun `delete report filter with incorrect merchant id`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            reportService.deleteReportFilter(incorrectMerchantId, filterName)
+        }
+    }
+
+    @Test
+    fun `delete report filter with incorrect filter name`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            reportService.deleteReportFilter(merchantId, incorrectFilterName)
+        }
+    }
+
     fun `get all report filter names successfully`() {
         val filtersList = reportService.getAllReportFilters(merchantId)
         Assertions.assertEquals(filtersList.filters[0].filterName, filterName)

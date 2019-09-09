@@ -41,6 +41,7 @@ class ReportController(
         const val EXPORT_DEFAULT_REPORT_URL = "/{Merchant-Id}/default"
         const val EXPORT_CUSTOM_REPORT_URL = "/{Merchant-Id}/custom"
         const val GET_ALL_FILTERS_URL = "/{Merchant-Id}"
+        const val DELETE_FILTER_URL = "/{Merchant-Id}"
 
         const val CSV_CONTENT_TYPE = "text/csv"
         const val CSV_HEADER_KEY = "Content-Disposition"
@@ -120,4 +121,20 @@ class ReportController(
     fun getAllReportFilters(
         @PathVariable("Merchant-Id") merchantId: String
     ) = reportService.getAllReportFilters(merchantId)
+
+    @ApiOperation(value = "Delete a report filter")
+    @ApiResponses(
+        ApiResponse(code = 204, message = "Successfully deleted report filter"),
+        ApiResponse(code = 401, message = "Unauthorized access"),
+        ApiResponse(code = 403, message = "Forbidden access"),
+        ApiResponse(code = 404, message = "Resource not found")
+    )
+    @RequestMapping(DELETE_FILTER_URL,
+        method = [RequestMethod.DELETE])
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
+    fun deleteReportFilter(
+        @PathVariable("Merchant-Id") merchantId: String,
+        @RequestParam filterName: String
+    ) = reportService.deleteReportFilter(merchantId, filterName)
 }

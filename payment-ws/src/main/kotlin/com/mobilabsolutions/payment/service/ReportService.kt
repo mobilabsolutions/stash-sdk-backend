@@ -145,6 +145,19 @@ class ReportService(
     }
 
     /**
+     * Delete report filter by filter name
+     *
+     * @param merchantId Merchant ID
+     * @param filterName Filter name
+     */
+    @Transactional
+    fun deleteReportFilter(merchantId: String, filterName: String) {
+        logger.info("Deleting report filter for merchant {}", merchantId)
+        merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        if (filterRepository.deleteFilterById(filterName) == 0) throw ApiError.ofErrorCode(ApiErrorCode.REPORT_FILTER_NOT_FOUND).asException()
+    }
+
+    /**
      * Calculates the date in the past for the given number of days
      *
      * @param merchant Merchant
