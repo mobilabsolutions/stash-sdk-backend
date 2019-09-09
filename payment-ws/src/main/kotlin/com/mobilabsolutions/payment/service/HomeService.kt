@@ -46,12 +46,14 @@ class HomeService(
 
     companion object : KLogging() {
         private const val DATE_FORMAT_UTC = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        private const val DATE_FORMAT = "yyyy-MM-dd HH:mm:ss"
         private const val DAY_PATTERN = "EEEE"
         private const val SUCCESSFUL_REFUND_NOTIFICATION = "Refunded %s"
         private const val FAILED_REFUND_NOTIFICATION = "Failed refund of %s"
         private const val CHARGEBACK_NOTIFICATION = "Chargeback %s"
 
-        private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_UTC)
+        private val dateFormatterUtc: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_UTC)
+        private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT)
     }
 
     /**
@@ -91,11 +93,11 @@ class HomeService(
             when (it.action) {
                 TransactionAction.REFUND ->
                     when (it.status) {
-                        TransactionStatus.SUCCESS -> NotificationModel(it.paymentMethod?.name, SUCCESSFUL_REFUND_NOTIFICATION.format("${it.amount?.toDouble()?.div(100)}${it.currencyId}"))
-                        TransactionStatus.FAIL -> NotificationModel(it.paymentMethod?.name, FAILED_REFUND_NOTIFICATION.format("${it.amount?.toDouble()?.div(100)}${it.currencyId}"))
+                        TransactionStatus.SUCCESS -> NotificationModel(it.paymentMethod?.name, SUCCESSFUL_REFUND_NOTIFICATION.format("${it.amount?.toDouble()?.div(100)}${it.currencyId}"), dateFormatter.withZone(ZoneId.of(merchant.timezone)).format(it.createdDate))
+                        TransactionStatus.FAIL -> NotificationModel(it.paymentMethod?.name, FAILED_REFUND_NOTIFICATION.format("${it.amount?.toDouble()?.div(100)}${it.currencyId}"), dateFormatter.withZone(ZoneId.of(merchant.timezone)).format(it.createdDate))
                         else -> null
                     }
-                TransactionAction.CHARGEBACK -> NotificationModel(it.paymentMethod?.name, CHARGEBACK_NOTIFICATION.format("${it.amount?.toDouble()?.div(100)}${it.currencyId}"))
+                TransactionAction.CHARGEBACK -> NotificationModel(it.paymentMethod?.name, CHARGEBACK_NOTIFICATION.format("${it.amount?.toDouble()?.div(100)}${it.currencyId}"), dateFormatter.withZone(ZoneId.of(merchant.timezone)).format(it.createdDate))
                 else -> null
             }
         }
@@ -160,8 +162,8 @@ class HomeService(
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
 
         val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
-        val startOfDay = dateFormatter.format(LocalDateTime.parse(date, dateFormatter).with(LocalTime.MIN).atZone(ZoneId.of(timezone)))
-        val endOfDay = dateFormatter.format(LocalDateTime.parse(date, dateFormatter).with(LocalTime.MAX).atZone(ZoneId.of(timezone)))
+        val startOfDay = dateFormatterUtc.format(LocalDateTime.parse(date, dateFormatterUtc).with(LocalTime.MIN).atZone(ZoneId.of(timezone)))
+        val endOfDay = dateFormatterUtc.format(LocalDateTime.parse(date, dateFormatterUtc).with(LocalTime.MAX).atZone(ZoneId.of(timezone)))
         val transactions = transactionRepository.getTransactionsForPaymentMethods(merchantId, startOfDay, endOfDay)
         val transactionsMap = LinkedHashMap<String, Int>()
         initHourlyMap(transactionsMap)
@@ -202,7 +204,7 @@ class HomeService(
      * @return date as String
      */
     fun getPastDate(merchant: Merchant, days: Long): String {
-        return dateFormatter
+        return dateFormatterUtc
             .withZone(ZoneId.of(merchant.timezone ?: ZoneId.systemDefault().toString()))
             .format(Instant.now().minus(days, ChronoUnit.DAYS))
     }
@@ -259,6 +261,8 @@ class HomeService(
     }
 
     private fun getLiveDataForRefundedTransaction(transaction: Transaction): LiveDataResponseModel {
+        val timezone = transaction.merchant.timezone
+
         return LiveDataResponseModel(
             keyPerformance = when (transaction.status) {
                 TransactionStatus.SUCCESS -> KeyPerformanceModel(
@@ -285,7 +289,8 @@ class HomeService(
                             TransactionStatus.SUCCESS -> SUCCESSFUL_REFUND_NOTIFICATION.format("${transaction.amount?.toDouble()?.div(100)}${transaction.currencyId}")
                             TransactionStatus.FAIL -> FAILED_REFUND_NOTIFICATION.format("${transaction.amount?.toDouble()?.div(100)}${transaction.currencyId}")
                             else -> null
-                        }
+                        },
+                        date = dateFormatter.withZone(ZoneId.of(timezone)).format(transaction.createdDate)
                     ),
                     nrOfTransactions = 1
                 )
@@ -295,6 +300,8 @@ class HomeService(
     }
 
     private fun getLiveDataForChargedbackTransaction(transaction: Transaction): LiveDataResponseModel {
+        val timezone = transaction.merchant.timezone
+
         return LiveDataResponseModel(
             keyPerformance = when (transaction.status) {
                 TransactionStatus.SUCCESS -> KeyPerformanceModel(
@@ -317,7 +324,8 @@ class HomeService(
                 true -> NotificationsModel(
                     notification = NotificationModel(
                         paymentMethod = transaction.paymentMethod?.name,
-                        content = CHARGEBACK_NOTIFICATION.format("${transaction.amount?.toDouble()?.div(100)}${transaction.currencyId}")
+                        content = CHARGEBACK_NOTIFICATION.format("${transaction.amount?.toDouble()?.div(100)}${transaction.currencyId}"),
+                        date = dateFormatter.withZone(ZoneId.of(timezone)).format(transaction.createdDate)
                     ),
                     nrOfTransactions = 1
                 )
@@ -380,8 +388,8 @@ class HomeService(
 
     private fun getTransactionsForLastWeek(merchant: Merchant, transactionsMap: LinkedHashMap<String, Int>): LinkedHashMap<String, Int> {
         val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
-        val startDate = dateFormatter.format(LocalDateTime.now().minusDays(7).with(LocalTime.MIN).atZone(ZoneId.of(timezone)))
-        val endDate = dateFormatter.format(LocalDateTime.now().with(LocalTime.MIN).atZone(ZoneId.of(timezone)))
+        val startDate = dateFormatterUtc.format(LocalDateTime.now().minusDays(7).with(LocalTime.MIN).atZone(ZoneId.of(timezone)))
+        val endDate = dateFormatterUtc.format(LocalDateTime.now().with(LocalTime.MIN).atZone(ZoneId.of(timezone)))
         val transactions = transactionRepository.getTransactionsByMerchantId(merchant.id!!, startDate, endDate)
         for (transaction in transactions) {
             val day = DateTimeFormatter.ofPattern(DAY_PATTERN).withZone(ZoneId.of(timezone)).format(transaction.createdDate)

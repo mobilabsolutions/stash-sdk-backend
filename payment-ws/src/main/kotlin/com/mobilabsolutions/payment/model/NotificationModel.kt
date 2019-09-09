@@ -12,5 +12,8 @@ data class NotificationModel(
     val paymentMethod: String?,
 
     @ApiModelProperty(value = "Notification content", example = "Refunded 100€")
-    val content: String?
+    val content: String?,
+
+    @ApiModelProperty(value = "Date", example = "2019-09-08 11:40:40")
+    val date: String?
 )
