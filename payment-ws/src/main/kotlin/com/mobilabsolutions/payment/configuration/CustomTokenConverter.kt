@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+*/
+
 package com.mobilabsolutions.payment.configuration
 
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
@@ -16,15 +20,13 @@ class CustomTokenConverter(
 ) : JwtAccessTokenConverter() {
 
     override fun enhance(token: OAuth2AccessToken?, authentication: OAuth2Authentication?): OAuth2AccessToken {
-        if (authentication?.oAuth2Request?.grantType?.equals("password", ignoreCase = true)!!) {
-            val user = authentication.principal as UserDetails
-            val additionalInfo = HashMap<String, Any>()
+        val user = authentication?.principal as UserDetails
+        val additionalInfo = HashMap<String, Any>()
 
-            val name = merchantRepository.getMerchantForUser(user.username)
-            additionalInfo["merchant_name"] = name ?: ""
+        val name = merchantRepository.getMerchantForUser(user.username)
+        additionalInfo["merchant_name"] = name ?: ""
 
-            (token as DefaultOAuth2AccessToken).additionalInformation = additionalInfo
-        }
+        (token as DefaultOAuth2AccessToken).additionalInformation = additionalInfo
         val accessToken = super.enhance(token, authentication)
         (accessToken as DefaultOAuth2AccessToken).additionalInformation = HashMap()
 
