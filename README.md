@@ -48,16 +48,12 @@ The resulting jar file will be produced in the directory named `target`.
 
 If you want to start only the ws service, you should run `docker-compose up` from the `payment-ws` folder. It will start the following services :
 - **PostgreSQL** - listens on port 5432, username:password - `payment:payment`
-- **Zookeeper** - listens on port 2181
-- **Kafka** - listens on port 9092, the topic will be created automatically on the application startup
 - **payment-ws** - listens on port 8080
 
 If you want to start both the ws service and the notification service, you should run `docker-compose up` from the root folder. It will start the following services :
 - **2 PostgreSQL databases** 
   - payment db, listens on port 5432, username:password - `payment:payment`
   - notifications db, listens on port 5433, username:password - `notifications:notifications`
-- **Zookeeper** - listens on port 2181
-- **Kafka** - listens on port 9092, the topic will be created automatically on the application startup
 - **2 services** 
   - payment-ws, listens on port 8080
   - payment-notifications, listens on port 8082
@@ -70,6 +66,9 @@ If you want to create a database instance on your own, you will need to set the 
 - spring.datasource.url: DB url
 - spring.datasource.username: DB username
 - spring.datasource.password: DB password
+- postgres.db.port: DB port
+- postgres.db.host: DB host
+- postgres.db.name: DB name
 - spring.jpa.show-sql=true
 - authorization.server.signingKey: oauth signing key
 - payment.ws.notification.apiKey= notification service api key
@@ -109,10 +108,6 @@ The secret key is used to authenticate the transactions requests and the alias d
 The Stash SDK uses a concept of idempotency for both aliases and transactions. The idempotent operation is the one that produces the same result no matter how many times it is called. The idempotency is performed by sending an `Idempotent-Key` in the header for `Create Alias`, `Preauthorization`, `Authorization` and `Refund` requests. This will avoid adding the same alias more than once or performing the same transaction several times if unintentionally called.
 
 When a request comes with a new idempotent key, the key and the request body are stored in the Stash backend. If a second request comes with the same idempotent key and the same body, the original response is returned. However, if the second request has the same idempotent key as the original one, but a different body, an appropriate error will be returned.
-
-## Kafka
-
-The Stash Backend uses [Kafka](https://kafka.apache.org/) and WebSockets to handle the live data for the Dashboard home page.
 
 ## Feedback
 

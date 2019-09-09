@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository
  */
 @Repository
 interface TransactionRepository : BaseRepository<Transaction, Long> {
+    fun getTransactionById(id: Long): Transaction
 
     @Query("SELECT DISTINCT tr FROM Transaction tr WHERE tr.idempotentKey = :idempotentKey AND tr.merchant = :merchant")
     fun getByIdempotentKeyAndMerchant(@Param("idempotentKey") idempotentKey: String, @Param("merchant") merchant: Merchant): Transaction?

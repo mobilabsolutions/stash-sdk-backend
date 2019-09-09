@@ -39,7 +39,6 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
-import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -55,14 +54,11 @@ class TransactionService(
     private val pspRegistry: PspRegistry,
     private val requestHashing: RequestHashing,
     private val objectMapper: ObjectMapper,
-    private val kafkaTemplate: KafkaTemplate<String, Transaction>,
     private val notificationService: NotificationService
 ) {
 
     @Value("\${payment.ws.notification.apiKey:}")
     private lateinit var paymentApiKey: String
-    @Value("\${kafka.transactions.topicName:}")
-    private lateinit var kafkaTopicName: String
 
     /**
      * Authorize transaction
@@ -314,7 +310,6 @@ class TransactionService(
                     processedNotification = false
                 )
                 transactionRepository.save(newTransaction)
-                sendMessageToKafka(newTransaction)
 
                 logger.info { "PSP transaction '${it.pspTransactionId}' is successfully processed for transaction action '${it.transactionAction}'" }
             } else {
@@ -331,7 +326,6 @@ class TransactionService(
      */
     @Transactional
     fun processNotifications(merchantId: String) {
-        logger.info("Picking notifications for $merchantId")
         val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transactions = transactionRepository.getTransactionsByUnprocessedNotifications(merchantId)
         val merchantNotifications = transactions.asSequence().map { MerchantNotificationsModel(it.transactionId, it.status!!.name,
@@ -404,7 +398,6 @@ class TransactionService(
                     alias = lastTransaction.alias
                 )
                 transactionRepository.save(newTransaction)
-                sendMessageToKafka(newTransaction)
 
                 return PaymentResponseModel(
                     newTransaction.transactionId, newTransaction.amount,
@@ -476,7 +469,6 @@ class TransactionService(
                     alias = lastTransaction.alias
                 )
                 transactionRepository.save(newTransaction)
-                sendMessageToKafka(newTransaction)
 
                 return PaymentResponseModel(
                     newTransaction.transactionId, newTransaction.amount,
@@ -602,7 +594,6 @@ class TransactionService(
                     alias = alias
                 )
                 transactionRepository.save(newTransaction)
-                sendMessageToKafka(newTransaction)
 
                 return PaymentResponseModel(
                     newTransaction.transactionId, newTransaction.amount,
@@ -635,11 +626,6 @@ class TransactionService(
         val result = objectMapper.readValue(alias.merchant?.pspConfig, PspConfigListModel::class.java)
         return result.psp.firstOrNull { it.type == alias.psp!!.toString() }
             ?: throw ApiError.ofErrorCode(ApiErrorCode.PSP_CONF_FOR_MERCHANT_NOT_FOUND, "PSP configuration for '${alias.psp}' cannot be found from used merchant").asException()
-    }
-
-    private fun sendMessageToKafka(transaction: Transaction) {
-        if (transaction.status == TransactionStatus.SUCCESS)
-            kafkaTemplate.send(kafkaTopicName, transaction.merchant.id!!, transaction)
     }
 
     companion object : KLogging() {

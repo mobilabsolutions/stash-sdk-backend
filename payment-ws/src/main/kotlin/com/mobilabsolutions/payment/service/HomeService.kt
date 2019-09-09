@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+*/
+
 package com.mobilabsolutions.payment.service
 
 import com.mobilabsolutions.payment.data.Merchant
@@ -5,7 +9,6 @@ import com.mobilabsolutions.payment.data.Transaction
 import com.mobilabsolutions.payment.data.enum.TransactionAction
 import com.mobilabsolutions.payment.data.enum.TransactionStatus
 import com.mobilabsolutions.payment.data.repository.MerchantRepository
-import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
 import com.mobilabsolutions.payment.data.repository.TransactionRepository
 import com.mobilabsolutions.payment.model.KeyPerformanceModel
 import com.mobilabsolutions.payment.model.NotificationModel
@@ -19,9 +22,6 @@ import com.mobilabsolutions.payment.model.response.SelectedDateActivityResponseM
 import com.mobilabsolutions.server.commons.exception.ApiError
 import com.mobilabsolutions.server.commons.exception.ApiErrorCode
 import mu.KLogging
-import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.messaging.handler.annotation.Payload
-import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.DayOfWeek
@@ -41,32 +41,17 @@ import java.util.Locale
 @Service
 class HomeService(
     private val transactionRepository: TransactionRepository,
-    private val merchantUserRepository: MerchantUserRepository,
-    private val merchantRepository: MerchantRepository,
-    private val simpleMessagingTemplate: SimpMessagingTemplate
+    private val merchantRepository: MerchantRepository
 ) {
 
     companion object : KLogging() {
         private const val DATE_FORMAT_UTC = "yyyy-MM-dd'T'HH:mm:ss'Z'"
         private const val DAY_PATTERN = "EEEE"
-        private const val REFUND_NOTIFICATION = "refund of %s"
+        private const val SUCCESSFUL_REFUND_NOTIFICATION = "Refunded %s"
+        private const val FAILED_REFUND_NOTIFICATION = "Failed refund of %s"
         private const val CHARGEBACK_NOTIFICATION = "Chargeback %s"
 
         private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_UTC)
-    }
-
-    /**
-     * Sends the live data to the client (Web dashboard) via WebSocket
-     *
-     * @param transaction successful transaction
-     */
-    @KafkaListener(topics = ["\${kafka.transactions.topicName:}"], groupId = "\${spring.kafka.consumer.group-id:}")
-    fun getLiveData(@Payload transaction: Transaction) {
-        logger.info { "Started listening the live data" }
-        val merchantUsers = merchantUserRepository.getMerchantUsers(transaction.merchant.id!!)
-        merchantUsers.forEach { user ->
-            simpleMessagingTemplate.convertAndSendToUser(user.email, "/topic/transactions", toLiveData(transaction))
-        }
     }
 
     /**
@@ -106,11 +91,11 @@ class HomeService(
             when (it.action) {
                 TransactionAction.REFUND ->
                     when (it.status) {
-                        TransactionStatus.SUCCESS -> NotificationModel(it.paymentMethod?.name, "Successful " + REFUND_NOTIFICATION.format("${it.amount!!.toDouble().div(100)}${it.currencyId}"))
-                        TransactionStatus.FAIL -> NotificationModel(it.paymentMethod?.name, "Failed " + REFUND_NOTIFICATION.format("${it.amount!!.toDouble().div(100)}${it.currencyId}"))
+                        TransactionStatus.SUCCESS -> NotificationModel(it.paymentMethod?.name, SUCCESSFUL_REFUND_NOTIFICATION.format("${it.amount?.toDouble()?.div(100)}${it.currencyId}"))
+                        TransactionStatus.FAIL -> NotificationModel(it.paymentMethod?.name, FAILED_REFUND_NOTIFICATION.format("${it.amount?.toDouble()?.div(100)}${it.currencyId}"))
                         else -> null
                     }
-                TransactionAction.CHARGEBACK -> NotificationModel(it.paymentMethod?.name, CHARGEBACK_NOTIFICATION.format("${it.amount}${it.currencyId}"))
+                TransactionAction.CHARGEBACK -> NotificationModel(it.paymentMethod?.name, CHARGEBACK_NOTIFICATION.format("${it.amount?.toDouble()?.div(100)}${it.currencyId}"))
                 else -> null
             }
         }
@@ -189,6 +174,27 @@ class HomeService(
     }
 
     /**
+     * Maps transaction to the live data model
+     *
+     * @param transactionId Transaction Id
+     * @return live data response model
+     */
+    @Transactional(readOnly = true)
+    fun toLiveData(transactionId: Long): LiveDataResponseModel {
+        val transaction = transactionRepository.getTransactionById(transactionId)
+        logger.info("Sending the live data for merchant {}", transaction.merchant.id)
+
+        return when (transaction.action) {
+            TransactionAction.AUTH -> getLiveDataForAuthAndCapturedTransaction(transaction)
+            TransactionAction.CAPTURE -> getLiveDataForAuthAndCapturedTransaction(transaction)
+            TransactionAction.REFUND -> getLiveDataForRefundedTransaction(transaction)
+            TransactionAction.CHARGEBACK -> getLiveDataForChargedbackTransaction(transaction)
+            TransactionAction.CHARGEBACK_REVERSED -> getLiveDataForChargebackReversedTransactions(transaction)
+            else -> getLiveDataForOtherTransactions(transaction)
+        }
+    }
+
+    /**
      * Calculates the date in the past for the given number of days
      *
      * @param merchant Merchant
@@ -229,55 +235,57 @@ class HomeService(
         return LocalDate.now().dayOfWeek
     }
 
-    private fun toLiveData(transaction: Transaction): LiveDataResponseModel {
-        return when (transaction.action) {
-            TransactionAction.AUTH -> getLiveDataForAuthAndCapturedTransaction(transaction)
-            TransactionAction.CAPTURE -> getLiveDataForAuthAndCapturedTransaction(transaction)
-            TransactionAction.REFUND -> getLiveDataForRefundedTransaction(transaction)
-            TransactionAction.CHARGEBACK -> getLiveDataForChargedbackTransaction(transaction)
-            TransactionAction.CHARGEBACK_REVERSED -> getLiveDataForChargebackReversedTransactions(transaction)
-            else -> getLiveDataForOtherTransactions()
-        }
-    }
-
     private fun getLiveDataForAuthAndCapturedTransaction(transaction: Transaction): LiveDataResponseModel {
-        return LiveDataResponseModel(
-            keyPerformance = KeyPerformanceModel(
-                salesVolume = transaction.amount,
-                currencyId = transaction.merchant.defaultCurrency,
-                nrOfTransactions = 1,
-                nrOfRefundedTransactions = 0,
-                nrOfChargebacks = 0
-            ),
-            todaysActivity = TodaysActivityModel(
-                time = getTransactionTime(transaction),
-                amount = transaction.amount
-            ),
-            notifications = NotificationsModel(
-                notification = null,
-                nrOfTransactions = 1
+        return when (transaction.status) {
+            TransactionStatus.SUCCESS -> LiveDataResponseModel(
+                keyPerformance = KeyPerformanceModel(
+                    salesVolume = transaction.amount,
+                    currencyId = transaction.merchant.defaultCurrency,
+                    nrOfTransactions = 1,
+                    nrOfRefundedTransactions = 0,
+                    nrOfChargebacks = 0
+                ),
+                todaysActivity = TodaysActivityModel(
+                    time = getTransactionTime(transaction),
+                    amount = transaction.amount
+                ),
+                notifications = NotificationsModel(
+                    notification = null,
+                    nrOfTransactions = 1
+                )
             )
-        )
+            else -> LiveDataResponseModel(null, null, null)
+        }
     }
 
     private fun getLiveDataForRefundedTransaction(transaction: Transaction): LiveDataResponseModel {
         return LiveDataResponseModel(
-            keyPerformance = KeyPerformanceModel(
-                salesVolume = transaction.amount?.unaryMinus(),
-                currencyId = transaction.merchant.defaultCurrency,
-                nrOfTransactions = 1,
-                nrOfRefundedTransactions = 1,
-                nrOfChargebacks = 0
-            ),
-            todaysActivity = TodaysActivityModel(
-                time = getTransactionTime(transaction),
-                amount = transaction.amount?.unaryMinus()
-            ),
+            keyPerformance = when (transaction.status) {
+                TransactionStatus.SUCCESS -> KeyPerformanceModel(
+                    salesVolume = transaction.amount?.unaryMinus(),
+                    currencyId = transaction.merchant.defaultCurrency,
+                    nrOfTransactions = 1,
+                    nrOfRefundedTransactions = 1,
+                    nrOfChargebacks = 0
+                )
+                else -> null
+            },
+            todaysActivity = when (transaction.status) {
+                TransactionStatus.SUCCESS -> TodaysActivityModel(
+                    time = getTransactionTime(transaction),
+                    amount = transaction.amount?.unaryMinus()
+                )
+                else -> null
+            },
             notifications = when (transaction.notification) {
                 true -> NotificationsModel(
                     notification = NotificationModel(
                         paymentMethod = transaction.paymentMethod?.name,
-                        content = REFUND_NOTIFICATION.format("${transaction.amount}${transaction.currencyId}")
+                        content = when (transaction.status) {
+                            TransactionStatus.SUCCESS -> SUCCESSFUL_REFUND_NOTIFICATION.format("${transaction.amount?.toDouble()?.div(100)}${transaction.currencyId}")
+                            TransactionStatus.FAIL -> FAILED_REFUND_NOTIFICATION.format("${transaction.amount?.toDouble()?.div(100)}${transaction.currencyId}")
+                            else -> null
+                        }
                     ),
                     nrOfTransactions = 1
                 )
@@ -288,22 +296,28 @@ class HomeService(
 
     private fun getLiveDataForChargedbackTransaction(transaction: Transaction): LiveDataResponseModel {
         return LiveDataResponseModel(
-            keyPerformance = KeyPerformanceModel(
-                salesVolume = transaction.amount?.unaryMinus(),
-                currencyId = transaction.merchant.defaultCurrency,
-                nrOfTransactions = 1,
-                nrOfRefundedTransactions = 0,
-                nrOfChargebacks = 1
-            ),
-            todaysActivity = TodaysActivityModel(
-                time = getTransactionTime(transaction),
-                amount = transaction.amount?.unaryMinus()
-            ),
+            keyPerformance = when (transaction.status) {
+                TransactionStatus.SUCCESS -> KeyPerformanceModel(
+                    salesVolume = transaction.amount?.unaryMinus(),
+                    currencyId = transaction.merchant.defaultCurrency,
+                    nrOfTransactions = 1,
+                    nrOfRefundedTransactions = 0,
+                    nrOfChargebacks = 1
+                )
+                else -> null
+            },
+            todaysActivity = when (transaction.status) {
+                TransactionStatus.SUCCESS -> TodaysActivityModel(
+                    time = getTransactionTime(transaction),
+                    amount = transaction.amount?.unaryMinus()
+                )
+                else -> null
+            },
             notifications = when (transaction.notification) {
                 true -> NotificationsModel(
                     notification = NotificationModel(
                         paymentMethod = transaction.paymentMethod?.name,
-                        content = CHARGEBACK_NOTIFICATION.format("${transaction.amount}${transaction.currencyId}")
+                        content = CHARGEBACK_NOTIFICATION.format("${transaction.amount?.toDouble()?.div(100)}${transaction.currencyId}")
                     ),
                     nrOfTransactions = 1
                 )
@@ -313,47 +327,54 @@ class HomeService(
     }
 
     private fun getLiveDataForChargebackReversedTransactions(transaction: Transaction): LiveDataResponseModel {
-        return LiveDataResponseModel(
-            keyPerformance = KeyPerformanceModel(
-                salesVolume = transaction.amount,
-                currencyId = transaction.merchant.defaultCurrency,
-                nrOfTransactions = 1,
-                nrOfRefundedTransactions = 0,
-                nrOfChargebacks = 0
-            ),
-            todaysActivity = TodaysActivityModel(
-                time = getTransactionTime(transaction),
-                amount = transaction.amount
-            ),
-            notifications = NotificationsModel(
-                notification = null,
-                nrOfTransactions = 1
+        return when (transaction.status) {
+            TransactionStatus.SUCCESS -> LiveDataResponseModel(
+                keyPerformance = KeyPerformanceModel(
+                    salesVolume = transaction.amount,
+                    currencyId = transaction.merchant.defaultCurrency,
+                    nrOfTransactions = 1,
+                    nrOfRefundedTransactions = 0,
+                    nrOfChargebacks = 0
+                ),
+                todaysActivity = TodaysActivityModel(
+                    time = getTransactionTime(transaction),
+                    amount = transaction.amount
+                ),
+                notifications = NotificationsModel(
+                    notification = null,
+                    nrOfTransactions = 1
+                )
             )
-        )
+            else -> LiveDataResponseModel(null, null, null)
+        }
     }
 
-    private fun getLiveDataForOtherTransactions(): LiveDataResponseModel {
-        return LiveDataResponseModel(
-            keyPerformance = KeyPerformanceModel(
-                salesVolume = 0,
-                currencyId = null,
-                nrOfTransactions = 1,
-                nrOfRefundedTransactions = 0,
-                nrOfChargebacks = 0
-            ),
-            todaysActivity = null,
-            notifications = NotificationsModel(
-                notification = null,
-                nrOfTransactions = 1
+    private fun getLiveDataForOtherTransactions(transaction: Transaction): LiveDataResponseModel {
+        return when (transaction.status) {
+            TransactionStatus.SUCCESS -> LiveDataResponseModel(
+                keyPerformance = KeyPerformanceModel(
+                    salesVolume = 0,
+                    currencyId = null,
+                    nrOfTransactions = 1,
+                    nrOfRefundedTransactions = 0,
+                    nrOfChargebacks = 0
+                ),
+                todaysActivity = null,
+                notifications = NotificationsModel(
+                    notification = null,
+                    nrOfTransactions = 1
+                )
             )
-        )
+            else -> LiveDataResponseModel(null, null, null)
+        }
     }
 
     private fun getTransactionTime(transaction: Transaction): String {
         val timezone = transaction.merchant.timezone ?: ZoneId.systemDefault().toString()
-        val hour = LocalDateTime.ofInstant(transaction.createdDate, ZoneId.of(timezone)).hour
-        val minute = LocalDateTime.ofInstant(transaction.createdDate, ZoneId.of(timezone)).minute
-        val second = LocalDateTime.ofInstant(transaction.createdDate, ZoneId.of(timezone)).second
+        val createdDate = LocalDateTime.ofInstant(transaction.createdDate, ZoneId.of(timezone))
+        val hour = createdDate.hour
+        val minute = createdDate.minute
+        val second = createdDate.second
         return "$hour:$minute:$second"
     }
 

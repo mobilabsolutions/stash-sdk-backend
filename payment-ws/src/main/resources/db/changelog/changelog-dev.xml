@@ -249,5 +249,29 @@
             <column name="merchant_id" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
+    <changeSet author="veskovic.jovana" id="PSOS-477_1">
+        <createProcedure>
+            CREATE OR REPLACE FUNCTION transaction_insert_notify()
+            RETURNS trigger
+            LANGUAGE plpgsql
+            AS $function$
+            BEGIN
+            PERFORM pg_notify('transaction_record', json_build_object('id', new.id, 'merchantId', new.merchant_id)::text);
+            RETURN NEW; END;$function$;
+        </createProcedure>
+        <rollback>
+            DROP FUNCTION transaction_insert_notify();
+        </rollback>
+    </changeSet>
+    <changeSet author="veskovic.jovana" id="PSOS-477_2">
+        <sql>
+            DROP TRIGGER IF EXISTS new_transaction_record ON transaction_record;
+            CREATE TRIGGER new_transaction_record AFTER INSERT ON
+            transaction_record FOR EACH ROW EXECUTE PROCEDURE transaction_insert_notify();
+        </sql>
+        <rollback>
+            DROP TRIGGER new_transaction_record ON transaction_record;
+        </rollback>
+    </changeSet>
 
 </databaseChangeLog>

@@ -50,7 +50,6 @@ import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
-import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.test.util.ReflectionTestUtils
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -88,7 +87,6 @@ class TransactionServiceTest {
     private val correctPaymentData = PaymentDataRequestModel(1, "EUR", "reason")
     private val wrongPaymentData = PaymentDataRequestModel(2, "EUR", "reason")
     private val notifApiKey = "test-key"
-    private val kafkaTopicName = "test-topic"
     private val pspTransId = "325105132"
     private val pspResponse = "{\"pspTransactionId\":\"$pspTransId\",\"status\":\"SUCCESS\",\"customerId\":\"160624370\"}"
     private val pspConfig = "{\"psp\" : [{\"type\" : \"BS_PAYONE\", \"portalId\" : \"123\", \"key\" : \"123\"," +
@@ -160,9 +158,6 @@ class TransactionServiceTest {
     private lateinit var requestHashing: RequestHashing
 
     @Mock
-    private lateinit var kafkaTemplate: KafkaTemplate<String, String>
-
-    @Mock
     private lateinit var notificationService: NotificationService
 
     @Spy
@@ -172,7 +167,6 @@ class TransactionServiceTest {
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
         ReflectionTestUtils.setField(transactionService, "paymentApiKey", notifApiKey)
-        ReflectionTestUtils.setField(transactionService, "kafkaTopicName", kafkaTopicName)
         notificationTransaction.createdDate = LocalDateTime.parse("2019-07-29T00:00:00Z", DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")).atZone(ZoneId.of("Europe/Berlin")).toInstant()
 
         Mockito.`when`(
