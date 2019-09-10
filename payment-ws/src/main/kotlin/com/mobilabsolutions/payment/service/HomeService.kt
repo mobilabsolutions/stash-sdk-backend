@@ -86,6 +86,7 @@ class HomeService(
         logger.info("Getting notifications for merchant {}", merchantId)
         val merchant = merchantRepository.getMerchantById(merchantId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
+        val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
         val transactions = transactionRepository.getTransactionsWithNotification(merchantId, getPastDate(merchant, 7), null)
         val transactionsMap = LinkedHashMap<String, Int>()
         initNotificationsMap(transactionsMap)
@@ -93,11 +94,11 @@ class HomeService(
             when (it.action) {
                 TransactionAction.REFUND ->
                     when (it.status) {
-                        TransactionStatus.SUCCESS -> NotificationModel(it.paymentMethod?.name, SUCCESSFUL_REFUND_NOTIFICATION.format("${it.amount?.toDouble()?.div(100)}${it.currencyId}"), dateFormatter.withZone(ZoneId.of(merchant.timezone)).format(it.createdDate))
-                        TransactionStatus.FAIL -> NotificationModel(it.paymentMethod?.name, FAILED_REFUND_NOTIFICATION.format("${it.amount?.toDouble()?.div(100)}${it.currencyId}"), dateFormatter.withZone(ZoneId.of(merchant.timezone)).format(it.createdDate))
+                        TransactionStatus.SUCCESS -> NotificationModel(it.paymentMethod?.name, SUCCESSFUL_REFUND_NOTIFICATION.format("${it.amount?.toDouble()?.div(100)}${it.currencyId}"), dateFormatter.withZone(ZoneId.of(timezone)).format(it.createdDate))
+                        TransactionStatus.FAIL -> NotificationModel(it.paymentMethod?.name, FAILED_REFUND_NOTIFICATION.format("${it.amount?.toDouble()?.div(100)}${it.currencyId}"), dateFormatter.withZone(ZoneId.of(timezone)).format(it.createdDate))
                         else -> null
                     }
-                TransactionAction.CHARGEBACK -> NotificationModel(it.paymentMethod?.name, CHARGEBACK_NOTIFICATION.format("${it.amount?.toDouble()?.div(100)}${it.currencyId}"), dateFormatter.withZone(ZoneId.of(merchant.timezone)).format(it.createdDate))
+                TransactionAction.CHARGEBACK -> NotificationModel(it.paymentMethod?.name, CHARGEBACK_NOTIFICATION.format("${it.amount?.toDouble()?.div(100)}${it.currencyId}"), dateFormatter.withZone(ZoneId.of(timezone)).format(it.createdDate))
                 else -> null
             }
         }
@@ -261,7 +262,7 @@ class HomeService(
     }
 
     private fun getLiveDataForRefundedTransaction(transaction: Transaction): LiveDataResponseModel {
-        val timezone = transaction.merchant.timezone
+        val timezone = transaction.merchant.timezone ?: ZoneId.systemDefault().toString()
 
         return LiveDataResponseModel(
             keyPerformance = when (transaction.status) {
@@ -300,7 +301,7 @@ class HomeService(
     }
 
     private fun getLiveDataForChargedbackTransaction(transaction: Transaction): LiveDataResponseModel {
-        val timezone = transaction.merchant.timezone
+        val timezone = transaction.merchant.timezone ?: ZoneId.systemDefault().toString()
 
         return LiveDataResponseModel(
             keyPerformance = when (transaction.status) {
