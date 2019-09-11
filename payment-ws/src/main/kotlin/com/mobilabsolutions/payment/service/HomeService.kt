@@ -390,7 +390,7 @@ class HomeService(
     private fun getTransactionsForLastWeek(merchant: Merchant, transactionsMap: LinkedHashMap<String, Int>): LinkedHashMap<String, Int> {
         val timezone = merchant.timezone ?: ZoneId.systemDefault().toString()
         val startDate = dateFormatterUtc.format(LocalDateTime.now().minusDays(7).with(LocalTime.MIN).atZone(ZoneId.of(timezone)))
-        val endDate = dateFormatterUtc.format(LocalDateTime.now().with(LocalTime.MIN).atZone(ZoneId.of(timezone)))
+        val endDate = dateFormatterUtc.format(LocalDateTime.now().with(LocalTime.MAX).atZone(ZoneId.of(timezone)))
         val transactions = transactionRepository.getTransactionsByMerchantId(merchant.id!!, startDate, endDate)
         for (transaction in transactions) {
             val day = DateTimeFormatter.ofPattern(DAY_PATTERN).withZone(ZoneId.of(timezone)).format(transaction.createdDate)
