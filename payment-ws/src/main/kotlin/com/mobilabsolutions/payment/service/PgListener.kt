@@ -64,7 +64,7 @@ class PgListener(
                     val transactionNotification = objectMapper.readValue(payload, TransactionNotificationModel::class.java)
                     val merchantUsers = merchantUserRepository.getMerchantUsers(transactionNotification.merchantId!!)
                     merchantUsers.forEach { user ->
-                        simpleMessagingTemplate.convertAndSendToUser(user.email, PgListener.TOPIC_NAME, homeService.toLiveData(transactionNotification.id!!))
+                        simpleMessagingTemplate.convertAndSendToUser(user.email!!, PgListener.TOPIC_NAME, homeService.toLiveData(transactionNotification.id!!))
                     }
                 } catch (exception: Exception) {
                     logger.error("An error occurred while listening to live data: {}", exception.message)

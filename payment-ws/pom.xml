@@ -108,6 +108,12 @@
             <version>${super.csv}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.sendgrid</groupId>
+            <artifactId>sendgrid-java</artifactId>
+            <version>${sendgrid.version}</version>
+        </dependency>
+
         <!-- DB -->
         <dependency>
             <groupId>com.h2database</groupId>

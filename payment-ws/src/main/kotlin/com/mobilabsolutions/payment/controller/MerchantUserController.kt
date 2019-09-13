@@ -20,8 +20,10 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import javax.servlet.http.HttpServletRequest
 import javax.validation.Valid
 
 /**
@@ -59,7 +61,7 @@ class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServ
         ApiResponse(code = 403, message = "User doesn't have the required rights for this operation")
     )
     @RequestMapping(
-        MerchantUserController.UPDATE_USER_URL, method = [RequestMethod.PUT],
+        UPDATE_USER_URL, method = [RequestMethod.PUT],
         consumes = [MediaType.APPLICATION_JSON_VALUE]
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -81,7 +83,7 @@ class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServ
         ApiResponse(code = 403, message = "User doesn't have the required rights for this operation")
     )
     @RequestMapping(
-        MerchantUserController.CHANGE_USER_PASSWORD_URL, method = [RequestMethod.PUT],
+        CHANGE_USER_PASSWORD_URL, method = [RequestMethod.PUT],
         consumes = [MediaType.APPLICATION_JSON_VALUE]
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -95,9 +97,48 @@ class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServ
         userDetailsServiceImpl.changePasswordMerchantUser(userId, principal, merchantUserEditPasswordModel)
     }
 
+    @ApiOperation(value = "Send forgot password email")
+    @ApiResponses(
+        ApiResponse(code = 201, message = "Successfully sent email"),
+        ApiResponse(code = 400, message = "Request model validation failed"),
+        ApiResponse(code = 401, message = "Authentication failed"),
+        ApiResponse(code = 403, message = "User doesn't have the required rights for this operation")
+    )
+    @RequestMapping(
+        FORGOT_PASSWORD_URL,
+        method = [RequestMethod.POST]
+    )
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('admin')")
+    fun sendForgotPasswordEmail(
+        request: HttpServletRequest,
+        @RequestParam email: String
+    ) = userDetailsServiceImpl.sendForgotPasswordEmail(email, request)
+
+    @ApiOperation(value = "Validate token and reset password")
+    @ApiResponses(
+        ApiResponse(code = 204, message = "Successfully reset merchant user's password"),
+        ApiResponse(code = 400, message = "Request model validation failed"),
+        ApiResponse(code = 401, message = "Authentication failed"),
+        ApiResponse(code = 403, message = "User doesn't have the required rights for this operation")
+    )
+    @RequestMapping(
+        RESET_PASSWORD_URL, method = [RequestMethod.PUT],
+        consumes = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority('admin')")
+    fun validateTokenAndResetPassword(
+        @RequestParam token: String,
+        @RequestParam email: String,
+        @Valid @ApiParam(name = "Merchant-User-Password-Model", value = "Merchant User Password Change Model") @RequestBody merchantUserEditPasswordModel: MerchantUserEditPasswordRequestModel
+    ) = userDetailsServiceImpl.validateTokenAndResetPassword(token, email, merchantUserEditPasswordModel)
+
     companion object {
         const val BASE_URL = "/merchant/{Merchant-Id}/user"
         const val UPDATE_USER_URL = "/{User-Id}"
         const val CHANGE_USER_PASSWORD_URL = "/{User-Id}/change-password"
+        const val FORGOT_PASSWORD_URL = "/forgot-password"
+        const val RESET_PASSWORD_URL = "/reset-password"
     }
 }

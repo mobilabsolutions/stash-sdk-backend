@@ -6,12 +6,15 @@ package com.mobilabsolutions.payment.service
 
 import com.mobilabsolutions.payment.data.Authority
 import com.mobilabsolutions.payment.data.MerchantUser
+import com.mobilabsolutions.payment.data.PasswordResetToken
 import com.mobilabsolutions.payment.data.repository.AuthorityRepository
 import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
+import com.mobilabsolutions.payment.data.repository.PasswordResetTokenRepository
 import com.mobilabsolutions.payment.model.request.MerchantUserEditPasswordRequestModel
 import com.mobilabsolutions.payment.model.request.MerchantUserEditRequestModel
 import com.mobilabsolutions.payment.model.request.MerchantUserRequestModel
 import com.mobilabsolutions.server.commons.exception.ApiException
+import com.sendgrid.SendGrid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -28,6 +31,9 @@ import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.util.ReflectionTestUtils
+import java.time.ZoneId
+import java.util.Date
+import javax.servlet.http.HttpServletRequest
 
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
@@ -49,17 +55,29 @@ class UserDetailsServiceTest {
     @Mock
     private lateinit var userPasswordEncoder: PasswordEncoder
 
+    @Mock
+    private lateinit var sendGrid: SendGrid
+
+    @Mock
+    private lateinit var passwordResetTokenRepository: PasswordResetTokenRepository
+
     private val knownMerchant = "known merchant"
     private val unKnownMerchant = "unknown merchant"
     private val knownEmail = "known email"
     private val unknownEmail = "unknown email"
     private val userPassword = "some password"
     private val anotherUserPassword = "another password"
+    private val request = Mockito.mock(HttpServletRequest::class.java)
+    private val token = "correct token"
+    private val incorrectToken = "incorrect token"
+    private val expiredToken = "expired token"
+    private val expiryDate = Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().plusDays(1)
 
     @BeforeAll
     fun beforeAll() {
         MockitoAnnotations.initMocks(this)
         ReflectionTestUtils.setField(userDetailsService, "adminUsername", "admin")
+        ReflectionTestUtils.setField(userDetailsService, "paymentEmail", "some email")
 
         Mockito.`when`(merchantUserRepository.findByEmail(knownEmail)).thenReturn(
             MerchantUser(
@@ -79,6 +97,25 @@ class UserDetailsServiceTest {
         Mockito.`when`(userPasswordEncoder.encode(userPassword)).thenReturn(anotherUserPassword)
         Mockito.`when`(authorityRepository.getAuthorityByName(knownMerchant)).thenReturn(Mockito.mock(Authority::class.java))
         Mockito.`when`(authorityRepository.getAuthorityByName(unKnownMerchant)).thenReturn(null)
+        Mockito.`when`(passwordResetTokenRepository.getByToken(token)).thenReturn(PasswordResetToken(
+            token = token,
+            expiryDate = Date.from(expiryDate.atZone(ZoneId.systemDefault()).toInstant()),
+            merchantUser = MerchantUser(
+                email = knownEmail,
+                password = userPassword,
+                authorities = setOf()
+            )
+        ))
+        Mockito.`when`(passwordResetTokenRepository.getByToken(incorrectToken)).thenReturn(null)
+        Mockito.`when`(passwordResetTokenRepository.getByToken(expiredToken)).thenReturn(PasswordResetToken(
+            token = token,
+            expiryDate = Date(),
+            merchantUser = MerchantUser(
+                email = knownEmail,
+                password = userPassword,
+                authorities = setOf()
+            )
+        ))
     }
 
     @Test
@@ -170,6 +207,37 @@ class UserDetailsServiceTest {
                 knownMerchant,
                 MerchantUserRequestModel(knownEmail, userPassword, "test name", "test lastname", "test locale")
             )
+        }
+    }
+
+    @Test
+    fun `send forgot password email successfully`() {
+        userDetailsService.sendForgotPasswordEmail(knownEmail, request)
+    }
+
+    @Test
+    fun `send forgot password email with incorrect email`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            userDetailsService.sendForgotPasswordEmail(unknownEmail, request)
+        }
+    }
+
+    @Test
+    fun `validate token and reset password successfully`() {
+        userDetailsService.validateTokenAndResetPassword(token, knownEmail, MerchantUserEditPasswordRequestModel(userPassword, "new password"))
+    }
+
+    @Test
+    fun `validate token with incorrect token`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            userDetailsService.validateTokenAndResetPassword(incorrectToken, knownEmail, MerchantUserEditPasswordRequestModel(userPassword, "new password"))
+        }
+    }
+
+    @Test
+    fun `validate token with expired date`() {
+        Assertions.assertThrows(ApiException::class.java) {
+            userDetailsService.validateTokenAndResetPassword(expiredToken, knownEmail, MerchantUserEditPasswordRequestModel(userPassword, "new password"))
         }
     }
 }
