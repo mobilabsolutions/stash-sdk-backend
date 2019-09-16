@@ -5,9 +5,11 @@
 package com.mobilabsolutions.payment.service
 
 import com.mobilabsolutions.payment.data.Authority
+import com.mobilabsolutions.payment.data.Merchant
 import com.mobilabsolutions.payment.data.MerchantUser
 import com.mobilabsolutions.payment.data.PasswordResetToken
 import com.mobilabsolutions.payment.data.repository.AuthorityRepository
+import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
 import com.mobilabsolutions.payment.data.repository.PasswordResetTokenRepository
 import com.mobilabsolutions.payment.model.request.MerchantUserEditPasswordRequestModel
@@ -56,6 +58,9 @@ class UserDetailsServiceTest {
     private lateinit var userPasswordEncoder: PasswordEncoder
 
     @Mock
+    private lateinit var merchantRepository: MerchantRepository
+
+    @Mock
     private lateinit var sendGrid: SendGrid
 
     @Mock
@@ -72,6 +77,7 @@ class UserDetailsServiceTest {
     private val incorrectToken = "incorrect token"
     private val expiredToken = "expired token"
     private val expiryDate = Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().plusDays(1)
+    private val merchantId = "known merchant id"
 
     @BeforeAll
     fun beforeAll() {
@@ -97,6 +103,9 @@ class UserDetailsServiceTest {
         Mockito.`when`(userPasswordEncoder.encode(userPassword)).thenReturn(anotherUserPassword)
         Mockito.`when`(authorityRepository.getAuthorityByName(knownMerchant)).thenReturn(Mockito.mock(Authority::class.java))
         Mockito.`when`(authorityRepository.getAuthorityByName(unKnownMerchant)).thenReturn(null)
+        Mockito.`when`(merchantRepository.getMerchantById(merchantId)).thenReturn(
+            Merchant(timezone = "Europe/Berlin")
+        )
         Mockito.`when`(passwordResetTokenRepository.getByToken(token)).thenReturn(PasswordResetToken(
             token = token,
             expiryDate = Date.from(expiryDate.atZone(ZoneId.systemDefault()).toInstant()),
@@ -212,13 +221,13 @@ class UserDetailsServiceTest {
 
     @Test
     fun `send forgot password email successfully`() {
-        userDetailsService.sendForgotPasswordEmail(knownEmail, request)
+        userDetailsService.sendForgotPasswordEmail(knownEmail, request, merchantId)
     }
 
     @Test
     fun `send forgot password email with incorrect email`() {
         Assertions.assertThrows(ApiException::class.java) {
-            userDetailsService.sendForgotPasswordEmail(unknownEmail, request)
+            userDetailsService.sendForgotPasswordEmail(unknownEmail, request, merchantId)
         }
     }
 

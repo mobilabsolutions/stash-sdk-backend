@@ -112,8 +112,9 @@ class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServ
     @PreAuthorize("hasAuthority('admin')")
     fun sendForgotPasswordEmail(
         request: HttpServletRequest,
-        @RequestParam email: String
-    ) = userDetailsServiceImpl.sendForgotPasswordEmail(email, request)
+        @RequestParam email: String,
+        @PathVariable("Merchant-Id") merchantId: String
+    ) = userDetailsServiceImpl.sendForgotPasswordEmail(email, request, merchantId)
 
     @ApiOperation(value = "Validate token and reset password")
     @ApiResponses(

@@ -8,6 +8,7 @@ import com.mobilabsolutions.payment.data.Authority
 import com.mobilabsolutions.payment.data.MerchantUser
 import com.mobilabsolutions.payment.data.PasswordResetToken
 import com.mobilabsolutions.payment.data.repository.AuthorityRepository
+import com.mobilabsolutions.payment.data.repository.MerchantRepository
 import com.mobilabsolutions.payment.data.repository.MerchantUserRepository
 import com.mobilabsolutions.payment.data.repository.PasswordResetTokenRepository
 import com.mobilabsolutions.payment.model.request.MerchantUserEditPasswordRequestModel
@@ -43,6 +44,7 @@ class UserDetailsServiceImpl(
     private val merchantUserRepository: MerchantUserRepository,
     private val authorityRepository: AuthorityRepository,
     private val passwordResetTokenRepository: PasswordResetTokenRepository,
+    private val merchantRepository: MerchantRepository,
     private val sendGrid: SendGrid,
     @Qualifier("userPasswordEncoder") private val userPasswordEncoder: PasswordEncoder
 ) : UserDetailsService {
@@ -125,13 +127,15 @@ class UserDetailsServiceImpl(
      *
      * @param email Email
      * @param request Request
+     * @param merchantId Merchant ID
      */
     @Transactional
-    fun sendForgotPasswordEmail(email: String, request: HttpServletRequest) {
+    fun sendForgotPasswordEmail(email: String, request: HttpServletRequest, merchantId: String) {
         val merchantUser = merchantUserRepository.findByEmail(email) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_USER_NOT_FOUND).asException()
+        val merchant = merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val token = UUID.randomUUID().toString()
-        val expiryDate = Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().plusDays(1)
-        passwordResetTokenRepository.save(PasswordResetToken(token = token, merchantUser = merchantUser, expiryDate = Date.from(expiryDate.atZone(ZoneId.systemDefault()).toInstant())))
+        val expiryDate = Date().toInstant().atZone(ZoneId.of(merchant.timezone) ?: ZoneId.systemDefault()).toLocalDateTime().plusDays(1)
+        passwordResetTokenRepository.save(PasswordResetToken(token = token, merchantUser = merchantUser, expiryDate = Date.from(expiryDate.atZone(ZoneId.of(merchant.timezone) ?: ZoneId.systemDefault()).toInstant())))
         val baseUrl = request.scheme + "://" + request.serverName + ":" + request.serverPort + request.contextPath
         val body = baseUrl + "/reset-password?token=" + token + "&email=" + email
         sendEmail(email, body)
