@@ -146,10 +146,12 @@ class UserDetailsServiceImpl(
      *
      * @param token Token
      * @param email Email
+     * @param merchantId Merchant ID
      * @param merchantUserChangePasswordModel Merchant user change password model
      */
     @Transactional
-    fun validateTokenAndResetPassword(token: String, email: String, merchantUserEditPasswordModel: MerchantUserEditPasswordRequestModel) {
+    fun validateTokenAndResetPassword(token: String, email: String, merchantId: String, merchantUserEditPasswordModel: MerchantUserEditPasswordRequestModel) {
+        merchantRepository.getMerchantById(merchantId) ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val passwordResetToken = passwordResetTokenRepository.getByToken(token) ?: throw ApiError.ofErrorCode(ApiErrorCode.TOKEN_NOT_FOUND).asException()
         if (passwordResetToken.isExpired()) throw ApiError.ofErrorCode(ApiErrorCode.TOKEN_EXPIRED).asException()
         changePasswordMerchantUser(email, email, merchantUserEditPasswordModel)

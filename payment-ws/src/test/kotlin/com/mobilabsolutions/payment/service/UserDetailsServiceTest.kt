@@ -233,20 +233,20 @@ class UserDetailsServiceTest {
 
     @Test
     fun `validate token and reset password successfully`() {
-        userDetailsService.validateTokenAndResetPassword(token, knownEmail, MerchantUserEditPasswordRequestModel(userPassword, "new password"))
+        userDetailsService.validateTokenAndResetPassword(token, knownEmail, merchantId, MerchantUserEditPasswordRequestModel(userPassword, "new password"))
     }
 
     @Test
     fun `validate token with incorrect token`() {
         Assertions.assertThrows(ApiException::class.java) {
-            userDetailsService.validateTokenAndResetPassword(incorrectToken, knownEmail, MerchantUserEditPasswordRequestModel(userPassword, "new password"))
+            userDetailsService.validateTokenAndResetPassword(incorrectToken, knownEmail, merchantId, MerchantUserEditPasswordRequestModel(userPassword, "new password"))
         }
     }
 
     @Test
     fun `validate token with expired date`() {
         Assertions.assertThrows(ApiException::class.java) {
-            userDetailsService.validateTokenAndResetPassword(expiredToken, knownEmail, MerchantUserEditPasswordRequestModel(userPassword, "new password"))
+            userDetailsService.validateTokenAndResetPassword(expiredToken, knownEmail, merchantId, MerchantUserEditPasswordRequestModel(userPassword, "new password"))
         }
     }
 }

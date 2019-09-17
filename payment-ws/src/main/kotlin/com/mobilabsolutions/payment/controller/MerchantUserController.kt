@@ -132,8 +132,9 @@ class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServ
     fun validateTokenAndResetPassword(
         @RequestParam token: String,
         @RequestParam email: String,
+        @PathVariable("Merchant-Id") merchantId: String,
         @Valid @ApiParam(name = "Merchant-User-Password-Model", value = "Merchant User Password Change Model") @RequestBody merchantUserEditPasswordModel: MerchantUserEditPasswordRequestModel
-    ) = userDetailsServiceImpl.validateTokenAndResetPassword(token, email, merchantUserEditPasswordModel)
+    ) = userDetailsServiceImpl.validateTokenAndResetPassword(token, email, merchantId, merchantUserEditPasswordModel)
 
     companion object {
         const val BASE_URL = "/merchant/{Merchant-Id}/user"
