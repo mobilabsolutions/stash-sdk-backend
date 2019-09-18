@@ -340,6 +340,68 @@
                         "url": "{{wsEndpoint}}/api/v1/merchant/:Merchant-Id/notifications"
                     },
                     "response": []
+                },
+                {
+                    "name": "Send forgot password email",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": {
+                                "token": "{{access_token}}"
+                            }
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{wsEndpoint}}/api/v1/merchant/mobilab/user/forgot-password?email=:email",
+                            "host": [
+                                "{{wsEndpoint}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "merchant",
+                                "mobilab",
+                                "user",
+                                "forgot-password",
+                                "email",
+                                ":email"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reset password",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": {
+                                "token": "{{access_token}}"
+                            }
+                        },
+                        "method": "PUT",
+                        "header": [],
+                        "url": {
+                            "raw": "{{wsEndpoint}}/api/v1/merchant/mobilab/user/reset-password?token=:token&email=:email",
+                            "host": [
+                                "{{wsEndpoint}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "merchant",
+                                "mobilab",
+                                "user",
+                                "reset-password",
+                                "token",
+                                ":token",
+                                "email",
+                                ":email"
+                            ]
+                        }
+                    },
+                    "response": []
                 }
             ]
 		},
