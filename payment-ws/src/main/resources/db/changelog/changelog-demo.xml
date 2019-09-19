@@ -273,5 +273,21 @@
             DROP TRIGGER new_transaction_record ON transaction_record;
         </rollback>
     </changeSet>
+    <changeSet author="mohamed.osman" id="PSOS-54_1">
+        <createTable tableName="password_reset_token">
+            <column autoIncrement="true" name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" primaryKeyName="password_reset_token_pkey"/>
+            </column>
+            <column name="token" type="VARCHAR(255)"/>
+            <column name="expiry_date" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="merchant_user_id" type="VARCHAR(255)"/>
+            <column name="created_date" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_date" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
 
 </databaseChangeLog>

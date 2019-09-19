@@ -12,6 +12,8 @@ export KUBE_WS_DEPLOYMENT_MEMORY_REQUEST="300Mi"
 export KUBE_WS_DEPLOYMENT_REPLICA_COUNT="1"
 export KUBE_WS_DEPLOYMENT_IMAGE_TAG=commit-${TRAVIS_COMMIT}
 export KUBE_WS_DEPLOYMENT_SQL_INSTANCE_NAME="payment-backend-dev"
+export KUBE_WS_SENDGRID_PORT="587"
+export KUBE_WS_SENDGRID_ADDRESS="stash-merchant-support-noreply@payment.mblb.net"
 
 # notif deployment variables
 export KUBE_NOTIF_DEPLOYMENT_CPU_REQUEST="300m"
