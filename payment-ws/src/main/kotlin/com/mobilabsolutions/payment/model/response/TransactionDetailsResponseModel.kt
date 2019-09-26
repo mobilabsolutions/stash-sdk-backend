@@ -23,6 +23,9 @@ data class TransactionDetailsResponseModel(
     @ApiModelProperty(value = "Currency", example = "EUR")
     val currencyId: String?,
 
+    @ApiModelProperty(value = "Initial amount in smallest currency unit (e.g. cent)", example = "2000")
+    val initialAmount: Int?,
+
     @ApiModelProperty(value = "Amount in smallest currency unit (e.g. cent)", example = "2000")
     val amount: Int?,
 
