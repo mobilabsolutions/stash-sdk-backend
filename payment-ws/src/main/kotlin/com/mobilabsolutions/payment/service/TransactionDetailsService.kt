@@ -65,7 +65,7 @@ class TransactionDetailsService(
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transaction = transactionRepository.getByTransactionId(transactionId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_FOUND).asException()
-        val originalTransaction = transactionRepository.getOriginalTransaction(merchantId, transaction.transactionId!!)
+        val originalTransaction = transactionRepository.getOriginalTransaction(merchantId, transactionId)
         val timelineTransactions = transactionRepository.getTransactionDetails(transactionId)
         val timezone = merchant.timezone ?: systemDefault().toString()
 
