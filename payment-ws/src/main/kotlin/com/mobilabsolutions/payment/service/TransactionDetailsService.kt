@@ -65,6 +65,7 @@ class TransactionDetailsService(
             ?: throw ApiError.ofErrorCode(ApiErrorCode.MERCHANT_NOT_FOUND).asException()
         val transaction = transactionRepository.getByTransactionId(transactionId)
             ?: throw ApiError.ofErrorCode(ApiErrorCode.TRANSACTION_NOT_FOUND).asException()
+        val originalTransaction = transactionRepository.getOriginalTransaction(merchantId, transactionId)
         val timelineTransactions = transactionRepository.getTransactionDetails(transactionId)
         val timezone = merchant.timezone ?: systemDefault().toString()
 
@@ -72,6 +73,7 @@ class TransactionDetailsService(
             DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.of(timezone)).format(transaction.createdDate),
             transaction.transactionId,
             transaction.currencyId,
+            originalTransaction?.amount,
             transaction.amount,
             transaction.reason,
             transaction.action?.name,
