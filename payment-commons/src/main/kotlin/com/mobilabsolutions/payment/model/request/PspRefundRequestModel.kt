@@ -30,7 +30,7 @@ data class PspRefundRequestModel(
     @TransactionActionEnumValidator(TransactionAction = TransactionAction::class)
     val action: String?,
 
-    @ApiModelProperty(value = "PSP config")
+    @ApiModelProperty(value = "PSP config model")
     val pspConfig: PspConfigModel?,
 
     @ApiModelProperty("Purchase ID", example = "132")

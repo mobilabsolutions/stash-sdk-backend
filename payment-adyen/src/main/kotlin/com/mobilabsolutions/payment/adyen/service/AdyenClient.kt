@@ -97,7 +97,7 @@ class AdyenClient(
     }
 
     /**
-     * Makes authorization request to Adyen
+     * Sends an authorization request to Adyen
      *
      * @param request Adyen authorization request
      * @param pspConfig Adyen configuration
@@ -123,7 +123,7 @@ class AdyenClient(
     }
 
     /**
-     * Makes preauthorization request to Adyen
+     * Sends a preauthorization request to Adyen
      *
      * @param request Adyen preauthorization request
      * @param pspConfig Adyen configuration
@@ -149,7 +149,7 @@ class AdyenClient(
     }
 
     /**
-     * Makes capture request to Adyen
+     * Sends a capture request to Adyen
      *
      * @param request Adyen capture request
      * @param pspConfig Adyen configuration
@@ -175,7 +175,7 @@ class AdyenClient(
     }
 
     /**
-     * Makes reversal request to Adyen
+     * Sends a reversal request to Adyen
      *
      * @param request Adyen reverse request
      * @param pspConfig Adyen configuration
@@ -201,7 +201,7 @@ class AdyenClient(
     }
 
     /**
-     * Makes SEPA payment request to Adyen
+     * Sends a SEPA payment request to Adyen
      *
      * @param request Adyen payment request
      * @param pspConfig Adyen configuration
@@ -233,7 +233,7 @@ class AdyenClient(
     }
 
     /**
-     * Makes refund request to Adyen
+     * Sends a refund request to Adyen
      *
      * @param request Adyen refund request
      * @param pspConfig Adyen configuration
@@ -259,7 +259,7 @@ class AdyenClient(
     }
 
     /**
-     * Makes SEPA refund request to Adyen
+     * Sends a SEPA refund request to Adyen
      *
      * @param request Adyen refund request
      * @param pspConfig Adyen configuration
@@ -285,7 +285,7 @@ class AdyenClient(
     }
 
     /**
-     * Deletes Alias at Adyen
+     * Deletes an Adyen alias
      *
      * @param request Adyen delete alias request
      * @param pspConfig Adyen configuration

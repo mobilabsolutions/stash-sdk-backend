@@ -28,7 +28,7 @@ data class TransactionTimelineModel(
     @ApiModelProperty(value = "Transaction status", example = "AUTHORIZED")
     val status: String?,
 
-    @ApiModelProperty(value = "Creation Date", example = "2018-12-31 23:59:59.999 +0100")
+    @ApiModelProperty(value = "Creation date", example = "2018-12-31 23:59:59.999 +0100")
     val createdDate: String?
 ) {
     constructor(transaction: Array<Any>, timezone: String?) : this(

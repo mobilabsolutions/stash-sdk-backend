@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel(value = "API key model")
+@ApiModel(value = "Api key info model")
 data class ApiKeyInfoModel(
     @ApiModelProperty(value = "Api key id", example = "1")
     val id: Long?,

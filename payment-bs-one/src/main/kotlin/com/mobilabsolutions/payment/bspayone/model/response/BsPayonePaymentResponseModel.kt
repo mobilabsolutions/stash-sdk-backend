@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "BS Payone Payment Response")
+@ApiModel(value = "BS Payone payment response model")
 data class BsPayonePaymentResponseModel(
     @ApiModelProperty(value = "BS Payone response status", example = "APPROVED")
     val status: BsPayoneResponseStatus?,

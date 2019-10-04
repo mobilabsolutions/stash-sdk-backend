@@ -34,7 +34,7 @@ class BsPayoneClient(
 ) {
 
     /**
-     * Makes preauthorization request to BS Payone.
+     * Sends a preauthorization request to BS Payone
      *
      * @param paymentRequest BS Payone payment request
      * @param pspConfigModel BS Payone configuration
@@ -48,7 +48,7 @@ class BsPayoneClient(
     }
 
     /**
-     * Makes authorization request to BS Payone.
+     * Sends an authorization request to BS Payone
      *
      * @param paymentRequest BS Payone payment request
      * @param pspConfigModel BS Payone configuration
@@ -62,7 +62,7 @@ class BsPayoneClient(
     }
 
     /**
-    * Makes capture request to BS Payone.
+    * Sends a capture request to BS Payone
     *
     * @param paymentRequest BS Payone payment request
     * @param pspConfigModel BS Payone configuration
@@ -76,7 +76,7 @@ class BsPayoneClient(
     }
 
     /**
-     * Makes refund request to BS Payone.
+     * Sends a refund request to BS Payone
      *
      * @param refundRequest BS Payone payment request
      * @param pspConfigModel BS Payone configuration
@@ -90,7 +90,7 @@ class BsPayoneClient(
     }
 
     /**
-     * Makes update user request to BS Payone, which will be used for alias deletion.
+     * Sends an update user request to BS Payone which will be used for alias deletion
      *
      * @param deleteAliasRequest BS Payone delete alias request
      * @param pspConfigModel BS Payone configuration
@@ -104,7 +104,7 @@ class BsPayoneClient(
     }
 
     /**
-     * Creates the BS Payone request with standard parameters.
+     * Creates a BS Payone request with standard parameters
      *
      * @param request BS Payone request
      * @param pspConfigModel BS Payone configuration
@@ -124,7 +124,7 @@ class BsPayoneClient(
     }
 
     /**
-     * Converts BS Payone response body to internal response.
+     * Converts a BS Payone response body to internal response
      *
      * @param body response body
      * @param response response class
@@ -140,7 +140,7 @@ class BsPayoneClient(
     }
 
     /**
-     * Converts the request to key/ value map
+     * Converts the request to key/value map
      *
      * @param request BS Payone request
      * @return key/ value map
@@ -153,7 +153,7 @@ class BsPayoneClient(
     }
 
     /**
-     * Returns BS Payone standard parameters.
+     * Returns BS Payone standard parameters
      *
      * @param pspConfigModel PSP Configuration
      * @param bsPayoneRequestType BS payone request type

@@ -39,7 +39,7 @@ class MerchantService(
     companion object : KLogging()
 
     /**
-     * Adds PSP configuration for the merchant based on the given merchant id.
+     * Adds PSP configuration for the merchant based on the given merchant id
      *
      * @param merchantId Merchant Id
      * @param pspConfigRequestModel PSP Config Request Model
@@ -81,7 +81,7 @@ class MerchantService(
     }
 
     /**
-     * Deletes PSP configuration for the merchant based on the given merchant id and psp type.
+     * Deletes PSP configuration for the merchant based on the given merchant id and psp type
      *
      * @param merchantId Merchant Id
      * @param pspId PSP Id
@@ -97,7 +97,7 @@ class MerchantService(
     }
 
     /**
-     * Returns the PSP configuration list for the given merchant id.
+     * Returns the PSP configuration list for the given merchant id
      *
      * @param merchantId Merchant Id
      * @return PSP configuration list
@@ -110,7 +110,7 @@ class MerchantService(
     }
 
     /**
-     * Returns the PSP configuration for the given merchant id and psp id.
+     * Returns the PSP configuration for the given merchant id and psp id
      *
      * @param merchantId Merchant Id
      * @param pspId Psp Id
@@ -127,7 +127,7 @@ class MerchantService(
     }
 
     /**
-     * Updates PSP configuration for the given merchant id and psp id.
+     * Updates PSP configuration for the given merchant id and psp id
      *
      * @param merchantId Merchant Id
      * @param pspId Psp Id

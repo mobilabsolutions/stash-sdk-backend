@@ -19,7 +19,7 @@ data class PspReversalRequestModel(
     @ApiModelProperty(value = "Currency", example = "EUR")
     val currency: String?,
 
-    @ApiModelProperty(value = "PSP config")
+    @ApiModelProperty(value = "PSP config model")
     val pspConfig: PspConfigModel,
 
     @ApiModelProperty(value = "Purchase ID", example = "12345")

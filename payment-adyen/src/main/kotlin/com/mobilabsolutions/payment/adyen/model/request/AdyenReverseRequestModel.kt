@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel(value = "Adyen Reverse Request")
+@ApiModel(value = "Adyen reverse request models")
 data class AdyenReverseRequestModel(
     @ApiModelProperty(value = "Adyen PSP reference", example = "42949")
     val originalReference: String?,

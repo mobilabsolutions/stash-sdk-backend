@@ -61,7 +61,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService) {
         @Valid @ApiParam(name = "Api-Key-Info", value = "Api Key Model") @RequestBody apiKeyInfo: ApiKeyRequestModel
     ) = apiKeyService.createMerchantApiKey(merchantId, apiKeyInfo)
 
-    @ApiOperation(value = "Get api for specific merchant using id")
+    @ApiOperation(value = "Get api key for specific merchant using id")
     @ApiResponses(
         ApiResponse(code = 200, message = "Successfully fetched the api key"),
         ApiResponse(code = 400, message = "Merchant does not exist"),

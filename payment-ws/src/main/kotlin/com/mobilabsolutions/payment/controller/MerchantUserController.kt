@@ -33,7 +33,7 @@ import javax.validation.Valid
 @RequestMapping(MerchantUserController.BASE_URL)
 class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServiceImpl) {
 
-    @ApiOperation(value = "Create the merchant user by given data")
+    @ApiOperation(value = "Create a merchant user")
     @ApiResponses(
         ApiResponse(code = 201, message = "Successfully created a merchant user"),
         ApiResponse(code = 400, message = "Request model validation failed"),
@@ -53,7 +53,7 @@ class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServ
         userDetailsServiceImpl.createMerchantUser(merchantId, merchantUserCreateModel)
     }
 
-    @ApiOperation(value = "Update the given merchant user by user id")
+    @ApiOperation(value = "Updates the given merchant user by user id")
     @ApiResponses(
         ApiResponse(code = 204, message = "Successfully updated merchant user"),
         ApiResponse(code = 400, message = "Request model validation failed"),
@@ -75,7 +75,7 @@ class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServ
         userDetailsServiceImpl.updateMerchantUser(userId, principal, merchantUserUpdateModel)
     }
 
-    @ApiOperation(value = "Change the password of the given merchant user by user id")
+    @ApiOperation(value = "Changes the password of the given merchant user by user id")
     @ApiResponses(
         ApiResponse(code = 204, message = "Successfully updated merchant user's password"),
         ApiResponse(code = 400, message = "Request model validation failed"),
@@ -97,7 +97,7 @@ class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServ
         userDetailsServiceImpl.changePasswordMerchantUser(userId, principal, merchantUserEditPasswordModel)
     }
 
-    @ApiOperation(value = "Send forgot password email")
+    @ApiOperation(value = "Sends a forgot password email")
     @ApiResponses(
         ApiResponse(code = 201, message = "Successfully sent email"),
         ApiResponse(code = 400, message = "Request model validation failed"),
@@ -116,7 +116,7 @@ class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServ
         @PathVariable("Merchant-Id") merchantId: String
     ) = userDetailsServiceImpl.sendForgotPasswordEmail(email, request, merchantId)
 
-    @ApiOperation(value = "Validate token and reset password")
+    @ApiOperation(value = "Validates token and resets password")
     @ApiResponses(
         ApiResponse(code = 204, message = "Successfully reset merchant user's password"),
         ApiResponse(code = 400, message = "Request model validation failed"),

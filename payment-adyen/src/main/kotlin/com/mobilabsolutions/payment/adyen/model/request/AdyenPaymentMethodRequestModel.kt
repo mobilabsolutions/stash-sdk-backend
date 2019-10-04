@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "Adyen Payment Method")
+@ApiModel(value = "Adyen payment method request model")
 data class AdyenPaymentMethodRequestModel(
     @ApiModelProperty(value = "Adyen payment method type", example = "sepadirectdebit")
     val type: String?,
@@ -36,6 +36,6 @@ data class AdyenPaymentMethodRequestModel(
     @ApiModelProperty(value = "Encrypted security code", example = "adyenjs_0_1_18MT6ppy0FAMVMLH...")
     val encryptedSecurityCode: String?,
 
-    @ApiModelProperty(value = "Should card details be stored", example = "true")
+    @ApiModelProperty(value = "Whether card details should be stored", example = "true")
     val storeDetails: Boolean?
 )

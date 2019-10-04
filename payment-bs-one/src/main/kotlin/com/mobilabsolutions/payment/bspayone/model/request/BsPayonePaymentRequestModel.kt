@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "BS Payone Payment Request")
+@ApiModel(value = "BS Payone payment request model")
 data class BsPayonePaymentRequestModel(
     @ApiModelProperty(value = "BS Payone account id", example = "42949")
     @JsonProperty(value = "aid")

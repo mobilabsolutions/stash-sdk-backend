@@ -14,7 +14,7 @@ import javax.validation.Valid
  */
 @ApiModel(value = "PSP notification list request model")
 data class PspNotificationListRequestModel(
-    @ApiModelProperty(value = "List of PSP Notifications")
+    @ApiModelProperty(value = "List of PSP notifications")
     @field:Valid
     val notifications: MutableList<PspNotificationModel> = mutableListOf()
 )

@@ -20,7 +20,7 @@ data class AliasExtraModel(
     @field:Valid
     val ccConfig: CreditCardConfigModel?,
 
-    @ApiModelProperty(value = "Sepa configuration")
+    @ApiModelProperty(value = "SEPA configuration")
     @field:Valid
     val sepaConfig: SepaConfigModel?,
 

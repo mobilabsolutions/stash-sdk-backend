@@ -6,11 +6,13 @@ package com.mobilabsolutions.payment.bspayone.model.response
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.mobilabsolutions.payment.bspayone.data.enum.BsPayoneResponseStatus
+import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
+@ApiModel(value = "BS Payone delete alias response model")
 data class BsPayoneDeleteAliasResponseModel(
     @ApiModelProperty(value = "BS Payone response status", example = "APPROVED")
     val status: BsPayoneResponseStatus?,

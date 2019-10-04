@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.service
 
 import com.mobilabsolutions.payment.data.Filter

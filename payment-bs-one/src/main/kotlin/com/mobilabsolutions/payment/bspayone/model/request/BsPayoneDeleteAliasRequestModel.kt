@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "BS Payone Delete Alias")
+@ApiModel(value = "BS Payone delete alias request model")
 data class BsPayoneDeleteAliasRequestModel(
     @ApiModelProperty(value = "BS Payone customer id", example = "12378")
     @JsonProperty(value = "customerid")

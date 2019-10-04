@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "BS Payone Standard Parameters")
+@ApiModel(value = "BS Payone standard parameters model")
 data class BsPayoneStandardParametersModel(
     @ApiModelProperty(value = "Merchant ID", example = "42865")
     @JsonProperty(value = "mid")

@@ -17,9 +17,9 @@ data class PspRegisterAliasRequestModel(
     @ApiModelProperty("Alias ID", example = "JipfjLKL6BkTIREaRGyX")
     val aliasId: String?,
 
-    @ApiModelProperty(value = "Alias extra")
+    @ApiModelProperty(value = "Alias extra model")
     val aliasExtra: AliasExtraModel?,
 
-    @ApiModelProperty(value = "PSP config")
+    @ApiModelProperty(value = "PSP config model")
     val pspConfig: PspConfigModel?
 )

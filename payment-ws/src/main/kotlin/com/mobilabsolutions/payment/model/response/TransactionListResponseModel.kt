@@ -18,7 +18,7 @@ data class TransactionListResponseModel(
     @ApiModelProperty(value = "Transaction list metadata")
     val metadata: TransactionListMetadataModel?,
 
-    @ApiModelProperty(value = "Transaction Model")
+    @ApiModelProperty(value = "Transaction model")
     val transactions: MutableList<TransactionModel> = mutableListOf()
 ) {
     constructor(transactions: List<Array<Any>>, offset: Int?, limit: Int?, timezone: String?) : this(

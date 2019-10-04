@@ -13,11 +13,11 @@ import javax.validation.constraints.NotNull
  */
 @ApiModel(value = "Merchant user update password request model")
 data class MerchantUserEditPasswordRequestModel(
-    @ApiModelProperty(value = "Old password of the merchant user", example = "old-password")
+    @ApiModelProperty(value = "Old password", example = "old-password")
     @field:NotNull
     val oldPassword: String,
 
-    @ApiModelProperty(value = "New password of the merchant user", example = "new-password")
+    @ApiModelProperty(value = "New password", example = "new-password")
     @field:NotNull
     val newPassword: String
 )

@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.adyen.model.response
 
 import com.mobilabsolutions.payment.adyen.configuration.getJsonObjectSafe
@@ -9,7 +13,7 @@ import org.json.JSONObject
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "Adyen 3D Secure Response")
+@ApiModel(value = "Adyen 3D secure response")
 data class Adyen3DSResponseModel(
     @ApiModelProperty(value = "Recurring detail reference", example = "8415568838266087")
     val recurringDetailReference: String?,

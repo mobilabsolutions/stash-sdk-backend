@@ -16,6 +16,6 @@ data class AliasResponseModel(
     @ApiModelProperty(value = "Generated alias", example = "XXmmg2Sy9L6JrDvvgpjn")
     val aliasId: String?,
 
-    @ApiModelProperty(value = "PSP Configuration")
+    @ApiModelProperty(value = "PSP configuration model")
     val psp: PspAliasConfigModel?
 )

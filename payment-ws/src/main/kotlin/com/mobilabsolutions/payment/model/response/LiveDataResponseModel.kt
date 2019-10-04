@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.model.response
 
 import com.mobilabsolutions.payment.model.KeyPerformanceModel
@@ -17,6 +21,6 @@ data class LiveDataResponseModel(
     @ApiModelProperty(value = "Today's activity")
     val todaysActivity: TodaysActivityModel?,
 
-    @ApiModelProperty(value = "Notifications")
+    @ApiModelProperty(value = "Notifications model")
     val notifications: NotificationsModel?
 )

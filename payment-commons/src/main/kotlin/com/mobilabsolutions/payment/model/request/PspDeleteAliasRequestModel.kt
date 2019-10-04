@@ -18,7 +18,7 @@ data class PspDeleteAliasRequestModel(
     @ApiModelProperty(value = "Alias ID", example = "JipfjLKL6BkTIREaRGyX")
     val aliasId: String?,
 
-    @ApiModelProperty(value = "PSP Alias ID", example = "JipfjLKL6BkTIREaRGyX")
+    @ApiModelProperty(value = "PSP alias ID", example = "JipfjLKL6BkTIREaRGyX")
     val pspAlias: String?,
 
     @ApiModelProperty(value = "Payment method", example = "Values: CC, SEPA, PAY_PAL, GOOGLE_PAY, APPLE_PAY, KLARNA")

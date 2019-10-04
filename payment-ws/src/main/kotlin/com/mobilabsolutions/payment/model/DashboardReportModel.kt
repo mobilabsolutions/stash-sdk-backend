@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.model
 
 import io.swagger.annotations.ApiModel
@@ -35,6 +39,6 @@ class DashboardReportModel(
     @ApiModelProperty(value = "Amount", example = "20")
     val amount: String?,
 
-    @ApiModelProperty(value = "Creation Date", example = "2018-12-31 23:59:59.999 +0100")
+    @ApiModelProperty(value = "Creation date", example = "2018-12-31 23:59:59.999 +0100")
     val createdDate: String?
 )

@@ -38,7 +38,7 @@ class BraintreeClient {
     companion object : KLogging()
 
     /**
-     * Returns Braintree client token.
+     * Opens a Braintree  a gateway and generates a client token
      *
      * @param pspConfigModel Braintree configuration
      * @param mode sandbox or production mode
@@ -55,7 +55,7 @@ class BraintreeClient {
     }
 
     /**
-     * Registers payment method at Braintree.
+     * Registers payment method at Braintree
      *
      * @param request Braintree register alias request
      * @param pspConfigModel Braintree configuration
@@ -93,7 +93,7 @@ class BraintreeClient {
     }
 
     /**
-     * Deletes alias at Braintree
+     * Deletes Braintree alias
      *
      * @param pspAlias Braintree alias
      * @param pspConfigModel Braintree configuration
@@ -113,7 +113,7 @@ class BraintreeClient {
     }
 
     /**
-     * Makes preauthorization request to Braintree
+     * Sends a preauthorization request to Braintree
      *
      * @param request Braintree payment request
      * @param pspConfigModel Braintree configuration
@@ -139,7 +139,7 @@ class BraintreeClient {
     }
 
     /**
-     * Makes authorization request to Braintree
+     * Sends an authorization request to Braintree
      *
      * @param request Braintree payment request
      * @param pspConfigModel Braintree configuration
@@ -165,7 +165,8 @@ class BraintreeClient {
         }
     }
 
-    /** Makes refund request to Braintree
+    /**
+    * Sends a refund request to Braintree
     *
     * @param refundRequest Braintree refund request
     * @param pspConfigModel Braintree configuration
@@ -187,7 +188,8 @@ class BraintreeClient {
         }
     }
 
-    /** Makes reverse request to Braintree
+    /**
+     * Sends a reverse request to Braintree
      *
      * @param reverseRequest Braintree reverse request
      * @param pspConfigModel Braintree configuration
@@ -208,7 +210,7 @@ class BraintreeClient {
     }
 
     /**
-     * Makes capture request to Braintree
+     * Sends a capture request to Braintree
      *
      * @param captureRequest Braintree capture request
      * @param pspConfigModel Braintree configuration
@@ -228,7 +230,7 @@ class BraintreeClient {
     }
 
     /**
-     * Returns Braintree Gateway based on the mode and Braintree PSP configuration
+     * Creats a Braintree gateway based on the mode and Braintree PSP configuration
      *
      * @param pspConfigModel Braintree configuration
      * @param mode sandbox or production mode

@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.model
 
 import io.swagger.annotations.ApiModel
@@ -8,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty
  */
 @ApiModel(value = "Notifications model")
 data class NotificationsModel(
-    @ApiModelProperty(value = "The notifications")
+    @ApiModelProperty(value = "Notifications model")
     val notification: NotificationModel?,
 
     @ApiModelProperty(value = "The number of transactions from yesterday", example = "20")

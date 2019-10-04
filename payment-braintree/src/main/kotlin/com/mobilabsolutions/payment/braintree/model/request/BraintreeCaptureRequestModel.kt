@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel(value = "Braintree Capture Request")
+@ApiModel(value = "Braintree capture request model")
 data class BraintreeCaptureRequestModel(
     @ApiModelProperty(value = "Braintree transaction id", example = "42949")
     @field:NotNull

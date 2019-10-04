@@ -32,7 +32,7 @@ import javax.validation.constraints.Size
 @Validated
 class AliasController(private val aliasService: AliasService) {
 
-    @ApiOperation(value = "Create an Alias for payment operations")
+    @ApiOperation(value = "Create an alias for payment operations")
     @ApiResponses(
         ApiResponse(code = 201, message = "Successfully created an Alias")
     )
@@ -47,7 +47,7 @@ class AliasController(private val aliasService: AliasService) {
         @RequestHeader(value = "PSP-Test-Mode", required = false) pspTestMode: Boolean?
     ) = aliasService.createAlias(publishableKey, pspType, idempotentKey, userAgent, pspTestMode)
 
-    @ApiOperation(value = "Update the given Alias for payment operations")
+    @ApiOperation(value = "Update the given alias for payment operations")
     @ApiResponses(
         ApiResponse(code = 200, message = "Successfully updated an Alias"),
         ApiResponse(code = 400, message = "Request model validation is failed")
@@ -64,7 +64,7 @@ class AliasController(private val aliasService: AliasService) {
         @Valid @ApiParam(name = "Alias-Info", value = "Alias Model") @RequestBody alias: AliasRequestModel
     ) = aliasService.exchangeAlias(publishableKey, pspTestMode, userAgent, aliasId, alias)
 
-    @ApiOperation(value = "Verify the given Alias for payment operations")
+    @ApiOperation(value = "Verify the given alias for payment operations")
     @ApiResponses(
         ApiResponse(code = 200, message = "Successfully verified an Alias"),
         ApiResponse(code = 400, message = "Request model validation is failed")
@@ -81,7 +81,7 @@ class AliasController(private val aliasService: AliasService) {
         @Valid @RequestBody verifyAliasRequest: VerifyAliasRequestModel
     ) = aliasService.verifyAlias(publishableKey, pspTestMode, userAgent, aliasId, verifyAliasRequest)
 
-    @ApiOperation(value = "Delete an Alias")
+    @ApiOperation(value = "Deletes the given alias")
     @ApiResponses(
         ApiResponse(code = 204, message = "Successfully deleted an Alias"),
         ApiResponse(code = 401, message = "Unauthorized access"),

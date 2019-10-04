@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:doruk@mobilabsolutions.com">Doruk Coskun</a>
  */
-@ApiModel(value = "Braintree Payment Response")
+@ApiModel(value = "Braintree payment response model")
 data class BraintreePaymentResponseModel(
     @ApiModelProperty(value = "Braintree response status", example = "AUTHORIZED")
     val status: Transaction.Status?,

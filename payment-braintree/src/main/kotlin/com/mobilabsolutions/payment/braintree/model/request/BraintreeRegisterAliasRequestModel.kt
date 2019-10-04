@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "Braintree Register Alias Request")
+@ApiModel(value = "Braintree register alias request model")
 data class BraintreeRegisterAliasRequestModel(
     @ApiModelProperty(value = "Customer ID", example = "123456")
     val customerId: String?,

@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.model.response
 
 import com.mobilabsolutions.payment.model.FiltersModel
@@ -7,7 +11,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel(value = "Filters response model")
+@ApiModel(value = "Filters list response model")
 data class FiltersListResponseModel(
     @ApiModelProperty(value = "Filters list")
     val filters: List<FiltersModel> = mutableListOf()

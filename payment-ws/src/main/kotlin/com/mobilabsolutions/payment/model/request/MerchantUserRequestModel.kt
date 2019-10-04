@@ -13,20 +13,20 @@ import javax.validation.constraints.NotNull
  */
 @ApiModel(value = "Merchant user request model")
 data class MerchantUserRequestModel(
-    @ApiModelProperty(value = "Email of the merchant user", example = "test@mblb.net")
+    @ApiModelProperty(value = "Email", example = "test@mblb.net")
     @field:NotNull
     val email: String,
 
-    @ApiModelProperty(value = "Password of the merchant user", example = "m5jSzBRQvaBS6FQ4")
+    @ApiModelProperty(value = "Password", example = "m5jSzBRQvaBS6FQ4")
     @field:NotNull
     val password: String,
 
-    @ApiModelProperty(value = "First name of the merchant user", example = "Max")
+    @ApiModelProperty(value = "First name", example = "Max")
     val firstname: String?,
 
-    @ApiModelProperty(value = "Last name of the merchant user", example = "Mustermann")
+    @ApiModelProperty(value = "Last name", example = "Mustermann")
     val lastname: String?,
 
-    @ApiModelProperty(value = "Locale of the merchant user", example = "de-DE")
+    @ApiModelProperty(value = "Locale", example = "de-DE")
     val locale: String?
 )

@@ -49,7 +49,7 @@ class AliasService(
     }
 
     /**
-     * Creates an alias for given pspType and publishableKey
+     * Creates an alias for given psp type and publishable key
      *
      * @param publishableKey Publishable Key
      * @param pspType PSP Type
@@ -78,7 +78,7 @@ class AliasService(
     }
 
     /**
-     * Update an alias for alias id and alias model
+     * Update an alias using given alias id and alias model
      *
      * @param publishableKey Publishable Key
      * @param pspTestMode indicator whether is the test mode or not
@@ -129,7 +129,7 @@ class AliasService(
     }
 
     /**
-     * Verifies alias after the 3D Secure check
+     * Verifies alias after successful 3D Secure check
      *
      * @param publishableKey Publishable Key
      * @param pspTestMode indicator whether is the test mode or not

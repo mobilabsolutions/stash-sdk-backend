@@ -17,7 +17,7 @@ data class AliasRequestModel(
     @ApiModelProperty(value = "Payment service provider alias", example = "GygOIj76ighI7T98yHg98ty78tH0h0hT6960lMLnsSD")
     val pspAlias: String?,
 
-    @ApiModelProperty(value = "Alias Extra")
+    @ApiModelProperty(value = "Alias extra model")
     @field:Valid
     val extra: AliasExtraModel?
 )

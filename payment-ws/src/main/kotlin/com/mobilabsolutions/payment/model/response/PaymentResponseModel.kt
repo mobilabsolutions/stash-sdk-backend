@@ -23,12 +23,12 @@ data class PaymentResponseModel(
     @ApiModelProperty("Currency")
     val currency: String?,
 
-    @ApiModelProperty("Transaction Status")
+    @ApiModelProperty("Transaction status")
     val status: TransactionStatus?,
 
-    @ApiModelProperty("Transaction Action")
+    @ApiModelProperty("Transaction action")
     val action: TransactionAction?,
 
-    @ApiModelProperty("Additional Info")
+    @ApiModelProperty("Additional info")
     val additionalInfo: String? = null
 )

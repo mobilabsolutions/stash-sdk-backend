@@ -21,22 +21,22 @@ data class PersonalDataModel(
     @ApiModelProperty(value = "Customer's IP", example = "61.294.12.12")
     val customerIP: String?,
 
-    @ApiModelProperty(value = "First name of user", example = "Max")
+    @ApiModelProperty(value = "First name", example = "Max")
     val firstName: String?,
 
-    @ApiModelProperty(value = "Last name of user", example = "Mustermann")
+    @ApiModelProperty(value = "Last name", example = "Mustermann")
     val lastName: String?,
 
-    @ApiModelProperty(value = "Address information of account holder", example = "Holzmarkt 59-65")
+    @ApiModelProperty(value = "Street name", example = "Holzmarkt 59-65")
     val street: String?,
 
-    @ApiModelProperty(value = "ZIP code information of account holder", example = "50676")
+    @ApiModelProperty(value = "ZIP code", example = "50676")
     val zip: String?,
 
-    @ApiModelProperty(value = "City of account holder", example = "Cologne")
+    @ApiModelProperty(value = "City", example = "Cologne")
     val city: String?,
 
-    @ApiModelProperty(value = "Country code of account holder", example = "DE")
+    @ApiModelProperty(value = "Country", example = "DE")
     @field:CountryCodeValidator
     val country: String?,
 

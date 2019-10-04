@@ -8,6 +8,9 @@ import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import javax.validation.constraints.Size
 
+/**
+ * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
+ */
 @ApiModel(value = "Credit card config model")
 data class CreditCardConfigModel(
     @ApiModelProperty(value = "Credit card mask", example = "1111")

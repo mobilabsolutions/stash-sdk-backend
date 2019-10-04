@@ -84,7 +84,7 @@ class MerchantController(
         @Valid @ApiParam(name = "Merchant-Info", value = "Merchant Model") @RequestBody merchantInfo: MerchantRequestModel
     ) = merchantService.createMerchant(merchantInfo)
 
-    @ApiOperation(value = "Add PSP Configuration for the Merchant")
+    @ApiOperation(value = "Adds PSP configuration for specific merchant")
     @ApiResponses(
         ApiResponse(code = 201, message = "Successfully added PSP Configuration"),
         ApiResponse(code = 400, message = "Request model validation failed"),
@@ -102,7 +102,7 @@ class MerchantController(
         @Valid @ApiParam(name = "PSP-Config-Info", value = "PSP Config Model") @RequestBody pspConfigRequestModel: PspConfigRequestModel
     ) = merchantService.addPspConfigForMerchant(merchantId, pspConfigRequestModel)
 
-    @ApiOperation(value = "Delete PSP Configuration for the Merchant")
+    @ApiOperation(value = "Deletes PSP configuration for specific merchant")
     @ApiResponses(
         ApiResponse(code = 204, message = "Successfully deleted PSP Configuration"),
         ApiResponse(code = 400, message = "Failed to delete PSP Configuration"),
@@ -118,7 +118,7 @@ class MerchantController(
         @PathVariable("Psp-Id") pspId: String
     ) = merchantService.deletePspConfigForMerchant(merchantId, pspId)
 
-    @ApiOperation(value = "Get List of PSP Configuration for the Merchant")
+    @ApiOperation(value = "Gets list of PSP configurations for a specific merchant")
     @ApiResponses(
         ApiResponse(code = 200, message = "Successfully retrieved PSP Configuration"),
         ApiResponse(code = 400, message = "Request model validation failed"),
@@ -135,7 +135,7 @@ class MerchantController(
         @PathVariable("Merchant-Id") merchantId: String
     ) = merchantService.getMerchantConfiguration(merchantId)
 
-    @ApiOperation(value = "Get PSP Configuration for the Merchant")
+    @ApiOperation(value = "Gets PSP configuration a specific merchant")
     @ApiResponses(
         ApiResponse(code = 200, message = "Successfully retrieved PSP Configuration"),
         ApiResponse(code = 400, message = "Request model validation failed"),
@@ -154,7 +154,7 @@ class MerchantController(
         @PathVariable("Psp-Id") pspId: String
     ) = merchantService.getMerchantPspConfiguration(merchantId, pspId)
 
-    @ApiOperation(value = "Update PSP Configuration for the Merchant")
+    @ApiOperation(value = "Updates PSP configuration for a specific erchant")
     @ApiResponses(
         ApiResponse(code = 204, message = "Successfully updated PSP Configuration"),
         ApiResponse(code = 400, message = "Request model validation failed"),
@@ -175,7 +175,7 @@ class MerchantController(
         @Valid @ApiParam(name = "PSP-Config-Info", value = "PSP Config Edit Model") @RequestBody pspUpsertConfigRequestModel: PspUpsertConfigRequestModel
     ) = merchantService.updatePspConfig(merchantId, pspId, pspUpsertConfigRequestModel)
 
-    @ApiOperation(value = "Get transaction details")
+    @ApiOperation(value = "Gets transaction details for a specific transaction")
     @ApiResponses(
         ApiResponse(code = 200, message = "Successfully queried transaction"),
         ApiResponse(code = 401, message = "Unauthorized access"),
@@ -194,7 +194,7 @@ class MerchantController(
         @PathVariable(value = "Transaction-Id") transactionId: String
     ) = transactionDetailsService.getTransactionDetails(merchantId, transactionId)
 
-    @ApiOperation(value = "Filter transactions")
+    @ApiOperation(value = "Gets filtered transactions")
     @ApiResponses(
         ApiResponse(code = 200, message = "Successfully queried transactions"),
         ApiResponse(code = 401, message = "Unauthorized access"),

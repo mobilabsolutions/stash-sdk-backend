@@ -8,7 +8,7 @@ import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import javax.validation.constraints.NotNull
 
-@ApiModel(value = "Braintree Reverse Request")
+@ApiModel(value = "Braintree reverse request model")
 data class BraintreeReverseRequestModel(
     @ApiModelProperty(value = "Braintree transaction id", example = "42949")
     @field:NotNull

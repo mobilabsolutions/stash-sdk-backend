@@ -80,7 +80,7 @@ class ApiKeyService(
     }
 
     /**
-     * Get merchant api key
+     * Get merchant api key using api key id
      *
      * @param apiKeyId Api Key Id
      * @return merchant api key by id method response

@@ -66,7 +66,7 @@ class BsPayonePsp(
             request = BsPayoneRequestType.CREDIT_CARD_CHECK.type,
             apiVersion = bsPayoneProperties.apiVersion,
             responseType = BsPayoneHashingService.RESPONSE_TYPE,
-            hash = bsPayoneHashingService.makeCreditCardCheckHash(pspConfigModel, getPspMode(pspTestMode)),
+            hash = bsPayoneHashingService.createCreditCardCheckHash(pspConfigModel, getPspMode(pspTestMode)),
             accountId = pspConfigModel.accountId,
             encoding = bsPayoneProperties.encoding,
             mode = getPspMode(pspTestMode),

@@ -13,7 +13,7 @@ import javax.validation.Valid
  */
 @ApiModel(value = "PSP config list model")
 data class PspConfigListModel(
-    @ApiModelProperty(value = "List of PSP Configuration")
+    @ApiModelProperty(value = "List of PSP configuration")
     @field:Valid
     val psp: MutableList<PspConfigModel> = mutableListOf()
 )

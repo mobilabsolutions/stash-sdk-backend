@@ -12,7 +12,7 @@ import org.json.JSONObject
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "Adyen Payment Response")
+@ApiModel(value = "Adyen payment response model")
 data class AdyenPaymentResponseModel(
     @ApiModelProperty(value = "PSP reference", example = "kdcnvbfkhbvka")
     val pspReference: String?,

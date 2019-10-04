@@ -12,14 +12,14 @@ import javax.validation.constraints.NotNull
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel(value = "BS Payone Refund Request")
+@ApiModel(value = "BS Payone refund request model")
 data class BsPayoneRefundRequestModel(
     @ApiModelProperty(value = "BS Payone transaction id", example = "42949")
     @JsonProperty(value = "txid")
     @field:NotNull
     val pspTransactionId: String?,
 
-    @ApiModelProperty(value = "BS Payone Sequence Number", example = "CC, SEPA: authorization 0, refund 1. CC: preauthorization 0, capture 1, refund 2")
+    @ApiModelProperty(value = "BS Payone sequence number", example = "CC, SEPA: authorization 0, refund 1. CC: preauthorization 0, capture 1, refund 2")
     @JsonProperty(value = "sequencenumber")
     @field:NotNull
     val sequenceNumber: Int?,

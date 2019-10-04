@@ -1,3 +1,7 @@
+/*
+ * Copyright © MobiLab Solutions GmbH
+ */
+
 package com.mobilabsolutions.payment.model.response
 
 import io.swagger.annotations.ApiModel
@@ -6,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "Exchange Alias Response")
+@ApiModel(value = "Alias 3DS response model")
 data class Alias3DSResponseModel(
     @ApiModelProperty(value = "Result code", example = "IdentifyShopper")
     val resultCode: String?,

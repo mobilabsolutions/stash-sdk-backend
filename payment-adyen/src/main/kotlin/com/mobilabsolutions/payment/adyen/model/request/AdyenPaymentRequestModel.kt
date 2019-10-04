@@ -10,9 +10,9 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author <a href="mailto:jovana@mobilabsolutions.com">Jovana Veskovic</a>
  */
-@ApiModel(value = "Adyen Payment Request")
+@ApiModel(value = "Adyen payment request model")
 data class AdyenPaymentRequestModel(
-    @ApiModelProperty(value = "Adyen amount")
+    @ApiModelProperty(value = "Amount request model")
     val amount: AdyenAmountRequestModel,
 
     @ApiModelProperty(value = "Shopper email", example = "shopper@test.com")
@@ -27,7 +27,7 @@ data class AdyenPaymentRequestModel(
     @ApiModelProperty(value = "Selected recurring detail reference", example = "LATEST")
     val selectedRecurringDetailReference: String?,
 
-    @ApiModelProperty(value = "Adyen recurring")
+    @ApiModelProperty(value = "Recurring request model")
     val recurring: AdyenRecurringRequestModel?,
 
     @ApiModelProperty(value = "Shopper interaction", example = "ContAuth")
@@ -36,10 +36,10 @@ data class AdyenPaymentRequestModel(
     @ApiModelProperty(value = "Reference", example = "yourShopperId_IOfW3k9G2PvXFu2j")
     val reference: String?,
 
-    @ApiModelProperty(value = "Merchant Account", example = "mobilab")
+    @ApiModelProperty(value = "Merchant account", example = "mobilab")
     val merchantAccount: String?,
 
-    @ApiModelProperty(value = "Time between authorization and auto-capture, will be used for authorization", example = "0")
+    @ApiModelProperty(value = "Time between authorization and auto-capture (to be used for authorization)", example = "0")
     val captureDelayHours: Int?,
 
     @ApiModelProperty(value = "Adyen payment method")
@@ -54,6 +54,6 @@ data class AdyenPaymentRequestModel(
     @ApiModelProperty(value = "Return URL", example = "payment-dev.mblb.net")
     val returnUrl: String?,
 
-    @ApiModelProperty(value = "Enable recurring payment", example = "true")
+    @ApiModelProperty(value = "Whethere to enable recurring payment", example = "true")
     val enableRecurring: Boolean?
 )

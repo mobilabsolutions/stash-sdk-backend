@@ -18,18 +18,18 @@ data class PspPaymentRequestModel(
     @ApiModelProperty("Alias ID", example = "JipfjLKL6BkTIREaRGyX")
     val aliasId: String?,
 
-    @ApiModelProperty(value = "Alias Extra")
+    @ApiModelProperty(value = "Alias extra model")
     @field:Valid
     val extra: AliasExtraModel?,
 
-    @ApiModelProperty("Payment data")
+    @ApiModelProperty("Payment data request model")
     @field:Valid
     val paymentData: PaymentDataRequestModel?,
 
     @ApiModelProperty(value = "PSP alias", example = "jsklcmn")
     val pspAlias: String?,
 
-    @ApiModelProperty(value = "PSP config")
+    @ApiModelProperty(value = "PSP config model")
     val pspConfig: PspConfigModel?,
 
     @ApiModelProperty("Purchase ID", example = "132")

@@ -11,13 +11,13 @@ import javax.validation.Valid
 /**
  * @author <a href="mailto:mohamed.osman@mobilabsolutions.com">Mohamed Osman</a>
  */
-@ApiModel(value = "Payment info Model")
+@ApiModel(value = "Payment info model")
 data class PaymentInfoModel(
     @ApiModelProperty("Alias extra")
     @field:Valid
     val extra: AliasExtraModel?,
 
-    @ApiModelProperty("Psp configuration")
+    @ApiModelProperty("Psp configuration model")
     @field:Valid
     val pspConfig: PspConfigModel?
 )
