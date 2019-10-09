@@ -109,7 +109,6 @@ class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServ
         method = [RequestMethod.POST]
     )
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun sendForgotPasswordEmail(
         request: HttpServletRequest,
         @RequestParam email: String,
@@ -128,7 +127,6 @@ class MerchantUserController(private val userDetailsServiceImpl: UserDetailsServ
         consumes = [MediaType.APPLICATION_JSON_VALUE]
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasAuthority(#merchantId) or hasAuthority('admin')")
     fun validateTokenAndResetPassword(
         @RequestParam token: String,
         @RequestParam email: String,

@@ -41,6 +41,6 @@ class ResourceServerConfiguration(private val exceptionTranslator: CustomWebResp
         private const val RESOURCE_ID = "payment-sdk-rest-api"
         private const val USER_SCOPE = "#oauth2.hasScope('user')"
         private val SWAGGER_PATTERNS = arrayOf("/swagger-ui.html", "/api-docs/**", "/webjars/**", "/v2/**", "/swagger-resources/**")
-        private val PERMITTED_PATTERNS = arrayOf("/actuator/**", "/alias/**", "/preauthorization/**", "/authorization/**", "/notification/**")
+        private val PERMITTED_PATTERNS = arrayOf("/actuator/**", "/alias/**", "/preauthorization/**", "/authorization/**", "/notification/**", "/merchant/**/user/forgot-password", "/merchant/**/user/reset-password")
     }
 }
