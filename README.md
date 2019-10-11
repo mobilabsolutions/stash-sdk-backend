@@ -87,6 +87,23 @@ mvn spring-boot:run -Dspring.profiles.active=local
 
 You can now access the Stash! Backend here: http://localhost:8080/ 
 
+### Setting up the infrastructure
+
+For setting up the GCP infrastructure, Terraform scripts can be used.
+
+* In cloud console, navigate to IAM & Admin > Service Accounts, and click Create Service Account with `Editor` 
+role. Create a new private key in JSON format and download it. Then create a directory called `creds` inside the 
+`terraform` root directory and copy this JSON file into it.
+* In cloud console, create a GCS bucket with bucket name of `stash-terraform-states` and prefix of `mobility` for 
+storing the terraform states.
+* Execute following Terraform commands inside `terraform` root directory and your infrastructure will be ready in few 
+minutes
+```
+$ terraform init
+$ terraform plan
+$ terraform apply
+```
+
 ## Request authentication
 
 In the Stash! Backend, there are the `secret` and `publishable` keys that should be generated for the merchants. These keys will later be used for the authentication requests.
