@@ -27,3 +27,11 @@ payment-notifications/src/main/resources/db/changelog/changelog-local.xml
 /nbdist/
 /.nb-gradle/
 /build/
+
+### Terraform ###
+*.tfstate
+*.tfstate.backup
+*.tfvars
+.terraform
+creds
+tfplan
