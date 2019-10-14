@@ -4,6 +4,8 @@
 
 Many applications need to process payments for digital or physical goods. Implementing payment functionality can be very cumbersome though: many payment service providers support or don't support various types of payment methods and payment method registration and usage flows. The Stash! SDK simplifies the integration of payments into our applications and abstracts away a lot of the internal complexity that different payment service providers' solutions have. With the Stash! SDK it does not matter which payment service provider one chooses to register payment methods with - the API is standardized and works across the board.
 
+There are many ways to contribute to this project. Get started [here](https://github.com/mobilabsolutions/payment-sdk-backend-open/tree/master/.github/CONTRIBUTING.md) and make sure to take a look at our [code of conduct](https://github.com/mobilabsolutions/payment-sdk-backend-open/tree/master/.github/CODE_OF_CONDUCT.md).
+
 ## Supported PSPs
 
 At the moment, the Stash! Backend supports the following PSPs:
