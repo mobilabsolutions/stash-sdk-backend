@@ -1,0 +1,73 @@
+name: CI Workflow
+
+on: [push, pull_request]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v1
+        - uses: actions/setup-java@v1
+          with:
+            java-version: 12.0.2
+        - name: Build & Test
+          run: |
+            mvn verify
+            mvn package -DskipTests=true -B -V -nsu
+        - name: Build Docker Images
+          env:
+              REGISTRY_HOSTNAME: eu.gcr.io
+              PROJECT_ID: payment-server-reloaded
+
+              WS_IMAGE_NAME: payment-sdk-backend
+              WS_BASE_IMAGE: ${REGISTRY_HOSTNAME}/${PROJECT_ID}/${WS_IMAGE_NAME}
+              WS_INITIAL_IMAGE: ${WS_BASE_IMAGE}:commit-${{ github.sha }}
+
+              NOTIF_IMAGE_NAME: payment-sdk-notification
+              NOTIF_BASE_IMAGE: ${REGISTRY_HOSTNAME}/${PROJECT_ID}/${NOTIF_IMAGE_NAME}
+              NOTIF_INITIAL_IMAGE: ${NOTIF_BASE_IMAGE}:commit-${{ github.sha }}
+          run: |
+              echo "Building ${WS_INITIAL_IMAGE}"
+              docker build -f Dockerfile -t ${WS_INITIAL_IMAGE} .
+
+              echo "Building ${NOTIF_INITIAL_IMAGE}"
+              docker build -f Dockerfile -t ${NOTIF_INITIAL_IMAGE} .
+          - uses: actions/gcloud/auth@master
+            env:
+              GCLOUD_AUTH: ${{ secrets.GCLOUD_AUTH }}
+        - name: Tag Docker Images
+          env:
+              REGISTRY_HOSTNAME: eu.gcr.io
+              PROJECT_ID: payment-server-reloaded
+
+              WS_IMAGE_NAME: payment-sdk-backend
+              WS_BASE_IMAGE: ${REGISTRY_HOSTNAME}/${PROJECT_ID}/${WS_IMAGE_NAME}
+              WS_INITIAL_IMAGE: ${WS_BASE_IMAGE}:commit-${{ github.sha }}
+
+              NOTIF_IMAGE_NAME: payment-sdk-notification
+              NOTIF_BASE_IMAGE: ${REGISTRY_HOSTNAME}/${PROJECT_ID}/${NOTIF_IMAGE_NAME}
+              NOTIF_INITIAL_IMAGE: ${NOTIF_BASE_IMAGE}:commit-${{ github.sha }}
+          run: |
+              if ${{ endsWith(github.ref, 'master') }}; then
+                docker tag ${WS_INITIAL_IMAGE} ${WS_BASE_IMAGE}:latest
+              fi
+              if ${{ github.head_ref != ''}}; then
+                docker tag ${NOTIF_INITIAL_IMAGE} ${NOTIF_BASE_IMAGE}:latest
+              fi
+        - name: Push Docker Images
+          uses: actions/gcloud/cli@master
+          env:
+            REGISTRY_HOSTNAME: eu.gcr.io
+            PROJECT_ID: payment-server-reloaded
+
+            WS_IMAGE_NAME: payment-sdk-backend
+            WS_BASE_IMAGE: ${REGISTRY_HOSTNAME}/${PROJECT_ID}/${WS_IMAGE_NAME}
+
+            NOTIF_IMAGE_NAME: payment-sdk-notification
+            NOTIF_BASE_IMAGE: ${REGISTRY_HOSTNAME}/${PROJECT_ID}/${NOTIF_IMAGE_NAME}
+          with:
+            args: |
+              auth configure-docker --quiet
+              docker push ${WS_BASE_IMAGE}
+              echo "Pushing tags for ${NOTIF_BASE_IMAGE}"
+              docker push ${NOTIF_BASE_IMAGE}
