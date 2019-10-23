@@ -2,8 +2,6 @@
 
 Thank you for being a part of the Stash! team. With your help, we can make sure Stash! will become a great tool.
 
-### What are we looking for?
-
 Stash! is an open source project and we are always looking forward to receive contributions from the community! If you want to contribute either by reporting a bug, suggesting a feature, or any other kind of enhancement, please keep reading. However, please do not use the issue tracker for support questions. If you have any questions, please send us an email at payment-sdk@mobilabsolutions.com.
 
 ### Where do I go from here?
