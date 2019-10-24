@@ -86,9 +86,9 @@ mvn spring-boot:run -Dspring.profiles.active=local
 
 You can now access the Stash! Backend here: http://localhost:8080/ 
 
-### Setting up the infrastructure
+### Setting up infrastructure
 
-For setting up the GCP infrastructure, Terraform scripts can be used.
+For setting up infrastructure on Google Cloud Platform, the provided Terraform scripts can be used.
 
 * In cloud console, navigate to IAM & Admin > Service Accounts, and click Create Service Account with `Editor` 
 role. Create a new private key in JSON format and download it. Then create a directory called `creds` inside the 
@@ -121,9 +121,9 @@ The secret key is used to authenticate transactions requests and alias deletion:
 
 ## Idempotency
 
-The Stash! SDK uses a concept of idempotency for both aliases and transactions. The idempotent operation is the one that produces the same result no matter how many times it is called. The idempotency is performed by sending an `Idempotent-Key` in the header for `Create Alias`, `Preauthorization`, `Authorization` and `Refund` requests. This will avoid adding the same alias more than once or performing the same transaction several times if unintentionally called.
+The Stash! SDK uses idempotence keys for both aliases and transactions. This prevents adding the same alias more than once or performing the same transaction several times. Idempotence works via an `Idempotent-Key` header for `Create Alias`, `Preauthorization`, `Authorization` and `Refund` requests. 
 
-When a request comes with a new idempotent key, the key and the request body are stored in the Stash! backend. If a second request comes with the same idempotent key and the same body, the original response is returned. However, if the second request has the same idempotent key as the original one, but a different body, an error is returned.
+The value of the header and the request body are stored in the Stash! backend. If a second request comes with the same idempotent key and the same body, the original response is returned. However, if the second request has the same idempotent key as the original one, but a different body, an error is returned.
 
 ## Feedback
 
