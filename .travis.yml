@@ -1,53 +1,16 @@
 services:
-  - docker
-
+- docker
 language: java
-
 jdk:
-  - openjdk11
-
-env:
-  - CLUSTER_NAME=main REGION="europe-west3" PROJECT_ID="payment-server-reloaded" REGISTRY_HOSTNAME="eu.gcr.io" MVN_BUILD_JAVA_OPTS=""
-
+- openjdk11
 branches:
   only:
-    - master
-    - /^(\d+\.)?(\d+\.)?\d+(-\w+)?$/
-
+  - master
+  - "/^(\\d+\\.)?(\\d+\\.)?\\d+(-\\w+)?$/"
 install: true
-
-before_script:
-  - cd ${HOME} && { curl -sL https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-207.0.0-linux-x86_64.tar.gz | tar xz; ./google-cloud-sdk/install.sh --quiet; cd -; };
-  - source ${HOME}/google-cloud-sdk/path.bash.inc
-  - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.11.0/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-
 script:
-  - ${TRAVIS_BUILD_DIR}/scripts/travis-build.sh
-
-deploy:
-  - provider: releases
-    skip_cleanup: true
-    api_key:
-      secure: bxKlGuLuPvyz43DSNRM1Ba6CJJMbp477gneKameX7BFvD9p5FSxvfVmKjtLaLzBt5WHlm4PGEOGNUyPr1kDeT0Q9i3yy+nsfdIwMOlKtY6E72CfgwqMPh1LADtYI5+kamLy9qTMd91iKQa+yXo/E7UHDF09DYU3hcF3XxwLXrFckx0kEbQckjVLuOvAnWUaea08YtEYvs5Y2Af9JyfsTRm8yiQ0v0Byy9utXZgB4MsdVkLYvhnMjsCEg+VMypx9WjNuuo7zGIiB3rQ23OTtpSFNCrg+JUmFjixqYtmuY4oSoR8ZlvwABzLD9yDJJsl9lZ4/TKVWGDdBdhpGurFhJ9PwreUhRfD2vrY/0Hc9Gq685lydTS+5gPzmrQirwlR57dkTZFVTb7rXJRMg0rd5D3o9u2jqcXjsIUWfuWXrrDbWruRtiZ8WEmxEVVAQh0FnH/BbyUoEwKQQGKv1wwzqqcGdpOtOY2ac5iOwKcMfBdknpFR1W8/WJoLgzQDZ6fxIvE0u6fFIeoxrnESwBOSBP4vouM2bxk00hmcjHR7mdC6oIJIlrf3tdWkBoRW8RkYa0U+1vt7KOpjhMfdef6RPBD6zJ6hDiUZx6AP95IDC38Jc4mowQQXqsr/uF+BHs7rZvnteSWsw6XY4zHOktkG+48TqOQe8mZKS6hCHP7k1ZtD4=
-    file:
-      - payment-adyen/target/payment-adyen-$TRAVIS_TAG.jar
-      - payment-braintree/target/payment-braintree-$TRAVIS_TAG.jar
-      - payment-bs-one/target/payment-bs-one-$TRAVIS_TAG.jar
-      - payment-commons/target/payment-commons-$TRAVIS_TAG.jar
-      - payment-notifications/target/payment-notifications-$TRAVIS_TAG.jar
-      - payment-ws/target/payment-ws-$TRAVIS_TAG.jar
-    on:
-      tags: true
-  - provider: script
-    skip_cleanup: true
-    # deploy to kube dev namespace
-    script: ${TRAVIS_BUILD_DIR}/k8s/gcp-dev-deploy.sh
-    on:
-      branch: master
-  - provider: script
-    skip_cleanup: true
-    # deploy to kube demo namespace
-    script: ${TRAVIS_BUILD_DIR}/k8s/gcp-demo-deploy.sh
-    on:
-      tags: true
-      branch: /^(\d+\.)?(\d+\.)?\d+(-demo)?$/
+- "${TRAVIS_BUILD_DIR}/scripts/travis-build.sh"
+env:
+  global:
+  - secure: SH8SfVWb9+WB03HPB+BwCELJRyQW3LDXrqPSZj/mCISn2B7uiiDv9KhcznTv3y9zaq/kUfLAd2ecUWg/6quuHs1ZKvL+Ehj9BEzTmgYFHPDiqAVtafhgNgCSCEEiwjjIxU9PUAIkQYng4eIcrCEaTyzr4fqsg7QO+1YucUIqOMooqcJp3W5UpU5wkwqlnks1bmyHMyBvhGkU2S+W/D8ARy+Or+Vwb68n2ADTl6TCbvMf+dGYMbNs2AME+vEAcx9iS/PbkiC8BDkW35mRmnh+abT6HcRB3DA54nlHbUHRWhNdA7WRPKDzB7DIvfW62ZQpUdZdp3fd1+073dSwgYWtcngUlS6pkF6azxRHHEP/Mk3Q8TRbEY5PlPqeQEbuz8K4PVyrwv5vJBxo7dCuns7w2l+ZPLNil4ve2YLwjO4Q04RHpFwFOBTJ+6GNmM9EmjsmIRfvTAwKbKAsktCGK/cVkyVWmz5uKctUPrVzE64VjtH5iUSSvcHmo1a/FTfgrwvU1p3zmstsFiamiQe2ODKgQeFx3tA0IoBRg4PaAtuopkDaxteg98kNm0n0HiRB8oLmK2TXmFv6Y6so924VQ3j4UXYGMjwS0kfCVvkh7kgKCt2WSZEcL+0dkj3/l6Jd6V/p5/xue145AR7bI7GPn3y+Uypuk2SgiMCck+vBmM0c9Dg=
+  - secure: BCgl+Spuz3gKRJ5q+cyehhKwFwaONwaTrFufVJ1nxLWqob5Mg9mYRsQLV/hJFcyXbs43Y3ApG0J1uB8SO64roWkkFh5Zlj1eMoHS5PXeIrJhkmjXr98VoHP5dgmxhqLdDo/9kynAOjC11UoJTLMst0+TiOYBzhoPSbbH75Tuur66mQfN+ufFaWEkxnqslP2R5/PmFQnfLvUXzvpJgWv5PAbtHwr4KLTO4kYnYmP+wwn9sFq6JR0DBbdU6BpIoTip5TZMqmSnPV4WhzHxArq2OUvFg4xcF4m5LHQfAz8hFMwiK1TgsdKDOTATiwdBxWwpzQaqZPVFXdaE1EOS/1Vb1LNRkJBplKgDIgTvvApdtF+LEAauMRxP/rkEsqW5FOqUxG3tqtkNV5jA7sqTHP74i8zT+NO+G1EpcfP9biacV2M1XsR4X6ATSCGPPep4Quw5T1sdoUn7+yLxCBeb+I1NVoWN68CikN5WUVzfXnh7dQnMFkF0r/KTEwtg9KeOOuRiKQTeDoaQqODoqhBFFElYnPUed28lvplYWgentqBU37Evrf0RRTiydcImYrmfeRF4jypmdDL2IkpLHJAWQc6YhYUGKnhVmzSElskDCoYlc2FnQbPHn6iFGVgl1QRAtI671VEg8DhbkBxDx8pGi4uPcDEYqCjxps7VWc4Vtwk8JSE=

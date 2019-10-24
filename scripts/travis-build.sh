@@ -2,45 +2,42 @@
 set -euox pipefail
 IFS=$'\n\t'
 
-mvn ${MVN_BUILD_JAVA_OPTS} -q clean package
+mvn -q clean package
 
-KEY_FILE=payment-gcp-service-account.json
-echo "${KEY_FILE_CONTENT}" | base64 --decode > ${KEY_FILE}
+PROJECT_ID="mobilabsolutions/payment-sdk-backend-open"
+REGISTRY="docker.pkg.github.com"
 
-gcloud auth activate-service-account --key-file ${KEY_FILE}
-
-gcloud config set project ${PROJECT_ID}
-gcloud auth configure-docker --quiet
+docker login ${REGISTRY} -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
 
 WS_IMAGE_NAME="payment-sdk-backend"
-WS_BASE_IMAGE=${REGISTRY_HOSTNAME}/${PROJECT_ID}/${WS_IMAGE_NAME}
+WS_BASE_IMAGE=${REGISTRY}/${PROJECT_ID}/${WS_IMAGE_NAME}
 WS_INITIAL_IMAGE=${WS_BASE_IMAGE}:commit-${TRAVIS_COMMIT}
 
-NOTIF_IMAGE_NAME="payment-sdk-notification"
-NOTIF_BASE_IMAGE=${REGISTRY_HOSTNAME}/${PROJECT_ID}/${NOTIF_IMAGE_NAME}
-NOTIF_INITIAL_IMAGE=${NOTIF_BASE_IMAGE}:commit-${TRAVIS_COMMIT}
+NOTIFICATION_IMAGE_NAME="payment-sdk-notification"
+NOTIFICATION_BASE_IMAGE=${REGISTRY}/${PROJECT_ID}/${NOTIFICATION_IMAGE_NAME}
+NOTIFICATION_INITIAL_IMAGE=${NOTIFICATION_BASE_IMAGE}:commit-${TRAVIS_COMMIT}
 
 build() {
   echo "Building ${WS_INITIAL_IMAGE}"
   docker build -t ${WS_INITIAL_IMAGE} ${TRAVIS_BUILD_DIR}/payment-ws
-  echo "Building ${NOTIF_INITIAL_IMAGE}"
-  docker build -t ${NOTIF_INITIAL_IMAGE} ${TRAVIS_BUILD_DIR}/payment-notifications
+  echo "Building ${NOTIFICATION_INITIAL_IMAGE}"
+  docker build -t ${NOTIFICATION_INITIAL_IMAGE} ${TRAVIS_BUILD_DIR}/payment-notifications
 }
 
 tag() {
   for TAG in "$@"; do
     echo "Tagging ${WS_BASE_IMAGE}:${TAG}"
     docker tag ${WS_INITIAL_IMAGE} ${WS_BASE_IMAGE}:${TAG}
-    echo "Tagging ${NOTIF_BASE_IMAGE}:${TAG}"
-    docker tag ${NOTIF_INITIAL_IMAGE} ${NOTIF_BASE_IMAGE}:${TAG}
+    echo "Tagging ${NOTIFICATION_BASE_IMAGE}:${TAG}"
+    docker tag ${NOTIFICATION_INITIAL_IMAGE} ${NOTIFICATION_BASE_IMAGE}:${TAG}
   done
 }
 
 push() {
   echo "Pushing tags for ${WS_BASE_IMAGE}"
   docker push ${WS_BASE_IMAGE}
-  echo "Pushing tags for ${NOTIF_BASE_IMAGE}"
-  docker push ${NOTIF_BASE_IMAGE}
+  echo "Pushing tags for ${NOTIFICATION_BASE_IMAGE}"
+  docker push ${NOTIFICATION_BASE_IMAGE}
 }
 
 build

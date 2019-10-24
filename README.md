@@ -119,7 +119,7 @@ The secret key is used to authenticate transactions requests and alias deletion:
 - Refund
 - Delete alias
 
-## Idempotency
+## Idempotence
 
 The Stash! SDK uses idempotence keys for both aliases and transactions. This prevents adding the same alias more than once or performing the same transaction several times. Idempotence works via an `Idempotent-Key` header for `Create Alias`, `Preauthorization`, `Authorization` and `Refund` requests. 
 
