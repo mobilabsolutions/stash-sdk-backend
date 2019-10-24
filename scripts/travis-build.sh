@@ -2,7 +2,7 @@
 set -euox pipefail
 IFS=$'\n\t'
 
-mvn -q clean package
+mvn -q package
 
 PROJECT_ID="mobilabsolutions/payment-sdk-backend-open"
 REGISTRY="docker.pkg.github.com"

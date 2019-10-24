@@ -7,6 +7,9 @@ branches:
   only:
   - master
   - "/^(\\d+\\.)?(\\d+\\.)?\\d+(-\\w+)?$/"
+cache:
+  directories:
+      - "$HOME/.m2"
 install: true
 script:
 - "${TRAVIS_BUILD_DIR}/scripts/travis-build.sh"
