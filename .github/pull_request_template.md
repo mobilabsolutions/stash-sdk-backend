@@ -3,7 +3,7 @@
 
 
 <!-- If there is a ticket associated with this pull request, mention it below. If not, please remove the below. -->
-This pull request implements <ISSUE-NR>
+This pull request implements ISSUE-NR
 
 # Checklist
 
