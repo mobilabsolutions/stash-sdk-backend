@@ -20,7 +20,7 @@ spec:
           secretName: cloudsql-instance-credentials
       containers:
       - name: payment-sdk-backend
-        image: eu.gcr.io/payment-server-reloaded/payment-sdk-backend:${KUBE_WS_DEPLOYMENT_IMAGE_TAG}
+        image: docker.pkg.github.com/payment-sdk-backend-open/payment-sdk-backend:${KUBE_WS_DEPLOYMENT_IMAGE_TAG}
         imagePullPolicy: Always
         resources:
           requests:

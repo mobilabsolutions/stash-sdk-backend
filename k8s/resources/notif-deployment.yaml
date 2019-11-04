@@ -20,7 +20,7 @@ spec:
           secretName: cloudsql-instance-credentials
       containers:
       - name: payment-sdk-notification
-        image: eu.gcr.io/payment-server-reloaded/payment-sdk-notification:${KUBE_NOTIF_DEPLOYMENT_IMAGE_TAG}
+        image: docker.pkg.github.com/payment-sdk-backend-open/payment-sdk-notification:${KUBE_NOTIF_DEPLOYMENT_IMAGE_TAG}
         imagePullPolicy: Always
         resources:
           requests:
