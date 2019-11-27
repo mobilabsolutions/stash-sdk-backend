@@ -4,24 +4,24 @@ IFS=$'\n\t'
 
 mvn -q package
 
-PROJECT_ID="mobilabsolutions/payment-sdk-backend-open"
+PROJECT_ID="mobilabsolutions/stash-sdk-backend"
 REGISTRY="docker.pkg.github.com"
 
 docker login ${REGISTRY} -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
 
-WS_IMAGE_NAME="payment-sdk-backend"
+WS_IMAGE_NAME="stash-sdk-backend"
 WS_BASE_IMAGE=${REGISTRY}/${PROJECT_ID}/${WS_IMAGE_NAME}
 WS_INITIAL_IMAGE=${WS_BASE_IMAGE}:commit-${TRAVIS_COMMIT}
 
-NOTIFICATION_IMAGE_NAME="payment-sdk-notification"
+NOTIFICATION_IMAGE_NAME="stash-sdk-notification"
 NOTIFICATION_BASE_IMAGE=${REGISTRY}/${PROJECT_ID}/${NOTIFICATION_IMAGE_NAME}
 NOTIFICATION_INITIAL_IMAGE=${NOTIFICATION_BASE_IMAGE}:commit-${TRAVIS_COMMIT}
 
 build() {
   echo "Building ${WS_INITIAL_IMAGE}"
-  docker build -t ${WS_INITIAL_IMAGE} ${TRAVIS_BUILD_DIR}/payment-ws
+  docker build -t ${WS_INITIAL_IMAGE} ${TRAVIS_BUILD_DIR}/stash-ws
   echo "Building ${NOTIFICATION_INITIAL_IMAGE}"
-  docker build -t ${NOTIFICATION_INITIAL_IMAGE} ${TRAVIS_BUILD_DIR}/payment-notifications
+  docker build -t ${NOTIFICATION_INITIAL_IMAGE} ${TRAVIS_BUILD_DIR}/stash-notifications
 }
 
 tag() {
