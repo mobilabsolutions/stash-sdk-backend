@@ -19,9 +19,9 @@ NOTIFICATION_INITIAL_IMAGE=${NOTIFICATION_BASE_IMAGE}:commit-${TRAVIS_COMMIT}
 
 build() {
   echo "Building ${WS_INITIAL_IMAGE}"
-  docker build -t ${WS_INITIAL_IMAGE} ${TRAVIS_BUILD_DIR}/stash-ws
+  docker build -t ${WS_INITIAL_IMAGE} ${TRAVIS_BUILD_DIR}/payment-ws
   echo "Building ${NOTIFICATION_INITIAL_IMAGE}"
-  docker build -t ${NOTIFICATION_INITIAL_IMAGE} ${TRAVIS_BUILD_DIR}/stash-notifications
+  docker build -t ${NOTIFICATION_INITIAL_IMAGE} ${TRAVIS_BUILD_DIR}/payment-notifications
 }
 
 tag() {
