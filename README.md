@@ -1,6 +1,6 @@
 # Stash! Backend
 
-[![Build Status](https://travis-ci.com/mobilabsolutions/payment-sdk-backend-open.svg?token=eZip4D1t6wvFGqNxU2ki&branch=master)](https://travis-ci.com/mobilabsolutions/payment-sdk-backend-open)
+[![Build Status](https://travis-ci.com/mobilabsolutions/stash-sdk-backend.svg?token=eZip4D1t6wvFGqNxU2ki&branch=master)](https://travis-ci.com/mobilabsolutions/stash-sdk-backend)
 
 Many applications need to process payments for digital or physical goods. Implementing payment functionality can be very cumbersome though: many payment service providers support or don't support various types of payment methods and payment method registration and usage flows. The Stash! SDK simplifies the integration of payments into our applications and abstracts away a lot of the internal complexity that different payment service providers' solutions have. With the Stash! SDK it does not matter which payment service provider one chooses to register payment methods with - the API is standardized and works across the board.
 
