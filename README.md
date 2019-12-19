@@ -127,7 +127,7 @@ The value of the header and the request body are stored in the Stash! backend. I
 
 ## Feedback
 
-The Stash! backend is in active development. We welcome your feedback! Please write to us at payment-sdk@mobilabsolutions.com to report any issues or give feedback.
+The Stash! backend is in active development. We welcome your feedback! Please write us at stash@mobilabsolutions.com to report any issues or give feedback.
 
 ## Documentation
 
